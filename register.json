@@ -1,0 +1,35 @@
+{
+    "status": "success",
+    "message": "User registered successfully. Please check your email to verify your account.",
+    "data": {
+        "user": {
+            "id": 11,
+            "email": "demo@parroquia.com",
+            "firstName": "Demo",
+            "lastName": "Usuario",
+            "role": "user",
+            "isActive": true,
+            "emailVerified": false,
+            "updatedAt": "2025-07-19T00:58:00.059Z",
+            "createdAt": "2025-07-19T00:57:59.845Z",
+            "lastLoginAt": null
+        },
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjExLCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzUyODg2NjgwLCJleHAiOjE3NTI4ODc1ODB9.UaTH5-PDgtkuX3zjja6cc9X7pdgEssQr3vyItogq7TM",
+        "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjExLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTc1Mjg4NjY4MCwiZXhwIjoxNzUzNDkxNDgwLogin successful",
+        "data": {
+            "user": {
+                "id": 11,
+                "email": "demo@parroquia.com",
+                "firstName": "Demo",
+                "lastName": "Usuario",
+                "role": "user",
+                "isActive": true,
+                "emailVerified": true,
+                "lastLoginAt": "2025-07-19T00:58:18.251Z",
+                "createdAt": "2025-07-19T00:57:59.845Z",
+                "updatedAt": "2025-07-19T00:58:18.252Z"
+            },
+            "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjExLCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzUyODg2Njk4LCJleHAiOjE3NTI4ODc1OTh9.pOol6Qh-yetuGjtFxbbWZEmazIMUcoMY60QOPys_KUw",
+            "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjExLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTc1Mjg4NjY5OCwiZXhwIjoxNzUzNDkxNDk4fQ.Tn80kxw-VwpYv3VAEjxuW2z1oWp5gE-SCNsahgDZX3U"
+        }
+    }

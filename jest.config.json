@@ -1,0 +1,16 @@
+{
+  "testEnvironment": "node",
+  "testMatch": ["**/tests/**/*.test.js"],
+  "setupFilesAfterEnv": ["<rootDir>/tests/setup-simple.js"],
+  "collectCoverageFrom": [
+    "src/**/*.js",
+    "!src/app.js",
+    "!src/models/index.js"
+  ],
+  "coverageDirectory": "coverage",
+  "coverageReporters": ["text", "lcov", "html"],
+  "testTimeout": 10000,
+  "forceExit": true,
+  "detectOpenHandles": true,
+  "verbose": true
+}

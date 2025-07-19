@@ -1,0 +1,33 @@
+version: '3.9'
+
+services:
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    restart: always
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]  # Elimina esta parte si no usas GPU
+    volumes:
+      - ollama-data:/root/.ollama
+
+  webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: ollama-webui
+    ports:
+      - "3000:3000"
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+    depends_on:
+      - ollama
+    restart: always
+    volumes:
+      - webui-data:/app/backend/data
+
+volumes:
+  ollama-data:
+  webui-data:
