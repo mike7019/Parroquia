@@ -344,30 +344,6 @@ docker-compose up --build -d
 - Mantener cobertura de tests > 70%
 - Documentar cambios en API
 
----
-
-## 📈 Roadmap
-
-### **Sprint #2 (Próximo)**
-- [ ] Completar cobertura de testing al 95%
-- [ ] Implementar rate limiting
-- [ ] Añadir logs estructurados
-- [ ] CI/CD con GitHub Actions
-
-### **Sprint #3**
-- [ ] Sistema de roles y permisos
-- [ ] Gestión de familias parroquiales
-- [ ] Calendario de eventos
-- [ ] Dashboard administrativo
-
-### **Futuro**
-- [ ] Two-factor authentication (2FA)
-- [ ] OAuth2 integration
-- [ ] Mobile app API
-- [ ] Reporting y analytics
-
----
-
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
