@@ -379,16 +379,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 ¿Tienes preguntas o necesitas ayuda?
 
 - 🐛 **Issues**: [GitHub Issues](https://github.com/mike7019/Parroquia/issues)
-- 📧 **Email**: [tu-email@example.com](mailto:tu-email@example.com)
+- 📧 **Email**: [amph7019@gmail.com](mailto:tu-email@example.com)
 - 📖 **Wiki**: [GitHub Wiki](https://github.com/mike7019/Parroquia/wiki)
 - 📋 **Documentación**: [Sprint Delivery Report](SPRINT_DELIVERY_REPORT.md)
 
----
-
-<div align="center">
-
-**⭐ Si este proyecto te resulta útil, ¡dale una estrella!**
-
-Hecho con ❤️ para la comunidad parroquial
-
-</div>
