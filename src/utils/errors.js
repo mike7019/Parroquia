@@ -28,7 +28,13 @@ class AuthenticationError extends AppError {
 }
 
 class AuthorizationError extends AppError {
-  constructor(message = 'Insufficient permissions', code = 'INSUFFICIENT_PERMISSIONS') {
+  constructor(message = 'Forbidden - insufficient permissions', code = 'FORBIDDEN') {
+    super(message, 403, code);
+  }
+}
+
+class UnauthorizedError extends AppError {
+  constructor(message = 'Unauthorized access', code = 'UNAUTHORIZED') {
     super(message, 403, code);
   }
 }
@@ -59,7 +65,8 @@ export {
   AuthorizationError,
   NotFoundError,
   ConflictError,
-  RateLimitError
+  RateLimitError,
+  UnauthorizedError
 };
 
 export default AppError;

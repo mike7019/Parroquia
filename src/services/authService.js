@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import { Op } from 'sequelize';
+import sequelize from '../../config/sequelize.js';
 import User from '../models/User.js';
 import emailService from './emailService.js';
 import { 
@@ -13,63 +14,93 @@ import {
 } from '../utils/errors.js';
 
 /**
- * Authentication service handling all auth-related operations using ES6 modules
+ * Authentication service handling all auth-related operations with transactions
  */
 class AuthService {
   /**
-   * Registers a new user
+   * Registers a new user with transaction handling
    * @param {Object} userData - User registration data
    * @returns {Promise<Object>} User and token data
    */
   async registerUser(userData) {
     const { email, password, firstName, lastName, role = 'user' } = userData;
+    
+    const transaction = await sequelize.transaction();
+    
+    try {
+      // Check if user already exists (including soft-deleted users)
+      const existingUser = await User.scope('withDeleted').findOne({ 
+        where: { email } 
+      });
+      
+      if (existingUser) {
+        throw new ConflictError('User with this email already exists');
+      }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) {
-      throw new ConflictError('User with this email already exists');
+      // Generate email verification token
+      const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+
+      // Create user with transaction - password will be hashed automatically by model hook
+      const user = await User.create({
+        email: email.toLowerCase().trim(),
+        password, // Will be hashed by beforeCreate hook
+        firstName,
+        lastName,
+        role,
+        status: 'active',
+        emailVerificationToken,
+        isActive: true,
+        emailVerified: false
+      }, { transaction });
+
+      // Generate tokens
+      const accessToken = this.generateAccessToken(user.id);
+      const refreshToken = this.generateRefreshToken(user.id);
+
+      // Save refresh token
+      await user.update({ refreshToken }, { transaction });
+
+      // Commit transaction before attempting to send email
+      await transaction.commit();
+
+      // Send verification email (outside transaction to avoid rollback on email failure)
+      try {
+        await emailService.sendEmailVerification(user.email, emailVerificationToken);
+      } catch (emailError) {
+        console.warn('Email service warning:', emailError.message);
+        // Don't throw - continue with successful registration
+      }
+
+      // Return user data without password
+      const userResponse = {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+        isActive: user.isActive,
+        emailVerified: user.emailVerified,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      };
+
+      return {
+        user: userResponse,
+        accessToken,
+        refreshToken
+      };
+
+    } catch (error) {
+      // Rollback transaction on any error
+      await transaction.rollback();
+      
+      if (error instanceof ConflictError) {
+        throw error;
+      }
+      
+      throw new ValidationError('Registration failed: ' + error.message);
     }
-
-    // The password will be automatically hashed by the User model's beforeCreate hook
-
-    // Generate email verification token
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
-
-    // Create user - password will be hashed automatically by model hook
-    const user = await User.create({
-      email,
-      password, // Pass the plain password, model will hash it
-      firstName,
-      lastName,
-      role,
-      emailVerificationToken,
-      isActive: true,
-      emailVerified: false
-    });
-
-    // Generate tokens
-    const accessToken = this.generateAccessToken(user.id);
-    const refreshToken = this.generateRefreshToken(user.id);
-
-    // Save refresh token
-    await user.update({ refreshToken });
-
-    // Send verification email
-    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${emailVerificationToken}`;
-    await emailService.sendEmailVerificationEmail(
-      user.email,
-      `${user.firstName} ${user.lastName}`,
-      verificationUrl
-    );
-
-    // Remove sensitive data from response
-    const userResponse = this.sanitizeUserData(user);
-
-    return {
-      user: userResponse,
-      accessToken,
-      refreshToken
-    };
   }
 
   /**

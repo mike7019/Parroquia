@@ -1,65 +1,114 @@
-const { body, query, param } = require('express-validator');
+import { body, param, query } from 'express-validator';
 
-const updateUserValidation = [
-  body('email')
-    .optional()
-    .isEmail()
-    .withMessage('Please provide a valid email')
-    .normalizeEmail(),
-  
-  body('firstName')
-    .optional()
-    .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('First name must be between 2 and 50 characters')
-    .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)
-    .withMessage('First name can only contain letters and spaces'),
-  
-  body('lastName')
-    .optional()
-    .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('Last name must be between 2 and 50 characters')
-    .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)
-    .withMessage('Last name can only contain letters and spaces'),
-  
-  body('role')
-    .optional()
-    .isIn(['admin', 'user', 'moderator'])
-    .withMessage('Role must be admin, user, or moderator'),
-  
-  body('isActive')
-    .optional()
-    .isBoolean()
-    .withMessage('isActive must be a boolean value')
-];
+/**
+ * User validation rules for CRUD operations
+ */
+class UserValidators {
+  /**
+   * Validation rules for user update
+   */
+  static updateUser() {
+    return [
+      param('id')
+        .isInt({ min: 1 })
+        .withMessage('User ID must be a positive integer'),
+      
+      body('firstName')
+        .optional()
+        .isString()
+        .withMessage('First name must be a string')
+        .isLength({ min: 2, max: 50 })
+        .withMessage('First name must be between 2 and 50 characters')
+        .trim(),
+      
+      body('lastName')
+        .optional()
+        .isString()
+        .withMessage('Last name must be a string')
+        .isLength({ min: 2, max: 50 })
+        .withMessage('Last name must be between 2 and 50 characters')
+        .trim(),
+      
+      body('email')
+        .optional()
+        .isEmail()
+        .withMessage('Please provide a valid email address')
+        .normalizeEmail()
+        .toLowerCase(),
+      
+      body('role')
+        .optional()
+        .isIn(['user', 'moderator', 'admin'])
+        .withMessage('Role must be one of: user, moderator, admin'),
+      
+      body('status')
+        .optional()
+        .isIn(['active', 'inactive'])
+        .withMessage('Status must be either active or inactive')
+    ];
+  }
 
-const getUsersValidation = [
-  query('page')
-    .optional()
-    .isInt({ min: 1 })
-    .withMessage('Page must be a positive integer'),
-  
-  query('limit')
-    .optional()
-    .isInt({ min: 1, max: 100 })
-    .withMessage('Limit must be between 1 and 100'),
-  
-  query('search')
-    .optional()
-    .trim()
-    .isLength({ max: 100 })
-    .withMessage('Search term must not exceed 100 characters')
-];
+  /**
+   * Validation rules for user ID parameter
+   */
+  static validateUserId() {
+    return [
+      param('id')
+        .isInt({ min: 1 })
+        .withMessage('User ID must be a positive integer')
+    ];
+  }
 
-const userIdValidation = [
-  param('id')
-    .isInt({ min: 1 })
-    .withMessage('User ID must be a positive integer')
-];
+  /**
+   * Validation rules for user creation (if needed for admin user creation)
+   */
+  static createUser() {
+    return [
+      body('firstName')
+        .notEmpty()
+        .withMessage('First name is required')
+        .isString()
+        .withMessage('First name must be a string')
+        .isLength({ min: 2, max: 50 })
+        .withMessage('First name must be between 2 and 50 characters')
+        .trim(),
+      
+      body('lastName')
+        .notEmpty()
+        .withMessage('Last name is required')
+        .isString()
+        .withMessage('Last name must be a string')
+        .isLength({ min: 2, max: 50 })
+        .withMessage('Last name must be between 2 and 50 characters')
+        .trim(),
+      
+      body('email')
+        .notEmpty()
+        .withMessage('Email is required')
+        .isEmail()
+        .withMessage('Please provide a valid email address')
+        .normalizeEmail()
+        .toLowerCase(),
+      
+      body('password')
+        .notEmpty()
+        .withMessage('Password is required')
+        .isLength({ min: 8 })
+        .withMessage('Password must be at least 8 characters long')
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+        .withMessage('Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character'),
+      
+      body('role')
+        .optional()
+        .isIn(['user', 'moderator', 'admin'])
+        .withMessage('Role must be one of: user, moderator, admin'),
+      
+      body('status')
+        .optional()
+        .isIn(['active', 'inactive'])
+        .withMessage('Status must be either active or inactive')
+    ];
+  }
+}
 
-module.exports = {
-  updateUserValidation,
-  getUsersValidation,
-  userIdValidation
-};
+export default UserValidators;

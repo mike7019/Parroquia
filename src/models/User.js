@@ -41,6 +41,11 @@ const User = sequelize.define('User', {
     type: DataTypes.ENUM('admin', 'user', 'moderator'),
     defaultValue: 'user'
   },
+  status: {
+    type: DataTypes.ENUM('active', 'inactive', 'deleted'),
+    allowNull: false,
+    defaultValue: 'active'
+  },
   isActive: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
@@ -72,6 +77,30 @@ const User = sequelize.define('User', {
 }, {
   tableName: 'users',
   timestamps: true,
+  // Scope por defecto: solo usuarios activos
+  defaultScope: {
+    where: {
+      status: 'active'
+    }
+  },
+  scopes: {
+    // Scope para incluir todos los usuarios (incluyendo deleted)
+    withDeleted: {
+      where: {}
+    },
+    // Scope para solo usuarios eliminados
+    deleted: {
+      where: {
+        status: 'deleted'
+      }
+    },
+    // Scope para usuarios inactivos
+    inactive: {
+      where: {
+        status: 'inactive'
+      }
+    }
+  },
   hooks: {
     beforeCreate: async (user) => {
       if (user.password) {

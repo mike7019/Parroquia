@@ -7,7 +7,7 @@ import sequelize from '../config/sequelize.js';
 
 // Import routes
 import authRoutes from './routes/authRoutes.js';
-import userRoutes from './routes/userRoutes.js';
+import userRoutes from './routes/userManagementRoutes.js';
 import systemRoutes from './routes/systemRoutes.js';
 
 // Import middlewares
@@ -92,6 +92,9 @@ const startServer = async () => {
       console.log('✅ Database synchronized');
     }
 
+    // Display all registered routes
+    displayRoutes();
+
     // Start server
     const server = app.listen(PORT, () => {
       console.log('🚀 Server Information:');
@@ -132,17 +135,84 @@ const startServer = async () => {
   }
 };
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
-});
+// Array to store registered routes
+const registeredRoutes = [];
 
-// Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
-  console.error('❌ Uncaught Exception:', error);
-  process.exit(1);
-});
+// Middleware to log routes as they are registered
+const routeLogger = (req, res, next) => {
+  const route = {
+    method: req.method,
+    path: req.route ? req.route.path : req.path,
+    originalUrl: req.originalUrl
+  };
+  
+  // Only log unique routes
+  const routeKey = `${route.method}:${route.originalUrl}`;
+  if (!registeredRoutes.some(r => `${r.method}:${r.originalUrl}` === routeKey)) {
+    registeredRoutes.push(route);
+  }
+  
+  next();
+};
+
+// Function to display all registered routes
+const displayRoutes = () => {
+  console.log('\n📋 Configured API Routes:');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  
+  // Manual route definition based on our router files
+  const routes = [
+    // Authentication routes
+    { method: 'POST', path: '/api/auth/register', group: 'Authentication', protected: false },
+    { method: 'POST', path: '/api/auth/login', group: 'Authentication', protected: false },
+    { method: 'POST', path: '/api/auth/refresh', group: 'Authentication', protected: false },
+    { method: 'POST', path: '/api/auth/logout', group: 'Authentication', protected: true },
+    
+    // User management routes
+    { method: 'GET', path: '/api/users', group: 'User Management', protected: true },
+    { method: 'GET', path: '/api/users/deleted', group: 'User Management', protected: true },
+    { method: 'GET', path: '/api/users/:id', group: 'User Management', protected: true },
+    { method: 'PUT', path: '/api/users/:id', group: 'User Management', protected: true },
+    { method: 'DELETE', path: '/api/users/:id', group: 'User Management', protected: true },
+    
+    // System routes
+    { method: 'GET', path: '/api/health', group: 'System', protected: false },
+    { method: 'GET', path: '/api-docs', group: 'Documentation', protected: false },
+  ];
+
+  // Group routes by category
+  const groupedRoutes = routes.reduce((groups, route) => {
+    if (!groups[route.group]) {
+      groups[route.group] = [];
+    }
+    groups[route.group].push(route);
+    return groups;
+  }, {});
+
+  // Display routes by group
+  Object.entries(groupedRoutes).forEach(([group, groupRoutes]) => {
+    console.log(`\n🔹 ${group}:`);
+    groupRoutes.forEach((route) => {
+      const methodPadded = route.method.padEnd(8);
+      const pathPadded = route.path.padEnd(35);
+      const protectionStatus = route.protected ? '🛡️  Protected' : '🌐 Public';
+      console.log(`   ${methodPadded} ${pathPadded} ${protectionStatus}`);
+    });
+  });
+  
+  console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log(`📊 Total Routes: ${routes.length}`);
+  
+  // Show route summary by type
+  const authRoutes = routes.filter(r => r.group === 'Authentication').length;
+  const userRoutes = routes.filter(r => r.group === 'User Management').length;
+  const systemRoutes = routes.filter(r => r.group === 'System').length;
+  
+  console.log(`   • Authentication: ${authRoutes} routes`);
+  console.log(`   • User Management: ${userRoutes} routes`);
+  console.log(`   • System: ${systemRoutes} routes`);
+  console.log('');
+};
 
 // Start the server only if not in test environment
 if (process.env.NODE_ENV !== 'test') {

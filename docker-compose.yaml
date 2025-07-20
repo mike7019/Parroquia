@@ -11,7 +11,7 @@ services:
       resources:
         reservations:
           devices:
-            - capabilities: [gpu]  # Elimina esta parte si no usas GPU
+            - capabilities: [gpu] # Elimina esta línea si no usas GPU
     volumes:
       - ollama-data:/root/.ollama
 
@@ -21,7 +21,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OLLAMA_BASE_URL=http://ollama:11434 # CAMBIO CLAVE AQUÍ
     depends_on:
       - ollama
     restart: always

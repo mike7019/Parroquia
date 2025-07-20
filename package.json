@@ -17,6 +17,7 @@
     "test:auth:tokens": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/.bin/jest tests/auth/token-management.test.js --detectOpenHandles --forceExit",
     "test:auth:password": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/.bin/jest tests/auth/password-recovery.test.js --detectOpenHandles --forceExit",
     "test:auth:protected": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/.bin/jest tests/auth/protected-endpoints.test.js --detectOpenHandles --forceExit",
+    "test:epics": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/.bin/jest tests/auth/user-crud-epics.test.js --detectOpenHandles --forceExit",
     "test:setup": "node scripts/create-test-db.js && node scripts/setup-test-schema.js",
     "db:migrate": "npx sequelize-cli db:migrate",
     "db:migrate:undo": "npx sequelize-cli db:migrate:undo",
