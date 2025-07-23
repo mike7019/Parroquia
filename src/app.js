@@ -3,6 +3,10 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import https from 'https';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import sequelize from '../config/sequelize.js';
 
 // Import routes
@@ -16,8 +20,12 @@ import errorHandler from './middlewares/errorHandler.js';
 // Import Swagger configuration
 import { setupSwagger } from './config/swagger.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
 
 // Trust proxy for rate limiting and security
 app.set('trust proxy', 1);
@@ -27,20 +35,53 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https:", "http:"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https:", "http:"],
+      imgSrc: ["'self'", "data:", "https:", "http:"],
+      connectSrc: ["'self'", "https:", "http:"],
+      fontSrc: ["'self'", "https:", "http:", "data:"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
     },
   },
-  crossOriginEmbedderPolicy: false
+  crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false,
+  crossOriginResourcePolicy: false,
+  // Disable HSTS in development to allow HTTP
+  hsts: process.env.NODE_ENV === 'production' ? {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  } : false
 }));
 
-// CORS configuration
+// CORS configuration - Allow all origins for development/deployment
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['', ''],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // In development or if ALLOW_ALL_ORIGINS is true, allow all origins
+    if (process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
+      return callback(null, true);
+    }
+    
+    // In production, check allowed origins
+    const allowedOrigins = process.env.ALLOWED_ORIGINS ? 
+      process.env.ALLOWED_ORIGINS.split(',') : 
+      ['http://localhost:3000', 'https://localhost:3000'];
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Origin', 'Accept'],
+  exposedHeaders: ['X-Total-Count', 'Content-Range']
 }));
 
 // Logging
@@ -55,6 +96,21 @@ app.use(express.urlencoded({
   extended: true, 
   limit: '10mb' 
 }));
+
+// Force HTTPS in production (for external access)
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    // Check if the request came through a proxy (like nginx) with HTTPS
+    if (req.headers['x-forwarded-proto'] === 'https' || req.secure) {
+      return next();
+    }
+    // If accessing from external IP and not HTTPS, redirect
+    if (req.hostname !== 'localhost' && req.hostname !== '127.0.0.1') {
+      return res.redirect(301, `https://${req.hostname}${req.url}`);
+    }
+    next();
+  });
+}
 
 // Setup Swagger documentation
 setupSwagger(app);
@@ -95,38 +151,100 @@ const startServer = async () => {
     // Display all registered routes
     displayRoutes();
 
-    // Start server
-    const server = app.listen(PORT, () => {
-      console.log('🚀 Server Information:');
-      console.log(`   • Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`   • Port: ${PORT}`);
-      console.log(`   • API URL: http://localhost:${PORT}/api`);
-      console.log(`   • Documentation: http://localhost:${PORT}/api-docs`);
-      console.log(`   • Health Check: http://localhost:${PORT}/api/health`);
-      console.log('✅ Server is running successfully!');
-    });
-
-    // Graceful shutdown
-    const gracefulShutdown = (signal) => {
-      console.log(`\n� Received ${signal}. Starting graceful shutdown...`);
+    const useHttps = process.argv.includes('--https') || process.env.USE_HTTPS === 'true';
+    
+    if (useHttps) {
+      // HTTPS Server
+      const certPath = path.join(__dirname, '..', 'certs', 'server.crt');
+      const keyPath = path.join(__dirname, '..', 'certs', 'server.key');
       
-      server.close(async () => {
-        console.log('🔄 HTTP server closed');
+      if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+        const options = {
+          key: fs.readFileSync(keyPath),
+          cert: fs.readFileSync(certPath)
+        };
         
-        try {
-          await sequelize.close();
-          console.log('🔄 Database connection closed');
-          console.log('✅ Graceful shutdown completed');
-          process.exit(0);
-        } catch (error) {
-          console.error('❌ Error during shutdown:', error);
-          process.exit(1);
-        }
-      });
-    };
+        const httpsServer = https.createServer(options, app);
+        
+        httpsServer.listen(HTTPS_PORT, () => {
+          console.log('🚀 Server Information (HTTPS):');
+          console.log(`   • Environment: ${process.env.NODE_ENV || 'development'}`);
+          console.log(`   • HTTPS Port: ${HTTPS_PORT}`);
+          console.log(`   • API URL: https://localhost:${HTTPS_PORT}/api`);
+          console.log(`   • Documentation: https://localhost:${HTTPS_PORT}/api-docs`);
+          console.log(`   • Health Check: https://localhost:${HTTPS_PORT}/api/health`);
+          console.log('✅ HTTPS Server is running successfully!');
+        });
+        
+        // Also start HTTP server for redirects
+        const httpServer = app.listen(PORT, () => {
+          console.log(`🌐 HTTP Server (redirects): http://localhost:${PORT}`);
+        });
+        
+        // Graceful shutdown for both servers
+        const gracefulShutdown = (signal) => {
+          console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
+          
+          httpsServer.close(() => {
+            httpServer.close(async () => {
+              console.log('🔄 Servers closed');
+              
+              try {
+                await sequelize.close();
+                console.log('🔄 Database connection closed');
+                console.log('✅ Graceful shutdown completed');
+                process.exit(0);
+              } catch (error) {
+                console.error('❌ Error during shutdown:', error);
+                process.exit(1);
+              }
+            });
+          });
+        };
 
-    // Handle graceful shutdown
-    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+        process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+        process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+        
+      } else {
+        console.log('❌ SSL certificates not found!');
+        console.log('Run: npm run ssl:create');
+        process.exit(1);
+      }
+    } else {
+      // HTTP Server (default)
+      const server = app.listen(PORT, () => {
+        console.log('🚀 Server Information:');
+        console.log(`   • Environment: ${process.env.NODE_ENV || 'development'}`);
+        console.log(`   • Port: ${PORT}`);
+        console.log(`   • API URL: http://localhost:${PORT}/api`);
+        console.log(`   • Documentation: http://localhost:${PORT}/api-docs`);
+        console.log(`   • Health Check: http://localhost:${PORT}/api/health`);
+        console.log('✅ Server is running successfully!');
+      });
+
+      // Graceful shutdown
+      const gracefulShutdown = (signal) => {
+        console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
+        
+        server.close(async () => {
+          console.log('🔄 HTTP server closed');
+          
+          try {
+            await sequelize.close();
+            console.log('🔄 Database connection closed');
+            console.log('✅ Graceful shutdown completed');
+            process.exit(0);
+          } catch (error) {
+            console.error('❌ Error during shutdown:', error);
+            process.exit(1);
+          }
+        });
+      };
+
+      // Handle graceful shutdown
+      process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+      process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+    }
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
   } catch (error) {
