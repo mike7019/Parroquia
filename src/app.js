@@ -54,35 +54,14 @@ app.use(helmet({
   xssFilter: false
 }));
 
-// CORS configuration - Allow all origins for development/deployment
+// CORS configuration - Allow all origins (most permissive)
 app.use(cors({
-  origin: function (origin, callback) {
-    console.log('🌐 CORS Check - Origin:', origin);
-    
-    // Allow all origins - simplified configuration
-    console.log('✅ CORS: Allowing all origins (unrestricted access)');
-    return callback(null, true);
-  },
-  credentials: false, // Set to false when using wildcard origin for better compatibility
+  origin: true, // Allow all origins
+  credentials: false, // Disable credentials for wildcard compatibility
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
-  allowedHeaders: [
-    'Content-Type', 
-    'Authorization', 
-    'X-Requested-With', 
-    'Origin', 
-    'Accept',
-    'Access-Control-Allow-Origin',
-    'Access-Control-Allow-Headers',
-    'Access-Control-Allow-Methods',
-    'X-Forwarded-For',
-    'X-Real-IP',
-    'Cache-Control',
-    'Pragma'
-  ],
+  allowedHeaders: '*', // Allow all headers
   exposedHeaders: ['X-Total-Count', 'Content-Range'],
-  // Pre-flight cache duration
-  maxAge: 86400, // 24 hours
-  // Handle preflight requests
+  maxAge: 86400,
   preflightContinue: false,
   optionsSuccessStatus: 200
 }));
@@ -90,22 +69,24 @@ app.use(cors({
 // Logging
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
-// Additional CORS headers middleware for problematic requests
+// Additional CORS headers middleware for maximum compatibility
 app.use((req, res, next) => {
   // Log request details for debugging
   console.log(`🌐 Request: ${req.method} ${req.url} from Origin: ${req.headers.origin || 'no-origin'}`);
   
-  // Set permissive CORS headers for all requests
+  // Set the most permissive CORS headers possible
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Credentials', 'false'); // Set to false when using wildcard origin
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS,HEAD');
-  res.header('Access-Control-Allow-Headers', 'Origin,X-Requested-With,Content-Type,Accept,Authorization,Cache-Control,Pragma,X-Forwarded-For,X-Real-IP');
+  res.header('Access-Control-Allow-Methods', '*');
+  res.header('Access-Control-Allow-Headers', '*');
   res.header('Access-Control-Max-Age', '86400');
   
-  // Remove problematic headers that cause agent cluster issues
+  // Remove any problematic headers
   res.removeHeader('Origin-Agent-Cluster');
+  res.removeHeader('Cross-Origin-Opener-Policy');
+  res.removeHeader('Cross-Origin-Embedder-Policy');
+  res.removeHeader('Cross-Origin-Resource-Policy');
   
-  // Handle preflight requests
+  // Handle preflight requests immediately
   if (req.method === 'OPTIONS') {
     console.log('✅ Handling OPTIONS preflight request');
     res.status(200).end();
@@ -125,7 +106,9 @@ app.use(express.urlencoded({
   limit: '10mb' 
 }));
 
+// Comment out HTTPS redirect to avoid mixed content issues
 // Force HTTPS in production (for external access)
+/*
 if (process.env.NODE_ENV === 'production') {
   app.use((req, res, next) => {
     // Check if the request came through a proxy (like nginx) with HTTPS
@@ -139,9 +122,20 @@ if (process.env.NODE_ENV === 'production') {
     next();
   });
 }
+*/
 
 // Setup Swagger documentation
 setupSwagger(app);
+
+// Test CORS endpoint
+app.get('/api/cors-test', (req, res) => {
+  res.json({
+    message: 'CORS is working!',
+    origin: req.headers.origin || 'no-origin',
+    method: req.method,
+    timestamp: new Date().toISOString()
+  });
+});
 
 // API Routes
 app.use('/api/auth', authRoutes);
