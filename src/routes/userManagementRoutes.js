@@ -1,7 +1,7 @@
 import express from 'express';
 import UserController from '../controllers/userController.js';
 import UserValidators from '../validators/userValidators.js';
-import AuthMiddleware from '../middlewares/authMiddleware.js';
+import AuthMiddleware from '../middlewares/auth.js';
 import validationMiddleware from '../middlewares/validation.js';
 
 const router = express.Router();
@@ -13,14 +13,14 @@ const router = express.Router();
 // GET /api/users - Get all active users (Admin only)
 router.get('/', 
   AuthMiddleware.authenticateToken,
-  AuthMiddleware.requireAdmin,
+  AuthMiddleware.requireRole(['admin']),
   UserController.getAllUsers
 );
 
 // GET /api/users/deleted - Get all soft-deleted users (Admin only)
 router.get('/deleted',
   AuthMiddleware.authenticateToken,
-  AuthMiddleware.requireAdmin,
+  AuthMiddleware.requireRole(['admin']),
   UserController.getDeletedUsers
 );
 
@@ -47,7 +47,7 @@ router.delete('/:id',
   UserValidators.validateUserId(),
   validationMiddleware.handleValidationErrors,
   AuthMiddleware.authenticateToken,
-  AuthMiddleware.requireAdmin,
+  AuthMiddleware.requireRole(['admin']),
   UserController.deleteUser
 );
 

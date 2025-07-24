@@ -9,7 +9,7 @@
     "start:https": "node src/app.js --https",
     "dev": "nodemon src/app.js",
     "dev:https": "nodemon src/app.js --https",
-    "ssl:create": "node create-ssl-cert.js",
+    "ssl:create": "node scripts/create-ssl-cert.js",
     "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/.bin/jest --detectOpenHandles --forceExit",
     "test:watch": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/.bin/jest --watch --detectOpenHandles",
     "test:coverage": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/.bin/jest --coverage --detectOpenHandles --forceExit",
@@ -21,16 +21,13 @@
     "test:auth:password": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/.bin/jest tests/auth/password-recovery.test.js --detectOpenHandles --forceExit",
     "test:auth:protected": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/.bin/jest tests/auth/protected-endpoints.test.js --detectOpenHandles --forceExit",
     "test:epics": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/.bin/jest tests/auth/user-crud-epics.test.js --detectOpenHandles --forceExit",
-    "test:setup": "node scripts/create-test-db.js && node scripts/setup-test-schema.js",
     "db:migrate": "npx sequelize-cli db:migrate",
     "db:migrate:undo": "npx sequelize-cli db:migrate:undo",
     "db:migrate:undo:all": "npx sequelize-cli db:migrate:undo:all",
     "db:seed": "npx sequelize-cli db:seed:all",
     "db:create": "npx sequelize-cli db:create",
     "db:drop": "npx sequelize-cli db:drop",
-    "db:migrate:custom": "node runMigrations.js",
-    "db:populate": "node populateDatabase.js",
-    "db:setup": "npm run db:migrate:custom && npm run db:populate"
+    "db:load-catalogs": "node loadCatalogData.js"
   },
   "keywords": [
     "node",
