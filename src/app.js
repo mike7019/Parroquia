@@ -32,19 +32,7 @@ app.set('trust proxy', 1);
 
 // Security middlewares
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https:", "http:"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https:", "http:"],
-      imgSrc: ["'self'", "data:", "https:", "http:"],
-      connectSrc: ["'self'", "https:", "http:"],
-      fontSrc: ["'self'", "https:", "http:", "data:"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-      frameSrc: ["'none'"],
-    },
-  },
+  contentSecurityPolicy: false, // Disable CSP to avoid conflicts with Swagger UI
   crossOriginEmbedderPolicy: false,
   crossOriginOpenerPolicy: false,
   crossOriginResourcePolicy: false,
@@ -53,7 +41,17 @@ app.use(helmet({
     maxAge: 31536000,
     includeSubDomains: true,
     preload: true
-  } : false
+  } : false,
+  // Disable other restrictive policies for better compatibility
+  originAgentCluster: false,
+  dnsPrefetchControl: false,
+  frameguard: false,
+  hidePoweredBy: true,
+  ieNoOpen: false,
+  noSniff: false,
+  permittedCrossDomainPolicies: false,
+  referrerPolicy: false,
+  xssFilter: false
 }));
 
 // CORS configuration - Allow all origins for development/deployment
@@ -61,57 +59,11 @@ app.use(cors({
   origin: function (origin, callback) {
     console.log('🌐 CORS Check - Origin:', origin);
     
-    // Allow requests with no origin (like mobile apps, curl, Postman, etc.)
-    if (!origin) {
-      console.log('✅ CORS: Allowing request with no origin');
-      return callback(null, true);
-    }
-    
-    // In development, allow all origins
-    if (process.env.NODE_ENV === 'development') {
-      console.log('✅ CORS: Development mode - allowing all origins');
-      return callback(null, true);
-    }
-    
-    // If ALLOW_ALL_ORIGINS is explicitly set to true, allow everything
-    if (process.env.ALLOW_ALL_ORIGINS === 'true') {
-      console.log('✅ CORS: ALLOW_ALL_ORIGINS=true - allowing all origins');
-      return callback(null, true);
-    }
-    
-    // Build allowed origins list
-    const allowedOrigins = process.env.ALLOWED_ORIGINS ? 
-      process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : 
-      ['http://localhost:3000', 'https://localhost:3000'];
-    
-    // Add your external IP origins automatically
-    const externalIpOrigins = [
-      'http://206.62.139.100:3000',
-      'https://206.62.139.100:3000',
-      'http://206.62.139.100:3001',
-      'https://206.62.139.100:3001'
-    ];
-    
-    const allAllowedOrigins = [...allowedOrigins, ...externalIpOrigins];
-    
-    console.log('🔍 CORS: Checking origin against allowed origins:', allAllowedOrigins);
-    
-    // Check if origin is in allowed list
-    if (allAllowedOrigins.includes(origin)) {
-      console.log('✅ CORS: Origin allowed');
-      callback(null, true);
-    } else {
-      console.log('❌ CORS: Origin not allowed:', origin);
-      // In production, be more lenient and allow most origins
-      if (process.env.NODE_ENV === 'production') {
-        console.log('⚠️  CORS: Production mode - allowing anyway for external access');
-        callback(null, true);
-      } else {
-        callback(new Error(`CORS policy: Origin ${origin} is not allowed`));
-      }
-    }
+    // Allow all origins - simplified configuration
+    console.log('✅ CORS: Allowing all origins (unrestricted access)');
+    return callback(null, true);
   },
-  credentials: true,
+  credentials: false, // Set to false when using wildcard origin for better compatibility
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
   allowedHeaders: [
     'Content-Type', 
@@ -123,7 +75,9 @@ app.use(cors({
     'Access-Control-Allow-Headers',
     'Access-Control-Allow-Methods',
     'X-Forwarded-For',
-    'X-Real-IP'
+    'X-Real-IP',
+    'Cache-Control',
+    'Pragma'
   ],
   exposedHeaders: ['X-Total-Count', 'Content-Range'],
   // Pre-flight cache duration
@@ -141,12 +95,15 @@ app.use((req, res, next) => {
   // Log request details for debugging
   console.log(`🌐 Request: ${req.method} ${req.url} from Origin: ${req.headers.origin || 'no-origin'}`);
   
-  // Set additional CORS headers manually for external IP access
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Credentials', 'true');
+  // Set permissive CORS headers for all requests
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Credentials', 'false'); // Set to false when using wildcard origin
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS,HEAD');
-  res.header('Access-Control-Allow-Headers', 'Origin,X-Requested-With,Content-Type,Accept,Authorization,Cache-Control,Pragma');
+  res.header('Access-Control-Allow-Headers', 'Origin,X-Requested-With,Content-Type,Accept,Authorization,Cache-Control,Pragma,X-Forwarded-For,X-Real-IP');
   res.header('Access-Control-Max-Age', '86400');
+  
+  // Remove problematic headers that cause agent cluster issues
+  res.removeHeader('Origin-Agent-Cluster');
   
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
