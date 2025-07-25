@@ -54,55 +54,23 @@ app.use(helmet({
   xssFilter: false
 }));
 
-// CORS configuration - Allow all origins (most permissive)
+// CORS configuration - Simplified and clean
 app.use(cors({
-  origin: true, // Allow all origins
-  credentials: false, // Disable credentials for wildcard compatibility
+  origin: '*', // Allow all origins for development/testing
+  credentials: false,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
-  allowedHeaders: '*', // Allow all headers
+  allowedHeaders: '*',
   exposedHeaders: ['X-Total-Count', 'Content-Range'],
   maxAge: 86400,
-  preflightContinue: false,
   optionsSuccessStatus: 200
 }));
 
-// Logging - only enable in development with verbose logging, or always in production
+// Logging
 if (process.env.NODE_ENV === 'production') {
   app.use(morgan('combined'));
 } else if (process.env.VERBOSE_LOGGING === 'true') {
   app.use(morgan('dev'));
 }
-
-// Additional CORS headers middleware for maximum compatibility
-app.use((req, res, next) => {
-  // Only log request details in development if VERBOSE_LOGGING is enabled
-  if (process.env.NODE_ENV === 'development' && process.env.VERBOSE_LOGGING === 'true') {
-    console.log(`🌐 Request: ${req.method} ${req.url} from Origin: ${req.headers.origin || 'no-origin'}`);
-  }
-  
-  // Set the most permissive CORS headers possible
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', '*');
-  res.header('Access-Control-Allow-Headers', '*');
-  res.header('Access-Control-Max-Age', '86400');
-  
-  // Remove any problematic headers
-  res.removeHeader('Origin-Agent-Cluster');
-  res.removeHeader('Cross-Origin-Opener-Policy');
-  res.removeHeader('Cross-Origin-Embedder-Policy');
-  res.removeHeader('Cross-Origin-Resource-Policy');
-  
-  // Handle preflight requests immediately
-  if (req.method === 'OPTIONS') {
-    if (process.env.VERBOSE_LOGGING === 'true') {
-      console.log('✅ Handling OPTIONS preflight request');
-    }
-    res.status(200).end();
-    return;
-  }
-  
-  next();
-});
 
 // Body parsing middlewares
 app.use(express.json({ 
@@ -399,8 +367,5 @@ if (process.env.NODE_ENV !== 'test') {
 
   startServer();
 }
-
-// Clean logging configuration applied
-// Trigger restart - verbose logging enabled
 
 export default app;

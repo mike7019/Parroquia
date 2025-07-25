@@ -26,6 +26,10 @@ const swaggerConfig = {
         description: 'Development server'
       },
       {
+        url: 'http://206.62.139.100:3000/',
+        description: 'Test server'
+      },
+      {
         url: 'https://api.parroquia.com',
         description: 'Production server'
       }
