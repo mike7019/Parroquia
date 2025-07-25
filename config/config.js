@@ -1,6 +1,6 @@
-import 'dotenv/config';
+require('dotenv').config();
 
-export default {
+module.exports = {
   development: {
     username: process.env.DB_USER || 'parroquia_user',
     password: process.env.DB_PASS || 'admin',
@@ -8,7 +8,7 @@ export default {
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 5432,
     dialect: 'postgres',
-    logging: process.env.VERBOSE_LOGGING === 'true' ? console.log : false,
+    logging: console.log,
     pool: {
       max: 5,
       min: 0,
@@ -19,7 +19,7 @@ export default {
   test: {
     username: process.env.DB_USER || 'parroquia_user',
     password: process.env.DB_PASS || 'admin',
-    database: process.env.DB_NAME + '_test' || 'parroquia_db_test',
+    database: (process.env.DB_NAME || 'parroquia_db') + '_test',
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 5432,
     dialect: 'postgres',

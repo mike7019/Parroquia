@@ -40,12 +40,13 @@ class EmailService {
         html: this.getPasswordResetEmailTemplate(userName, resetUrl)
       };
 
-      // In development, just log the email content instead of sending
-      if (process.env.NODE_ENV === 'development') {
+      // In development, only log email content if SEND_REAL_EMAILS is not true
+      if (process.env.NODE_ENV === 'development' && process.env.SEND_REAL_EMAILS !== 'true') {
         console.log('📧 Development mode - Password reset email would be sent:');
         console.log(`To: ${userEmail}`);
         console.log(`Subject: ${mailOptions.subject}`);
         console.log(`Reset URL: ${resetUrl}`);
+        console.log('💡 Set SEND_REAL_EMAILS=true in .env to send real emails');
         
         return {
           success: true,
@@ -90,12 +91,13 @@ class EmailService {
         html: this.getEmailVerificationTemplate(userName, verificationUrl)
       };
 
-      // In development, just log the email content instead of sending
-      if (process.env.NODE_ENV === 'development') {
+      // In development, only log email content if SEND_REAL_EMAILS is not true
+      if (process.env.NODE_ENV === 'development' && process.env.SEND_REAL_EMAILS !== 'true') {
         console.log('📧 Development mode - Email verification would be sent:');
         console.log(`To: ${userEmail}`);
         console.log(`Subject: ${mailOptions.subject}`);
         console.log(`Verification URL: ${verificationUrl}`);
+        console.log('💡 Set SEND_REAL_EMAILS=true in .env to send real emails');
         
         return {
           success: true,
@@ -139,12 +141,13 @@ class EmailService {
         html: this.getWelcomeEmailTemplate(userName)
       };
 
-      // In development, just log the email content instead of sending
-      if (process.env.NODE_ENV === 'development') {
+      // In development, only log email content if SEND_REAL_EMAILS is not true
+      if (process.env.NODE_ENV === 'development' && process.env.SEND_REAL_EMAILS !== 'true') {
         console.log('📧 Development mode - Welcome email would be sent:');
         console.log(`To: ${userEmail}`);
         console.log(`Subject: ${mailOptions.subject}`);
         console.log(`User: ${userName}`);
+        console.log('💡 Set SEND_REAL_EMAILS=true in .env to send real emails');
         
         return {
           success: true,

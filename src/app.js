@@ -66,13 +66,19 @@ app.use(cors({
   optionsSuccessStatus: 200
 }));
 
-// Logging
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+// Logging - only enable in development with verbose logging, or always in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(morgan('combined'));
+} else if (process.env.VERBOSE_LOGGING === 'true') {
+  app.use(morgan('dev'));
+}
 
 // Additional CORS headers middleware for maximum compatibility
 app.use((req, res, next) => {
-  // Log request details for debugging
-  console.log(`🌐 Request: ${req.method} ${req.url} from Origin: ${req.headers.origin || 'no-origin'}`);
+  // Only log request details in development if VERBOSE_LOGGING is enabled
+  if (process.env.NODE_ENV === 'development' && process.env.VERBOSE_LOGGING === 'true') {
+    console.log(`🌐 Request: ${req.method} ${req.url} from Origin: ${req.headers.origin || 'no-origin'}`);
+  }
   
   // Set the most permissive CORS headers possible
   res.header('Access-Control-Allow-Origin', '*');
@@ -88,7 +94,9 @@ app.use((req, res, next) => {
   
   // Handle preflight requests immediately
   if (req.method === 'OPTIONS') {
-    console.log('✅ Handling OPTIONS preflight request');
+    if (process.env.VERBOSE_LOGGING === 'true') {
+      console.log('✅ Handling OPTIONS preflight request');
+    }
     res.status(200).end();
     return;
   }
@@ -160,8 +168,14 @@ app.use(errorHandler);
 // Database connection and server start
 const startServer = async () => {
   try {
-    // Test database connection
-    await sequelize.authenticate();
+    // Test database connection with timeout
+    console.log('🔍 Testing database connection...');
+    await Promise.race([
+      sequelize.authenticate(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database connection timeout')), 10000)
+      )
+    ]);
     console.log('✅ Database connection established successfully');
 
     // Sync database (be careful in production)
@@ -271,7 +285,6 @@ const startServer = async () => {
       process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
       process.on('SIGINT', () => gracefulShutdown('SIGINT'));
     }
-    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
   } catch (error) {
     console.error('❌ Unable to start server:', error);
@@ -301,66 +314,93 @@ const routeLogger = (req, res, next) => {
 
 // Function to display all registered routes
 const displayRoutes = () => {
-  console.log('\n📋 Configured API Routes:');
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  
-  // Manual route definition based on our router files
-  const routes = [
-    // Authentication routes
-    { method: 'POST', path: '/api/auth/register', group: 'Authentication', protected: false },
-    { method: 'POST', path: '/api/auth/login', group: 'Authentication', protected: false },
-    { method: 'POST', path: '/api/auth/refresh', group: 'Authentication', protected: false },
-    { method: 'POST', path: '/api/auth/logout', group: 'Authentication', protected: true },
+  if (process.env.VERBOSE_LOGGING === 'true') {
+    console.log('\n📋 Configured API Routes:');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     
-    // User management routes
-    { method: 'GET', path: '/api/users', group: 'User Management', protected: true },
-    { method: 'GET', path: '/api/users/deleted', group: 'User Management', protected: true },
-    { method: 'GET', path: '/api/users/:id', group: 'User Management', protected: true },
-    { method: 'PUT', path: '/api/users/:id', group: 'User Management', protected: true },
-    { method: 'DELETE', path: '/api/users/:id', group: 'User Management', protected: true },
-    
-    // System routes
-    { method: 'GET', path: '/api/health', group: 'System', protected: false },
-    { method: 'GET', path: '/api-docs', group: 'Documentation', protected: false },
-  ];
+    // Manual route definition based on our router files
+    const routes = [
+      // Authentication routes
+      { method: 'POST', path: '/api/auth/register', group: 'Authentication', protected: false },
+      { method: 'POST', path: '/api/auth/login', group: 'Authentication', protected: false },
+      { method: 'POST', path: '/api/auth/refresh', group: 'Authentication', protected: false },
+      { method: 'POST', path: '/api/auth/logout', group: 'Authentication', protected: true },
+      { method: 'GET', path: '/api/auth/verify-email', group: 'Authentication', protected: false },
+      { method: 'POST', path: '/api/auth/forgot-password', group: 'Authentication', protected: false },
+      { method: 'POST', path: '/api/auth/reset-password', group: 'Authentication', protected: false },
+      
+      // User management routes
+      { method: 'GET', path: '/api/users', group: 'User Management', protected: true },
+      { method: 'GET', path: '/api/users/deleted', group: 'User Management', protected: true },
+      { method: 'GET', path: '/api/users/:id', group: 'User Management', protected: true },
+      { method: 'PUT', path: '/api/users/:id', group: 'User Management', protected: true },
+      { method: 'DELETE', path: '/api/users/:id', group: 'User Management', protected: true },
+      
+      // System routes
+      { method: 'GET', path: '/api/health', group: 'System', protected: false },
+      { method: 'GET', path: '/api/status', group: 'System', protected: false },
+      { method: 'GET', path: '/api-docs', group: 'Documentation', protected: false },
+      { method: 'GET', path: '/verify-email', group: 'Compatibility', protected: false },
+      { method: 'GET', path: '/reset-password', group: 'Compatibility', protected: false },
+    ];
 
-  // Group routes by category
-  const groupedRoutes = routes.reduce((groups, route) => {
-    if (!groups[route.group]) {
-      groups[route.group] = [];
-    }
-    groups[route.group].push(route);
-    return groups;
-  }, {});
+    // Group routes by category
+    const groupedRoutes = routes.reduce((groups, route) => {
+      if (!groups[route.group]) {
+        groups[route.group] = [];
+      }
+      groups[route.group].push(route);
+      return groups;
+    }, {});
 
-  // Display routes by group
-  Object.entries(groupedRoutes).forEach(([group, groupRoutes]) => {
-    console.log(`\n🔹 ${group}:`);
-    groupRoutes.forEach((route) => {
-      const methodPadded = route.method.padEnd(8);
-      const pathPadded = route.path.padEnd(35);
-      const protectionStatus = route.protected ? '🛡️  Protected' : '🌐 Public';
-      console.log(`   ${methodPadded} ${pathPadded} ${protectionStatus}`);
+    // Display routes by group
+    Object.entries(groupedRoutes).forEach(([group, groupRoutes]) => {
+      console.log(`\n🔹 ${group}:`);
+      groupRoutes.forEach((route) => {
+        const methodPadded = route.method.padEnd(8);
+        const pathPadded = route.path.padEnd(35);
+        const protectionStatus = route.protected ? '🛡️  Protected' : '🌐 Public';
+        console.log(`   ${methodPadded} ${pathPadded} ${protectionStatus}`);
+      });
     });
-  });
-  
-  console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log(`📊 Total Routes: ${routes.length}`);
-  
-  // Show route summary by type
-  const authRoutes = routes.filter(r => r.group === 'Authentication').length;
-  const userRoutes = routes.filter(r => r.group === 'User Management').length;
-  const systemRoutes = routes.filter(r => r.group === 'System').length;
-  
-  console.log(`   • Authentication: ${authRoutes} routes`);
-  console.log(`   • User Management: ${userRoutes} routes`);
-  console.log(`   • System: ${systemRoutes} routes`);
-  console.log('');
+    
+    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log(`📊 Total Routes: ${routes.length}`);
+    
+    // Show route summary by type
+    const authRoutes = routes.filter(r => r.group === 'Authentication').length;
+    const userRoutes = routes.filter(r => r.group === 'User Management').length;
+    const systemRoutes = routes.filter(r => r.group === 'System').length;
+    const compatRoutes = routes.filter(r => r.group === 'Compatibility').length;
+    
+    console.log(`   • Authentication: ${authRoutes} routes`);
+    console.log(`   • User Management: ${userRoutes} routes`);
+    console.log(`   • System: ${systemRoutes} routes`);
+    console.log(`   • Compatibility: ${compatRoutes} routes`);
+    console.log('');
+  } else {
+    // Simplified route summary
+    console.log('📋 API Routes: Auth (7), Users (5), System (3), Compatibility (2) - Use VERBOSE_LOGGING=true for details');
+  }
 };
 
 // Start the server only if not in test environment
 if (process.env.NODE_ENV !== 'test') {
+  // Add handlers for unhandled errors
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Promise Rejection:', reason);
+    console.error('At promise:', promise);
+  });
+
+  process.on('uncaughtException', (error) => {
+    console.error('❌ Uncaught Exception:', error);
+    process.exit(1);
+  });
+
   startServer();
 }
+
+// Clean logging configuration applied
+// Trigger restart - verbose logging enabled
 
 export default app;

@@ -1,0 +1,66 @@
+name: ollama_deepseek_webui_project # Nombre opcional del proyecto
+
+services:
+  ollama:
+    image: ollama/ollama:latest # Imagen oficial de Ollama
+    container_name: ollama
+    ports:
+      - "11434:11434" # Mapea el puerto API de Ollama al host
+    volumes:
+      - ollama_data:/root/.ollama # Volumen persistente para modelos y configuraciones
+    restart: unless-stopped # Reinicia automáticamente el contenedor a menos que se detenga explícitamente
+    deploy: # Configuración para recursos de despliegue, incluyendo GPU
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia # Especifica el controlador NVIDIA
+              count: all # Expone todas las GPUs disponibles al contenedor
+              capabilities: [gpu] # Habilita las capacidades de GPU
+    runtime: nvidia # Habilita el passthrough de GPU para GPUs NVIDIA
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all # Variable de entorno para exponer todas las GPUs (alternativa/complemento)
+    healthcheck: # Comprobación de salud para asegurar que Ollama esté operativo
+      test: ["CMD", "ollama", "list"] # Verifica que Ollama esté funcionando usando el comando nativo
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - ollama_network # Conecta Ollama a la red compartida
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main # Imagen oficial de Open WebUI
+    container_name: open-webui
+    ports:
+      - "5000:8080" # Mapea el puerto de la WebUI al host (accesible en http://localhost:5000)
+    volumes:
+      - openwebui_data:/app/backend/data # Volumen persistente para datos de la WebUI
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434 # Configura la WebUI para comunicarse con el servicio Ollama
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # Permite la resolución de host.docker.internal
+    restart: unless-stopped
+    depends_on: # Asegura que Open WebUI inicie solo después de que Ollama esté saludable
+      ollama:
+        condition: service_healthy
+    networks:
+      - ollama_network # Conecta Open WebUI a la red compartida
+
+  ollama-model-pull: # Servicio opcional para descargar modelos al inicio
+    image: curlimages/curl:latest # Imagen ligera con curl para llamadas API
+    container_name: ollama-deepseek-pull
+    command: >
+      curl -X POST http://ollama:11434/api/pull -d '{"name":"deepseek-r1:8b"}' # Cambiar por el modelo DeepSeek R1 deseado
+    depends_on: # Asegura que la descarga del modelo inicie solo después de que Ollama esté saludable
+      ollama:
+        condition: service_healthy
+    networks:
+      - ollama_network # Conecta este servicio a la red compartida
+
+networks:
+  ollama_network:
+    driver: bridge # Define una red de puente personalizada para la comunicación entre servicios
+
+volumes:
+  ollama_data: # Volumen nombrado para los modelos de Ollama
+  openwebui_data: # Volumen nombrado para los datos de Open WebUI

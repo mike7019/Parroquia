@@ -65,9 +65,13 @@ class AuthService {
 
       // Send verification email (outside transaction to avoid rollback on email failure)
       try {
-        await emailService.sendEmailVerification(user.email, emailVerificationToken);
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${emailVerificationToken}`;
+        console.log('🚀 Attempting to send verification email to:', user.email);
+        const emailResult = await emailService.sendEmailVerificationEmail(user.email, `${user.firstName} ${user.lastName}`, verificationUrl);
+        console.log('✅ Email sent successfully:', emailResult);
       } catch (emailError) {
-        console.warn('Email service warning:', emailError.message);
+        console.warn('⚠️ Email service warning:', emailError.message);
+        console.warn('Error details:', emailError);
         // Don't throw - continue with successful registration
       }
 
@@ -205,7 +209,7 @@ class AuthService {
    * @returns {Promise<Object>} Success message
    */
   async initiatePasswordReset(email) {
-    const user = await User.findOne({ where: { email } });
+    const user = await User.unscoped().findOne({ where: { email } });
     if (!user) {
       // Don't reveal if email exists or not for security
       return { message: 'If the email exists, a password reset link has been sent' };
@@ -222,24 +226,31 @@ class AuthService {
     });
 
     // Send reset email
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-    await emailService.sendPasswordResetEmail(
-      user.email,
-      `${user.firstName} ${user.lastName}`,
-      resetUrl
-    );
+    try {
+      const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+      console.log('🔑 Attempting to send password reset email to:', user.email);
+      const emailResult = await emailService.sendPasswordResetEmail(
+        user.email,
+        `${user.firstName} ${user.lastName}`,
+        resetUrl
+      );
+      console.log('✅ Password reset email sent successfully:', emailResult);
+    } catch (emailError) {
+      console.warn('⚠️ Password reset email service warning:', emailError.message);
+      console.warn('Error details:', emailError);
+      // Don't throw - continue with success message for security
+    }
 
     return { message: 'If the email exists, a password reset link has been sent' };
   }
 
   /**
-   * Resets user password using reset token
+   * Validates password reset token
    * @param {string} token - Reset token
-   * @param {string} newPassword - New password
-   * @returns {Promise<Object>} Success message
+   * @returns {Promise<Object>} Validation result
    */
-  async resetPassword(token, newPassword) {
-    const user = await User.findOne({
+  async validatePasswordResetToken(token) {
+    const user = await User.unscoped().findOne({
       where: {
         passwordResetToken: token,
         passwordResetExpires: {
@@ -252,12 +263,38 @@ class AuthService {
       throw new AuthenticationError('Invalid or expired reset token', 'INVALID_RESET_TOKEN');
     }
 
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    return { 
+      message: 'Token is valid', 
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName
+    };
+  }
+
+  /**
+   * Resets user password using reset token
+   * @param {string} token - Reset token
+   * @param {string} newPassword - New password
+   * @returns {Promise<Object>} Success message
+   */
+  async resetPassword(token, newPassword) {
+    const user = await User.unscoped().findOne({
+      where: {
+        passwordResetToken: token,
+        passwordResetExpires: {
+          [Op.gt]: new Date()
+        }
+      }
+    });
+
+    if (!user) {
+      throw new AuthenticationError('Invalid or expired reset token', 'INVALID_RESET_TOKEN');
+    }
 
     // Update password and clear reset token
+    // The password will be automatically hashed by the beforeUpdate hook
     await user.update({
-      password: hashedPassword,
+      password: newPassword, // Let the model hook handle the hashing
       passwordResetToken: null,
       passwordResetExpires: null,
       refreshToken: null // Invalidate all sessions
@@ -285,12 +322,10 @@ class AuthService {
       throw new AuthenticationError('Current password is incorrect', 'INCORRECT_PASSWORD');
     }
 
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
-
     // Update password and invalidate all sessions
+    // The password will be automatically hashed by the beforeUpdate hook
     await user.update({
-      password: hashedPassword,
+      password: newPassword, // Let the model hook handle the hashing
       refreshToken: null
     });
 
@@ -303,7 +338,7 @@ class AuthService {
    * @returns {Promise<Object>} Success message
    */
   async verifyEmail(token) {
-    const user = await User.findOne({
+    const user = await User.unscoped().findOne({
       where: { emailVerificationToken: token }
     });
 
@@ -521,7 +556,7 @@ class AuthService {
    * @returns {Promise<Object>} Success message
    */
   async resendEmailVerification(email) {
-    const user = await User.findOne({ where: { email } });
+    const user = await User.unscoped().findOne({ where: { email } });
     if (!user) {
       throw new NotFoundError('User not found');
     }
@@ -547,6 +582,36 @@ class AuthService {
     );
 
     return { message: 'Verification email sent successfully. Please check your email' };
+  }
+
+  /**
+   * Get verification token for development (DEVELOPMENT ONLY)
+   * @param {string} email - User email
+   * @returns {Promise<Object>} Token data
+   */
+  async getVerificationTokenForDev(email) {
+    // Only allow in development
+    if (process.env.NODE_ENV !== 'development') {
+      throw new Error('This method is only available in development mode');
+    }
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+
+    if (user.emailVerified) {
+      throw new ValidationError('Email is already verified');
+    }
+
+    if (!user.emailVerificationToken) {
+      throw new ValidationError('No verification token found for this user. Try requesting a new verification email.');
+    }
+
+    return {
+      email: user.email,
+      token: user.emailVerificationToken
+    };
   }
 }
 

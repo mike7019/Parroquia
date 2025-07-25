@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Sistema Parroquia - Autenticación",
-    "description": "Colección completa de endpoints de autenticación para el Sistema Parroquia\n\n**Configuración:**\n- Variable {{baseUrl}}: http://localhost:3000/api/auth\n- Variable {{accessToken}}: Se actualiza automáticamente con el login\n\n**Flujo recomendado:**\n1. Register - Registrar usuario\n2. Verify Email - Verificar email con token\n3. Login - Iniciar sesión\n4. Get Profile - Obtener perfil (requiere autenticación)\n5. Logout - Cerrar sesión",
+    "description": "Colección completa de endpoints de autenticación para el Sistema Parroquia\n\n**Configuración:**\n- Variable {{baseUrl}}: http://localhost:3000/api/auth\n- Variable {{accessToken}}: Se actualiza automáticamente con el login\n\n**⚠️ IMPORTANTE - Flujo obligatorio:**\n1. **Register** - Registrar usuario\n2. **Verify Email** - ⭐ REQUERIDO antes del login\n   - En desarrollo: Token aparece en logs del servidor\n   - En producción: Token enviado por email\n3. **Login** - Solo funciona DESPUÉS de verificar email\n4. **Get Profile** - Obtener perfil (requiere autenticación)\n\n**🔍 Para obtener token de verificación:**\n- Revisa los logs del servidor después del registro\n- Busca: \"Verification URL: http://...?token=TU_TOKEN\"\n- Copia el token y úsalo en \"Verify Email\"\n\n**📧 Si no ves el token:** Usa \"Resend Verification\" para obtener uno nuevo",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -19,6 +19,12 @@
       "key": "refreshToken",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "lastVerificationToken",
+      "value": "",
+      "type": "string",
+      "description": "Último token de verificación obtenido (útil para desarrollo)"
     }
   ],
   "item": [
@@ -44,6 +50,15 @@
                   "    pm.test('Usuario registrado exitosamente', function () {",
                   "        pm.expect(response.status).to.eql('success');",
                   "    });",
+                  "    console.log('✅ Usuario registrado exitosamente');",
+                  "    console.log('📧 Próximo paso: VERIFICAR EMAIL');",
+                  "    console.log('📍 Instrucciones:');",
+                  "    console.log('   1. Revisa los logs del servidor ahora');",
+                  "    console.log('   2. Busca: \"Verification URL: http://...\"');",
+                  "    console.log('   3. Copia el token de esa URL');",
+                  "    console.log('   4. Ve al endpoint \"2. Verify Email\"');",
+                  "    console.log('   5. Reemplaza TOKEN_AQUI con tu token real');",
+                  "    console.log('⚠️  NO PUEDES hacer login sin verificar email primero');",
                   "}"
                 ]
               }
@@ -85,6 +100,47 @@
                   "    pm.test('Email verificado exitosamente', function () {",
                   "        pm.expect(response.status).to.eql('success');",
                   "    });",
+                  "    console.log('✅ Email verificado correctamente. Ahora puedes hacer login.');",
+                  "} else if (pm.response.code === 400 || pm.response.code === 401) {",
+                  "    const response = pm.response.json();",
+                  "    console.error('❌ Error en verificación:', response.message);",
+                  "    if (response.code === 'INVALID_VERIFICATION_TOKEN') {",
+                  "        console.log('💡 Sugerencias:');",
+                  "        console.log('   1. Verifica que copiaste el token completo');",
+                  "        console.log('   2. El token solo se puede usar una vez');",
+                  "        console.log('   3. Puedes solicitar un nuevo token con \"Resend Verification\"');",
+                  "    }",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Verificar si hay un token en la URL",
+                  "const url = pm.request.url.toString();",
+                  "if (url.includes('TOKEN_AQUI')) {",
+                  "    console.warn('⚠️  IMPORTANTE: Debes reemplazar TOKEN_AQUI con el token real');",
+                  "    console.log('📍 Para obtener el token:');",
+                  "    console.log('   OPCIÓN 1 - Usar herramienta de desarrollo:');",
+                  "    console.log('      1. Ve al endpoint \"Get Verification Token (DEV)\"');",
+                  "    console.log('      2. Ejecuta con el email del usuario');",
+                  "    console.log('      3. Copia el token y regresa aquí');",
+                  "    console.log('   OPCIÓN 2 - Revisar logs del servidor:');",
+                  "    console.log('      1. Después de registrarte, revisa los logs del servidor');",
+                  "    console.log('      2. Busca el mensaje que dice \"Verification URL:\"');",
+                  "    console.log('      3. Copia el token de esa URL');",
+                  "    console.log('   OPCIÓN 3 - Reenviar email:');",
+                  "    console.log('      1. Usa \"Resend Verification\" para obtener un nuevo token');",
+                  "    ",
+                  "    // Verificar si hay un token guardado",
+                  "    const savedToken = pm.collectionVariables.get('lastVerificationToken');",
+                  "    if (savedToken) {",
+                  "        console.log('💡 TIP: Hay un token guardado de la última consulta.');",
+                  "        console.log('Token guardado: ' + savedToken);",
+                  "        console.log('Puedes usar este token si es para el mismo usuario.');",
+                  "    }",
                   "}"
                 ]
               }
@@ -105,7 +161,7 @@
                 {
                   "key": "token",
                   "value": "TOKEN_AQUI",
-                  "description": "Token de verificación obtenido del email o logs del servidor"
+                  "description": "🔑 REEMPLAZA con tu token real. En desarrollo: revisa logs del servidor. En producción: revisa tu email."
                 }
               ]
             }
@@ -130,6 +186,21 @@
                   "    pm.test('Login exitoso', function () {",
                   "        pm.expect(response.status).to.eql('success');",
                   "    });",
+                  "    console.log('✅ Login exitoso. Token guardado en variables de colección.');",
+                  "} else if (pm.response.code === 401) {",
+                  "    const response = pm.response.json();",
+                  "    console.error('❌ Error de autenticación:', response.message);",
+                  "    if (response.code === 'EMAIL_NOT_VERIFIED') {",
+                  "        console.log('📧 Tu email no está verificado. Pasos a seguir:');",
+                  "        console.log('   1. Ve al endpoint \"2. Verify Email\"');",
+                  "        console.log('   2. Revisa los logs del servidor para obtener el token');",
+                  "        console.log('   3. O usa \"Resend Verification\" para nuevo token');",
+                  "        console.log('   4. Después de verificar, intenta login nuevamente');",
+                  "    } else if (response.code === 'ACCOUNT_DEACTIVATED') {",
+                  "        console.log('🚫 Cuenta desactivada. Contacta al administrador.');",
+                  "    } else {",
+                  "        console.log('🔐 Verifica email y contraseña.');",
+                  "    }",
                   "}"
                 ]
               }
@@ -162,7 +233,81 @@
       ]
     },
     {
-      "name": "👤 Gestión de Perfil",
+      "name": "�️ Herramientas de Desarrollo",
+      "description": "Endpoints útiles para desarrollo y testing (solo disponibles en NODE_ENV=development)",
+      "item": [
+        {
+          "name": "Get Verification Token (DEV)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.test('Token obtenido exitosamente', function () {",
+                  "        pm.expect(response.status).to.eql('success');",
+                  "    });",
+                  "    if (response.data && response.data.token) {",
+                  "        console.log('🔑 TOKEN DE VERIFICACIÓN:');",
+                  "        console.log(response.data.token);",
+                  "        console.log('🔗 URL completa de verificación:');",
+                  "        console.log(response.data.verificationUrl);",
+                  "        console.log('📋 Próximos pasos:');",
+                  "        console.log('   1. Copia el token de arriba');",
+                  "        console.log('   2. Ve al endpoint \"2. Verify Email\"');",
+                  "        console.log('   3. Reemplaza TOKEN_AQUI con el token copiado');",
+                  "        console.log('   4. Ejecuta la verificación');",
+                  "        // Opcional: guardar token en variable para uso automático",
+                  "        pm.collectionVariables.set('lastVerificationToken', response.data.token);",
+                  "    }",
+                  "} else if (pm.response.code === 403) {",
+                  "    console.log('❌ Este endpoint solo está disponible en modo desarrollo');",
+                  "    console.log('💡 Verifica que NODE_ENV=development en tu servidor');",
+                  "} else if (pm.response.code === 404) {",
+                  "    console.log('❌ Usuario no encontrado o email ya verificado');",
+                  "    console.log('💡 Verifica el email o registra un nuevo usuario');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "console.log('🛠️ Obteniendo token de verificación para desarrollo...');",
+                  "console.log('📧 Email a consultar: ' + pm.request.url.query.get('email'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dev/get-verification-token?email=usuario@test.com",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dev",
+                "get-verification-token"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "usuario@test.com",
+                  "description": "Email del usuario registrado"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "�👤 Gestión de Perfil",
       "description": "Endpoints para gestión del perfil de usuario autenticado",
       "item": [
         {

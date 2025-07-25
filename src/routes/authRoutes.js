@@ -300,6 +300,11 @@ router.post('/forgot-password',
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
+
+// GET endpoint to validate reset token
+router.get('/reset-password', authController.validateResetToken);
+
+// POST endpoint to reset password
 router.post('/reset-password',
   authValidators.validateResetPassword,
   validationMiddleware.handleValidationErrors,
@@ -600,5 +605,53 @@ router.get('/profile',
   authMiddleware.authenticateToken,
   authController.getProfile
 );
+
+// Development only routes
+if (process.env.NODE_ENV === 'development') {
+  /**
+   * @swagger
+   * /api/auth/dev/get-verification-token:
+   *   get:
+   *     tags: [Development]
+   *     summary: Obtener token de verificación (SOLO DESARROLLO)
+   *     description: Endpoint para obtener el token de verificación de email en modo desarrollo
+   *     parameters:
+   *       - in: query
+   *         name: email
+   *         required: true
+   *         schema:
+   *           type: string
+   *           format: email
+   *         description: Email del usuario
+   *     responses:
+   *       200:
+   *         description: Token de verificación obtenido exitosamente
+   *         content:
+   *           application/json:
+   *             schema:
+   *               allOf:
+   *                 - $ref: '#/components/schemas/ApiResponse'
+   *                 - type: object
+   *                   properties:
+   *                     data:
+   *                       type: object
+   *                       properties:
+   *                         email:
+   *                           type: string
+   *                         token:
+   *                           type: string
+   *                         verificationUrl:
+   *                           type: string
+   *       400:
+   *         $ref: '#/components/responses/BadRequestError'
+   *       403:
+   *         description: No disponible en producción
+   *       404:
+   *         $ref: '#/components/responses/NotFoundError'
+   */
+  router.get('/dev/get-verification-token',
+    authController.getVerificationTokenDev
+  );
+}
 
 export default router;

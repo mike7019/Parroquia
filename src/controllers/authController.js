@@ -114,6 +114,37 @@ class AuthController {
   }
 
   /**
+   * Validate reset password token (GET endpoint)
+   */
+  async validateResetToken(req, res, next) {
+    try {
+      const { token } = req.query;
+      
+      if (!token) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Reset token is required',
+          code: 'MISSING_TOKEN'
+        });
+      }
+      
+      const result = await authService.validatePasswordResetToken(token);
+
+      res.status(200).json({
+        status: 'success',
+        message: result.message,
+        data: {
+          email: result.email,
+          firstName: result.firstName,
+          lastName: result.lastName
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Reset password
    */
   async resetPassword(req, res, next) {
@@ -217,6 +248,44 @@ class AuthController {
       res.status(200).json({
         status: 'success',
         data: { user }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get verification token for development (DEVELOPMENT ONLY)
+   */
+  async getVerificationTokenDev(req, res, next) {
+    try {
+      // Only allow in development mode
+      if (process.env.NODE_ENV !== 'development') {
+        return res.status(403).json({
+          status: 'error',
+          message: 'This endpoint is only available in development mode'
+        });
+      }
+
+      const { email } = req.query;
+      
+      if (!email) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Email is required'
+        });
+      }
+
+      const result = await authService.getVerificationTokenForDev(email);
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Verification token retrieved (DEVELOPMENT ONLY)',
+        data: {
+          email: result.email,
+          token: result.token,
+          verificationUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email?token=${result.token}`
+        }
       });
     } catch (error) {
       next(error);

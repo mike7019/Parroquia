@@ -191,6 +191,43 @@ router.get('/status', async (req, res) => {
  *               health: "/api/health"
  *               status: "/api/status"
  */
+
+/**
+ * Email verification compatibility route
+ * Redirects /verify-email to /api/auth/verify-email for backward compatibility
+ */
+router.get('/verify-email', (req, res) => {
+  const token = req.query.token;
+  if (!token) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Token de verificación requerido',
+      code: 'TOKEN_REQUIRED'
+    });
+  }
+  
+  // Redirect to the proper API endpoint
+  res.redirect(301, `/api/auth/verify-email?token=${encodeURIComponent(token)}`);
+});
+
+/**
+ * Password reset compatibility route  
+ * Redirects /reset-password to /api/auth/reset-password for backward compatibility
+ */
+router.get('/reset-password', (req, res) => {
+  const token = req.query.token;
+  if (!token) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Token de restablecimiento requerido',
+      code: 'TOKEN_REQUIRED'
+    });
+  }
+  
+  // Redirect to the proper API endpoint
+  res.redirect(301, `/api/auth/reset-password?token=${encodeURIComponent(token)}`);
+});
+
 router.get('/', (req, res) => {
   res.json({
     message: 'Welcome to Parroquia API',

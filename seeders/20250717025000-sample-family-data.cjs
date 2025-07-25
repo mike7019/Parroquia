@@ -3,16 +3,23 @@ const { v4: uuidv4 } = require('uuid');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
-    // Create sample family data based on the diagram structure
+  async up (queryInterface, Sequ    // Insert sample difuntos_familia
+    await queryInterface.bulkInsert('difuntos_familia', [
+      {
+        id_difunto: 1,
+        nombre_completo: 'Pedro García Sánchez',
+        fecha_fallecimiento: '2018-12-20',
+        motivo: 'Enfermedad natural - gran devoto'
+      }
+    ]);  // Create sample family data based on the diagram structure
     
     // Insert sample familia
     await queryInterface.bulkInsert('familias', [
       {
         id_familia: 1,
         nombre_familia: 'Familia García López',
-        direccion: 'Calle 123 #45-67',
-        telefono: '3001234567',
+        direccion_familia: 'Calle 123 #45-67',
+        numero_contacto: '3001234567',
         id_municipio: 1,
         id_vereda: 1,
         id_sector: 1,
@@ -24,8 +31,8 @@ module.exports = {
       {
         id_familia: 2,
         nombre_familia: 'Familia Rodríguez Martínez',
-        direccion: 'Carrera 89 #12-34',
-        telefono: '3009876543',
+        direccion_familia: 'Carrera 89 #12-34',
+        numero_contacto: '3009876543',
         id_municipio: 1,
         id_vereda: 2,
         id_sector: 3,
@@ -148,28 +155,23 @@ module.exports = {
         id_liderazgo: 1,
         fecha_inicio: '2020-01-15',
         fecha_fin: null,
-        activo: true,
-        observaciones: 'Liderazgo en catequesis adultos'
+        activo: true
       },
       {
         id_liderazgo: 2,
         fecha_inicio: '2019-03-20',
         fecha_fin: null,
-        activo: true,
-        observaciones: 'Coordinación de actividades juveniles'
+        activo: true
       }
     ]);
 
     // Sample difuntos_familia
     await queryInterface.bulkInsert('difuntos_familia', [
       {
-        id_difuntos_familia: 1,
+        id_difunto: 1,
         nombre_completo: 'Pedro García Sánchez',
-        fecha_nacimiento: '1945-06-15',
-        fecha_defuncion: '2018-12-20',
-        causa_muerte: 'Enfermedad natural',
-        lugar_defuncion: 'Hospital San José',
-        observaciones: 'Abuelo paterno, gran devoto'
+        fecha_fallecimiento: '2018-12-20',
+        motivo: 'Enfermedad natural - gran devoto'
       }
     ]);
   },
