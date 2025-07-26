@@ -13,6 +13,7 @@ import sequelize from '../config/sequelize.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userManagementRoutes.js';
 import systemRoutes from './routes/systemRoutes.js';
+import surveyRoutes from './routes/surveyRoutes.js';
 
 // Import middlewares
 import errorHandler from './middlewares/errorHandler.js';
@@ -116,6 +117,7 @@ app.get('/api/cors-test', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/surveys', surveyRoutes);
 app.use('/api', systemRoutes);
 
 // Root route

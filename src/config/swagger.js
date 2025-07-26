@@ -136,10 +136,46 @@ const swaggerConfig = {
             },
             role: {
               type: 'string',
+              enum: ['admin', 'coordinator', 'surveyor'],
+              default: 'surveyor',
+              description: 'Rol del usuario',
+              example: 'surveyor'
+            }
+          }
+        },
+        UserUpdate: {
+          type: 'object',
+          properties: {
+            firstName: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 50,
+              description: 'Primer nombre del usuario',
+              example: 'Juan'
+            },
+            lastName: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 50,
+              description: 'Apellido del usuario',
+              example: 'Pérez'
+            },
+            email: {
+              type: 'string',
+              format: 'email',
+              description: 'Correo electrónico único',
+              example: 'juan.perez@example.com'
+            },
+            role: {
+              type: 'string',
               enum: ['admin', 'user', 'moderator'],
-              default: 'user',
               description: 'Rol del usuario',
               example: 'user'
+            },
+            isActive: {
+              type: 'boolean',
+              description: 'Estado activo del usuario',
+              example: true
             }
           }
         },
@@ -310,6 +346,310 @@ const swaggerConfig = {
               example: false
             }
           }
+        },
+        Survey: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              format: 'uuid',
+              description: 'ID único de la encuesta',
+              example: '123e4567-e89b-12d3-a456-426614174000'
+            },
+            userId: {
+              type: 'integer',
+              description: 'ID del encuestador',
+              example: 1
+            },
+            familyId: {
+              type: 'string',
+              format: 'uuid',
+              description: 'ID de la familia (opcional)',
+              example: '123e4567-e89b-12d3-a456-426614174001'
+            },
+            sector: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Sector asignado',
+              example: 'La Esperanza'
+            },
+            familyHead: {
+              type: 'string',
+              maxLength: 200,
+              description: 'Nombre del jefe de familia',
+              example: 'María González Pérez'
+            },
+            address: {
+              type: 'string',
+              description: 'Dirección de la familia',
+              example: 'Calle 15 #23-45, Barrio Centro'
+            },
+            phone: {
+              type: 'string',
+              maxLength: 20,
+              description: 'Teléfono de contacto',
+              example: '3001234567'
+            },
+            email: {
+              type: 'string',
+              format: 'email',
+              description: 'Correo electrónico',
+              example: 'maria.gonzalez@email.com'
+            },
+            familySize: {
+              type: 'integer',
+              minimum: 1,
+              maximum: 50,
+              description: 'Tamaño de la familia',
+              example: 4
+            },
+            housingType: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Tipo de vivienda',
+              example: 'Casa propia'
+            },
+            status: {
+              type: 'string',
+              enum: ['draft', 'in_progress', 'completed', 'cancelled'],
+              description: 'Estado de la encuesta',
+              example: 'in_progress'
+            },
+            currentStage: {
+              type: 'integer',
+              minimum: 1,
+              description: 'Etapa actual',
+              example: 2
+            },
+            totalStages: {
+              type: 'integer',
+              minimum: 1,
+              description: 'Total de etapas',
+              example: 4
+            },
+            progress: {
+              type: 'integer',
+              minimum: 0,
+              maximum: 100,
+              description: 'Porcentaje de progreso',
+              example: 50
+            },
+            observations: {
+              type: 'string',
+              description: 'Observaciones adicionales',
+              example: 'Familia muy colaborativa'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización'
+            }
+          },
+          required: ['sector', 'familyHead', 'address', 'familySize', 'housingType']
+        },
+        CreateSurveyRequest: {
+          type: 'object',
+          properties: {
+            sector: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Sector asignado',
+              example: 'La Esperanza'
+            },
+            familyHead: {
+              type: 'string',
+              maxLength: 200,
+              description: 'Nombre del jefe de familia',
+              example: 'María González Pérez'
+            },
+            address: {
+              type: 'string',
+              description: 'Dirección de la familia',
+              example: 'Calle 15 #23-45, Barrio Centro'
+            },
+            phone: {
+              type: 'string',
+              maxLength: 20,
+              description: 'Teléfono de contacto',
+              example: '3001234567'
+            },
+            email: {
+              type: 'string',
+              format: 'email',
+              description: 'Correo electrónico',
+              example: 'maria.gonzalez@email.com'
+            },
+            familySize: {
+              type: 'integer',
+              minimum: 1,
+              maximum: 50,
+              description: 'Tamaño de la familia',
+              example: 4
+            },
+            housingType: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Tipo de vivienda',
+              example: 'Casa propia'
+            },
+            observations: {
+              type: 'string',
+              description: 'Observaciones adicionales',
+              example: 'Familia muy colaborativa'
+            }
+          },
+          required: ['sector', 'familyHead', 'address', 'familySize', 'housingType']
+        },
+        Sector: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              format: 'uuid',
+              description: 'ID único del sector',
+              example: '123e4567-e89b-12d3-a456-426614174000'
+            },
+            name: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre del sector',
+              example: 'La Esperanza'
+            },
+            description: {
+              type: 'string',
+              description: 'Descripción del sector',
+              example: 'Sector ubicado en la zona norte de la parroquia'
+            },
+            families: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Número total de familias',
+              example: 150
+            },
+            completed: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Encuestas completadas',
+              example: 45
+            },
+            pending: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Encuestas pendientes',
+              example: 105
+            },
+            coordinator: {
+              type: 'integer',
+              description: 'ID del coordinador',
+              example: 2
+            },
+            status: {
+              type: 'string',
+              enum: ['active', 'inactive'],
+              description: 'Estado del sector',
+              example: 'active'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización'
+            }
+          },
+          required: ['name']
+        },
+        FamilyMember: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              format: 'uuid',
+              description: 'ID único del miembro',
+              example: '123e4567-e89b-12d3-a456-426614174000'
+            },
+            surveyId: {
+              type: 'string',
+              format: 'uuid',
+              description: 'ID de la encuesta',
+              example: '123e4567-e89b-12d3-a456-426614174001'
+            },
+            nombres: {
+              type: 'string',
+              maxLength: 500,
+              description: 'Nombres completos',
+              example: 'Carlos Eduardo González López'
+            },
+            fechaNacimiento: {
+              type: 'string',
+              format: 'date',
+              description: 'Fecha de nacimiento',
+              example: '1985-03-15'
+            },
+            tipoIdentificacion: {
+              type: 'string',
+              enum: ['CC', 'TI', 'CE', 'PA', 'RC'],
+              description: 'Tipo de identificación',
+              example: 'CC'
+            },
+            numeroIdentificacion: {
+              type: 'string',
+              maxLength: 50,
+              description: 'Número de identificación',
+              example: '12345678'
+            },
+            sexo: {
+              type: 'string',
+              enum: ['M', 'F', 'Otro'],
+              description: 'Sexo',
+              example: 'M'
+            },
+            situacionCivil: {
+              type: 'string',
+              enum: ['Soltero', 'Casado', 'Divorciado', 'Viudo', 'Unión Libre'],
+              description: 'Situación civil',
+              example: 'Casado'
+            },
+            parentesco: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Parentesco con el jefe de familia',
+              example: 'Jefe de familia'
+            },
+            estudio: {
+              type: 'string',
+              maxLength: 200,
+              description: 'Nivel educativo',
+              example: 'Universitario completo'
+            },
+            comunidadCultural: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Comunidad cultural',
+              example: 'Ninguna'
+            },
+            telefono: {
+              type: 'string',
+              maxLength: 20,
+              description: 'Teléfono personal',
+              example: '3009876543'
+            },
+            correoElectronico: {
+              type: 'string',
+              format: 'email',
+              description: 'Correo electrónico',
+              example: 'carlos.gonzalez@email.com'
+            }
+          },
+          required: ['nombres', 'fechaNacimiento', 'tipoIdentificacion', 'numeroIdentificacion', 'sexo', 'situacionCivil', 'parentesco', 'estudio', 'comunidadCultural']
         }
       },
       responses: {
@@ -383,7 +723,22 @@ const swaggerConfig = {
             }
           }
         },
-        ServerError: {
+        ConflictError: {
+          description: 'Conflicto - el recurso ya existe o hay un conflicto con el estado actual',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/ErrorResponse'
+              },
+              example: {
+                status: 'error',
+                message: 'El email ya está registrado',
+                code: 'CONFLICT'
+              }
+            }
+          }
+        },
+        InternalServerError: {
           description: 'Error interno del servidor',
           content: {
             'application/json': {

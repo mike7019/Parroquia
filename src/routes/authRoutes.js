@@ -71,7 +71,7 @@ const router = express.Router();
  *               message: "El email ya está registrado"
  *               code: "EMAIL_ALREADY_EXISTS"
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/register', 
   authValidators.validateRegister,
@@ -143,7 +143,7 @@ router.post('/register',
  *               message: "Cuenta inactiva. Contacta al administrador."
  *               code: "ACCOUNT_INACTIVE"
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/login', 
   authValidators.validateLogin,
@@ -208,7 +208,7 @@ router.post('/login',
  *               message: "Refresh token inválido o expirado"
  *               code: "INVALID_REFRESH_TOKEN"
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/refresh-token',
   authValidators.validateRefreshToken,
@@ -251,7 +251,7 @@ router.post('/refresh-token',
  *       400:
  *         $ref: '#/components/responses/ValidationError'
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/forgot-password',
   authValidators.validateForgotPassword,
@@ -298,7 +298,7 @@ router.post('/forgot-password',
  *               message: "Token de recuperación inválido o expirado"
  *               code: "INVALID_RESET_TOKEN"
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 // GET endpoint to validate reset token
@@ -357,7 +357,7 @@ router.post('/reset-password',
  *               message: "Token de verificación inválido"
  *               code: "INVALID_VERIFICATION_TOKEN"
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.get('/verify-email',
   authValidators.validateEmailVerification,
@@ -429,7 +429,7 @@ router.get('/verify-email',
  *               message: "Email is already verified"
  *               code: "CONFLICT"
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/resend-verification-public',
   authValidators.validateResendVerificationPublic,
@@ -461,7 +461,7 @@ router.post('/resend-verification-public',
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/logout',
   authMiddleware.authenticateToken,
@@ -509,7 +509,7 @@ router.post('/logout',
  *               message: "Contraseña actual incorrecta"
  *               code: "INVALID_CURRENT_PASSWORD"
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/change-password',
   authMiddleware.authenticateToken,
@@ -550,7 +550,7 @@ router.post('/change-password',
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/resend-verification',
   authMiddleware.authenticateToken,
@@ -599,7 +599,7 @@ router.post('/resend-verification',
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.get('/profile',
   authMiddleware.authenticateToken,

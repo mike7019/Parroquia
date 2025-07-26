@@ -37,14 +37,33 @@ const User = sequelize.define('User', {
       len: [2, 50]
     }
   },
+  phone: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    validate: {
+      len: [10, 20]
+    }
+  },
   role: {
-    type: DataTypes.ENUM('admin', 'user', 'moderator'),
-    defaultValue: 'user'
+    type: DataTypes.ENUM('admin', 'coordinator', 'surveyor'),
+    defaultValue: 'surveyor'
+  },
+  sector: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    comment: 'Sector asignado para coordinadores y encuestadores'
   },
   status: {
-    type: DataTypes.ENUM('active', 'inactive', 'deleted'),
+    type: DataTypes.ENUM('active', 'inactive'),
     allowNull: false,
     defaultValue: 'active'
+  },
+  surveysCompleted: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    validate: {
+      min: 0
+    }
   },
   isActive: {
     type: DataTypes.BOOLEAN,
