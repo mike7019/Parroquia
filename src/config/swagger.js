@@ -347,6 +347,134 @@ const swaggerConfig = {
             }
           }
         },
+        ParroquiaResponse: {
+          allOf: [
+            { $ref: '#/components/schemas/ApiResponse' },
+            {
+              type: 'object',
+              properties: {
+                data: {
+                  $ref: '#/components/schemas/Parroquia'
+                }
+              }
+            }
+          ]
+        },
+        ParroquiasListResponse: {
+          allOf: [
+            { $ref: '#/components/schemas/ApiResponse' },
+            {
+              type: 'object',
+              properties: {
+                data: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/Parroquia'
+                  }
+                },
+                pagination: {
+                  $ref: '#/components/schemas/Pagination'
+                }
+              }
+            }
+          ]
+        },
+        SectorResponse: {
+          allOf: [
+            { $ref: '#/components/schemas/ApiResponse' },
+            {
+              type: 'object',
+              properties: {
+                data: {
+                  $ref: '#/components/schemas/Sector'
+                }
+              }
+            }
+          ]
+        },
+        SectorsListResponse: {
+          allOf: [
+            { $ref: '#/components/schemas/ApiResponse' },
+            {
+              type: 'object',
+              properties: {
+                data: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/Sector'
+                  }
+                },
+                pagination: {
+                  $ref: '#/components/schemas/Pagination'
+                }
+              }
+            }
+          ]
+        },
+        VeredaResponse: {
+          allOf: [
+            { $ref: '#/components/schemas/ApiResponse' },
+            {
+              type: 'object',
+              properties: {
+                data: {
+                  $ref: '#/components/schemas/Vereda'
+                }
+              }
+            }
+          ]
+        },
+        VeredasListResponse: {
+          allOf: [
+            { $ref: '#/components/schemas/ApiResponse' },
+            {
+              type: 'object',
+              properties: {
+                data: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/Vereda'
+                  }
+                },
+                pagination: {
+                  $ref: '#/components/schemas/Pagination'
+                }
+              }
+            }
+          ]
+        },
+        SexoResponse: {
+          allOf: [
+            { $ref: '#/components/schemas/ApiResponse' },
+            {
+              type: 'object',
+              properties: {
+                data: {
+                  $ref: '#/components/schemas/Sexo'
+                }
+              }
+            }
+          ]
+        },
+        SexosListResponse: {
+          allOf: [
+            { $ref: '#/components/schemas/ApiResponse' },
+            {
+              type: 'object',
+              properties: {
+                data: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/Sexo'
+                  }
+                },
+                pagination: {
+                  $ref: '#/components/schemas/Pagination'
+                }
+              }
+            }
+          ]
+        },
         Survey: {
           type: 'object',
           properties: {
@@ -567,6 +695,122 @@ const swaggerConfig = {
           },
           required: ['name']
         },
+        Parroquia: {
+          type: 'object',
+          properties: {
+            id_parroquia: {
+              type: 'integer',
+              description: 'ID único de la parroquia',
+              example: 1
+            },
+            nombre: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre de la parroquia',
+              example: 'San José'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización'
+            }
+          },
+          required: ['nombre']
+        },
+        Vereda: {
+          type: 'object',
+          properties: {
+            id_vereda: {
+              type: 'integer',
+              description: 'ID único de la vereda',
+              example: 1
+            },
+            nombre: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre de la vereda',
+              example: 'La Esperanza'
+            },
+            id_municipio: {
+              type: 'integer',
+              description: 'ID del municipio',
+              example: 1
+            },
+            municipio: {
+              $ref: '#/components/schemas/Municipio'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización'
+            }
+          },
+          required: ['nombre', 'id_municipio']
+        },
+        Municipio: {
+          type: 'object',
+          properties: {
+            id_municipio: {
+              type: 'integer',
+              description: 'ID único del municipio',
+              example: 1
+            },
+            nombre: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre del municipio',
+              example: 'Bogotá'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización'
+            }
+          },
+          required: ['nombre']
+        },
+        Sexo: {
+          type: 'object',
+          properties: {
+            id_sexo: {
+              type: 'integer',
+              description: 'ID único del sexo',
+              example: 1
+            },
+            sexo: {
+              type: 'string',
+              maxLength: 50,
+              description: 'Designación de sexo/género',
+              example: 'Masculino'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización'
+            }
+          },
+          required: ['sexo']
+        },
         FamilyMember: {
           type: 'object',
           properties: {
@@ -770,6 +1014,30 @@ const swaggerConfig = {
         description: 'Operaciones de gestión de usuarios'
       },
       {
+        name: 'Surveys',
+        description: 'Gestión de encuestas y familias'
+      },
+      {
+        name: 'Parroquias',
+        description: 'Gestión de catálogo de parroquias'
+      },
+      {
+        name: 'Sectors',
+        description: 'Gestión de catálogo de sectores'
+      },
+      {
+        name: 'Veredas',
+        description: 'Gestión de catálogo de veredas'
+      },
+      {
+        name: 'Sexos',
+        description: 'Gestión de catálogo de sexos'
+      },
+      {
+        name: 'Catalog',
+        description: 'Operaciones generales de catálogos'
+      },
+      {
         name: 'System',
         description: 'Endpoints del sistema y verificación de salud'
       }
@@ -777,7 +1045,9 @@ const swaggerConfig = {
   },
   apis: [
     './src/routes/*.js',
-    './src/controllers/*.js'
+    './src/routes/catalog/*.js',
+    './src/controllers/*.js',
+    './src/controllers/catalog/*.js'
   ]
 };
 

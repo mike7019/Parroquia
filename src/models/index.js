@@ -6,6 +6,13 @@ import Family from './Family.js';
 import FamilyMember from './FamilyMember.js';
 import SurveyAuditLog from './SurveyAuditLog.js';
 
+// Import catalog models
+import Parroquia from './catalog/Parroquia.js';
+import Veredas from './catalog/Veredas.js';
+import Sexo from './catalog/Sexo.js';
+import Municipios from './catalog/Municipios.js';
+import Persona from './catalog/Persona.js';
+
 // Definir asociaciones para los nuevos modelos
 User.hasMany(Survey, {
   foreignKey: 'userId',
@@ -68,6 +75,67 @@ SurveyAuditLog.belongsTo(User, {
   as: 'user'
 });
 
+// Catalog model associations
+Parroquia.hasMany(Persona, {
+  foreignKey: 'id_parroquia',
+  as: 'personas'
+});
+
+Persona.belongsTo(Parroquia, {
+  foreignKey: 'id_parroquia',
+  as: 'parroquia'
+});
+
+Sexo.hasMany(Persona, {
+  foreignKey: 'id_sexo',
+  as: 'personas'
+});
+
+Persona.belongsTo(Sexo, {
+  foreignKey: 'id_sexo',
+  as: 'sexo'
+});
+
+Municipios.hasMany(Veredas, {
+  foreignKey: 'id_municipio',
+  as: 'veredas'
+});
+
+Veredas.belongsTo(Municipios, {
+  foreignKey: 'id_municipio',
+  as: 'municipio'
+});
+
+Veredas.hasMany(Persona, {
+  foreignKey: 'id_vereda',
+  as: 'personas'
+});
+
+Persona.belongsTo(Veredas, {
+  foreignKey: 'id_vereda',
+  as: 'vereda'
+});
+
+Veredas.hasMany(Sector, {
+  foreignKey: 'veredaId',
+  as: 'sectores'
+});
+
+Sector.belongsTo(Veredas, {
+  foreignKey: 'veredaId',
+  as: 'vereda'
+});
+
+Municipios.hasMany(Sector, {
+  foreignKey: 'municipioId',
+  as: 'sectores'
+});
+
+Sector.belongsTo(Municipios, {
+  foreignKey: 'municipioId',
+  as: 'municipio'
+});
+
 // Re-export everything including new models
 export default {
   sequelize,
@@ -76,7 +144,12 @@ export default {
   Sector,
   Family,
   FamilyMember,
-  SurveyAuditLog
+  SurveyAuditLog,
+  Parroquia,
+  Veredas,
+  Sexo,
+  Municipios,
+  Persona
 };
 
 export {
@@ -85,5 +158,10 @@ export {
   Sector,
   Family,
   FamilyMember,
-  SurveyAuditLog
+  SurveyAuditLog,
+  Parroquia,
+  Veredas,
+  Sexo,
+  Municipios,
+  Persona
 };

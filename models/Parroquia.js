@@ -16,7 +16,8 @@ module.exports = (sequelize, DataTypes) => {
     id_parroquia: {
       type: DataTypes.BIGINT,
       primaryKey: true,
-      allowNull: false
+      allowNull: false,
+      autoIncrement: true
     },
     nombre: {
       type: DataTypes.STRING(255),

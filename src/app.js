@@ -14,6 +14,7 @@ import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userManagementRoutes.js';
 import systemRoutes from './routes/systemRoutes.js';
 import surveyRoutes from './routes/surveyRoutes.js';
+import catalogRoutes from './routes/catalog/index.js';
 
 // Import middlewares
 import errorHandler from './middlewares/errorHandler.js';
@@ -118,6 +119,7 @@ app.get('/api/cors-test', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/surveys', surveyRoutes);
+app.use('/api/catalog', catalogRoutes);
 app.use('/api', systemRoutes);
 
 // Root route
@@ -321,6 +323,37 @@ const displayRoutes = () => {
       { method: 'POST', path: '/api/surveys/:id/auto-save', group: 'Surveys', protected: true },
       { method: 'GET', path: '/api/surveys/:id/auto-save', group: 'Surveys', protected: true },
       
+      // Catalog routes
+      { method: 'GET', path: '/api/catalog/health', group: 'Catalog', protected: false },
+      { method: 'POST', path: '/api/catalog/parroquias', group: 'Catalog', protected: true },
+      { method: 'GET', path: '/api/catalog/parroquias', group: 'Catalog', protected: true },
+      { method: 'GET', path: '/api/catalog/parroquias/search', group: 'Catalog', protected: true },
+      { method: 'GET', path: '/api/catalog/parroquias/statistics', group: 'Catalog', protected: true },
+      { method: 'GET', path: '/api/catalog/parroquias/:id', group: 'Catalog', protected: true },
+      { method: 'PUT', path: '/api/catalog/parroquias/:id', group: 'Catalog', protected: true },
+      { method: 'DELETE', path: '/api/catalog/parroquias/:id', group: 'Catalog', protected: true },
+      { method: 'POST', path: '/api/catalog/sectors', group: 'Catalog', protected: true },
+      { method: 'GET', path: '/api/catalog/sectors', group: 'Catalog', protected: true },
+      { method: 'GET', path: '/api/catalog/sectors/search', group: 'Catalog', protected: true },
+      { method: 'GET', path: '/api/catalog/sectors/statistics', group: 'Catalog', protected: true },
+      { method: 'GET', path: '/api/catalog/sectors/:id', group: 'Catalog', protected: true },
+      { method: 'PUT', path: '/api/catalog/sectors/:id', group: 'Catalog', protected: true },
+      { method: 'DELETE', path: '/api/catalog/sectors/:id', group: 'Catalog', protected: true },
+      { method: 'POST', path: '/api/catalog/veredas', group: 'Catalog', protected: true },
+      { method: 'GET', path: '/api/catalog/veredas', group: 'Catalog', protected: true },
+      { method: 'GET', path: '/api/catalog/veredas/search', group: 'Catalog', protected: true },
+      { method: 'GET', path: '/api/catalog/veredas/statistics', group: 'Catalog', protected: true },
+      { method: 'GET', path: '/api/catalog/veredas/:id', group: 'Catalog', protected: true },
+      { method: 'PUT', path: '/api/catalog/veredas/:id', group: 'Catalog', protected: true },
+      { method: 'DELETE', path: '/api/catalog/veredas/:id', group: 'Catalog', protected: true },
+      { method: 'POST', path: '/api/catalog/sexos', group: 'Catalog', protected: true },
+      { method: 'GET', path: '/api/catalog/sexos', group: 'Catalog', protected: true },
+      { method: 'GET', path: '/api/catalog/sexos/search', group: 'Catalog', protected: true },
+      { method: 'GET', path: '/api/catalog/sexos/statistics', group: 'Catalog', protected: true },
+      { method: 'GET', path: '/api/catalog/sexos/:id', group: 'Catalog', protected: true },
+      { method: 'PUT', path: '/api/catalog/sexos/:id', group: 'Catalog', protected: true },
+      { method: 'DELETE', path: '/api/catalog/sexos/:id', group: 'Catalog', protected: true },
+      
       // System routes
       { method: 'GET', path: '/api/health', group: 'System', protected: false },
       { method: 'GET', path: '/api/status', group: 'System', protected: false },
@@ -356,12 +389,14 @@ const displayRoutes = () => {
     const authRoutes = routes.filter(r => r.group === 'Authentication').length;
     const userRoutes = routes.filter(r => r.group === 'User Management').length;
     const surveyRoutes = routes.filter(r => r.group === 'Surveys').length;
+    const catalogRoutes = routes.filter(r => r.group === 'Catalog').length;
     const systemRoutes = routes.filter(r => r.group === 'System').length;
     const compatRoutes = routes.filter(r => r.group === 'Compatibility').length;
     
     console.log(`   • Authentication: ${authRoutes} routes`);
     console.log(`   • User Management: ${userRoutes} routes`);
     console.log(`   • Surveys: ${surveyRoutes} routes`);
+    console.log(`   • Catalog: ${catalogRoutes} routes`);
     console.log(`   • System: ${systemRoutes} routes`);
     console.log(`   • Compatibility: ${compatRoutes} routes`);
     console.log('');
