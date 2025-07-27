@@ -70,7 +70,7 @@ const corsOptions = {
 };
 
 // CORS configuration - Simplified and clean
-app.use(cors(corsOptions));
+app.use(cors());
 
 // Custom middleware to log request IPs
 app.use((req, res, next) => {
