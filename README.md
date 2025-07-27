@@ -35,6 +35,7 @@
 ## 🚀 Características
 
 ### ✅ **Sistema de Autenticación Completo**
+
 - 🔐 **JWT Authentication** - Tokens de acceso y renovación
 - 📧 **Verificación de Email** - Proceso automático con templates HTML
 - 🔄 **Recuperación de Contraseña** - Sistema seguro de recuperación
@@ -42,12 +43,14 @@
 - 🛡️ **Middleware de Seguridad** - Protección de endpoints
 
 ### 🧪 **Suite de Pruebas Automatizadas**
+
 - ✨ **57 Pruebas Implementadas** - Cobertura del 70%
 - 🎯 **6 Suites de Testing** - Registro, Login, Email, Tokens, Password, Endpoints
 - 🔄 **CI/CD Ready** - Configuración Jest con ES6 modules
 - 📊 **Coverage Reports** - Métricas detalladas de cobertura
 
 ### 🏗️ **Arquitectura Moderna**
+
 - 🚀 **Node.js + Express** - Backend escalable y moderno
 - 🐘 **PostgreSQL** - Base de datos relacional robusta
 - 🔄 **Sequelize ORM** - Migraciones y modelos automatizados
@@ -93,6 +96,7 @@ graph TB
 ## ⚡ Instalación Rápida
 
 ### **Prerequisitos**
+
 - Node.js v18 o superior
 - PostgreSQL v15 o superior
 - Docker (opcional pero recomendado)
@@ -111,13 +115,17 @@ cp .env.example .env
 # 3. Levantar servicios con Docker
 docker-compose up -d
 
-# 4. Ejecutar migraciones
-npm run migrate
+# 4. IMPORTANTE: Arreglar migraciones ES Module
+# Ejecutar script de migración personalizado
+node runMigration.js
 
-# 5. (Opcional) Ejecutar seeders
-npm run seed
+# 5. Poblar base de datos desde cero
+npm run db:populate
 
-# 6. Iniciar la aplicación
+# 6. Verificar población de datos
+npm run db:verify
+
+# 7. Iniciar la aplicación
 npm run dev
 ```
 
@@ -138,10 +146,14 @@ npm install
 cp .env.example .env
 # Editar .env con configuración de tu DB local
 
-# 5. Ejecutar migraciones
-npm run migrate
+# 5. SOLUCIÓN para error ES Module en migraciones:
+# Ejecutar script de migración personalizado
+node runMigration.js
 
-# 6. Iniciar aplicación
+# 6. Poblar base de datos completa
+npm run db:populate
+
+# 7. Iniciar aplicación
 npm run dev
 ```
 
@@ -177,6 +189,7 @@ EMAIL_PASSWORD=tu_app_password
 # Application
 NODE_ENV=development
 PORT=3000
+
 ```
 
 ### **Scripts Disponibles**
@@ -200,6 +213,7 @@ npm run test:auth:email     # Tests de verificación email
 npm run test:auth:tokens    # Tests de gestión de tokens
 npm run test:auth:password  # Tests de recuperación contraseña
 npm run test:auth:protected # Tests de endpoints protegidos
+
 ```
 
 ---
@@ -210,6 +224,7 @@ npm run test:auth:protected # Tests de endpoints protegidos
 
 ```bash
 npm test
+
 ```
 
 ### **Estadísticas de Testing**
@@ -234,12 +249,14 @@ npm run test:auth:email      # Pruebas de email
 npm run test:auth:tokens     # Pruebas de tokens
 npm run test:auth:password   # Pruebas de password
 npm run test:auth:protected  # Pruebas de endpoints protegidos
+
 ```
 
 ### **Coverage Report**
 
 ```bash
 npm run test:coverage  # Genera reporte de cobertura
+
 ```
 
 ---
@@ -296,6 +313,7 @@ docker-compose down
 
 # Reconstruir contenedores
 docker-compose up --build -d
+
 ```
 
 ### **Servicios Incluidos**
@@ -321,7 +339,7 @@ docker-compose up --build -d
 ### **Configuración de Tokens**
 
 - **Access Token**: 15 minutos
-- **Refresh Token**: 7 días  
+- **Refresh Token**: 7 días
 - **Email Verification**: 24 horas
 - **Password Reset**: 1 hora
 
@@ -344,6 +362,33 @@ docker-compose up --build -d
 - Mantener cobertura de tests > 70%
 - Documentar cambios en API
 
+---
+
+## 📈 Roadmap
+
+### **Sprint #2 (Próximo)**
+
+- [ ] Completar cobertura de testing al 95%
+- [ ] Implementar rate limiting
+- [ ] Añadir logs estructurados
+- [ ] CI/CD con GitHub Actions
+
+### **Sprint #3**
+
+- [ ] Sistema de roles y permisos
+- [ ] Gestión de familias parroquiales
+- [ ] Calendario de eventos
+- [ ] Dashboard administrativo
+
+### **Futuro**
+
+- [ ] Two-factor authentication (2FA)
+- [ ] OAuth2 integration
+- [ ] Mobile app API
+- [ ] Reporting y analytics
+
+---
+
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
@@ -355,7 +400,16 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 ¿Tienes preguntas o necesitas ayuda?
 
 - 🐛 **Issues**: [GitHub Issues](https://github.com/mike7019/Parroquia/issues)
-- 📧 **Email**: [amph7019@gmail.com](mailto:tu-email@example.com)
+- 📧 **Email**: [tu-email@example.com](mailto:tu-email@example.com)
 - 📖 **Wiki**: [GitHub Wiki](https://github.com/mike7019/Parroquia/wiki)
-- 📋 **Documentación**: [Sprint Delivery Report](SPRINT_DELIVERY_REPORT.md)
+- 📋 __Documentación__: [Sprint Delivery Report](SPRINT_DELIVERY_REPORT.md)
 
+---
+
+<div align="center">
+
+**⭐ Si este proyecto te resulta útil, ¡dale una estrella!**
+
+Hecho con ❤️ para la comunidad parroquial
+
+</div>

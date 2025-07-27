@@ -1,19 +1,44 @@
-import authService from '../services/authService.js';
+import UserService from '../services/userService.js';
+import AuthService from '../services/authService.js';
+import { 
+  NotFoundError, 
+  ConflictError, 
+  ValidationError,
+  UnauthorizedError 
+} from '../utils/errors.js';
 
 /**
- * User controller handling user management operations using ES6 modules
+ * User controller handling user management operations with CRUD support
  */
 class UserController {
   /**
-   * Get current user profile
+   * Get all active users (Admin only)
    */
-  async getCurrentUserProfile(req, res, next) {
+  static async getAllUsers(req, res, next) {
     try {
-      const userId = req.user.id;
-      const user = await authService.getUserProfile(userId);
-
+      const users = await UserService.getAllUsers();
+      
       res.status(200).json({
         status: 'success',
+        message: 'Users retrieved successfully',
+        data: { users }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get user by ID
+   */
+  static async getUserById(req, res, next) {
+    try {
+      const { id } = req.params;
+      const user = await UserService.getUserById(id);
+      
+      res.status(200).json({
+        status: 'success',
+        message: 'User retrieved successfully',
         data: { user }
       });
     } catch (error) {
@@ -22,49 +47,19 @@ class UserController {
   }
 
   /**
-   * Get all users with pagination (admin only)
+   * Update user information (Admin can edit any user, users can edit themselves)
    */
-  async getAllUsers(req, res, next) {
+  static async updateUser(req, res, next) {
     try {
-      const { page = 1, limit = 10, search, role, isActive } = req.query;
-      
-      const filters = {};
-      if (search) filters.search = search;
-      if (role) filters.role = role;
-      if (isActive !== undefined) filters.isActive = isActive === 'true';
-
-      const result = await authService.getAllUsers({
-        page: parseInt(page),
-        limit: parseInt(limit),
-        ...filters
-      });
-
-      res.status(200).json({
-        status: 'success',
-        message: 'Usuarios obtenidos exitosamente',
-        data: {
-          users: result.users,
-          pagination: result.pagination
-        }
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * Update user profile
-   */
-  async updateUserProfile(req, res, next) {
-    try {
-      const userId = req.user.id;
+      const { id } = req.params;
       const updateData = req.body;
+      const currentUser = req.user;
 
-      const updatedUser = await authService.updateUserProfile(userId, updateData);
-
+      const updatedUser = await UserService.updateUser(id, updateData, currentUser);
+      
       res.status(200).json({
         status: 'success',
-        message: 'Profile updated successfully',
+        message: 'User updated successfully',
         data: { user: updatedUser }
       });
     } catch (error) {
@@ -73,12 +68,49 @@ class UserController {
   }
 
   /**
-   * Get user by ID (admin only)
+   * Soft delete user (Admin only)
    */
-  async getUserById(req, res, next) {
+  static async deleteUser(req, res, next) {
     try {
       const { id } = req.params;
-      const user = await authService.getUserProfile(parseInt(id));
+      const currentUser = req.user;
+
+      await UserService.deleteUser(id, currentUser);
+      
+      res.status(204).json({
+        status: 'success',
+        message: 'User deleted successfully'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get all deleted users (Admin only)
+   */
+  static async getDeletedUsers(req, res, next) {
+    try {
+      const currentUser = req.user;
+      const deletedUsers = await UserService.getDeletedUsers(currentUser);
+      
+      res.status(200).json({
+        status: 'success',
+        message: 'Deleted users retrieved successfully',
+        data: { users: deletedUsers }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get current user profile
+   */
+  static async getCurrentUserProfile(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const user = await UserService.getUserById(userId);
 
       res.status(200).json({
         status: 'success',
@@ -88,40 +120,6 @@ class UserController {
       next(error);
     }
   }
-
-  /**
-   * Deactivate user account (admin only)
-   */
-  async deactivateUser(req, res, next) {
-    try {
-      const { id } = req.params;
-      const result = await authService.deactivateUser(parseInt(id));
-
-      res.status(200).json({
-        status: 'success',
-        message: result.message
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * Activate user account (admin only)
-   */
-  async activateUser(req, res, next) {
-    try {
-      const { id } = req.params;
-      const result = await authService.activateUser(parseInt(id));
-
-      res.status(200).json({
-        status: 'success',
-        message: result.message
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
 }
 
-export default new UserController();
+export default UserController;

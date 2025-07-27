@@ -1,33 +1,55 @@
 version: '3.9'
 
 services:
-  ollama:
-    image: ollama/ollama
-    container_name: ollama
-    ports:
-      - "11434:11434"
+  # PostgreSQL Database for Parroquia API
+  postgres:
+    image: postgres:15-alpine
+    container_name: parroquia_postgres
     restart: always
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - capabilities: [gpu]  # Elimina esta parte si no usas GPU
-    volumes:
-      - ollama-data:/root/.ollama
-
-  webui:
-    image: ghcr.io/open-webui/open-webui:main
-    container_name: ollama-webui
     ports:
-      - "3000:3000"
+      - "5432:5432"  # Exposed to all network interfaces
     environment:
-      - OLLAMA_BASE_URL=http://host.docker.internal:11434
-    depends_on:
-      - ollama
-    restart: always
+      POSTGRES_DB: parroquia_db
+      POSTGRES_USER: parroquia_user
+      POSTGRES_PASSWORD: admin
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
     volumes:
-      - webui-data:/app/backend/data
+      # Persistent data volume for migrations
+      - postgres_data:/var/lib/postgresql/data
+      # Backup/restore directory (optional)
+      - ./backups:/backups
+      # Custom initialization scripts (optional)
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - parroquia_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U parroquia_user -d parroquia_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+      -c max_connections=200
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+
+networks:
+  parroquia_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
 
 volumes:
-  ollama-data:
-  webui-data:
+  # PostgreSQL data volume for persistence
+  postgres_data:
+    driver: local

@@ -37,9 +37,35 @@ const User = sequelize.define('User', {
       len: [2, 50]
     }
   },
+  phone: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    validate: {
+      len: [10, 20]
+    }
+  },
   role: {
-    type: DataTypes.ENUM('admin', 'user', 'moderator'),
-    defaultValue: 'user'
+    type: DataTypes.ENUM('admin', 'coordinator', 'surveyor'),
+    defaultValue: 'surveyor'
+  },
+  sector: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    comment: 'Sector asignado para coordinadores y encuestadores'
+  },
+  status: {
+    type: DataTypes.ENUM('active', 'inactive'),
+    allowNull: false,
+    defaultValue: 'active'
+  },
+  surveysCompleted: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+    field: 'surveys_completed',
+    validate: {
+      min: 0
+    }
   },
   isActive: {
     type: DataTypes.BOOLEAN,
@@ -72,6 +98,30 @@ const User = sequelize.define('User', {
 }, {
   tableName: 'users',
   timestamps: true,
+  // Scope por defecto: solo usuarios activos
+  defaultScope: {
+    where: {
+      status: 'active'
+    }
+  },
+  scopes: {
+    // Scope para incluir todos los usuarios (incluyendo deleted)
+    withDeleted: {
+      where: {}
+    },
+    // Scope para solo usuarios eliminados
+    deleted: {
+      where: {
+        status: 'deleted'
+      }
+    },
+    // Scope para usuarios inactivos
+    inactive: {
+      where: {
+        status: 'inactive'
+      }
+    }
+  },
   hooks: {
     beforeCreate: async (user) => {
       if (user.password) {

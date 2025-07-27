@@ -71,7 +71,7 @@ const router = express.Router();
  *               message: "El email ya está registrado"
  *               code: "EMAIL_ALREADY_EXISTS"
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/register', 
   authValidators.validateRegister,
@@ -143,7 +143,7 @@ router.post('/register',
  *               message: "Cuenta inactiva. Contacta al administrador."
  *               code: "ACCOUNT_INACTIVE"
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/login', 
   authValidators.validateLogin,
@@ -208,7 +208,7 @@ router.post('/login',
  *               message: "Refresh token inválido o expirado"
  *               code: "INVALID_REFRESH_TOKEN"
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/refresh-token',
   authValidators.validateRefreshToken,
@@ -251,7 +251,7 @@ router.post('/refresh-token',
  *       400:
  *         $ref: '#/components/responses/ValidationError'
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/forgot-password',
   authValidators.validateForgotPassword,
@@ -298,8 +298,13 @@ router.post('/forgot-password',
  *               message: "Token de recuperación inválido o expirado"
  *               code: "INVALID_RESET_TOKEN"
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
+
+// GET endpoint to validate reset token
+router.get('/reset-password', authController.validateResetToken);
+
+// POST endpoint to reset password
 router.post('/reset-password',
   authValidators.validateResetPassword,
   validationMiddleware.handleValidationErrors,
@@ -352,7 +357,7 @@ router.post('/reset-password',
  *               message: "Token de verificación inválido"
  *               code: "INVALID_VERIFICATION_TOKEN"
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.get('/verify-email',
   authValidators.validateEmailVerification,
@@ -424,7 +429,7 @@ router.get('/verify-email',
  *               message: "Email is already verified"
  *               code: "CONFLICT"
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/resend-verification-public',
   authValidators.validateResendVerificationPublic,
@@ -456,7 +461,7 @@ router.post('/resend-verification-public',
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/logout',
   authMiddleware.authenticateToken,
@@ -504,7 +509,7 @@ router.post('/logout',
  *               message: "Contraseña actual incorrecta"
  *               code: "INVALID_CURRENT_PASSWORD"
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/change-password',
   authMiddleware.authenticateToken,
@@ -545,7 +550,7 @@ router.post('/change-password',
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/resend-verification',
   authMiddleware.authenticateToken,
@@ -594,11 +599,59 @@ router.post('/resend-verification',
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  *       500:
- *         $ref: '#/components/responses/ServerError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.get('/profile',
   authMiddleware.authenticateToken,
   authController.getProfile
 );
+
+// Development only routes
+if (process.env.NODE_ENV === 'development') {
+  /**
+   * @swagger
+   * /api/auth/dev/get-verification-token:
+   *   get:
+   *     tags: [Development]
+   *     summary: Obtener token de verificación (SOLO DESARROLLO)
+   *     description: Endpoint para obtener el token de verificación de email en modo desarrollo
+   *     parameters:
+   *       - in: query
+   *         name: email
+   *         required: true
+   *         schema:
+   *           type: string
+   *           format: email
+   *         description: Email del usuario
+   *     responses:
+   *       200:
+   *         description: Token de verificación obtenido exitosamente
+   *         content:
+   *           application/json:
+   *             schema:
+   *               allOf:
+   *                 - $ref: '#/components/schemas/ApiResponse'
+   *                 - type: object
+   *                   properties:
+   *                     data:
+   *                       type: object
+   *                       properties:
+   *                         email:
+   *                           type: string
+   *                         token:
+   *                           type: string
+   *                         verificationUrl:
+   *                           type: string
+   *       400:
+   *         $ref: '#/components/responses/BadRequestError'
+   *       403:
+   *         description: No disponible en producción
+   *       404:
+   *         $ref: '#/components/responses/NotFoundError'
+   */
+  router.get('/dev/get-verification-token',
+    authController.getVerificationTokenDev
+  );
+}
 
 export default router;
