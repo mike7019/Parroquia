@@ -127,6 +127,7 @@ npm run db:verify
 
 # 7. Iniciar la aplicación
 npm run dev
+
 ```
 
 ### **Opción 2: Instalación Local**
@@ -155,6 +156,7 @@ npm run db:populate
 
 # 7. Iniciar aplicación
 npm run dev
+
 ```
 
 🎉 **¡La aplicación estará disponible en http://localhost:3000!**
@@ -190,6 +192,7 @@ EMAIL_PASSWORD=tu_app_password
 NODE_ENV=development
 PORT=3000
 
+
 ```
 
 ### **Scripts Disponibles**
@@ -214,6 +217,7 @@ npm run test:auth:tokens    # Tests de gestión de tokens
 npm run test:auth:password  # Tests de recuperación contraseña
 npm run test:auth:protected # Tests de endpoints protegidos
 
+
 ```
 
 ---
@@ -224,6 +228,7 @@ npm run test:auth:protected # Tests de endpoints protegidos
 
 ```bash
 npm test
+
 
 ```
 
@@ -250,12 +255,14 @@ npm run test:auth:tokens     # Pruebas de tokens
 npm run test:auth:password   # Pruebas de password
 npm run test:auth:protected  # Pruebas de endpoints protegidos
 
+
 ```
 
 ### **Coverage Report**
 
 ```bash
 npm run test:coverage  # Genera reporte de cobertura
+
 
 ```
 
@@ -313,6 +320,7 @@ docker-compose down
 
 # Reconstruir contenedores
 docker-compose up --build -d
+
 
 ```
 
