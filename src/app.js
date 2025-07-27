@@ -30,7 +30,7 @@ const PORT = process.env.PORT || 3000;
 const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
 
 // Trust proxy for rate limiting and security
-app.set('trust proxy', 1);
+app.set('trust proxy', true); // Changed to true for better IP detection
 
 // Security middlewares
 app.use(helmet({
@@ -56,10 +56,46 @@ app.use(helmet({
   xssFilter: false
 }));
 
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://127.0.0.1:3000',
+    process.env.FRONTEND_URL || 'http://localhost:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With',
+    'Content-Type', 
+    'Accept',
+    'Authorization'
+  ]
+};
+
 // CORS configuration - Simplified and clean
-app.use(cors({
-  origin: '*'
-}));
+app.use(cors(corsOptions));
+
+// Custom middleware to log request IPs
+app.use((req, res, next) => {
+  const clientIP = req.headers['x-forwarded-for'] || 
+                   req.headers['x-real-ip'] || 
+                   req.connection.remoteAddress || 
+                   req.socket.remoteAddress ||
+                   (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
+                   req.ip;
+  
+  const timestamp = new Date().toISOString();
+  const method = req.method;
+  const url = req.originalUrl || req.url;
+  const userAgent = req.headers['user-agent'] || 'Unknown';
+  
+  // Log request details
+  console.log(`🌐 [${timestamp}] ${method} ${url} - IP: ${clientIP} - User-Agent: ${userAgent.substring(0, 50)}${userAgent.length > 50 ? '...' : ''}`);
+  
+  next();
+});
 
 // Logging
 if (process.env.NODE_ENV === 'production') {
@@ -105,6 +141,32 @@ app.get('/api/cors-test', (req, res) => {
     message: 'CORS is working!',
     origin: req.headers.origin || 'no-origin',
     method: req.method,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Test IP endpoint
+app.get('/api/ip-test', (req, res) => {
+  const clientIP = req.headers['x-forwarded-for'] || 
+                   req.headers['x-real-ip'] || 
+                   req.connection.remoteAddress || 
+                   req.socket.remoteAddress ||
+                   (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
+                   req.ip;
+
+  res.json({
+    message: 'IP detection test',
+    clientIP: clientIP,
+    headers: {
+      'x-forwarded-for': req.headers['x-forwarded-for'],
+      'x-real-ip': req.headers['x-real-ip'],
+      'user-agent': req.headers['user-agent'],
+      'origin': req.headers.origin
+    },
+    connection: {
+      remoteAddress: req.connection?.remoteAddress,
+      socketRemoteAddress: req.socket?.remoteAddress
+    },
     timestamp: new Date().toISOString()
   });
 });
