@@ -306,6 +306,21 @@ const displayRoutes = () => {
       { method: 'PUT', path: '/api/users/:id', group: 'User Management', protected: true },
       { method: 'DELETE', path: '/api/users/:id', group: 'User Management', protected: true },
       
+      // Survey routes
+      { method: 'POST', path: '/api/surveys', group: 'Surveys', protected: true },
+      { method: 'GET', path: '/api/surveys/my', group: 'Surveys', protected: true },
+      { method: 'GET', path: '/api/surveys/statistics', group: 'Surveys', protected: true },
+      { method: 'GET', path: '/api/surveys/sector/:sectorName', group: 'Surveys', protected: true },
+      { method: 'GET', path: '/api/surveys/:id', group: 'Surveys', protected: true },
+      { method: 'PUT', path: '/api/surveys/:id/stages/:stageNumber', group: 'Surveys', protected: true },
+      { method: 'POST', path: '/api/surveys/:id/members', group: 'Surveys', protected: true },
+      { method: 'PUT', path: '/api/surveys/:id/members/:memberId', group: 'Surveys', protected: true },
+      { method: 'DELETE', path: '/api/surveys/:id/members/:memberId', group: 'Surveys', protected: true },
+      { method: 'POST', path: '/api/surveys/:id/complete', group: 'Surveys', protected: true },
+      { method: 'POST', path: '/api/surveys/:id/cancel', group: 'Surveys', protected: true },
+      { method: 'POST', path: '/api/surveys/:id/auto-save', group: 'Surveys', protected: true },
+      { method: 'GET', path: '/api/surveys/:id/auto-save', group: 'Surveys', protected: true },
+      
       // System routes
       { method: 'GET', path: '/api/health', group: 'System', protected: false },
       { method: 'GET', path: '/api/status', group: 'System', protected: false },
@@ -340,11 +355,13 @@ const displayRoutes = () => {
     // Show route summary by type
     const authRoutes = routes.filter(r => r.group === 'Authentication').length;
     const userRoutes = routes.filter(r => r.group === 'User Management').length;
+    const surveyRoutes = routes.filter(r => r.group === 'Surveys').length;
     const systemRoutes = routes.filter(r => r.group === 'System').length;
     const compatRoutes = routes.filter(r => r.group === 'Compatibility').length;
     
     console.log(`   • Authentication: ${authRoutes} routes`);
     console.log(`   • User Management: ${userRoutes} routes`);
+    console.log(`   • Surveys: ${surveyRoutes} routes`);
     console.log(`   • System: ${systemRoutes} routes`);
     console.log(`   • Compatibility: ${compatRoutes} routes`);
     console.log('');

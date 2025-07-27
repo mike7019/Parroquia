@@ -60,7 +60,9 @@ const User = sequelize.define('User', {
   },
   surveysCompleted: {
     type: DataTypes.INTEGER,
+    allowNull: false,
     defaultValue: 0,
+    field: 'surveys_completed',
     validate: {
       min: 0
     }

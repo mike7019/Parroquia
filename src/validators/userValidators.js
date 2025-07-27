@@ -38,8 +38,8 @@ class UserValidators {
       
       body('role')
         .optional()
-        .isIn(['user', 'moderator', 'admin'])
-        .withMessage('Role must be one of: user, moderator, admin'),
+        .isIn(['admin', 'coordinator', 'surveyor'])
+        .withMessage('Role must be one of: admin, coordinator, surveyor'),
       
       body('status')
         .optional()
@@ -100,8 +100,8 @@ class UserValidators {
       
       body('role')
         .optional()
-        .isIn(['user', 'moderator', 'admin'])
-        .withMessage('Role must be one of: user, moderator, admin'),
+        .isIn(['admin', 'coordinator', 'surveyor'])
+        .withMessage('Role must be one of: admin, coordinator, surveyor'),
       
       body('status')
         .optional()

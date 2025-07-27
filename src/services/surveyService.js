@@ -177,7 +177,7 @@ class SurveyService {
       // Update family members cache in survey
       const allMembers = await FamilyMember.findAll({
         where: { surveyId, active: true },
-        order: [['order', 'ASC'], ['createdAt', 'ASC']]
+        order: [['order', 'ASC'], ['created_at', 'ASC']]
       });
 
       await survey.update({
@@ -230,7 +230,7 @@ class SurveyService {
       // Update family members cache in survey
       const allMembers = await FamilyMember.findAll({
         where: { surveyId, active: true },
-        order: [['order', 'ASC'], ['createdAt', 'ASC']]
+        order: [['order', 'ASC'], ['created_at', 'ASC']]
       });
 
       await survey.update({
@@ -349,6 +349,10 @@ class SurveyService {
 
       const offset = (page - 1) * limit;
 
+      // Map sort fields to database columns if needed
+      const sortField = sortBy === 'createdAt' ? 'created_at' :
+                       sortBy === 'updatedAt' ? 'updated_at' : sortBy;
+
       const result = await Survey.findAndCountAll({
         where,
         include: [
@@ -358,7 +362,7 @@ class SurveyService {
             attributes: ['id', 'firstName', 'lastName', 'email']
           }
         ],
-        order: [[sortBy, sortOrder]],
+        order: [[sortField, sortOrder]],
         limit: parseInt(limit),
         offset: parseInt(offset)
       });
@@ -399,6 +403,10 @@ class SurveyService {
 
       const offset = (page - 1) * limit;
 
+      // Map sort fields to database columns if needed
+      const sortField = sortBy === 'createdAt' ? 'created_at' :
+                       sortBy === 'updatedAt' ? 'updated_at' : sortBy;
+
       const result = await Survey.findAndCountAll({
         where,
         include: [
@@ -413,7 +421,7 @@ class SurveyService {
             required: false
           }
         ],
-        order: [[sortBy, sortOrder]],
+        order: [[sortField, sortOrder]],
         limit: parseInt(limit),
         offset: parseInt(offset)
       });
