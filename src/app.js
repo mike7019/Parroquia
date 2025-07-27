@@ -58,8 +58,9 @@ app.use(helmet({
 
 const corsOptions = {
   origin: [
-    'http://localhost:3000',
-    'http://localhost:3001',
+    'http://206.62.139.100:3000',
+    'http://186.114.40.173:3000',
+    'http://186.121.33.175:3000',
     'http://127.0.0.1:3000',
     process.env.FRONTEND_URL || 'http://localhost:3000'
   ],
