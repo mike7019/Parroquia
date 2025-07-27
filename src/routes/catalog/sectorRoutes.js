@@ -21,35 +21,7 @@ router.use(authenticateToken);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - name
- *             properties:
- *               name:
- *                 type: string
- *                 description: Name of the sector
- *               description:
- *                 type: string
- *                 description: Description of the sector
- *               families:
- *                 type: integer
- *                 description: Number of families
- *               coordinator:
- *                 type: string
- *                 description: Coordinator user ID
- *               status:
- *                 type: string
- *                 enum: [active, inactive]
- *                 description: Sector status
- *               code:
- *                 type: string
- *                 description: Sector code
- *               municipioId:
- *                 type: integer
- *                 description: Municipio ID
- *               veredaId:
- *                 type: integer
- *                 description: Vereda ID
+ *             $ref: '#/components/schemas/SectorInput'
  *     responses:
  *       201:
  *         description: Sector created successfully
@@ -247,39 +219,7 @@ router.get('/:id', sectorController.getSectorById);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: Name of the sector
- *               description:
- *                 type: string
- *                 description: Description of the sector
- *               families:
- *                 type: integer
- *                 description: Number of families
- *               completed:
- *                 type: integer
- *                 description: Completed surveys
- *               pending:
- *                 type: integer
- *                 description: Pending surveys
- *               coordinator:
- *                 type: string
- *                 description: Coordinator user ID
- *               status:
- *                 type: string
- *                 enum: [active, inactive]
- *                 description: Sector status
- *               code:
- *                 type: string
- *                 description: Sector code
- *               municipioId:
- *                 type: integer
- *                 description: Municipio ID
- *               veredaId:
- *                 type: integer
- *                 description: Vereda ID
+ *             $ref: '#/components/schemas/SectorInput'
  *     responses:
  *       200:
  *         description: Sector updated successfully

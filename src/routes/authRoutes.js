@@ -4,6 +4,41 @@ import authValidators from '../validators/authValidators.js';
 import authMiddleware from '../middlewares/auth.js';
 import validationMiddleware from '../middlewares/validation.js';
 
+/**
+ * Generate dynamic user examples for route documentation
+ * This ensures examples are never the same across API calls
+ */
+const generateDynamicExamples = () => {
+  const firstNames = ['Ana', 'Carlos', 'Maria', 'Jose', 'Laura', 'Pedro', 'Sofia', 'Luis', 'Carmen', 'Diego', 'Valentina', 'Andres', 'Isabella', 'Fernando', 'Gabriela'];
+  const lastNames = ['Garcia', 'Rodriguez', 'Lopez', 'Martinez', 'Gonzalez', 'Perez', 'Sanchez', 'Ramirez', 'Cruz', 'Flores', 'Herrera', 'Vargas', 'Castro', 'Ortiz', 'Morales'];
+  
+  const getRandomElement = (array) => array[Math.floor(Math.random() * array.length)];
+  const generateRandomId = () => Math.floor(Math.random() * 9000) + 1000;
+  const generateRandomPassword = () => {
+    const passwords = ['MiPassword123!', 'Segura456@', 'Clave789#', 'Pass321$', 'Super456%', 'Fuerte789&'];
+    return getRandomElement(passwords);
+  };
+
+  const firstName = getRandomElement(firstNames);
+  const lastName = getRandomElement(lastNames);
+  const randomId = generateRandomId();
+  // Remove any special characters and convert to lowercase for email compatibility
+  const cleanFirstName = firstName.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const cleanLastName = lastName.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const email = `${cleanFirstName}.${cleanLastName}${randomId}@yopmail.com`;
+
+  return {
+    firstName,
+    lastName,
+    email,
+    password: generateRandomPassword(),
+    role: 'surveyor'
+  };
+};
+
+// Generate dynamic examples once when the module loads
+const dynamicExample = generateDynamicExamples();
+
 const router = express.Router();
 
 // Public routes (no authentication required)
@@ -22,11 +57,11 @@ const router = express.Router();
  *           schema:
  *             $ref: '#/components/schemas/UserInput'
  *           example:
- *             firstName: "Juan"
- *             lastName: "Pérez"
- *             email: "juan.perez@example.com"
- *             password: "MiPassword123!"
- *             role: "user"
+ *             firstName: "Diego"
+ *             lastName: "Garcia"
+ *             email: "diego.garcia5105@yopmail.com"
+ *             password: "Fuerte789&"
+ *             role: "surveyor"
  *     responses:
  *       201:
  *         description: Usuario registrado exitosamente
@@ -51,10 +86,10 @@ const router = express.Router();
  *               data:
  *                 user:
  *                   id: 1
- *                   firstName: "Juan"
- *                   lastName: "Pérez"
- *                   email: "juan.perez@example.com"
- *                   role: "user"
+ *                   firstName: "Carlos"
+ *                   lastName: "Martínez"
+ *                   email: "carlos.martínez1024@yopmail.com"
+ *                   role: "surveyor"
  *                   isActive: true
  *                   emailVerified: false
  *                 emailSent: true
@@ -93,8 +128,8 @@ router.post('/register',
  *           schema:
  *             $ref: '#/components/schemas/LoginInput'
  *           example:
- *             email: "juan.perez@example.com"
- *             password: "MiPassword123!"
+ *             email: "sofía.rodríguez6931@yopmail.com"
+ *             password: "Fuerte789&"
  *     responses:
  *       200:
  *         description: Login exitoso
@@ -116,10 +151,10 @@ router.post('/register',
  *                 expiresIn: 900
  *                 user:
  *                   id: 1
- *                   firstName: "Juan"
- *                   lastName: "Pérez"
- *                   email: "juan.perez@example.com"
- *                   role: "user"
+ *                   firstName: "Sofía"
+ *                   lastName: "Rodríguez"
+ *                   email: "sofía.rodríguez6931@yopmail.com"
+ *                   role: "surveyor"
  *       400:
  *         $ref: '#/components/responses/ValidationError'
  *       401:
@@ -163,13 +198,7 @@ router.post('/login',
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - refreshToken
- *             properties:
- *               refreshToken:
- *                 type: string
- *                 description: Token de renovación válido
+ *             $ref: '#/components/schemas/RefreshTokenInput'
  *           example:
  *             refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  *     responses:
@@ -228,16 +257,9 @@ router.post('/refresh-token',
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - email
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 description: Email del usuario registrado
+ *             $ref: '#/components/schemas/ForgotPasswordInput'
  *           example:
- *             email: "juan.perez@example.com"
+ *             email: "carlos.vargas4169@yopmail.com"
  *     responses:
  *       200:
  *         description: Email de recuperación enviado
@@ -385,7 +407,7 @@ router.get('/verify-email',
  *                 type: string
  *                 format: email
  *                 description: Email del usuario
- *                 example: usuario@ejemplo.com
+ *                 example: "laura.vargas7551@yopmail.com"
  *     responses:
  *       200:
  *         description: Email de verificación reenviado exitosamente
@@ -471,7 +493,7 @@ router.post('/logout',
 /**
  * @swagger
  * /api/auth/change-password:
- *   patch:
+ *   post:
  *     tags: [Authentication]
  *     summary: Cambiar contraseña
  *     description: Cambiar contraseña para usuario autenticado
@@ -587,10 +609,10 @@ router.post('/resend-verification',
  *               data:
  *                 user:
  *                   id: 1
- *                   firstName: "Juan"
- *                   lastName: "Pérez"
- *                   email: "juan.perez@example.com"
- *                   role: "user"
+ *                   firstName: "Sofía"
+ *                   lastName: "Flores"
+ *                   email: "sofía.flores3129@yopmail.com"
+ *                   role: "surveyor"
  *                   isActive: true
  *                   emailVerified: true
  *                   lastLogin: "2025-07-16T10:30:00.000Z"

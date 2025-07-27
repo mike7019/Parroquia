@@ -34,6 +34,15 @@ router.use(authenticateToken);
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/CreateSurveyRequest'
+ *           example:
+ *             sector: "La Esperanza"
+ *             familyHead: "María González Pérez"
+ *             address: "Calle 15 #23-45, Barrio Centro"
+ *             phone: "3001234567"
+ *             email: "maria.gonzalez@email.com"
+ *             familySize: 4
+ *             housingType: "Casa propia"
+ *             observations: "Familia muy colaborativa"
  *     responses:
  *       201:
  *         description: Survey created successfully
@@ -283,8 +292,18 @@ router.get('/:id',
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             description: Stage data (flexible structure)
+ *             $ref: '#/components/schemas/StageDataInput'
+ *           example:
+ *             stageData:
+ *               generalInfo:
+ *                 interviewDate: "2025-07-20"
+ *                 interviewerNotes: "Familia muy colaborativa"
+ *               economicData:
+ *                 monthlyIncome: 1500000
+ *                 employmentStatus: "empleado"
+ *                 occupation: "comerciante"
+ *             currentStage: 2
+ *             isComplete: true
  *     responses:
  *       200:
  *         description: Stage data saved successfully
@@ -321,7 +340,26 @@ router.put('/:id/stages/:stageNumber',
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/FamilyMember'
+ *             $ref: '#/components/schemas/FamilyMemberInput'
+ *           example:
+ *             nombres: "Carlos"
+ *             apellidos: "González"
+ *             tipoIdentificacion: "CC"
+ *             numeroIdentificacion: "12345678"
+ *             fechaNacimiento: "1990-05-15"
+ *             sexo: "M"
+ *             situacionCivil: "Soltero"
+ *             parentesco: "Hijo"
+ *             estudio: "Secundaria completa"
+ *             comunidadCultural: "Ninguna"
+ *             ocupacion: "Estudiante"
+ *             telefono: "3001234567"
+ *             email: "carlos.gonzalez@email.com"
+ *             talla:
+ *               camisa: "M"
+ *               pantalon: "32"
+ *               calzado: "42"
+ *             isActive: true
  *     responses:
  *       200:
  *         description: Family member saved successfully
@@ -365,7 +403,26 @@ router.post('/:id/members',
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/FamilyMember'
+ *             $ref: '#/components/schemas/FamilyMemberInput'
+ *           example:
+ *             nombres: "Ana"
+ *             apellidos: "González"
+ *             tipoIdentificacion: "CC"
+ *             numeroIdentificacion: "87654321"
+ *             fechaNacimiento: "1985-08-20"
+ *             sexo: "F"
+ *             situacionCivil: "Casada"
+ *             parentesco: "Esposa"
+ *             estudio: "Universidad completa"
+ *             comunidadCultural: "Ninguna"
+ *             ocupacion: "Profesora"
+ *             telefono: "3009876543"
+ *             email: "ana.gonzalez@email.com"
+ *             talla:
+ *               camisa: "S"
+ *               pantalon: "28"
+ *               calzado: "38"
+ *             isActive: true
  *     responses:
  *       200:
  *         description: Family member updated successfully
@@ -464,6 +521,8 @@ router.post('/:id/complete',
  *               reason:
  *                 type: string
  *                 description: Reason for cancellation
+ *           example:
+ *             reason: "La familia se mudó de la zona"
  *     responses:
  *       200:
  *         description: Survey cancelled successfully
@@ -502,6 +561,15 @@ router.post('/:id/cancel',
  *           schema:
  *             type: object
  *             description: Temporary data to save
+ *           example:
+ *             tempData:
+ *               basicInfo:
+ *                 familyHead: "María González"
+ *                 address: "Calle 15 #23-45"
+ *                 phone: "3001234567"
+ *               currentStep: 2
+ *               lastModified: "2025-07-20T10:30:00.000Z"
+ *               isDraft: true
  *     responses:
  *       200:
  *         description: Data auto-saved successfully

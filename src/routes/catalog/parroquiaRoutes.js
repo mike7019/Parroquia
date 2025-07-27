@@ -21,13 +21,9 @@ router.use(authenticateToken);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - nombre
- *             properties:
- *               nombre:
- *                 type: string
- *                 description: Name of the parroquia
+ *             $ref: '#/components/schemas/ParroquiaInput'
+ *           example:
+ *             nombre: "Parroquia San José"
  *     responses:
  *       201:
  *         description: Parroquia created successfully
@@ -191,11 +187,9 @@ router.get('/:id', parroquiaController.getParroquiaById);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               nombre:
- *                 type: string
- *                 description: Name of the parroquia
+ *             $ref: '#/components/schemas/ParroquiaInput'
+ *           example:
+ *             nombre: "Parroquia San José Actualizada"
  *     responses:
  *       200:
  *         description: Parroquia updated successfully

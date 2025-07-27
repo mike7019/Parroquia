@@ -32,16 +32,34 @@ const authMiddleware = {
       }
       
       // Find user and attach to request
-      const user = await User.findByPk(decoded.userId);
-      if (!user || !user.isActive) {
-        return res.status(401).json({
+      try {
+        // Usar consulta SQL cruda para evitar problemas con Sequelize
+        const users = await User.sequelize.query(
+          'SELECT id, email, "firstName", "lastName", phone, role, sector, status, "surveys_completed", "isActive", "emailVerified", "lastLoginAt", "createdAt", "updatedAt" FROM users WHERE id = :userId AND status = \'active\' AND "isActive" = true LIMIT 1',
+          {
+            replacements: { userId: decoded.userId },
+            type: User.sequelize.QueryTypes.SELECT
+          }
+        );
+        
+        const user = users[0];
+        
+        if (!user) {
+          return res.status(401).json({
+            status: 'error',
+            message: 'Invalid token or user not active'
+          });
+        }
+
+        req.user = user;
+        next();
+      } catch (dbError) {
+        console.error('❌ authenticateToken - Database error:', dbError);
+        return res.status(500).json({
           status: 'error',
-          message: 'Invalid token or user not active'
+          message: 'Database error during authentication'
         });
       }
-
-      req.user = user;
-      next();
     } catch (error) {
       console.error('Authentication error:', error);
       

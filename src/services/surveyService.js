@@ -83,8 +83,14 @@ class SurveyService {
         throw new Error('Survey not found');
       }
 
-      // Verify user has permission to edit this survey
-      if (survey.userId !== userId) {
+      // Check if user has permission to edit this survey
+      const user = await User.findByPk(userId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // Allow if user is owner OR admin
+      if (survey.userId !== userId && user.role !== 'admin') {
         throw new Error('Unauthorized to edit this survey');
       }
 
@@ -140,7 +146,14 @@ class SurveyService {
         throw new Error('Survey not found');
       }
 
-      if (survey.userId !== userId) {
+      // Check if user has permission to edit this survey
+      const user = await User.findByPk(userId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // Allow if user is owner OR admin
+      if (survey.userId !== userId && user.role !== 'admin') {
         throw new Error('Unauthorized to edit this survey');
       }
 
@@ -212,7 +225,14 @@ class SurveyService {
         throw new Error('Survey not found');
       }
 
-      if (survey.userId !== userId) {
+      // Check if user has permission to edit this survey
+      const user = await User.findByPk(userId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // Allow if user is owner OR admin
+      if (survey.userId !== userId && user.role !== 'admin') {
         throw new Error('Unauthorized to edit this survey');
       }
 
@@ -509,7 +529,14 @@ class SurveyService {
         throw new Error('Survey not found');
       }
 
-      if (survey.userId !== userId) {
+      // Check if user has permission to edit this survey
+      const user = await User.findByPk(userId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // Allow if user is owner OR admin
+      if (survey.userId !== userId && user.role !== 'admin') {
         throw new Error('Unauthorized to edit this survey');
       }
 

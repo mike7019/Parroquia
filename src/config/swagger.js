@@ -66,7 +66,7 @@ const swaggerConfig = {
               type: 'string',
               format: 'email',
               description: 'Correo electrónico único',
-              example: 'juan.perez@example.com'
+              example: 'juan.perez@yopmail.com'
             },
             role: {
               type: 'string',
@@ -113,20 +113,20 @@ const swaggerConfig = {
               minLength: 2,
               maxLength: 50,
               description: 'Primer nombre del usuario',
-              example: 'Juan'
+              example: 'Diego'
             },
             lastName: {
               type: 'string',
               minLength: 2,
               maxLength: 50,
               description: 'Apellido del usuario',
-              example: 'Pérez'
+              example: 'Garcia'
             },
             email: {
               type: 'string',
               format: 'email',
               description: 'Correo electrónico único',
-              example: 'juan.perez@example.com'
+              example: 'diego.garcia5105@yopmail.com'
             },
             password: {
               type: 'string',
@@ -164,13 +164,13 @@ const swaggerConfig = {
               type: 'string',
               format: 'email',
               description: 'Correo electrónico único',
-              example: 'juan.perez@example.com'
+              example: 'juan.perez@yopmail.com'
             },
             role: {
               type: 'string',
-              enum: ['admin', 'user', 'moderator'],
+              enum: ['admin', 'coordinator', 'surveyor'],
               description: 'Rol del usuario',
-              example: 'user'
+              example: 'surveyor'
             },
             isActive: {
               type: 'boolean',
@@ -187,12 +187,12 @@ const swaggerConfig = {
               type: 'string',
               format: 'email',
               description: 'Correo electrónico',
-              example: 'juan.perez@example.com'
+              example: 'ana.herrera8687@yopmail.com'
             },
             password: {
               type: 'string',
               description: 'Contraseña',
-              example: 'MiPassword123!'
+              example: 'Segura456@'
             }
           }
         },
@@ -632,6 +632,153 @@ const swaggerConfig = {
             }
           },
           required: ['sector', 'familyHead', 'address', 'familySize', 'housingType']
+        },
+        CreateSurveyInput: {
+          $ref: '#/components/schemas/CreateSurveyRequest'
+        },
+        StageDataInput: {
+          type: 'object',
+          properties: {
+            stageData: {
+              type: 'object',
+              description: 'Data específica de la etapa de la encuesta',
+              additionalProperties: true,
+              example: {
+                "generalInfo": {
+                  "interviewDate": "2025-07-20",
+                  "interviewerNotes": "Familia muy colaborativa"
+                },
+                "economicData": {
+                  "monthlyIncome": 1500000,
+                  "employmentStatus": "empleado",
+                  "occupation": "comerciante"
+                }
+              }
+            },
+            currentStage: {
+              type: 'integer',
+              minimum: 1,
+              maximum: 10,
+              description: 'Etapa actual de la encuesta',
+              example: 2
+            },
+            isComplete: {
+              type: 'boolean',
+              description: 'Indica si la etapa está completa',
+              example: true
+            }
+          },
+          required: ['stageData']
+        },
+        FamilyMemberInput: {
+          type: 'object',
+          properties: {
+            nombres: {
+              type: 'string',
+              maxLength: 500,
+              description: 'Nombres completos del miembro de la familia',
+              example: 'Carlos'
+            },
+            apellidos: {
+              type: 'string',
+              maxLength: 500,
+              description: 'Apellidos del miembro de la familia',
+              example: 'González'
+            },
+            tipoIdentificacion: {
+              type: 'string',
+              enum: ['CC', 'TI', 'CE', 'PA', 'RC'],
+              description: 'Tipo de documento de identidad',
+              example: 'CC'
+            },
+            numeroIdentificacion: {
+              type: 'string',
+              maxLength: 50,
+              description: 'Número de documento de identidad',
+              example: '12345678'
+            },
+            fechaNacimiento: {
+              type: 'string',
+              format: 'date',
+              description: 'Fecha de nacimiento',
+              example: '1990-05-15'
+            },
+            sexo: {
+              type: 'string',
+              enum: ['M', 'F', 'Otro'],
+              description: 'Sexo del miembro',
+              example: 'M'
+            },
+            situacionCivil: {
+              type: 'string',
+              enum: ['Soltero', 'Casado', 'Divorciado', 'Viudo', 'Unión Libre'],
+              description: 'Estado civil',
+              example: 'Soltero'
+            },
+            parentesco: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Relación con el jefe de familia',
+              example: 'Hijo'
+            },
+            estudio: {
+              type: 'string',
+              maxLength: 200,
+              description: 'Nivel educativo',
+              example: 'Secundaria completa'
+            },
+            comunidadCultural: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Comunidad cultural',
+              example: 'Ninguna'
+            },
+            ocupacion: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Ocupación laboral',
+              example: 'Estudiante'
+            },
+            telefono: {
+              type: 'string',
+              maxLength: 20,
+              description: 'Teléfono de contacto',
+              example: '3001234567'
+            },
+            email: {
+              type: 'string',
+              format: 'email',
+              description: 'Correo electrónico',
+              example: 'carlos.gonzalez@email.com'
+            },
+            talla: {
+              type: 'object',
+              description: 'Tallas del miembro (al menos una requerida)',
+              properties: {
+                camisa: {
+                  type: 'string',
+                  description: 'Talla de camisa',
+                  example: 'M'
+                },
+                pantalon: {
+                  type: 'string',
+                  description: 'Talla de pantalón',
+                  example: '32'
+                },
+                calzado: {
+                  type: 'string',
+                  description: 'Talla de calzado',
+                  example: '42'
+                }
+              }
+            },
+            isActive: {
+              type: 'boolean',
+              description: 'Indica si el miembro está activo',
+              example: true
+            }
+          },
+          required: ['nombres', 'apellidos', 'tipoIdentificacion', 'numeroIdentificacion', 'fechaNacimiento', 'sexo', 'situacionCivil', 'parentesco', 'estudio', 'comunidadCultural', 'talla']
         },
         Sector: {
           type: 'object',

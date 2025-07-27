@@ -361,10 +361,16 @@ const displayRoutes = () => {
       { method: 'POST', path: '/api/auth/register', group: 'Authentication', protected: false },
       { method: 'POST', path: '/api/auth/login', group: 'Authentication', protected: false },
       { method: 'POST', path: '/api/auth/refresh', group: 'Authentication', protected: false },
+      { method: 'POST', path: '/api/auth/refresh-token', group: 'Authentication', protected: false },
       { method: 'POST', path: '/api/auth/logout', group: 'Authentication', protected: true },
+      { method: 'POST', path: '/api/auth/change-password', group: 'Authentication', protected: true },
       { method: 'GET', path: '/api/auth/verify-email', group: 'Authentication', protected: false },
       { method: 'POST', path: '/api/auth/forgot-password', group: 'Authentication', protected: false },
+      { method: 'GET', path: '/api/auth/reset-password', group: 'Authentication', protected: false },
       { method: 'POST', path: '/api/auth/reset-password', group: 'Authentication', protected: false },
+      { method: 'POST', path: '/api/auth/resend-verification-public', group: 'Authentication', protected: false },
+      { method: 'POST', path: '/api/auth/resend-verification', group: 'Authentication', protected: true },
+      { method: 'GET', path: '/api/auth/profile', group: 'Authentication', protected: true },
       
       // User management routes
       { method: 'GET', path: '/api/users', group: 'User Management', protected: true },

@@ -21,19 +21,7 @@ router.use(authenticateToken);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - nombre
- *             properties:
- *               nombre:
- *                 type: string
- *                 description: Name of the vereda
- *               codigo_vereda:
- *                 type: string
- *                 description: Vereda code
- *               id_municipio:
- *                 type: integer
- *                 description: Municipio ID
+ *             $ref: '#/components/schemas/VeredaInput'
  *     responses:
  *       201:
  *         description: Vereda created successfully
@@ -247,17 +235,7 @@ router.get('/:id/details', veredaController.getVeredaDetails);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               nombre:
- *                 type: string
- *                 description: Name of the vereda
- *               codigo_vereda:
- *                 type: string
- *                 description: Vereda code
- *               id_municipio:
- *                 type: integer
- *                 description: Municipio ID
+ *             $ref: '#/components/schemas/VeredaInput'
  *     responses:
  *       200:
  *         description: Vereda updated successfully

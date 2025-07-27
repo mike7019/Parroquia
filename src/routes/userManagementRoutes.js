@@ -168,8 +168,8 @@ router.get('/:id',
  *           example:
  *             firstName: "Juan Carlos"
  *             lastName: "Pérez García"
- *             email: "juan.carlos@example.com"
- *             role: "user"
+ *             email: "juan.carlos@yopmail.com"
+ *             role: "surveyor"
  *     responses:
  *       200:
  *         description: Usuario actualizado exitosamente

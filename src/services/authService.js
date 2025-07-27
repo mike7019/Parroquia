@@ -23,7 +23,7 @@ class AuthService {
    * @returns {Promise<Object>} User and token data
    */
   async registerUser(userData) {
-    const { email, password, firstName, lastName, role = 'user' } = userData;
+    const { email, password, firstName, lastName, role = 'surveyor' } = userData;
     
     const transaction = await sequelize.transaction();
     

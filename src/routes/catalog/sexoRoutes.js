@@ -21,13 +21,7 @@ router.use(authenticateToken);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - sexo
- *             properties:
- *               sexo:
- *                 type: string
- *                 description: Name/type of sexo
+ *             $ref: '#/components/schemas/SexoInput'
  *     responses:
  *       201:
  *         description: Sexo created successfully
@@ -276,11 +270,7 @@ router.get('/:id/details', sexoController.getSexoDetails);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               sexo:
- *                 type: string
- *                 description: Name/type of sexo
+ *             $ref: '#/components/schemas/SexoInput'
  *     responses:
  *       200:
  *         description: Sexo updated successfully
