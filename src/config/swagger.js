@@ -711,7 +711,7 @@ const swaggerConfig = {
             },
             situacionCivil: {
               type: 'string',
-              enum: ['Soltero', 'Casado', 'Divorciado', 'Viudo', 'Unión Libre'],
+              enum: ['Soltero', 'Soltera', 'Casado', 'Casada', 'Divorciado', 'Divorciada', 'Viudo', 'Viuda', 'Unión Libre'],
               description: 'Estado civil',
               example: 'Soltero'
             },
@@ -1005,7 +1005,7 @@ const swaggerConfig = {
             },
             situacionCivil: {
               type: 'string',
-              enum: ['Soltero', 'Casado', 'Divorciado', 'Viudo', 'Unión Libre'],
+              enum: ['Soltero', 'Soltera', 'Casado', 'Casada', 'Divorciado', 'Divorciada', 'Viudo', 'Viuda', 'Unión Libre'],
               description: 'Situación civil',
               example: 'Casado'
             },

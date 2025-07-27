@@ -94,7 +94,7 @@ export const saveFamilyMemberValidation = [
     .withMessage('Invalid sex value'),
   
   body('situacionCivil')
-    .isIn(['Soltero', 'Casado', 'Divorciado', 'Viudo', 'Unión Libre'])
+    .isIn(['Soltero', 'Soltera', 'Casado', 'Casada', 'Divorciado', 'Divorciada', 'Viudo', 'Viuda', 'Unión Libre'])
     .withMessage('Invalid civil status'),
   
   body('parentesco')
