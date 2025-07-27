@@ -58,13 +58,7 @@ app.use(helmet({
 
 // CORS configuration - Simplified and clean
 app.use(cors({
-  origin: '*', // Allow all origins for development/testing
-  credentials: false,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
-  allowedHeaders: '*',
-  exposedHeaders: ['X-Total-Count', 'Content-Range'],
-  maxAge: 86400,
-  optionsSuccessStatus: 200
+  origin: '*'
 }));
 
 // Logging
