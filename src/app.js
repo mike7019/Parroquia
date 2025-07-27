@@ -57,19 +57,13 @@ app.use(helmet({
 }));
 
 const corsOptions = {
-  origin: [
-    'http://206.62.139.100:3000',
-    'http://186.114.40.173',
-    'http://186.121.33.175',
-    'http://127.0.0.1:3000',
-    process.env.FRONTEND_URL || 'http://localhost:3000'
-  ],
+  origin: true, // permite todos los orígenes
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: [
     'Origin',
     'X-Requested-With',
-    'Content-Type', 
+    'Content-Type',
     'Accept',
     'Authorization'
   ]
