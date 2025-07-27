@@ -62,7 +62,7 @@ class VeredaService {
           },
           {
             association: 'personas',
-            attributes: ['id_persona', 'nombres'],
+            attributes: ['id', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'],
             required: false
           },
           {
@@ -107,7 +107,7 @@ class VeredaService {
           },
           {
             association: 'personas',
-            attributes: ['id_persona', 'nombres', 'apellidos'],
+            attributes: ['id', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'],
             required: false
           },
           {
@@ -230,7 +230,7 @@ class VeredaService {
           'id_vereda',
           'nombre',
           'codigo_vereda',
-          [sequelize.fn('COUNT', sequelize.col('personas.id_persona')), 'personasCount'],
+          [sequelize.fn('COUNT', sequelize.col('personas.id')), 'personasCount'],
           [sequelize.fn('COUNT', sequelize.col('familias.id_familia')), 'familiasCount'],
           [sequelize.fn('COUNT', sequelize.col('sectores.id')), 'sectoresCount']
         ],

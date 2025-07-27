@@ -99,11 +99,25 @@ if (process.env.NODE_ENV === 'production') {
   app.use(morgan('dev'));
 }
 
-// Body parsing middlewares
+// Body parsing middlewares with enhanced error handling
 app.use(express.json({ 
   limit: '10mb',
-  type: ['application/json', 'text/plain']
+  type: ['application/json', 'text/plain'],
+  verify: (req, res, buf, encoding) => {
+    // Store raw body for error reporting
+    req.rawBody = buf.toString(encoding || 'utf8');
+  }
 }));
+
+// Custom JSON error handler
+app.use((err, req, res, next) => {
+  if (err.type === 'entity.parse.failed') {
+    // Add the raw body to the error for better debugging
+    err.body = req.rawBody;
+  }
+  next(err);
+});
+
 app.use(express.urlencoded({ 
   extended: true, 
   limit: '10mb' 

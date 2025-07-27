@@ -47,7 +47,7 @@ class ParroquiaService {
         include: [
           {
             association: 'personas',
-            attributes: ['id_persona', 'nombres'],
+            attributes: ['id', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'],
             required: false
           }
         ]
@@ -77,7 +77,7 @@ class ParroquiaService {
         include: [
           {
             association: 'personas',
-            attributes: ['id_persona', 'nombres', 'apellidos'],
+            attributes: ['id', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'],
             required: false
           }
         ]
@@ -166,7 +166,7 @@ class ParroquiaService {
           attributes: [
             'id_parroquia',
             'nombre',
-            [sequelize.fn('COUNT', sequelize.col('personas.id_persona')), 'personasCount']
+            [sequelize.fn('COUNT', sequelize.col('personas.id')), 'personasCount']
           ],
           include: [{
             association: 'personas',

@@ -47,7 +47,7 @@ class SexoService {
         include: [
           {
             association: 'personas',
-            attributes: ['id_persona', 'nombres'],
+            attributes: ['id', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'],
             required: false
           }
         ]
@@ -77,7 +77,7 @@ class SexoService {
         include: [
           {
             association: 'personas',
-            attributes: ['id_persona', 'nombres', 'apellidos'],
+            attributes: ['id', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'],
             required: false
           }
         ]
@@ -154,7 +154,7 @@ class SexoService {
         attributes: [
           'id_sexo',
           'sexo',
-          [sequelize.fn('COUNT', sequelize.col('personas.id_persona')), 'personasCount']
+          [sequelize.fn('COUNT', sequelize.col('personas.id')), 'personasCount']
         ],
         include: [
           {

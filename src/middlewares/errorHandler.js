@@ -54,6 +54,17 @@ const errorHandler = (err, req, res, next) => {
     return res.status(409).json(error);
   }
 
+  // JSON parsing errors
+  if (err.type === 'entity.parse.failed' || err.name === 'SyntaxError') {
+    error.message = 'Invalid JSON format';
+    error.details = {
+      issue: 'Request body contains malformed JSON',
+      hint: 'Check for trailing commas, unquoted keys, or invalid syntax',
+      body: err.body ? err.body.substring(0, 200) + (err.body.length > 200 ? '...' : '') : 'No body received'
+    };
+    return res.status(400).json(error);
+  }
+
   // JWT errors
   if (err.name === 'JsonWebTokenError') {
     error.message = 'Invalid token';
