@@ -12,6 +12,7 @@ import Veredas from './catalog/Veredas.js';
 import Sexo from './catalog/Sexo.js';
 import Municipios from './catalog/Municipios.js';
 import Persona from './catalog/Persona.js';
+import Familias from './catalog/Familias.js';
 
 // Definir asociaciones para los nuevos modelos
 User.hasMany(Survey, {
@@ -98,11 +99,13 @@ Persona.belongsTo(Sexo, {
 
 Municipios.hasMany(Veredas, {
   foreignKey: 'id_municipio',
+  targetKey: 'id_municipio',
   as: 'veredas'
 });
 
 Veredas.belongsTo(Municipios, {
   foreignKey: 'id_municipio',
+  targetKey: 'id_municipio',
   as: 'municipio'
 });
 
@@ -136,6 +139,29 @@ Sector.belongsTo(Municipios, {
   as: 'municipio'
 });
 
+// Asociaciones many-to-many entre Veredas y Familias
+Veredas.belongsToMany(Familias, {
+  through: {
+    model: 'veredas_has_many_familias',
+    unique: false
+  },
+  foreignKey: 'id_vereda',
+  otherKey: 'id_familia',
+  as: 'familias',
+  timestamps: false
+});
+
+Familias.belongsToMany(Veredas, {
+  through: {
+    model: 'veredas_has_many_familias',
+    unique: false
+  },
+  foreignKey: 'id_familia',
+  otherKey: 'id_vereda',
+  as: 'veredas',
+  timestamps: false
+});
+
 // Re-export everything including new models
 export default {
   sequelize,
@@ -149,7 +175,8 @@ export default {
   Veredas,
   Sexo,
   Municipios,
-  Persona
+  Persona,
+  Familias
 };
 
 export {
@@ -163,5 +190,6 @@ export {
   Veredas,
   Sexo,
   Municipios,
-  Persona
+  Persona,
+  Familias
 };

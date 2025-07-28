@@ -57,7 +57,7 @@ class VeredaService {
         include: [
           {
             association: 'municipio',
-            attributes: ['id', 'nombre'],
+            attributes: ['id_municipio', 'nombre'],
             required: false
           },
           {
@@ -66,13 +66,13 @@ class VeredaService {
             required: false
           },
           {
-            association: 'familias',
-            attributes: ['id_familia'],
+            association: 'sectores',
+            attributes: ['id', 'name'],
             required: false
           },
           {
-            association: 'sectores',
-            attributes: ['id', 'name'],
+            association: 'familias',
+            attributes: ['id_familia', 'jefe_familia', 'numero_miembros', 'estado_encuesta'],
             required: false
           }
         ]
@@ -102,17 +102,12 @@ class VeredaService {
         include: [
           {
             association: 'municipio',
-            attributes: ['id', 'nombre', 'codigo_municipio'],
+            attributes: ['id_municipio', 'nombre', 'codigo_municipio'],
             required: false
           },
           {
             association: 'personas',
             attributes: ['id', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'],
-            required: false
-          },
-          {
-            association: 'familias',
-            attributes: ['id_familia', 'jefe_familia'],
             required: false
           },
           {
@@ -173,18 +168,16 @@ class VeredaService {
       const vereda_with_associations = await Veredas.findByPk(id, {
         include: [
           { association: 'personas', required: false },
-          { association: 'familias', required: false },
           { association: 'sectores', required: false }
         ]
       });
 
       const hasAssociations = 
         (vereda_with_associations.personas && vereda_with_associations.personas.length > 0) ||
-        (vereda_with_associations.familias && vereda_with_associations.familias.length > 0) ||
         (vereda_with_associations.sectores && vereda_with_associations.sectores.length > 0);
 
       if (hasAssociations) {
-        throw new Error('Cannot delete vereda: it has associated personas, familias, or sectores');
+        throw new Error('Cannot delete vereda: it has associated personas or sectores');
       }
 
       await vereda.destroy();
@@ -231,17 +224,11 @@ class VeredaService {
           'nombre',
           'codigo_vereda',
           [sequelize.fn('COUNT', sequelize.col('personas.id')), 'personasCount'],
-          [sequelize.fn('COUNT', sequelize.col('familias.id_familia')), 'familiasCount'],
           [sequelize.fn('COUNT', sequelize.col('sectores.id')), 'sectoresCount']
         ],
         include: [
           {
             association: 'personas',
-            attributes: [],
-            required: false
-          },
-          {
-            association: 'familias',
             attributes: [],
             required: false
           },
@@ -252,7 +239,7 @@ class VeredaService {
           },
           {
             association: 'municipio',
-            attributes: ['nombre'],
+            attributes: ['id_municipio', 'nombre'],
             required: false
           }
         ],
@@ -260,7 +247,7 @@ class VeredaService {
           'Veredas.id_vereda', 
           'Veredas.nombre', 
           'Veredas.codigo_vereda',
-          'municipio.id',
+          'municipio.id_municipio',
           'municipio.nombre'
         ],
         raw: true
@@ -273,7 +260,6 @@ class VeredaService {
       const summary = {
         totalVeredas: statistics.length,
         totalPersonas: statistics.reduce((sum, v) => sum + parseInt(v.personasCount || 0), 0),
-        totalFamilias: statistics.reduce((sum, v) => sum + parseInt(v.familiasCount || 0), 0),
         totalSectores: statistics.reduce((sum, v) => sum + parseInt(v.sectoresCount || 0), 0),
         detailedStats: statistics
       };
@@ -330,7 +316,7 @@ class VeredaService {
         include: [
           {
             association: 'municipio',
-            attributes: ['id', 'nombre', 'codigo_municipio'],
+            attributes: ['id_municipio', 'nombre', 'codigo_municipio'],
             required: false
           }
         ]
@@ -341,17 +327,10 @@ class VeredaService {
       }
 
       // Get counts separately for better performance
-      const [personasCount, familiasCount, sectoresCount] = await Promise.all([
+      const [personasCount, sectoresCount] = await Promise.all([
         Veredas.count({
           include: [{
             association: 'personas',
-            required: true
-          }],
-          where: { id_vereda: id }
-        }),
-        Veredas.count({
-          include: [{
-            association: 'familias',
             required: true
           }],
           where: { id_vereda: id }
@@ -369,7 +348,6 @@ class VeredaService {
         ...vereda.toJSON(),
         counts: {
           personas: personasCount,
-          familias: familiasCount,
           sectores: sectoresCount
         }
       };

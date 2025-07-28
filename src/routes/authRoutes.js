@@ -4,41 +4,6 @@ import authValidators from '../validators/authValidators.js';
 import authMiddleware from '../middlewares/auth.js';
 import validationMiddleware from '../middlewares/validation.js';
 
-/**
- * Generate dynamic user examples for route documentation
- * This ensures examples are never the same across API calls
- */
-const generateDynamicExamples = () => {
-  const firstNames = ['Ana', 'Carlos', 'Maria', 'Jose', 'Laura', 'Pedro', 'Sofia', 'Luis', 'Carmen', 'Diego', 'Valentina', 'Andres', 'Isabella', 'Fernando', 'Gabriela'];
-  const lastNames = ['Garcia', 'Rodriguez', 'Lopez', 'Martinez', 'Gonzalez', 'Perez', 'Sanchez', 'Ramirez', 'Cruz', 'Flores', 'Herrera', 'Vargas', 'Castro', 'Ortiz', 'Morales'];
-  
-  const getRandomElement = (array) => array[Math.floor(Math.random() * array.length)];
-  const generateRandomId = () => Math.floor(Math.random() * 9000) + 1000;
-  const generateRandomPassword = () => {
-    const passwords = ['MiPassword123!', 'Segura456@', 'Clave789#', 'Pass321$', 'Super456%', 'Fuerte789&'];
-    return getRandomElement(passwords);
-  };
-
-  const firstName = getRandomElement(firstNames);
-  const lastName = getRandomElement(lastNames);
-  const randomId = generateRandomId();
-  // Remove any special characters and convert to lowercase for email compatibility
-  const cleanFirstName = firstName.toLowerCase().replace(/[^a-z0-9]/g, '');
-  const cleanLastName = lastName.toLowerCase().replace(/[^a-z0-9]/g, '');
-  const email = `${cleanFirstName}.${cleanLastName}${randomId}@yopmail.com`;
-
-  return {
-    firstName,
-    lastName,
-    email,
-    password: generateRandomPassword(),
-    role: 'surveyor'
-  };
-};
-
-// Generate dynamic examples once when the module loads
-const dynamicExample = generateDynamicExamples();
-
 const router = express.Router();
 
 // Public routes (no authentication required)

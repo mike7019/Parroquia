@@ -780,6 +780,29 @@ const swaggerConfig = {
           },
           required: ['nombres', 'apellidos', 'tipoIdentificacion', 'numeroIdentificacion', 'fechaNacimiento', 'sexo', 'situacionCivil', 'parentesco', 'estudio', 'comunidadCultural', 'talla']
         },
+        VeredaInput: {
+          type: 'object',
+          properties: {
+            nombre: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre de la vereda',
+              example: 'El Alamo'
+            },
+            codigo_vereda: {
+              type: 'string',
+              maxLength: 50,
+              description: 'Código único de la vereda (opcional)',
+              example: '001'
+            },
+            id_municipio: {
+              type: 'integer',
+              description: 'ID del municipio al que pertenece la vereda (opcional)',
+              example: 1
+            }
+          },
+          required: ['nombre']
+        },
         Sector: {
           type: 'object',
           properties: {
