@@ -68,11 +68,16 @@ const swaggerConfig = {
               description: 'Correo electrónico único',
               example: 'juan.perez@yopmail.com'
             },
+            phone: {
+              type: 'string',
+              description: 'Número de teléfono del usuario',
+              example: '+57 300 123 4567'
+            },
             role: {
               type: 'string',
-              enum: ['admin', 'user', 'moderator'],
+              enum: ['admin', 'coordinator', 'surveyor'],
               description: 'Rol del usuario en el sistema',
-              example: 'user'
+              example: 'surveyor'
             },
             isActive: {
               type: 'boolean',
@@ -134,6 +139,13 @@ const swaggerConfig = {
               description: 'Contraseña (mínimo 8 caracteres, debe incluir mayúsculas, minúsculas, números y símbolos)',
               example: 'MiPassword123!'
             },
+            phone: {
+              type: 'string',
+              minLength: 10,
+              maxLength: 20,
+              description: 'Número de teléfono del usuario',
+              example: '+57 300 123 4567'
+            },
             role: {
               type: 'string',
               enum: ['admin', 'coordinator', 'surveyor'],
@@ -165,6 +177,13 @@ const swaggerConfig = {
               format: 'email',
               description: 'Correo electrónico único',
               example: 'juan.perez@yopmail.com'
+            },
+            phone: {
+              type: 'string',
+              minLength: 10,
+              maxLength: 20,
+              description: 'Número de teléfono del usuario',
+              example: '+57 300 123 4567'
             },
             role: {
               type: 'string',

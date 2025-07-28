@@ -26,6 +26,7 @@ const router = express.Router();
  *             lastName: "Garcia"
  *             email: "diego.garcia5105@yopmail.com"
  *             password: "Fuerte789&"
+ *             phone: "+57 300 456 7890"
  *             role: "surveyor"
  *     responses:
  *       201:

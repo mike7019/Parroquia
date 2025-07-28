@@ -23,7 +23,7 @@ class AuthService {
    * @returns {Promise<Object>} User and token data
    */
   async registerUser(userData) {
-    const { email, password, firstName, lastName, role = 'surveyor' } = userData;
+    const { email, password, firstName, lastName, role = 'surveyor', phone } = userData;
     
     const transaction = await sequelize.transaction();
     
@@ -47,6 +47,7 @@ class AuthService {
         firstName,
         lastName,
         role,
+        phone,
         status: 'active',
         emailVerificationToken,
         isActive: true,

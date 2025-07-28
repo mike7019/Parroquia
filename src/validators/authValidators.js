@@ -35,6 +35,13 @@ const authValidators = {
       .matches(/^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/)
       .withMessage('Last name can only contain letters and spaces'),
     
+    body('phone')
+      .optional()
+      .isLength({ min: 10, max: 20 })
+      .withMessage('Phone must be between 10 and 20 characters')
+      .matches(/^[\+]?[0-9\s\-\(\)]+$/)
+      .withMessage('Phone must contain only numbers, spaces, hyphens, parentheses, and optional plus sign'),
+    
     body('role')
       .optional()
       .isIn(['admin', 'coordinator', 'surveyor'])
