@@ -31,21 +31,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3000
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: parroquia_db
-      DB_USER: parroquia_user
-      DB_PASSWORD: ${DB_PASSWORD:-parroquia_password}
-      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-super-secret-refresh-key-change-this}
-      EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
-      EMAIL_PORT: ${EMAIL_PORT:-587}
-      EMAIL_USER: ${EMAIL_USER:-your-email@gmail.com}
-      EMAIL_PASS: ${EMAIL_PASS:-your-app-password}
-      EMAIL_FROM: ${EMAIL_FROM:-noreply@parroquia.com}
+    env_file:
+      - .env
     ports:
       - "3000:3000"
     networks:

@@ -1,0 +1,122 @@
+pipeline {
+    agent any
+
+    environment {
+        // IP o dominio de tu servidor de producción
+        SERVER_IP = '206.62.139.100'
+        // Usuario para conectar por SSH al servidor
+        SERVER_USER = 'l4bs' // Ajusta según tu usuario real
+        // Ruta absoluta a la carpeta de tu proyecto en el servidor
+        PROJECT_PATH = '/home/l4bs/parroquia/backend/Parroquia' // Ajusta según tu ruta real
+        // ID de la credencial SSH que creaste en Jenkins
+        SSH_CREDENTIAL_ID = 'servidor-produccion-ssh'
+        // Puerto de la aplicación
+        APP_PORT = '3000'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Clona el repositorio desde la rama que activó el pipeline
+                echo 'Obteniendo el código más reciente...'
+                checkout scm
+            }
+        }
+
+        stage('Deploy to Production') {
+            steps {
+                echo "🚀 Desplegando en el servidor ${SERVER_IP}..."
+                // Usa el plugin SSH Agent para conectar de forma segura
+                sshagent([SSH_CREDENTIAL_ID]) {
+                    // Ejecuta los comandos de despliegue en el servidor remoto
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} << 'EOL'
+                            echo 'Conectado al servidor. Actualizando...'
+                            
+                            # Navega a la carpeta del proyecto
+                            cd ${PROJECT_PATH}
+                            
+                            # Asegura que estemos en la rama correcta
+                            git checkout develop
+                            
+                            # Baja los últimos cambios
+                            git pull origin develop
+                            
+                            # Copia el archivo de configuración de producción
+                            echo 'Configurando variables de entorno...'
+                            cp .env.production .env
+                            
+                            echo 'Deteniendo servicios actuales (si existen)...'
+                            docker-compose down
+                            
+                            echo 'Limpiando contenedores e imágenes antiguas...'
+                            docker system prune -f
+                            
+                            echo 'Construyendo y desplegando los nuevos contenedores...'
+                            # El --build reconstruye la imagen de la api con los nuevos cambios
+                            # El -d lo ejecuta en segundo plano (detached)
+                            docker-compose up --build -d
+                            
+                            echo 'Esperando que los servicios se inicien...'
+                            sleep 30
+                            
+                            echo '✅ Despliegue completado.'
+                        EOL
+                    """
+                }
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                echo "🔍 Verificando que la aplicación esté funcionando..."
+                sshagent([SSH_CREDENTIAL_ID]) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} << 'EOL'
+                            echo 'Verificando estado de los contenedores...'
+                            docker-compose ps
+                            
+                            echo 'Verificando logs de la aplicación...'
+                            docker-compose logs --tail=20 api
+                            
+                            echo 'Probando endpoint de salud...'
+                            curl -f http://localhost:${APP_PORT}/api/health || exit 1
+                            
+                            echo '✅ La aplicación está funcionando correctamente.'
+                        EOL
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline finalizado.'
+            // Limpia el workspace de Jenkins
+            cleanWs()
+        }
+        success {
+            echo '🎉 El despliegue fue exitoso.'
+            // Aquí podrías agregar notificaciones de éxito
+            // slackSend(channel: '#deployments', message: "✅ Despliegue exitoso en ${SERVER_IP}")
+        }
+        failure {
+            echo '❌ El despliegue falló.'
+            // Recolecta logs para debugging
+            sshagent([SSH_CREDENTIAL_ID]) {
+                sh """
+                    ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} << 'EOL'
+                        cd ${PROJECT_PATH}
+                        echo 'Logs de los contenedores:'
+                        docker-compose logs --tail=50
+                        echo 'Estado de los contenedores:'
+                        docker-compose ps
+                    EOL
+                """ || true // No fallar si no puede conectar
+            }
+            // Aquí podrías agregar notificaciones de fallo
+            // slackSend(channel: '#deployments', message: "❌ Fallo en despliegue en ${SERVER_IP}")
+        }
+    }
+}
