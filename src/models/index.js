@@ -180,6 +180,7 @@ export default {
 };
 
 export {
+  sequelize,
   User,
   Survey,
   Sector,

@@ -24,9 +24,7 @@ class AuthController {
         status: 'success',
         message: 'User registered successfully. Please check your email to verify your account.',
         data: {
-          user: result.user,
-          accessToken: result.accessToken,
-          refreshToken: result.refreshToken
+          user: result.user
         }
       });
     } catch (error) {
