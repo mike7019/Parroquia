@@ -82,7 +82,7 @@ const Sector = sequelize.define('Sector', {
     field: 'municipio_id',
     references: {
       model: 'municipios',
-      key: 'id'
+      key: 'id_municipio'  // ✅ CORREGIDO: era 'id'
     }
   },
   veredaId: {
