@@ -1,13 +1,14 @@
 services:
-  # PostgreSQL Database
+  # PostgreSQL Database Only
   postgres:
     image: postgres:15-alpine
-    container_name: parroquia-postgres
+    container_name: parroquia-postgres-only
     restart: unless-stopped
     environment:
       POSTGRES_DB: parroquia_db
       POSTGRES_USER: parroquia_user
       POSTGRES_PASSWORD: "admin"
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
@@ -20,32 +21,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  # Parroquia API Application
-  api:
-    build: .
-    container_name: parroquia-api
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-    env_file:
-      - .env
-    environment:
-      # Override DB_HOST para usar el nombre del servicio Docker
-      DB_HOST: postgres
-    ports:
-      - "3000:3000"
-    networks:
-      - parroquia-network
-    volumes:
-      - app_logs:/app/logs
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      start_period: 30s
 
 networks:
   parroquia-network:
@@ -53,6 +29,4 @@ networks:
 
 volumes:
   postgres_data:
-    driver: local
-  app_logs:
     driver: local

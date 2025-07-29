@@ -127,11 +127,20 @@ DB_PASSWORD=UnPasswordMuySeguro123!
 JWT_SECRET=jwt_secret_super_seguro_para_produccion_123456789
 JWT_REFRESH_SECRET=refresh_secret_super_seguro_para_produccion_987654321
 
-# Email para notificaciones
+# Email para notificaciones (variables EMAIL_)
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=tu_email@gmail.com
 EMAIL_PASS=tu_app_password
+EMAIL_FROM=noreply@parroquia.com
+SEND_REAL_EMAILS=true
+
+# SMTP para el servicio de email (variables SMTP_)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=tu_email@gmail.com
+SMTP_PASS=tu_app_password
+SMTP_FROM_EMAIL=noreply@parroquia.com
 
 # Configuración del servidor
 NODE_ENV=production
@@ -235,6 +244,52 @@ docker compose config
 docker compose down
 docker system prune -f
 docker compose up -d
+```
+
+### Problema: Error de autenticación SASL
+**Error:** `SASL: SCRAM-SERVER-FIRST-MESSAGE: client password must be a string`
+
+**Solución:**
+
+```bash
+# 1. Verificar variables de entorno en el contenedor
+docker compose exec api env | grep -E "(DB_|SMTP_|EMAIL_)"
+
+# 2. Si faltan variables SMTP_, agregar al archivo .env:
+echo "SMTP_HOST=smtp.gmail.com" >> .env
+echo "SMTP_PORT=587" >> .env
+echo "SMTP_USER=tu_email@gmail.com" >> .env
+echo "SMTP_PASS=tu_app_password" >> .env
+echo "SMTP_FROM_EMAIL=noreply@parroquia.com" >> .env
+
+# 3. Reiniciar servicios para cargar nuevas variables
+docker compose down
+docker compose up -d
+
+# 4. Ejecutar migraciones nuevamente
+docker compose exec api npm run db:migrate
+```
+
+### Problema: Error de conexión a base de datos durante migraciones
+
+**Solución:**
+
+```bash
+# Verificar estado de PostgreSQL
+docker compose exec postgres pg_isready -U parroquia_user
+
+# Verificar variables de base de datos
+docker compose exec api env | grep DB_
+
+# Conectar manualmente para verificar credenciales
+docker compose exec postgres psql -U parroquia_user -d parroquia_db
+
+# Si la conexión falla, reiniciar servicios
+docker compose restart
+
+# Esperar a que PostgreSQL esté listo
+sleep 30
+docker compose exec api npm run db:migrate
 ```
 
 ## 📝 Checklist de Despliegue
