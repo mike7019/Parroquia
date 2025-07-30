@@ -822,6 +822,30 @@ const swaggerConfig = {
           },
           required: ['nombre']
         },
+        ParroquiaInput: {
+          type: 'object',
+          properties: {
+            nombre: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre de la parroquia',
+              example: 'Parroquia San José'
+            }
+          },
+          required: ['nombre']
+        },
+        SexoInput: {
+          type: 'object',
+          properties: {
+            sexo: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Nombre del sexo/género',
+              example: 'Masculino'
+            }
+          },
+          required: ['sexo']
+        },
         Sector: {
           type: 'object',
           properties: {
@@ -880,6 +904,50 @@ const swaggerConfig = {
               type: 'string',
               format: 'date-time',
               description: 'Fecha de última actualización'
+            }
+          },
+          required: ['name']
+        },
+        SectorInput: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre del sector',
+              example: 'La Esperanza'
+            },
+            description: {
+              type: 'string',
+              description: 'Descripción del sector',
+              example: 'Sector ubicado en la zona norte de la parroquia'
+            },
+            coordinator: {
+              type: 'integer',
+              description: 'ID del coordinador (opcional)',
+              example: 2
+            },
+            status: {
+              type: 'string',
+              enum: ['active', 'inactive'],
+              description: 'Estado del sector',
+              example: 'active'
+            },
+            code: {
+              type: 'string',
+              maxLength: 20,
+              description: 'Código único del sector (opcional)',
+              example: 'SEC001'
+            },
+            municipioId: {
+              type: 'integer',
+              description: 'ID del municipio (opcional)',
+              example: 1
+            },
+            veredaId: {
+              type: 'integer',
+              description: 'ID de la vereda (opcional)',
+              example: 1
             }
           },
           required: ['name']
