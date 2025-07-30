@@ -49,28 +49,10 @@ class SurveyController {
 
       // Check if user has permission to view this survey
       if (survey.userId !== req.user.id && req.user.role !== 'admin') {
-        // Check if user is coordinator of this sector
-        if (req.user.role === 'coordinator') {
-          const { Sector } = await import('../models/index.js');
-          const sector = await Sector.findOne({
-            where: { 
-              name: survey.sector,
-              coordinator: req.user.id
-            }
-          });
-          
-          if (!sector) {
-            return res.status(403).json({
-              status: 'error',
-              message: 'Access denied'
-            });
-          }
-        } else {
-          return res.status(403).json({
-            status: 'error',
-            message: 'Access denied'
-          });
-        }
+        return res.status(403).json({
+          status: 'error',
+          message: 'Access denied'
+        });
       }
 
       res.json({
@@ -277,62 +259,6 @@ class SurveyController {
       };
 
       const result = await surveyService.getSurveysByUser(userId, options);
-
-      res.json({
-        status: 'success',
-        data: result
-      });
-    } catch (error) {
-      res.status(500).json({
-        status: 'error',
-        message: error.message
-      });
-    }
-  }
-
-  /**
-   * Get surveys by sector (for coordinators)
-   * GET /api/surveys/sector/:sectorName
-   */
-  async getSurveysBySector(req, res) {
-    try {
-      const { sectorName } = req.params;
-      const userId = req.user.id;
-
-      // Verify user is coordinator of this sector (unless admin)
-      if (req.user.role !== 'admin') {
-        if (req.user.role !== 'coordinator') {
-          return res.status(403).json({
-            status: 'error',
-            message: 'Access denied. Coordinators only.'
-          });
-        }
-
-        const { Sector } = await import('../models/index.js');
-        const sector = await Sector.findOne({
-          where: { 
-            name: sectorName,
-            coordinator: userId
-          }
-        });
-
-        if (!sector) {
-          return res.status(403).json({
-            status: 'error',
-            message: 'Access denied. You are not coordinator of this sector.'
-          });
-        }
-      }
-
-      const options = {
-        page: req.query.page || 1,
-        limit: req.query.limit || 10,
-        status: req.query.status,
-        sortBy: req.query.sort_by || 'createdAt',
-        sortOrder: req.query.sort_order || 'DESC'
-      };
-
-      const result = await surveyService.getSurveysBySector(sectorName, options);
 
       res.json({
         status: 'success',

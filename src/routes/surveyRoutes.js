@@ -9,7 +9,6 @@ import {
   surveyIdValidation,
   memberIdValidation,
   paginationValidation,
-  sectorNameValidation,
   autoSaveValidation,
   cancelSurveyValidation,
   statisticsValidation
@@ -167,53 +166,6 @@ router.get('/my',
 router.get('/statistics',
   statisticsValidation,
   surveyController.getStatistics
-);
-
-/**
- * @swagger
- * /api/surveys/sector/{sectorName}:
- *   get:
- *     summary: Get surveys by sector (coordinators only)
- *     tags: [Surveys]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: sectorName
- *         required: true
- *         schema:
- *           type: string
- *         description: Sector name
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           minimum: 1
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           minimum: 1
- *           maximum: 100
- *         description: Items per page
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           enum: [draft, in_progress, completed, cancelled]
- *         description: Filter by status
- *     responses:
- *       200:
- *         description: Sector surveys retrieved successfully
- *       403:
- *         description: Access denied - not coordinator of this sector
- */
-router.get('/sector/:sectorName',
-  requireRole(['admin', 'coordinator']),
-  sectorNameValidation,
-  paginationValidation,
-  surveyController.getSurveysBySector
 );
 
 /**

@@ -24,7 +24,8 @@ const sequelize = new Sequelize(
  * Repara problemas comunes de la base de datos
  * - Elimina tablas con foreign keys incorrectas
  * - Limpia tipos ENUM huérfanos
- * - Verifica y limpia referencias de foreign keys inválidas
+ * - Verifica y corrige violaciones de foreign keys
+ * - Carga datos básicos si no existen
  * - Permite que Sequelize recree las tablas con la estructura correcta
  */
 async function fixDatabase() {
@@ -42,11 +43,18 @@ async function fixDatabase() {
     const [veredas] = await sequelize.query('SELECT COUNT(*) as count FROM veredas');
     console.log(`🏘️ Veredas encontradas: ${veredas[0].count}`);
     
-    const [sectors] = await sequelize.query('SELECT COUNT(*) as count FROM sectors');
-    console.log(`🏢 Sectores encontrados: ${sectors[0].count}`);
+    // Verificar si la tabla sectors existe
+    let sectorsCount = 0;
+    try {
+      const [sectors] = await sequelize.query('SELECT COUNT(*) as count FROM sectors');
+      sectorsCount = sectors[0].count;
+      console.log(`🏢 Sectores encontrados: ${sectorsCount}`);
+    } catch (error) {
+      console.log('🏢 La tabla sectors aún no existe (normal después de una configuración nueva)');
+    }
 
     // Verificar foreign keys problemáticas en veredas
-    console.log('\n🔍 Verificando violaciones de foreign key en veredas...');
+    console.log('\n🔍 Verificando violaciones de foreign keys en veredas...');
     const [invalidVeredas] = await sequelize.query(`
       SELECT v.id_vereda, v.nombre, v.id_municipio 
       FROM veredas v 
@@ -60,15 +68,15 @@ async function fixDatabase() {
         console.log(`   - Vereda "${v.nombre}" (ID: ${v.id_vereda}) referencia municipio inexistente ${v.id_municipio}`);
       });
       
-      console.log('🧹 Limpiando referencias de foreign key inválidas en veredas...');
+      console.log('🧹 Limpiando referencias de foreign keys inválidas en veredas...');
       await sequelize.query(`
         UPDATE veredas 
         SET id_municipio = NULL 
         WHERE id_municipio NOT IN (SELECT id_municipio FROM municipios)
       `);
-      console.log('✅ Referencias de foreign key inválidas limpiadas');
+      console.log('✅ Referencias de foreign keys inválidas limpiadas');
     } else {
-      console.log('✅ No se encontraron violaciones de foreign key en veredas');
+      console.log('✅ No se encontraron violaciones de foreign keys en veredas');
     }
 
     console.log('\n🗑️ Eliminando tabla sectors si existe (para corregir foreign keys)...');
@@ -79,23 +87,10 @@ async function fixDatabase() {
     await sequelize.query('DROP TYPE IF EXISTS "public"."enum_sectors_status" CASCADE');
     console.log('✅ Tipos ENUM eliminados correctamente');
 
-    // Opcional: También limpiar otras tablas problemáticas si es necesario
-    console.log('\n🧹 Verificando otras posibles inconsistencias...');
-    
-    // Verificar si existen otras tablas con problemas similares
-    const [tables] = await sequelize.query(`
-      SELECT table_name 
-      FROM information_schema.tables 
-      WHERE table_schema = 'public' 
-      AND table_type = 'BASE TABLE'
-    `);
-    
-    console.log(`📊 Tablas encontradas en la base de datos: ${tables.length}`);
-
     // Verificar que tenemos datos básicos para que la app funcione
     if (municipios[0].count == 0) {
       console.log('\n⚠️ ADVERTENCIA: No se encontraron municipios en la base de datos');
-      console.log('� Insertando datos básicos de municipios...');
+      console.log('🔧 Insertando datos básicos de municipios...');
       
       try {
         await sequelize.query(`
@@ -106,7 +101,7 @@ async function fixDatabase() {
           ('Barranquilla', '08001', 'Atlántico'),
           ('Cartagena', '13001', 'Bolívar')
         `);
-        console.log('✅ Datos básicos de municipios insertados correctamente');
+        console.log('✅ Datos básicos de municipios insertados exitosamente');
         
         // Actualizar el conteo
         const [newMunicipios] = await sequelize.query('SELECT COUNT(*) as count FROM municipios');
@@ -131,7 +126,7 @@ async function fixDatabase() {
           ('Femenino'),
           ('Otro')
         `);
-        console.log('✅ Datos básicos de sexo insertados correctamente');
+        console.log('✅ Datos básicos de sexo insertados exitosamente');
       } catch (insertError) {
         console.error('⚠️ Error insertando datos de sexo:', insertError.message);
       }
@@ -155,16 +150,29 @@ async function fixDatabase() {
             ('Oriente', 'V004', ${municipioId}),
             ('Occidente', 'V005', ${municipioId})
           `);
-          console.log('✅ Datos básicos de veredas insertados correctamente');
+          console.log('✅ Datos básicos de veredas insertados exitosamente');
         } catch (insertError) {
           console.error('⚠️ Error insertando veredas:', insertError.message);
         }
       }
     }
+
+    // Opcional: También limpiar otras tablas problemáticas si es necesario
+    console.log('\n🧹 Verificando otras posibles inconsistencias...');
+    
+    // Verificar si existen otras tablas con problemas similares
+    const [tables] = await sequelize.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      AND table_type = 'BASE TABLE'
+    `);
+    
+    console.log(`📊 Tablas encontradas en la base de datos: ${tables.length}`);
     
     console.log('\n✅ Reparación de base de datos completada exitosamente!');
     console.log('📝 Ahora puedes ejecutar "npm start" para recrear las tablas con las foreign keys correctas');
-    console.log('🔄 O ejecutar "npm run db:load-catalogs" si necesitas cargar datos de catálogo');
+    console.log('🔄 O ejecutar "npm run db:sync" si tienes ese comando configurado');
 
   } catch (error) {
     console.error('❌ Error al reparar la base de datos:', error.message);

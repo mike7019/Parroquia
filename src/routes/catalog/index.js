@@ -1,6 +1,5 @@
 import express from 'express';
 import parroquiaRoutes from './parroquiaRoutes.js';
-import sectorRoutes from './sectorRoutes.js';
 import veredaRoutes from './veredaRoutes.js';
 import sexoRoutes from './sexoRoutes.js';
 
@@ -48,7 +47,6 @@ const router = express.Router();
 
 // Mount catalog routes
 router.use('/parroquias', parroquiaRoutes);
-router.use('/sectors', sectorRoutes);
 router.use('/veredas', veredaRoutes);
 router.use('/sexos', sexoRoutes);
 
@@ -60,7 +58,6 @@ router.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     services: {
       parroquias: 'active',
-      sectors: 'active', 
       veredas: 'active',
       sexos: 'active'
     }

@@ -15,6 +15,7 @@ import userRoutes from './routes/userManagementRoutes.js';
 import systemRoutes from './routes/systemRoutes.js';
 import surveyRoutes from './routes/surveyRoutes.js';
 import catalogRoutes from './routes/catalog/index.js';
+import swaggerCustomRoutes from './routes/swaggerCustomRoutes.js';
 
 // Import middlewares
 import errorHandler from './middlewares/errorHandler.js';
@@ -186,6 +187,9 @@ app.use('/api/users', userRoutes);
 app.use('/api/surveys', surveyRoutes);
 app.use('/api/catalog', catalogRoutes);
 app.use('/api', systemRoutes);
+
+// Custom Swagger routes
+app.use('/', swaggerCustomRoutes);
 
 // Root route
 app.use('/', systemRoutes);
@@ -383,7 +387,6 @@ const displayRoutes = () => {
       { method: 'POST', path: '/api/surveys', group: 'Surveys', protected: true },
       { method: 'GET', path: '/api/surveys/my', group: 'Surveys', protected: true },
       { method: 'GET', path: '/api/surveys/statistics', group: 'Surveys', protected: true },
-      { method: 'GET', path: '/api/surveys/sector/:sectorName', group: 'Surveys', protected: true },
       { method: 'GET', path: '/api/surveys/:id', group: 'Surveys', protected: true },
       { method: 'PUT', path: '/api/surveys/:id/stages/:stageNumber', group: 'Surveys', protected: true },
       { method: 'POST', path: '/api/surveys/:id/members', group: 'Surveys', protected: true },
@@ -403,13 +406,6 @@ const displayRoutes = () => {
       { method: 'GET', path: '/api/catalog/parroquias/:id', group: 'Catalog', protected: true },
       { method: 'PUT', path: '/api/catalog/parroquias/:id', group: 'Catalog', protected: true },
       { method: 'DELETE', path: '/api/catalog/parroquias/:id', group: 'Catalog', protected: true },
-      { method: 'POST', path: '/api/catalog/sectors', group: 'Catalog', protected: true },
-      { method: 'GET', path: '/api/catalog/sectors', group: 'Catalog', protected: true },
-      { method: 'GET', path: '/api/catalog/sectors/search', group: 'Catalog', protected: true },
-      { method: 'GET', path: '/api/catalog/sectors/statistics', group: 'Catalog', protected: true },
-      { method: 'GET', path: '/api/catalog/sectors/:id', group: 'Catalog', protected: true },
-      { method: 'PUT', path: '/api/catalog/sectors/:id', group: 'Catalog', protected: true },
-      { method: 'DELETE', path: '/api/catalog/sectors/:id', group: 'Catalog', protected: true },
       { method: 'POST', path: '/api/catalog/veredas', group: 'Catalog', protected: true },
       { method: 'GET', path: '/api/catalog/veredas', group: 'Catalog', protected: true },
       { method: 'GET', path: '/api/catalog/veredas/search', group: 'Catalog', protected: true },

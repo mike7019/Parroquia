@@ -27,7 +27,8 @@
     "db:create": "npx sequelize-cli db:create",
     "db:drop": "npx sequelize-cli db:drop",
     "db:load-catalogs": "node loadCatalogData.js",
-    "db:fix": "node scripts/fix-database.js"
+    "db:fix": "node scripts/fix-database.js",
+    "db:setup": "npm run db:fix && npm start"
   },
   "keywords": [
     "node",

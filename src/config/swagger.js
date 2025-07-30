@@ -398,38 +398,6 @@ const swaggerConfig = {
             }
           ]
         },
-        SectorResponse: {
-          allOf: [
-            { $ref: '#/components/schemas/ApiResponse' },
-            {
-              type: 'object',
-              properties: {
-                data: {
-                  $ref: '#/components/schemas/Sector'
-                }
-              }
-            }
-          ]
-        },
-        SectorsListResponse: {
-          allOf: [
-            { $ref: '#/components/schemas/ApiResponse' },
-            {
-              type: 'object',
-              properties: {
-                data: {
-                  type: 'array',
-                  items: {
-                    $ref: '#/components/schemas/Sector'
-                  }
-                },
-                pagination: {
-                  $ref: '#/components/schemas/Pagination'
-                }
-              }
-            }
-          ]
-        },
         VeredaResponse: {
           allOf: [
             { $ref: '#/components/schemas/ApiResponse' },
@@ -514,12 +482,6 @@ const swaggerConfig = {
               description: 'ID de la familia (opcional)',
               example: '123e4567-e89b-12d3-a456-426614174001'
             },
-            sector: {
-              type: 'string',
-              maxLength: 100,
-              description: 'Sector asignado',
-              example: 'La Esperanza'
-            },
             familyHead: {
               type: 'string',
               maxLength: 200,
@@ -597,17 +559,11 @@ const swaggerConfig = {
               description: 'Fecha de última actualización'
             }
           },
-          required: ['sector', 'familyHead', 'address', 'familySize', 'housingType']
+          required: ['familyHead', 'address', 'familySize', 'housingType']
         },
         CreateSurveyRequest: {
           type: 'object',
           properties: {
-            sector: {
-              type: 'string',
-              maxLength: 100,
-              description: 'Sector asignado',
-              example: 'La Esperanza'
-            },
             familyHead: {
               type: 'string',
               maxLength: 200,
@@ -650,7 +606,7 @@ const swaggerConfig = {
               example: 'Familia muy colaborativa'
             }
           },
-          required: ['sector', 'familyHead', 'address', 'familySize', 'housingType']
+          required: ['familyHead', 'address', 'familySize', 'housingType']
         },
         CreateSurveyInput: {
           $ref: '#/components/schemas/CreateSurveyRequest'
@@ -845,112 +801,6 @@ const swaggerConfig = {
             }
           },
           required: ['sexo']
-        },
-        Sector: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'string',
-              format: 'uuid',
-              description: 'ID único del sector',
-              example: '123e4567-e89b-12d3-a456-426614174000'
-            },
-            name: {
-              type: 'string',
-              maxLength: 255,
-              description: 'Nombre del sector',
-              example: 'La Esperanza'
-            },
-            description: {
-              type: 'string',
-              description: 'Descripción del sector',
-              example: 'Sector ubicado en la zona norte de la parroquia'
-            },
-            families: {
-              type: 'integer',
-              minimum: 0,
-              description: 'Número total de familias',
-              example: 150
-            },
-            completed: {
-              type: 'integer',
-              minimum: 0,
-              description: 'Encuestas completadas',
-              example: 45
-            },
-            pending: {
-              type: 'integer',
-              minimum: 0,
-              description: 'Encuestas pendientes',
-              example: 105
-            },
-            coordinator: {
-              type: 'integer',
-              description: 'ID del coordinador',
-              example: 2
-            },
-            status: {
-              type: 'string',
-              enum: ['active', 'inactive'],
-              description: 'Estado del sector',
-              example: 'active'
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de creación'
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de última actualización'
-            }
-          },
-          required: ['name']
-        },
-        SectorInput: {
-          type: 'object',
-          properties: {
-            name: {
-              type: 'string',
-              maxLength: 255,
-              description: 'Nombre del sector',
-              example: 'La Esperanza'
-            },
-            description: {
-              type: 'string',
-              description: 'Descripción del sector',
-              example: 'Sector ubicado en la zona norte de la parroquia'
-            },
-            coordinator: {
-              type: 'integer',
-              description: 'ID del coordinador (opcional)',
-              example: 2
-            },
-            status: {
-              type: 'string',
-              enum: ['active', 'inactive'],
-              description: 'Estado del sector',
-              example: 'active'
-            },
-            code: {
-              type: 'string',
-              maxLength: 20,
-              description: 'Código único del sector (opcional)',
-              example: 'SEC001'
-            },
-            municipioId: {
-              type: 'integer',
-              description: 'ID del municipio (opcional)',
-              example: 1
-            },
-            veredaId: {
-              type: 'integer',
-              description: 'ID de la vereda (opcional)',
-              example: 1
-            }
-          },
-          required: ['name']
         },
         Parroquia: {
           type: 'object',
@@ -1279,10 +1129,6 @@ const swaggerConfig = {
         description: 'Gestión de catálogo de parroquias'
       },
       {
-        name: 'Sectors',
-        description: 'Gestión de catálogo de sectores'
-      },
-      {
         name: 'Veredas',
         description: 'Gestión de catálogo de veredas'
       },
@@ -1324,13 +1170,41 @@ const swaggerUiOptions = {
     docExpansion: 'none',
     filter: true,
     showExtensions: true,
-    tryItOutEnabled: true
+    tryItOutEnabled: true,
+    deepLinking: true,
+    displayOperationId: false,
+    defaultModelsExpandDepth: 2,
+    defaultModelExpandDepth: 2,
+    defaultModelRendering: 'model',
+    supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+    requestSnippetsEnabled: true,
+    validatorUrl: null, // Disable validator to avoid external requests
+    oauth2RedirectUrl: null,
+    showMutatedRequest: true,
+    requestSnippets: {
+      generators: {
+        curl_bash: {
+          title: "cURL (bash)",
+          syntax: "bash"
+        },
+        curl_powershell: {
+          title: "cURL (PowerShell)",
+          syntax: "powershell"
+        }
+      }
+    }
   },
   customCss: `
     .swagger-ui .topbar { display: none }
     .swagger-ui .info { margin: 20px 0 }
     .swagger-ui .scheme-container { margin: 20px 0 }
     .swagger-ui .info .title { color: #3b4151 }
+    .swagger-ui .model-box { background: #f9f9f9; border: 1px solid #e3e3e3; }
+    .swagger-ui .model { font-family: monospace; }
+    .swagger-ui .model .property { margin: 5px 0; }
+    .swagger-ui .model-toggle { cursor: pointer; }
+    .swagger-ui .models { margin-top: 20px; }
+    .swagger-ui .model-container { border: 1px solid #d3d3d3; margin: 10px 0; }
   `,
   customSiteTitle: 'Parroquia API Documentation'
 };
@@ -1339,11 +1213,22 @@ const swaggerUiOptions = {
  * Setup Swagger middleware
  */
 const setupSwagger = (app) => {
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, swaggerUiOptions));
+  // Configurar headers para evitar caché
+  app.use('/api-docs', (req, res, next) => {
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+    next();
+  }, swaggerUi.serve, swaggerUi.setup(specs, swaggerUiOptions));
   
-  // Serve swagger.json
+  // Serve swagger.json sin caché
   app.get('/api-docs.json', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.send(specs);
   });
 

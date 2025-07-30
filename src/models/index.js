@@ -1,7 +1,6 @@
 import sequelize from '../../config/sequelize.js';
 import User from './User.js';
 import Survey from './Survey.js';
-import Sector from './Sector.js';
 import Family from './Family.js';
 import FamilyMember from './FamilyMember.js';
 import SurveyAuditLog from './SurveyAuditLog.js';
@@ -43,16 +42,6 @@ Survey.hasMany(FamilyMember, {
 FamilyMember.belongsTo(Survey, {
   foreignKey: 'surveyId',
   as: 'survey'
-});
-
-Sector.belongsTo(User, {
-  foreignKey: 'coordinator',
-  as: 'coordinatorUser'
-});
-
-User.hasMany(Sector, {
-  foreignKey: 'coordinator',
-  as: 'coordinatedSectors'
 });
 
 // SurveyAuditLog associations
@@ -119,26 +108,7 @@ Persona.belongsTo(Veredas, {
   as: 'vereda'
 });
 
-Veredas.hasMany(Sector, {
-  foreignKey: 'veredaId',
-  as: 'sectores'
-});
-
-Sector.belongsTo(Veredas, {
-  foreignKey: 'veredaId',
-  as: 'vereda'
-});
-
-Municipios.hasMany(Sector, {
-  foreignKey: 'municipioId',
-  as: 'sectores'
-});
-
-Sector.belongsTo(Municipios, {
-  foreignKey: 'municipioId',
-  as: 'municipio'
-});
-
+// Relación entre Municipios y Veredas
 // Asociaciones many-to-many entre Veredas y Familias
 Veredas.belongsToMany(Familias, {
   through: {
@@ -167,7 +137,6 @@ export default {
   sequelize,
   User,
   Survey,
-  Sector,
   Family,
   FamilyMember,
   SurveyAuditLog,
@@ -183,7 +152,6 @@ export {
   sequelize,
   User,
   Survey,
-  Sector,
   Family,
   FamilyMember,
   SurveyAuditLog,

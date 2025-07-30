@@ -3,12 +3,6 @@ import { Op } from 'sequelize';
 
 // Survey creation validation
 export const createSurveyValidation = [
-  body('sector')
-    .notEmpty()
-    .withMessage('Sector is required')
-    .isLength({ max: 100 })
-    .withMessage('Sector must not exceed 100 characters'),
-  
   body('familyHead')
     .notEmpty()
     .withMessage('Family head name is required')
@@ -220,22 +214,13 @@ export const paginationValidation = [
   
   query('sort_by')
     .optional()
-    .isIn(['createdAt', 'updatedAt', 'familyHead', 'sector', 'progress'])
+    .isIn(['createdAt', 'updatedAt', 'familyHead', 'progress'])
     .withMessage('Invalid sort field'),
   
   query('sort_order')
     .optional()
     .isIn(['ASC', 'DESC'])
     .withMessage('Sort order must be ASC or DESC')
-];
-
-// Sector name validation
-export const sectorNameValidation = [
-  param('sectorName')
-    .notEmpty()
-    .withMessage('Sector name is required')
-    .isLength({ max: 255 })
-    .withMessage('Sector name must not exceed 255 characters')
 ];
 
 // Auto-save validation
@@ -319,10 +304,5 @@ export const completeFamilyMemberValidation = [
 
 // Survey statistics validation
 export const statisticsValidation = [
-  query('sector')
-    .optional()
-    .isString()
-    .withMessage('Sector must be a string')
-    .isLength({ max: 255 })
-    .withMessage('Sector name must not exceed 255 characters')
+  // No specific validations needed for statistics endpoint
 ];

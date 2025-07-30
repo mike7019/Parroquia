@@ -1,4 +1,4 @@
-import { Survey, FamilyMember, Family, Sector, User } from '../models/index.js';
+import { Survey, FamilyMember, Family, User } from '../models/index.js';
 import { v4 as uuidv4 } from 'uuid';
 import { Op } from 'sequelize';
 
@@ -328,9 +328,6 @@ class SurveyService {
         });
       }
 
-      // Update sector statistics
-      await this.updateSectorStatistics(survey.sector);
-
       // Log completion
       await this.logSurveyChange(surveyId, userId, 'complete', null, null, {
         completedAt: new Date(),
@@ -399,100 +396,6 @@ class SurveyService {
       };
     } catch (error) {
       throw new Error(`Error fetching user surveys: ${error.message}`);
-    }
-  }
-
-  /**
-   * Get surveys by sector for coordinators
-   */
-  async getSurveysBySector(sectorName, options = {}) {
-    try {
-      const {
-        page = 1,
-        limit = 10,
-        status = null,
-        sortBy = 'createdAt',
-        sortOrder = 'DESC'
-      } = options;
-
-      const where = { sector: sectorName };
-      
-      if (status) {
-        where.status = status;
-      }
-
-      const offset = (page - 1) * limit;
-
-      // Map sort fields to database columns if needed
-      const sortField = sortBy === 'createdAt' ? 'created_at' :
-                       sortBy === 'updatedAt' ? 'updated_at' : sortBy;
-
-      const result = await Survey.findAndCountAll({
-        where,
-        include: [
-          {
-            model: User,
-            as: 'surveyor',
-            attributes: ['id', 'firstName', 'lastName', 'email']
-          },
-          {
-            model: Family,
-            as: 'family',
-            required: false
-          }
-        ],
-        order: [[sortField, sortOrder]],
-        limit: parseInt(limit),
-        offset: parseInt(offset)
-      });
-
-      return {
-        surveys: result.rows,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(result.count / limit),
-          totalCount: result.count,
-          hasNext: page * limit < result.count,
-          hasPrev: page > 1
-        }
-      };
-    } catch (error) {
-      throw new Error(`Error fetching sector surveys: ${error.message}`);
-    }
-  }
-
-  /**
-   * Update sector statistics
-   */
-  async updateSectorStatistics(sectorName) {
-    try {
-      const sector = await Sector.findOne({ where: { name: sectorName } });
-      if (!sector) {
-        return; // Skip if sector doesn't exist
-      }
-
-      const totalSurveys = await Survey.count({
-        where: { sector: sectorName }
-      });
-
-      const completedSurveys = await Survey.count({
-        where: { 
-          sector: sectorName,
-          status: 'completed'
-        }
-      });
-
-      const pendingSurveys = totalSurveys - completedSurveys;
-
-      await sector.update({
-        completed: completedSurveys,
-        pending: pendingSurveys,
-        lastUpdate: new Date()
-      });
-
-      return sector;
-    } catch (error) {
-      console.error('Error updating sector statistics:', error);
     }
   }
 
