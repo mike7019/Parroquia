@@ -24,7 +24,7 @@ const createAdminUser = async () => {
 
     // Verificar si ya existe un usuario admin
     const [existingAdmin] = await sequelize.query(
-      'SELECT * FROM usuarios WHERE correo_electronico = ?',
+      'SELECT * FROM users WHERE email = ?',
       {
         replacements: [adminData.correo_electronico],
         type: sequelize.QueryTypes.SELECT
