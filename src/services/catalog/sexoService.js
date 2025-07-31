@@ -9,7 +9,7 @@ class SexoService {
   async createSexo(sexoData) {
     try {
       const sexo = await Sexo.create({
-        sexo: sexoData.sexo
+        descripcion: sexoData.sexo
       });
 
       return sexo;
@@ -24,8 +24,8 @@ class SexoService {
   async findOrCreateSexo(sexoData) {
     try {
       const [sexo, created] = await Sexo.findOrCreate({
-        where: { sexo: sexoData.sexo },
-        defaults: { sexo: sexoData.sexo }
+        where: { descripcion: sexoData.sexo },
+        defaults: { descripcion: sexoData.sexo }
       });
 
       return { sexo, created };

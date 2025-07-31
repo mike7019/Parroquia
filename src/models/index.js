@@ -1,5 +1,7 @@
 import sequelize from '../../config/sequelize.js';
 import User from './User.js';
+import Role from './Role.js';
+import UsuarioRole from './UsuarioRole.js';
 // Temporarily disabled English models to use Spanish tables only
 // import Survey from './Survey.js';
 // import Family from './Family.js';
@@ -184,9 +186,26 @@ export default {
   Familias
 };
 
+// Define associations between User and Role
+User.belongsToMany(Role, {
+  through: UsuarioRole,
+  foreignKey: 'id_usuarios',
+  otherKey: 'id_roles',
+  as: 'roles'
+});
+
+Role.belongsToMany(User, {
+  through: UsuarioRole,
+  foreignKey: 'id_roles',
+  otherKey: 'id_usuarios',
+  as: 'usuarios'
+});
+
 export {
   sequelize,
   User,
+  Role,
+  UsuarioRole,
   // Temporarily disabled English models
   // Survey,
   // Family,

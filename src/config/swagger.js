@@ -48,110 +48,151 @@ const swaggerConfig = {
           type: 'object',
           properties: {
             id: {
-              type: 'integer',
-              description: 'ID único del usuario',
-              example: 1
+              type: 'string',
+              format: 'uuid',
+              description: 'ID único del usuario (UUID)',
+              example: '2acc2c01-91d8-4d3a-a184-f002304620ec'
             },
-            firstName: {
+            correo_electronico: {
+              type: 'string',
+              format: 'email',
+              description: 'Correo electrónico del usuario',
+              example: 'usuario@example.com'
+            },
+            primer_nombre: {
               type: 'string',
               description: 'Primer nombre del usuario',
               example: 'Juan'
             },
-            lastName: {
+            segundo_nombre: {
               type: 'string',
-              description: 'Apellido del usuario',
+              nullable: true,
+              description: 'Segundo nombre del usuario (opcional)',
+              example: 'Carlos'
+            },
+            primer_apellido: {
+              type: 'string',
+              description: 'Primer apellido del usuario',
               example: 'Pérez'
             },
-            email: {
+            segundo_apellido: {
               type: 'string',
-              format: 'email',
-              description: 'Correo electrónico único',
-              example: 'juan.perez@yopmail.com'
+              nullable: true,
+              description: 'Segundo apellido del usuario (opcional)',
+              example: 'García'
             },
-            phone: {
-              type: 'string',
-              description: 'Número de teléfono del usuario',
-              example: '+57 300 123 4567'
-            },
-            role: {
-              type: 'string',
-              enum: ['admin', 'coordinator', 'surveyor'],
-              description: 'Rol del usuario en el sistema',
-              example: 'surveyor'
-            },
-            isActive: {
+            activo: {
               type: 'boolean',
               description: 'Estado activo del usuario',
               example: true
             },
-            emailVerified: {
+            email_verificado: {
               type: 'boolean',
               description: 'Si el email ha sido verificado',
               example: true
             },
-            lastLoginAt: {
+            fecha_verificacion_email: {
               type: 'string',
               format: 'date-time',
-              description: 'Fecha y hora del último login',
-              example: '2025-07-16T10:30:00.000Z'
+              nullable: true,
+              description: 'Fecha de verificación del email',
+              example: '2025-07-31T10:30:00.000Z'
             },
-            createdAt: {
+            expira_token_reset: {
               type: 'string',
               format: 'date-time',
-              description: 'Fecha de creación',
-              example: '2025-07-16T08:00:00.000Z'
+              nullable: true,
+              description: 'Fecha de expiración del token de reset',
+              example: '2025-07-31T12:30:00.000Z'
             },
-            updatedAt: {
+            roles: {
+              type: 'array',
+              items: {
+                type: 'string'
+              },
+              description: 'Lista de roles asignados al usuario',
+              example: ['Administrador']
+            }
+          }
+        },
+        Role: {
+          type: 'object',
+          properties: {
+            id: {
               type: 'string',
-              format: 'date-time',
-              description: 'Fecha de última actualización',
-              example: '2025-07-16T10:30:00.000Z'
+              format: 'uuid',
+              description: 'ID único del rol',
+              example: '00000000-0000-0000-0000-000000000001'
+            },
+            nombre: {
+              type: 'string',
+              enum: ['Administrador', 'Encuestador'],
+              description: 'Nombre del rol',
+              example: 'Encuestador'
+            },
+            descripcion: {
+              type: 'string',
+              description: 'Descripción del rol y sus permisos',
+              example: 'Usuario con permisos para realizar encuestas'
             }
           }
         },
         UserInput: {
           type: 'object',
-          required: ['firstName', 'lastName', 'email', 'password'],
+          required: ['primer_nombre', 'primer_apellido', 'correo_electronico', 'contrasena', 'rol'],
           properties: {
-            firstName: {
+            primer_nombre: {
               type: 'string',
               minLength: 2,
               maxLength: 50,
               description: 'Primer nombre del usuario',
               example: 'Diego'
             },
-            lastName: {
+            segundo_nombre: {
               type: 'string',
               minLength: 2,
               maxLength: 50,
-              description: 'Apellido del usuario',
+              description: 'Segundo nombre del usuario (opcional)',
+              example: 'Carlos'
+            },
+            primer_apellido: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 50,
+              description: 'Primer apellido del usuario',
               example: 'Garcia'
             },
-            email: {
+            segundo_apellido: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 50,
+              description: 'Segundo apellido del usuario (opcional)',
+              example: 'López'
+            },
+            correo_electronico: {
               type: 'string',
               format: 'email',
               description: 'Correo electrónico único',
               example: 'diego.garcia5105@yopmail.com'
             },
-            password: {
+            contrasena: {
               type: 'string',
               minLength: 8,
               description: 'Contraseña (mínimo 8 caracteres, debe incluir mayúsculas, minúsculas, números y símbolos)',
               example: 'MiPassword123!'
             },
-            phone: {
+            telefono: {
               type: 'string',
               minLength: 10,
               maxLength: 20,
               description: 'Número de teléfono del usuario',
               example: '+57 300 123 4567'
             },
-            role: {
+            rol: {
               type: 'string',
-              enum: ['admin', 'coordinator', 'surveyor'],
-              default: 'surveyor',
-              description: 'Rol del usuario',
-              example: 'surveyor'
+              enum: ['Administrador', 'Encuestador'],
+              description: 'Rol del usuario en el sistema',
+              example: 'Encuestador'
             }
           }
         },
@@ -200,15 +241,15 @@ const swaggerConfig = {
         },
         LoginInput: {
           type: 'object',
-          required: ['email', 'password'],
+          required: ['correo_electronico', 'contrasena'],
           properties: {
-            email: {
+            correo_electronico: {
               type: 'string',
               format: 'email',
               description: 'Correo electrónico',
               example: 'ana.herrera8687@yopmail.com'
             },
-            password: {
+            contrasena: {
               type: 'string',
               description: 'Contraseña',
               example: 'Segura456@'
@@ -907,10 +948,10 @@ const swaggerConfig = {
               description: 'ID único del sexo',
               example: 1
             },
-            sexo: {
+            descripcion: {
               type: 'string',
-              maxLength: 50,
-              description: 'Designación de sexo/género',
+              maxLength: 255,
+              description: 'Descripción del tipo de sexo',
               example: 'Masculino'
             },
             createdAt: {
@@ -983,6 +1024,83 @@ const swaggerConfig = {
               type: 'array',
               items: {
                 $ref: '#/components/schemas/Municipio'
+              }
+            },
+            pagination: {
+              $ref: '#/components/schemas/Pagination'
+            }
+          }
+        },
+        Departamento: {
+          type: 'object',
+          properties: {
+            id_departamento: {
+              type: 'integer',
+              description: 'ID único del departamento',
+              example: 1
+            },
+            nombre: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Nombre del departamento',
+              example: 'Antioquia'
+            },
+            codigo_dane: {
+              type: 'string',
+              maxLength: 2,
+              description: 'Código DANE del departamento (2 dígitos)',
+              example: '05'
+            },
+            region: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Región geográfica del departamento',
+              example: 'Región Andina'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización'
+            }
+          },
+          required: ['nombre', 'codigo_dane']
+        },
+        DepartamentoInput: {
+          type: 'object',
+          properties: {
+            nombre: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Nombre del departamento',
+              example: 'Antioquia'
+            },
+            codigo_dane: {
+              type: 'string',
+              maxLength: 2,
+              description: 'Código DANE del departamento (2 dígitos)',
+              example: '05'
+            },
+            region: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Región geográfica del departamento',
+              example: 'Región Andina'
+            }
+          },
+          required: ['nombre', 'codigo_dane']
+        },
+        DepartamentosListResponse: {
+          type: 'object',
+          properties: {
+            departamentos: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/Departamento'
               }
             },
             pagination: {

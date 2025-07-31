@@ -3,7 +3,7 @@ import parroquiaRoutes from './parroquiaRoutes.js';
 import veredaRoutes from './veredaRoutes.js';
 import sexoRoutes from './sexoRoutes.js';
 import municipioRoutes from './municipioRoutes.js';
-// import departamentoRoutes from './departamentoRoutes.js'; // CRUD no necesario
+import departamentoRoutes from './departamentoRoutes.js';
 import sectorRoutes from './sectorRoutes.js';
 import tipoIdentificacionRoutes from './tipoIdentificacionRoutes.js';
 
@@ -60,7 +60,7 @@ router.use('/parroquias', parroquiaRoutes);
 router.use('/veredas', veredaRoutes);
 router.use('/sexos', sexoRoutes);
 router.use('/municipios', municipioRoutes);
-// router.use('/departamentos', departamentoRoutes); // CRUD no necesario
+router.use('/departamentos', departamentoRoutes);
 router.use('/sectors', sectorRoutes);
 router.use('/tipos-identificacion', tipoIdentificacionRoutes);
 
@@ -73,6 +73,7 @@ router.get('/health', (req, res) => {
     services: {
       parroquias: 'active',
       municipios: 'active',
+      departamentos: 'active',
       veredas: 'active',
       sexos: 'active',
       sectors: 'active',

@@ -8,76 +8,77 @@ const authValidators = {
    * Validation for user registration
    */
   validateRegister: [
-    body('email')
+    body('correo_electronico')
       .isEmail()
-      .withMessage('Please provide a valid email address')
+      .withMessage('Por favor proporciona una dirección de correo electrónico válida')
       .normalizeEmail()
       .isLength({ max: 100 })
-      .withMessage('Email must not exceed 100 characters'),
+      .withMessage('El correo electrónico no debe exceder 100 caracteres'),
     
-    body('password')
+    body('contrasena')
       .isLength({ min: 8, max: 100 })
-      .withMessage('Password must be between 8 and 100 characters')
+      .withMessage('La contraseña debe tener entre 8 y 100 caracteres')
       .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
-      .withMessage('Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character'),
+      .withMessage('La contraseña debe contener al menos una letra minúscula, una mayúscula, un número y un carácter especial'),
     
-    body('firstName')
+    body('primer_nombre')
       .trim()
       .isLength({ min: 2, max: 50 })
-      .withMessage('First name must be between 2 and 50 characters')
+      .withMessage('El primer nombre debe tener entre 2 y 50 caracteres')
       .matches(/^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/)
-      .withMessage('First name can only contain letters and spaces'),
+      .withMessage('El primer nombre solo puede contener letras y espacios'),
     
-    body('secondName')
+    body('segundo_nombre')
       .optional()
       .trim()
       .isLength({ min: 2, max: 50 })
-      .withMessage('Second name must be between 2 and 50 characters')
+      .withMessage('El segundo nombre debe tener entre 2 y 50 caracteres')
       .matches(/^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/)
-      .withMessage('Second name can only contain letters and spaces'),
+      .withMessage('El segundo nombre solo puede contener letras y espacios'),
     
-    body('lastName')
+    body('primer_apellido')
       .trim()
       .isLength({ min: 2, max: 50 })
-      .withMessage('Last name must be between 2 and 50 characters')
+      .withMessage('El primer apellido debe tener entre 2 y 50 caracteres')
       .matches(/^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/)
-      .withMessage('Last name can only contain letters and spaces'),
+      .withMessage('El primer apellido solo puede contener letras y espacios'),
     
-    body('secondLastName')
+    body('segundo_apellido')
       .optional()
       .trim()
       .isLength({ min: 2, max: 50 })
-      .withMessage('Second last name must be between 2 and 50 characters')
+      .withMessage('El segundo apellido debe tener entre 2 y 50 caracteres')
       .matches(/^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/)
-      .withMessage('Second last name can only contain letters and spaces'),
+      .withMessage('El segundo apellido solo puede contener letras y espacios'),
     
-    body('phone')
+    body('telefono')
       .optional()
       .isLength({ min: 10, max: 20 })
-      .withMessage('Phone must be between 10 and 20 characters')
+      .withMessage('El teléfono debe tener entre 10 y 20 caracteres')
       .matches(/^[\+]?[0-9\s\-\(\)]+$/)
-      .withMessage('Phone must contain only numbers, spaces, hyphens, parentheses, and optional plus sign'),
+      .withMessage('El teléfono debe contener solo números, espacios, guiones, paréntesis y signo más opcional'),
     
-    body('role')
-      .optional()
-      .isIn(['admin', 'coordinator', 'surveyor'])
-      .withMessage('Role must be one of: admin, coordinator, surveyor')
+    body('rol')
+      .notEmpty()
+      .withMessage('El rol es requerido')
+      .isIn(['Administrador', 'Encuestador'])
+      .withMessage('El rol debe ser uno de: Administrador, Encuestador')
   ],
 
   /**
    * Validation for user login
    */
   validateLogin: [
-    body('email')
+    body('correo_electronico')
       .isEmail()
-      .withMessage('Please provide a valid email address')
+      .withMessage('Por favor proporciona una dirección de correo electrónico válida')
       .normalizeEmail(),
     
-    body('password')
+    body('contrasena')
       .notEmpty()
-      .withMessage('Password is required')
+      .withMessage('La contraseña es requerida')
       .isLength({ min: 1, max: 100 })
-      .withMessage('Password must not exceed 100 characters')
+      .withMessage('La contraseña no debe exceder 100 caracteres')
   ],
 
   /**

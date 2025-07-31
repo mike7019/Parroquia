@@ -22,12 +22,14 @@ const router = express.Router();
  *           schema:
  *             $ref: '#/components/schemas/UserInput'
  *           example:
- *             firstName: "Diego"
- *             lastName: "Garcia"
- *             email: "diego.garcia5105@yopmail.com"
- *             password: "Fuerte789&"
- *             phone: "+57 300 456 7890"
- *             role: "surveyor"
+ *             primer_nombre: "Diego"
+ *             segundo_nombre: "Carlos"
+ *             primer_apellido: "Garcia"
+ *             segundo_apellido: "López"
+ *             correo_electronico: "diego.garcia5105@yopmail.com"
+ *             contrasena: "Fuerte789&"
+ *             telefono: "+57 300 456 7890"
+ *             rol: "Encuestador"
  *     responses:
  *       201:
  *         description: Usuario registrado exitosamente
@@ -51,13 +53,15 @@ const router = express.Router();
  *               message: "Usuario registrado exitosamente. Revisa tu email para verificar tu cuenta."
  *               data:
  *                 user:
- *                   id: 1
- *                   firstName: "Carlos"
- *                   lastName: "Martínez"
- *                   email: "carlos.martínez1024@yopmail.com"
- *                   role: "surveyor"
- *                   isActive: true
- *                   emailVerified: false
+ *                   id: "2acc2c01-91d8-4d3a-a184-f002304620ec"
+ *                   correo_electronico: "carlos.martinez1024@yopmail.com"
+ *                   primer_nombre: "Carlos"
+ *                   segundo_nombre: "Alberto"
+ *                   primer_apellido: "Martínez"
+ *                   segundo_apellido: "Silva"
+ *                   activo: true
+ *                   email_verificado: false
+ *                   roles: ["Encuestador"]
  *                 emailSent: true
  *       400:
  *         $ref: '#/components/responses/ValidationError'
@@ -94,8 +98,8 @@ router.post('/register',
  *           schema:
  *             $ref: '#/components/schemas/LoginInput'
  *           example:
- *             email: "sofía.rodríguez6931@yopmail.com"
- *             password: "Fuerte789&"
+ *             correo_electronico: "admin@parroquia.com"
+ *             contrasena: "admin123"
  *     responses:
  *       200:
  *         description: Login exitoso
@@ -114,13 +118,16 @@ router.post('/register',
  *               data:
  *                 accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  *                 refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
- *                 expiresIn: 900
  *                 user:
- *                   id: 1
- *                   firstName: "Sofía"
- *                   lastName: "Rodríguez"
- *                   email: "sofía.rodríguez6931@yopmail.com"
- *                   role: "surveyor"
+ *                   id: "2f21d967-0ed6-4357-8876-c648550b3908"
+ *                   correo_electronico: "admin@parroquia.com"
+ *                   primer_nombre: "Admin"
+ *                   segundo_nombre: null
+ *                   primer_apellido: "Sistema"
+ *                   segundo_apellido: null
+ *                   activo: true
+ *                   email_verificado: false
+ *                   roles: ["Administrador"]
  *       400:
  *         $ref: '#/components/responses/ValidationError'
  *       401:

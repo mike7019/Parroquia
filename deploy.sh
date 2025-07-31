@@ -81,17 +81,58 @@ sleep 10
 
 # Ejecutar migraciones de base de datos
 log "Ejecutando migraciones de base de datos..."
-docker-compose exec api npm run db:migrate
+docker-compose exec -T api npm run db:migrate
 
-# Cargar datos de catálogo
-log "Cargando datos de catálogo..."
-docker-compose exec api npm run db:load-catalogs
+# Verificar que las migraciones fueron exitosas
+log "Verificando estado de las migraciones..."
+if docker-compose exec -T api npx sequelize-cli db:migrate:status; then
+    log "✅ Migraciones verificadas exitosamente"
+else
+    error "❌ Error verificando migraciones"
+    exit 1
+fi
+
+# Verificar estructura de base de datos crítica
+log "Verificando estructura de base de datos..."
+docker-compose exec -T postgres psql -U parroquia_user -d parroquia_db -c "
+SELECT 
+    'Tabla: ' || table_name || ' - Columnas: ' || count(*) as tabla_info
+FROM information_schema.columns 
+WHERE table_schema = 'public' 
+AND table_name IN ('sexo', 'sector', 'parroquia', 'municipios', 'departamentos', 'usuarios')
+GROUP BY table_name
+ORDER BY table_name;" || {
+    warn "⚠️  No se pudo verificar estructura completa de BD"
+}
+
+# Verificar secuencias auto-increment
+log "Verificando secuencias auto-increment..."
+docker-compose exec -T postgres psql -U parroquia_user -d parroquia_db -c "
+SELECT sequence_name, last_value FROM information_schema.sequences 
+WHERE sequence_name LIKE '%_seq' AND sequence_schema = 'public';" || {
+    warn "⚠️  No se pudo verificar secuencias"
+}
+
+# Cargar datos de catálogo básicos
+log "Cargando datos de catálogo básicos..."
+docker-compose exec -T api npm run db:load-catalogs
 
 # Crear usuario administrador
 log "¿Deseas crear un usuario administrador? (y/N)"
 read -r create_admin
 if [[ $create_admin =~ ^[Yy]$ ]]; then
-    docker-compose exec api npm run admin:create
+    log "Creando usuario administrador..."
+    docker-compose exec -T api npm run admin:create
+fi
+
+# Verificar que la API responde
+log "Verificando que la API está respondiendo..."
+sleep 10
+if curl -f http://localhost:3000/api/health > /dev/null 2>&1; then
+    log "✅ API respondiendo correctamente"
+else
+    warn "⚠️ API no responde en el endpoint de health. Verificando logs..."
+    docker-compose logs api --tail=20
 fi
 
 # Mostrar logs en tiempo real (opcional)
@@ -108,16 +149,18 @@ log "✅ Despliegue completado exitosamente!"
 echo ""
 
 # URLs importantes
-echo -e "${BLUE}🌐 API URL: http://206.62.139.11:3000/api${NC}"
-echo -e "${BLUE}📚 Documentación: http://206.62.139.11:3000/api-docs${NC}"
-echo -e "${BLUE}💚 Health Check: http://206.62.139.11:3000/api/health${NC}"
+echo -e "${BLUE}🌐 API URL: http://$(hostname -I | cut -d' ' -f1):3000/api${NC}"
+echo -e "${BLUE}📚 Documentación: http://$(hostname -I | cut -d' ' -f1):3000/api-docs${NC}"
+echo -e "${BLUE}💚 Health Check: http://$(hostname -I | cut -d' ' -f1):3000/api/health${NC}"
 echo ""
 
 # Comandos útiles para administración
 echo -e "${YELLOW}📝 Comandos útiles:${NC}"
 echo "  • Ver logs: docker-compose logs -f"
+echo "  • Ver logs específicos: docker-compose logs -f api"
 echo "  • Migrar base de datos: docker-compose exec api npm run db:migrate"
 echo "  • Cargar catálogos: docker-compose exec api npm run db:load-catalogs"
+echo "  • Crear admin: docker-compose exec api npm run admin:create"
 echo "  • Reiniciar: docker-compose restart"
 echo "  • Detener: docker-compose down"
 echo "  • Ver estado: docker-compose ps"

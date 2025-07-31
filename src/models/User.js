@@ -61,47 +61,73 @@ const User = sequelize.define('User', {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
     field: 'activo'
+  },
+  token_verificacion_email: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    field: 'token_verificacion_email'
+  },
+  email_verificado: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+    field: 'email_verificado'
+  },
+  fecha_verificacion_email: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'fecha_verificacion_email'
+  },
+  token_reset_password: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    field: 'token_reset_password'
+  },
+  expira_token_reset: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'expira_token_reset'
   }
 }, {
   tableName: 'usuarios',
-  timestamps: false, // La nueva tabla no tiene campos createdAt/updatedAt
-  
-  // Define virtual getters for compatibility with existing code
-  getterMethods: {
-    email() {
-      return this.correo_electronico;
-    },
-    password() {
-      return this.contrasena;
-    },
-    firstName() {
-      return this.primer_nombre;
-    },
-    secondName() {
-      return this.segundo_nombre;
-    },
-    lastName() {
-      return this.primer_apellido;
-    },
-    secondLastName() {
-      return this.segundo_apellido;
-    },
-    fullName() {
-      const nombres = [this.primer_nombre, this.segundo_nombre].filter(Boolean).join(' ');
-      const apellidos = [this.primer_apellido, this.segundo_apellido].filter(Boolean).join(' ');
-      return `${nombres} ${apellidos}`.trim();
-    },
-    isActive() {
-      return this.activo;
-    },
-    role() {
-      return 'surveyor'; // Default role for compatibility
-    },
-    status() {
-      return this.activo ? 'active' : 'inactive';
-    }
-  }
+  timestamps: false
 });
+
+// Define instance methods
+User.prototype.checkPassword = async function(password) {
+  return await bcrypt.compare(password, this.contrasena);
+};
+
+User.prototype.setPassword = async function(password) {
+  this.contrasena = await bcrypt.hash(password, 10);
+};
+
+User.prototype.getUserRoles = async function() {
+  const roles = await this.getRoles();
+  return roles.map(role => role.nombre);
+};
+
+User.prototype.hasRole = async function(roleName) {
+  const roles = await this.getRoles();
+  return roles.some(role => role.nombre === roleName);
+};
+
+// Custom toJSON method - only Spanish fields
+User.prototype.toJSON = function() {
+  const values = { ...this.dataValues };
+  
+  // Remove sensitive fields
+  delete values.contrasena;
+  delete values.token_verificacion_email;
+  delete values.token_reset_password;
+  
+  // If roles are included, convert them to simple array of role names
+  if (values.roles && Array.isArray(values.roles)) {
+    values.roles = values.roles.map(role => role.nombre || role);
+  }
+  
+  return values;
+};
 
 // Hash password before creating user
 User.beforeCreate(async (user) => {
@@ -116,32 +142,5 @@ User.beforeUpdate(async (user) => {
     user.contrasena = await bcrypt.hash(user.contrasena, 10);
   }
 });
-
-// Define instance methods
-User.prototype.checkPassword = async function(password) {
-  return await bcrypt.compare(password, this.contrasena);
-};
-
-User.prototype.setPassword = async function(password) {
-  this.contrasena = await bcrypt.hash(password, 10);
-};
-
-// Override toJSON to hide password and add compatibility fields
-User.prototype.toJSON = function() {
-  const values = { ...this.get() };
-  delete values.contrasena;
-  
-  // Add virtual properties for compatibility
-  values.email = this.correo_electronico;
-  values.firstName = this.primer_nombre;
-  values.secondName = this.segundo_nombre;
-  values.lastName = this.primer_apellido;
-  values.secondLastName = this.segundo_apellido;
-  values.isActive = this.activo;
-  values.role = 'surveyor';
-  values.status = this.activo ? 'active' : 'inactive';
-  
-  return values;
-};
 
 export default User;

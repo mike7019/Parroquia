@@ -9,22 +9,36 @@ class AuthController {
    */
   async registerUser(req, res, next) {
     try {
-      const { email, password, firstName, secondName, lastName, secondLastName, role, phone } = req.body;
+      const { 
+        correo_electronico, 
+        contrasena, 
+        primer_nombre, 
+        segundo_nombre, 
+        primer_apellido, 
+        segundo_apellido, 
+        telefono,
+        rol 
+      } = req.body;
       
       const result = await authService.registerUser({
-        email,
-        password,
-        firstName,
-        secondName,
-        lastName,
-        secondLastName,
-        role,
-        phone
+        correo_electronico,
+        contrasena,
+        primer_nombre,
+        segundo_nombre,
+        primer_apellido,
+        segundo_apellido,
+        telefono,
+        rol
       });
 
       res.status(201).json({
         status: 'success',
-        message: 'Usuario registrado exitosamente. Por favor revisa tu email para verificar tu cuenta.'
+        message: 'Usuario registrado exitosamente. Por favor revisa tu email para verificar tu cuenta.',
+        data: {
+          user: result.user,
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken
+        }
       });
     } catch (error) {
       next(error);
@@ -36,13 +50,13 @@ class AuthController {
    */
   async loginUser(req, res, next) {
     try {
-      const { email, password } = req.body;
+      const { correo_electronico, contrasena } = req.body;
       
-      const result = await authService.loginUser(email, password);
+      const result = await authService.loginUser(correo_electronico, contrasena);
 
       res.status(200).json({
         status: 'success',
-        message: 'Login successful',
+        message: 'Login exitoso',
         data: {
           user: result.user,
           accessToken: result.accessToken,

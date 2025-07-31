@@ -16,7 +16,7 @@ const Sector = sequelize.define('Sector', {
   sequelize,
   modelName: 'Sector',
   tableName: 'sector',
-  timestamps: false
+  timestamps: true
 });
 
 export default Sector;

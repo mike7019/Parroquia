@@ -17,7 +17,7 @@ const Sexo = sequelize.define('Sexo', {
   sequelize,
   modelName: 'Sexo',
   tableName: 'sexo',
-  timestamps: false
+  timestamps: true
 });
 
 export default Sexo;

@@ -23,12 +23,15 @@
     "db:migrate": "npx sequelize-cli db:migrate",
     "db:migrate:undo": "npx sequelize-cli db:migrate:undo",
     "db:migrate:undo:all": "npx sequelize-cli db:migrate:undo:all",
+    "db:migrate:status": "npx sequelize-cli db:migrate:status",
     "db:seed": "npx sequelize-cli db:seed:all",
     "db:create": "npx sequelize-cli db:create",
     "db:drop": "npx sequelize-cli db:drop",
     "db:load-catalogs": "node loadCatalogData.js",
     "db:fix": "node scripts/fix-database.js",
-    "db:setup": "npm run db:fix && npm start"
+    "db:setup": "npm run db:fix && npm start",
+    "deploy:check": "bash pre-deploy.sh",
+    "deploy:prod": "bash deploy.sh"
   },
   "keywords": [
     "node",
@@ -40,6 +43,7 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
     "chart.js": "^4.5.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

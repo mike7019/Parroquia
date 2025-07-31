@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import { Op } from 'sequelize';
 import sequelize from '../../config/sequelize.js';
-import User from '../models/User.js';
+import { User, Role } from '../models/index.js';
 import emailService from './emailService.js';
 import { 
   AuthenticationError, 
@@ -23,14 +23,23 @@ class AuthService {
    * @returns {Promise<Object>} User and token data
    */
   async registerUser(userData) {
-    const { email, password, firstName, secondName, lastName, secondLastName, role = 'surveyor', phone } = userData;
+    const { 
+      correo_electronico, 
+      contrasena, 
+      primer_nombre, 
+      segundo_nombre, 
+      primer_apellido, 
+      segundo_apellido, 
+      telefono,
+      rol 
+    } = userData;
     
     const transaction = await sequelize.transaction();
     
     try {
       // Check if user already exists
       const existingUser = await User.findOne({ 
-        where: { correo_electronico: email.toLowerCase().trim() } 
+        where: { correo_electronico: correo_electronico.toLowerCase().trim() } 
       });
       
       if (existingUser) {
@@ -42,24 +51,33 @@ class AuthService {
 
       // Create user with transaction - password will be hashed automatically by model hook
       const user = await User.create({
-        correo_electronico: email.toLowerCase().trim(),
-        contrasena: password, // Will be hashed by beforeCreate hook
-        primer_nombre: firstName,
-        segundo_nombre: secondName || null,
-        primer_apellido: lastName,
-        segundo_apellido: secondLastName || null,
-        telefono: phone || null,
+        correo_electronico: correo_electronico.toLowerCase().trim(),
+        contrasena: contrasena, // Will be hashed by beforeCreate hook
+        primer_nombre: primer_nombre,
+        segundo_nombre: segundo_nombre || null,
+        primer_apellido: primer_apellido,
+        segundo_apellido: segundo_apellido || null,
+        telefono: telefono || null,
         activo: true,
         email_verificado: false,
         token_verificacion_email: emailVerificationToken
       }, { transaction });
 
+      // Assign the specified role to the new user
+      const userRole = await Role.findOne({ where: { nombre: rol || 'Encuestador' } });
+      if (userRole) {
+        await sequelize.query(
+          'INSERT INTO usuarios_roles (id_usuarios, id_roles, "createdAt", "updatedAt") VALUES ($1, $2, NOW(), NOW())',
+          {
+            bind: [user.id, userRole.id],
+            transaction
+          }
+        );
+      }
+
       // Generate tokens
       const accessToken = this.generateAccessToken(user.id);
       const refreshToken = this.generateRefreshToken(user.id);
-
-      // Save refresh token
-      await user.update({ refresh_token: refreshToken }, { transaction });
 
       // Commit transaction before attempting to send email
       await transaction.commit();
@@ -67,8 +85,12 @@ class AuthService {
       // Send verification email (outside transaction to avoid rollback on email failure)
       try {
         const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${emailVerificationToken}`;
-        console.log('🚀 Attempting to send verification email to:', user.email);
-        const emailResult = await emailService.sendEmailVerificationEmail(user.email, `${user.firstName} ${user.lastName}`, verificationUrl);
+        console.log('🚀 Attempting to send verification email to:', user.correo_electronico);
+        const emailResult = await emailService.sendEmailVerificationEmail(
+          user.correo_electronico, 
+          `${user.primer_nombre} ${user.primer_apellido}`, 
+          verificationUrl
+        );
         console.log('✅ Email sent successfully:', emailResult);
       } catch (emailError) {
         console.warn('⚠️ Email service warning:', emailError.message);
@@ -76,26 +98,17 @@ class AuthService {
         // Don't throw - continue with successful registration
       }
 
-      // Return user data without password
-      const userResponse = {
-        id: user.id,
-        firstName: user.firstName,
-        secondName: user.secondName,
-        lastName: user.lastName,
-        secondLastName: user.secondLastName,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        status: user.status,
-        isActive: user.isActive,
-        emailVerified: user.emailVerified,
-        fullName: user.fullName,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt
-      };
+      // Get user with roles for response
+      const userWithRoles = await User.findByPk(user.id, {
+        include: [{
+          model: Role,
+          as: 'roles',
+          through: { attributes: [] }
+        }]
+      });
 
       return {
-        user: userResponse,
+        user: userWithRoles.toJSON(),
         accessToken,
         refreshToken
       };
@@ -119,8 +132,16 @@ class AuthService {
    * @returns {Promise<Object>} User and token data
    */
   async loginUser(email, password) {
-    // Find user
-    const user = await User.findOne({ where: { correo_electronico: email } });
+    // Find user with roles included
+    const user = await User.findOne({ 
+      where: { correo_electronico: email },
+      include: [{
+        model: Role,
+        as: 'roles',
+        through: { attributes: [] }
+      }]
+    });
+    
     if (!user) {
       throw new AuthenticationError('Invalid email or password');
     }
@@ -149,8 +170,8 @@ class AuthService {
     //   refresh_token: refreshToken
     // });
 
-    // Remove sensitive data from response
-    const userResponse = this.sanitizeUserData(user);
+    // Return user data with roles (toJSON will handle sanitization)
+    const userResponse = user.toJSON();
 
     return {
       user: userResponse,

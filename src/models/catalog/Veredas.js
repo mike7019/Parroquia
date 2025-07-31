@@ -32,7 +32,7 @@ const Veredas = sequelize.define('Veredas', {
   sequelize,
   modelName: 'Veredas',
   tableName: 'veredas',
-  timestamps: false
+  timestamps: true
 });
 
 export default Veredas;

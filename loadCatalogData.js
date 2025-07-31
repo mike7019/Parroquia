@@ -82,11 +82,11 @@ async function executeCatalogSeeder(queryInterface, Sequelize) {
     { id_estado_civil: 5, descripcion: 'Unión Libre' }
   ], { ignoreDuplicates: true });
 
-  // Insertar datos para sexo
+  // Insertar datos para sexo (corregir nombre de campo)
   await queryInterface.bulkInsert('sexo', [
-    { id_sexo: 1, sexo: 'Masculino' },
-    { id_sexo: 2, sexo: 'Femenino' },
-    { id_sexo: 3, sexo: 'Otro' }
+    { id_sexo: 1, descripcion: 'Masculino', createdAt: new Date(), updatedAt: new Date() },
+    { id_sexo: 2, descripcion: 'Femenino', createdAt: new Date(), updatedAt: new Date() },
+    { id_sexo: 3, descripcion: 'Otro', createdAt: new Date(), updatedAt: new Date() }
   ], { ignoreDuplicates: true });
 
   // Insertar datos para tipo_vivienda
@@ -98,11 +98,11 @@ async function executeCatalogSeeder(queryInterface, Sequelize) {
     { id_tipo_vivienda: 5, tipo_vivienda: 'Otro' }
   ], { ignoreDuplicates: true });
 
-  // Insertar datos para parroquia
+  // Insertar datos para parroquia (agregar timestamps)
   await queryInterface.bulkInsert('parroquia', [
-    { id_parroquia: 1, nombre: 'Parroquia San José' },
-    { id_parroquia: 2, nombre: 'Parroquia Nuestra Señora de Fátima' },
-    { id_parroquia: 3, nombre: 'Parroquia San Pedro' }
+    { id_parroquia: 1, nombre: 'Parroquia San José', createdAt: new Date(), updatedAt: new Date() },
+    { id_parroquia: 2, nombre: 'Parroquia Nuestra Señora de Fátima', createdAt: new Date(), updatedAt: new Date() },
+    { id_parroquia: 3, nombre: 'Parroquia San Pedro', createdAt: new Date(), updatedAt: new Date() }
   ], { ignoreDuplicates: true });
 
   // Insertar datos para parentesco
@@ -244,31 +244,58 @@ async function executeCatalogSeeder(queryInterface, Sequelize) {
     { id_enfermedades: 10, nombre: 'Otras - Otras enfermedades no especificadas' }
   ], { ignoreDuplicates: true });
 
-  // Insertar datos para municipios (ejemplo Colombia)
+  // Insertar datos para departamentos (añadir tabla que faltaba)
+  await queryInterface.bulkInsert('departamentos', [
+    { id_departamento: 1, codigo_dane: '05', nombre: 'Antioquia', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 2, codigo_dane: '08', nombre: 'Atlántico', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 3, codigo_dane: '11', nombre: 'Bogotá D.C.', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 4, codigo_dane: '13', nombre: 'Bolívar', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 5, codigo_dane: '15', nombre: 'Boyacá', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 6, codigo_dane: '17', nombre: 'Caldas', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 7, codigo_dane: '19', nombre: 'Cauca', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 8, codigo_dane: '20', nombre: 'Cesar', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 9, codigo_dane: '23', nombre: 'Córdoba', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 10, codigo_dane: '25', nombre: 'Cundinamarca', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 11, codigo_dane: '27', nombre: 'Chocó', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 12, codigo_dane: '41', nombre: 'Huila', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 13, codigo_dane: '44', nombre: 'La Guajira', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 14, codigo_dane: '47', nombre: 'Magdalena', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 15, codigo_dane: '50', nombre: 'Meta', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 16, codigo_dane: '52', nombre: 'Nariño', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 17, codigo_dane: '54', nombre: 'Norte de Santander', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 18, codigo_dane: '63', nombre: 'Quindío', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 19, codigo_dane: '66', nombre: 'Risaralda', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 20, codigo_dane: '68', nombre: 'Santander', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 21, codigo_dane: '70', nombre: 'Sucre', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 22, codigo_dane: '73', nombre: 'Tolima', createdAt: new Date(), updatedAt: new Date() },
+    { id_departamento: 23, codigo_dane: '76', nombre: 'Valle del Cauca', createdAt: new Date(), updatedAt: new Date() }
+  ], { ignoreDuplicates: true });
+
+  // Insertar datos para municipios (corregir nombre de campo y añadir relación con departamentos)
   await queryInterface.bulkInsert('municipios', [
-    { id_municipio: 1, nombre: 'Bogotá D.C.', codigo_dane: '11001', departamento: 'Cundinamarca' },
-    { id_municipio: 2, nombre: 'Medellín', codigo_dane: '05001', departamento: 'Antioquia' },
-    { id_municipio: 3, nombre: 'Cali', codigo_dane: '76001', departamento: 'Valle del Cauca' },
-    { id_municipio: 4, nombre: 'Barranquilla', codigo_dane: '08001', departamento: 'Atlántico' },
-    { id_municipio: 5, nombre: 'Cartagena', codigo_dane: '13001', departamento: 'Bolívar' }
+    { id_municipio: 1, nombre_municipio: 'Bogotá D.C.', codigo_dane: '11001', id_departamento: 3, createdAt: new Date(), updatedAt: new Date() },
+    { id_municipio: 2, nombre_municipio: 'Medellín', codigo_dane: '05001', id_departamento: 1, createdAt: new Date(), updatedAt: new Date() },
+    { id_municipio: 3, nombre_municipio: 'Cali', codigo_dane: '76001', id_departamento: 23, createdAt: new Date(), updatedAt: new Date() },
+    { id_municipio: 4, nombre_municipio: 'Barranquilla', codigo_dane: '08001', id_departamento: 2, createdAt: new Date(), updatedAt: new Date() },
+    { id_municipio: 5, nombre_municipio: 'Cartagena', codigo_dane: '13001', id_departamento: 4, createdAt: new Date(), updatedAt: new Date() }
   ], { ignoreDuplicates: true });
 
-  // Insertar datos para veredas
+  // Insertar datos para veredas (agregar timestamps)
   await queryInterface.bulkInsert('veredas', [
-    { id_vereda: 1, nombre: 'Centro', id_municipio: 1 },
-    { id_vereda: 2, nombre: 'Norte', id_municipio: 1 },
-    { id_vereda: 3, nombre: 'Sur', id_municipio: 1 },
-    { id_vereda: 4, nombre: 'Oriente', id_municipio: 1 },
-    { id_vereda: 5, nombre: 'Occidente', id_municipio: 1 }
+    { id_vereda: 1, nombre: 'Centro', createdAt: new Date(), updatedAt: new Date() },
+    { id_vereda: 2, nombre: 'Norte', createdAt: new Date(), updatedAt: new Date() },
+    { id_vereda: 3, nombre: 'Sur', createdAt: new Date(), updatedAt: new Date() },
+    { id_vereda: 4, nombre: 'Oriente', createdAt: new Date(), updatedAt: new Date() },
+    { id_vereda: 5, nombre: 'Occidente', createdAt: new Date(), updatedAt: new Date() }
   ], { ignoreDuplicates: true });
 
-  // Insertar datos para sector
+  // Insertar datos para sector (agregar timestamps y corregir estructura)
   await queryInterface.bulkInsert('sector', [
-    { id_sector: 1, nombre: 'Sector A', id_vereda: 1 },
-    { id_sector: 2, nombre: 'Sector B', id_vereda: 1 },
-    { id_sector: 3, nombre: 'Sector C', id_vereda: 2 },
-    { id_sector: 4, nombre: 'Sector D', id_vereda: 2 },
-    { id_sector: 5, nombre: 'Sector E', id_vereda: 3 }
+    { id_sector: 1, nombre: 'Sector A', createdAt: new Date(), updatedAt: new Date() },
+    { id_sector: 2, nombre: 'Sector B', createdAt: new Date(), updatedAt: new Date() },
+    { id_sector: 3, nombre: 'Sector C', createdAt: new Date(), updatedAt: new Date() },
+    { id_sector: 4, nombre: 'Sector D', createdAt: new Date(), updatedAt: new Date() },
+    { id_sector: 5, nombre: 'Sector E', createdAt: new Date(), updatedAt: new Date() }
   ], { ignoreDuplicates: true });
 
   // Insertar datos para celebraciones_personales

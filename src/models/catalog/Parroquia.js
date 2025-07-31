@@ -16,7 +16,7 @@ const Parroquia = sequelize.define('Parroquia', {
   sequelize,
   modelName: 'Parroquia',
   tableName: 'parroquia',
-  timestamps: false
+  timestamps: true
 });
 
 export default Parroquia;
