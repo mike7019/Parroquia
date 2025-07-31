@@ -15,11 +15,21 @@ class VeredaController {
         );
       }
 
-      const vereda = await veredaService.createVereda({
+      const result = await veredaService.findOrCreateVereda({
         nombre,
         codigo_vereda,
         id_municipio
       });
+
+      if (!result.created) {
+        return res.status(409).json(
+          createErrorResponse(
+            'Vereda ya existe con ese nombre o código',
+            null,
+            'DUPLICATE_ERROR'
+          )
+        );
+      }
 
       res.status(201).json(
         createSuccessResponse(

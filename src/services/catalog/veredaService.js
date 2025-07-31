@@ -4,6 +4,34 @@ import sequelize from '../../../config/sequelize.js';
 
 class VeredaService {
   /**
+   * Find or create a vereda (prevents duplicates)
+   */
+  async findOrCreateVereda(veredaData) {
+    try {
+      const [vereda, created] = await Veredas.findOrCreate({
+        where: {
+          [Op.or]: [
+            { nombre: veredaData.nombre },
+            { codigo_vereda: veredaData.codigo_vereda }
+          ]
+        },
+        defaults: {
+          nombre: veredaData.nombre,
+          codigo_vereda: veredaData.codigo_vereda,
+          id_municipio: veredaData.id_municipio
+        }
+      });
+
+      return {
+        vereda,
+        created
+      };
+    } catch (error) {
+      throw new Error(`Error finding or creating vereda: ${error.message}`);
+    }
+  }
+
+  /**
    * Create a new vereda
    */
   async createVereda(veredaData) {

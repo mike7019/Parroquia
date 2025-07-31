@@ -15,7 +15,14 @@ class SexoController {
         );
       }
 
-      const newSexo = await sexoService.createSexo({ sexo });
+      // Usar findOrCreate para evitar duplicados
+      const result = await sexoService.findOrCreateSexo({ sexo });
+      
+      if (!result.created) {
+        return res.status(409).json(
+          createErrorResponse('Sexo ya existe', null, 'DUPLICATE_ERROR')
+        );
+      }
 
       res.status(201).json(
         createSuccessResponse(

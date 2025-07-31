@@ -15,15 +15,14 @@ class SectorController {
         );
       }
 
-      // Check if sector already exists
-      const exists = await sectorService.sectorExistsByName(nombre);
-      if (exists) {
+      // Usar findOrCreate para evitar duplicados
+      const result = await sectorService.findOrCreateSector({ nombre });
+      
+      if (!result.created) {
         return res.status(409).json(
-          createErrorResponse('Sector with this name already exists', null, 'DUPLICATE_ERROR')
+          createErrorResponse('Sector con este nombre ya existe', null, 'DUPLICATE_ERROR')
         );
       }
-
-      const newSector = await sectorService.createSector({ nombre });
 
       res.status(201).json(
         createSuccessResponse(

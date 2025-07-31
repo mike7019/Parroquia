@@ -4,6 +4,30 @@ import sequelize from '../../../config/sequelize.js';
 
 class MunicipioService {
   /**
+   * Find or create a municipio (prevents duplicates)
+   */
+  async findOrCreateMunicipio(municipioData) {
+    try {
+      const [municipio, created] = await Municipios.findOrCreate({
+        where: {
+          [Op.or]: [
+            { nombre_municipio: municipioData.nombre_municipio },
+            { codigo_dane: municipioData.codigo_dane }
+          ]
+        },
+        defaults: municipioData
+      });
+
+      return {
+        municipio: await this.getMunicipioById(municipio.id_municipio),
+        created
+      };
+    } catch (error) {
+      throw new Error(`Error finding or creating municipio: ${error.message}`);
+    }
+  }
+
+  /**
    * Create a new municipio
    */
   async createMunicipio(municipioData) {

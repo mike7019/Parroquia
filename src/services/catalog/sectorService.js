@@ -15,6 +15,22 @@ class SectorService {
   }
 
   /**
+   * Find or create a sector to avoid duplicates
+   */
+  async findOrCreateSector(sectorData) {
+    try {
+      const [sector, created] = await Sector.findOrCreate({
+        where: { nombre: sectorData.nombre },
+        defaults: sectorData
+      });
+
+      return { sector, created };
+    } catch (error) {
+      throw new Error(`Error finding or creating sector: ${error.message}`);
+    }
+  }
+
+  /**
    * Get all sectors with pagination and filtering
    */
   async getAllSectors(options = {}) {

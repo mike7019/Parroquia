@@ -15,11 +15,21 @@ class MunicipioController {
         );
       }
 
-      const municipio = await municipioService.createMunicipio({
+      const result = await municipioService.findOrCreateMunicipio({
         nombre_municipio,
         codigo_dane,
         id_departamento 
       });
+
+      if (!result.created) {
+        return res.status(409).json(
+          createErrorResponse(
+            'Municipio ya existe con ese nombre o código DANE',
+            null,
+            'DUPLICATE_ERROR'
+          )
+        );
+      }
 
       res.status(201).json(
         createSuccessResponse(

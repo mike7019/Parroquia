@@ -19,6 +19,22 @@ class SexoService {
   }
 
   /**
+   * Find or create a sexo to avoid duplicates
+   */
+  async findOrCreateSexo(sexoData) {
+    try {
+      const [sexo, created] = await Sexo.findOrCreate({
+        where: { sexo: sexoData.sexo },
+        defaults: { sexo: sexoData.sexo }
+      });
+
+      return { sexo, created };
+    } catch (error) {
+      throw new Error(`Error finding or creating sexo: ${error.message}`);
+    }
+  }
+
+  /**
    * Get all sexos with pagination and search
    */
   async getAllSexos(options = {}) {

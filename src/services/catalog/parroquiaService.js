@@ -19,6 +19,22 @@ class ParroquiaService {
   }
 
   /**
+   * Find or create a parroquia to avoid duplicates
+   */
+  async findOrCreateParroquia(parroquiaData) {
+    try {
+      const [parroquia, created] = await Parroquia.findOrCreate({
+        where: { nombre: parroquiaData.nombre },
+        defaults: { nombre: parroquiaData.nombre }
+      });
+
+      return { parroquia, created };
+    } catch (error) {
+      throw new Error(`Error finding or creating parroquia: ${error.message}`);
+    }
+  }
+
+  /**
    * Get all parroquias with pagination and search
    */
   async getAllParroquias(options = {}) {

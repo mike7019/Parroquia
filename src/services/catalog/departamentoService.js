@@ -15,6 +15,27 @@ class DepartamentoService {
   }
 
   /**
+   * Find or create a departamento to avoid duplicates
+   */
+  async findOrCreateDepartamento(departamentoData) {
+    try {
+      const [departamento, created] = await Departamentos.findOrCreate({
+        where: { 
+          [Op.or]: [
+            { nombre: departamentoData.nombre },
+            { codigo_dane: departamentoData.codigo_dane }
+          ]
+        },
+        defaults: departamentoData
+      });
+
+      return { departamento, created };
+    } catch (error) {
+      throw new Error(`Error finding or creating departamento: ${error.message}`);
+    }
+  }
+
+  /**
    * Get all departamentos with pagination and search
    */
   async getAllDepartamentos(options = {}) {

@@ -15,7 +15,14 @@ class ParroquiaController {
         );
       }
 
-      const parroquia = await parroquiaService.createParroquia({ nombre });
+      // Usar findOrCreate para evitar duplicados
+      const result = await parroquiaService.findOrCreateParroquia({ nombre });
+      
+      if (!result.created) {
+        return res.status(409).json(
+          createErrorResponse('Parroquia con este nombre ya existe', null, 'DUPLICATE_ERROR')
+        );
+      }
 
       res.status(201).json(
         createSuccessResponse(

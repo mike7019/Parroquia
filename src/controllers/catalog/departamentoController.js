@@ -15,11 +15,18 @@ class DepartamentoController {
         );
       }
 
-      const departamento = await departamentoService.createDepartamento({ 
+      // Usar findOrCreate para evitar duplicados
+      const result = await departamentoService.findOrCreateDepartamento({ 
         nombre, 
         codigo_dane, 
         region 
       });
+
+      if (!result.created) {
+        return res.status(409).json(
+          createErrorResponse('Departamento con este nombre o código DANE ya existe', null, 'DUPLICATE_ERROR')
+        );
+      }
 
       res.status(201).json(
         createSuccessResponse(
