@@ -22,11 +22,12 @@ const router = express.Router();
  *           schema:
  *             $ref: '#/components/schemas/UserInput'
  *           example:
- *             firstName: "Juan"
- *             lastName: "Pérez"
- *             email: "juan.perez@example.com"
- *             password: "MiPassword123!"
- *             role: "user"
+ *             firstName: "Diego"
+ *             lastName: "Garcia"
+ *             email: "diego.garcia5105@yopmail.com"
+ *             password: "Fuerte789&"
+ *             phone: "+57 300 456 7890"
+ *             role: "surveyor"
  *     responses:
  *       201:
  *         description: Usuario registrado exitosamente
@@ -51,10 +52,10 @@ const router = express.Router();
  *               data:
  *                 user:
  *                   id: 1
- *                   firstName: "Juan"
- *                   lastName: "Pérez"
- *                   email: "juan.perez@example.com"
- *                   role: "user"
+ *                   firstName: "Carlos"
+ *                   lastName: "Martínez"
+ *                   email: "carlos.martínez1024@yopmail.com"
+ *                   role: "surveyor"
  *                   isActive: true
  *                   emailVerified: false
  *                 emailSent: true
@@ -93,8 +94,8 @@ router.post('/register',
  *           schema:
  *             $ref: '#/components/schemas/LoginInput'
  *           example:
- *             email: "juan.perez@example.com"
- *             password: "MiPassword123!"
+ *             email: "sofía.rodríguez6931@yopmail.com"
+ *             password: "Fuerte789&"
  *     responses:
  *       200:
  *         description: Login exitoso
@@ -116,10 +117,10 @@ router.post('/register',
  *                 expiresIn: 900
  *                 user:
  *                   id: 1
- *                   firstName: "Juan"
- *                   lastName: "Pérez"
- *                   email: "juan.perez@example.com"
- *                   role: "user"
+ *                   firstName: "Sofía"
+ *                   lastName: "Rodríguez"
+ *                   email: "sofía.rodríguez6931@yopmail.com"
+ *                   role: "surveyor"
  *       400:
  *         $ref: '#/components/responses/ValidationError'
  *       401:
@@ -163,13 +164,7 @@ router.post('/login',
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - refreshToken
- *             properties:
- *               refreshToken:
- *                 type: string
- *                 description: Token de renovación válido
+ *             $ref: '#/components/schemas/RefreshTokenInput'
  *           example:
  *             refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  *     responses:
@@ -228,16 +223,9 @@ router.post('/refresh-token',
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - email
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 description: Email del usuario registrado
+ *             $ref: '#/components/schemas/ForgotPasswordInput'
  *           example:
- *             email: "juan.perez@example.com"
+ *             email: "carlos.vargas4169@yopmail.com"
  *     responses:
  *       200:
  *         description: Email de recuperación enviado
@@ -385,7 +373,7 @@ router.get('/verify-email',
  *                 type: string
  *                 format: email
  *                 description: Email del usuario
- *                 example: usuario@ejemplo.com
+ *                 example: "laura.vargas7551@yopmail.com"
  *     responses:
  *       200:
  *         description: Email de verificación reenviado exitosamente
@@ -471,7 +459,7 @@ router.post('/logout',
 /**
  * @swagger
  * /api/auth/change-password:
- *   patch:
+ *   post:
  *     tags: [Authentication]
  *     summary: Cambiar contraseña
  *     description: Cambiar contraseña para usuario autenticado
@@ -587,10 +575,10 @@ router.post('/resend-verification',
  *               data:
  *                 user:
  *                   id: 1
- *                   firstName: "Juan"
- *                   lastName: "Pérez"
- *                   email: "juan.perez@example.com"
- *                   role: "user"
+ *                   firstName: "Sofía"
+ *                   lastName: "Flores"
+ *                   email: "sofía.flores3129@yopmail.com"
+ *                   role: "surveyor"
  *                   isActive: true
  *                   emailVerified: true
  *                   lastLogin: "2025-07-16T10:30:00.000Z"

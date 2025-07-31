@@ -40,7 +40,7 @@ const FamilyMember = sequelize.define('FamilyMember', {
     allowNull: false,
     field: 'tipo_identificacion',
     validate: {
-      isIn: [['CC', 'TI', 'CE', 'PA', 'RC']]
+      isIn: [['CC', 'TI', 'RC', 'CE', 'PP', 'PEP', 'DIE', 'CCD']]
     }
   },
   numeroIdentificacion: {
@@ -64,7 +64,7 @@ const FamilyMember = sequelize.define('FamilyMember', {
     allowNull: false,
     field: 'situacion_civil',
     validate: {
-      isIn: [['Soltero', 'Casado', 'Divorciado', 'Viudo', 'Unión Libre']]
+      isIn: [['Soltero', 'Soltera', 'Casado', 'Casada', 'Divorciado', 'Divorciada', 'Viudo', 'Viuda', 'Unión Libre']]
     }
   },
   parentesco: {

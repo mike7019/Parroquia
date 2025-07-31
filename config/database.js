@@ -3,7 +3,7 @@ import 'dotenv/config';
 export default {
   development: {
     username: process.env.DB_USER || 'parroquia_user',
-    password: process.env.DB_PASS || 'admin',
+    password: process.env.DB_PASSWORD || 'admin',
     database: process.env.DB_NAME || 'parroquia_db',
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 5432,
@@ -18,7 +18,7 @@ export default {
   },
   test: {
     username: process.env.DB_USER || 'parroquia_user',
-    password: process.env.DB_PASS || 'admin',
+    password: process.env.DB_PASSWORD || 'admin',
     database: process.env.DB_NAME + '_test' || 'parroquia_db_test',
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 5432,
@@ -27,7 +27,7 @@ export default {
   },
   production: {
     username: process.env.DB_USER,
-    password: process.env.DB_PASS,
+    password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,

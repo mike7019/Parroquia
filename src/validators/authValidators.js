@@ -28,12 +28,35 @@ const authValidators = {
       .matches(/^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/)
       .withMessage('First name can only contain letters and spaces'),
     
+    body('secondName')
+      .optional()
+      .trim()
+      .isLength({ min: 2, max: 50 })
+      .withMessage('Second name must be between 2 and 50 characters')
+      .matches(/^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/)
+      .withMessage('Second name can only contain letters and spaces'),
+    
     body('lastName')
       .trim()
       .isLength({ min: 2, max: 50 })
       .withMessage('Last name must be between 2 and 50 characters')
       .matches(/^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/)
       .withMessage('Last name can only contain letters and spaces'),
+    
+    body('secondLastName')
+      .optional()
+      .trim()
+      .isLength({ min: 2, max: 50 })
+      .withMessage('Second last name must be between 2 and 50 characters')
+      .matches(/^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/)
+      .withMessage('Second last name can only contain letters and spaces'),
+    
+    body('phone')
+      .optional()
+      .isLength({ min: 10, max: 20 })
+      .withMessage('Phone must be between 10 and 20 characters')
+      .matches(/^[\+]?[0-9\s\-\(\)]+$/)
+      .withMessage('Phone must contain only numbers, spaces, hyphens, parentheses, and optional plus sign'),
     
     body('role')
       .optional()

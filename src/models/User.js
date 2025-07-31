@@ -4,148 +4,143 @@ import bcrypt from 'bcrypt';
 
 const User = sequelize.define('User', {
   id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
     primaryKey: true,
-    autoIncrement: true
+    defaultValue: DataTypes.UUIDV4
   },
-  email: {
+  correo_electronico: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
+    field: 'correo_electronico',
     validate: {
       isEmail: true
     }
   },
-  password: {
+  contrasena: {
     type: DataTypes.STRING,
     allowNull: false,
+    field: 'contrasena',
     validate: {
       len: [6, 100]
     }
   },
-  firstName: {
+  primer_nombre: {
     type: DataTypes.STRING,
     allowNull: false,
+    field: 'primer_nombre',
     validate: {
       len: [2, 50]
     }
   },
-  lastName: {
+  segundo_nombre: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
+    field: 'segundo_nombre',
     validate: {
       len: [2, 50]
     }
   },
-  phone: {
-    type: DataTypes.STRING(20),
-    allowNull: true,
+  primer_apellido: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    field: 'primer_apellido',
     validate: {
-      len: [10, 20]
+      len: [2, 50]
     }
   },
-  role: {
-    type: DataTypes.ENUM('admin', 'coordinator', 'surveyor'),
-    defaultValue: 'surveyor'
-  },
-  sector: {
-    type: DataTypes.STRING(100),
+  segundo_apellido: {
+    type: DataTypes.STRING,
     allowNull: true,
-    comment: 'Sector asignado para coordinadores y encuestadores'
-  },
-  status: {
-    type: DataTypes.ENUM('active', 'inactive'),
-    allowNull: false,
-    defaultValue: 'active'
-  },
-  surveysCompleted: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 0,
-    field: 'surveys_completed',
+    field: 'segundo_apellido',
     validate: {
-      min: 0
+      len: [2, 50]
     }
   },
-  isActive: {
+  activo: {
     type: DataTypes.BOOLEAN,
-    defaultValue: true
-  },
-  emailVerified: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false
-  },
-  emailVerificationToken: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  passwordResetToken: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  passwordResetExpires: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-  lastLoginAt: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-  refreshToken: {
-    type: DataTypes.TEXT,
-    allowNull: true
+    defaultValue: true,
+    field: 'activo'
   }
 }, {
-  tableName: 'users',
-  timestamps: true,
-  // Scope por defecto: solo usuarios activos
-  defaultScope: {
-    where: {
-      status: 'active'
-    }
-  },
-  scopes: {
-    // Scope para incluir todos los usuarios (incluyendo deleted)
-    withDeleted: {
-      where: {}
+  tableName: 'usuarios',
+  timestamps: false, // La nueva tabla no tiene campos createdAt/updatedAt
+  
+  // Define virtual getters for compatibility with existing code
+  getterMethods: {
+    email() {
+      return this.correo_electronico;
     },
-    // Scope para solo usuarios eliminados
-    deleted: {
-      where: {
-        status: 'deleted'
-      }
+    password() {
+      return this.contrasena;
     },
-    // Scope para usuarios inactivos
-    inactive: {
-      where: {
-        status: 'inactive'
-      }
-    }
-  },
-  hooks: {
-    beforeCreate: async (user) => {
-      if (user.password) {
-        const saltRounds = parseInt(process.env.BCRYPT_ROUNDS) || 12;
-        user.password = await bcrypt.hash(user.password, saltRounds);
-      }
+    firstName() {
+      return this.primer_nombre;
     },
-    beforeUpdate: async (user) => {
-      if (user.changed('password')) {
-        const saltRounds = parseInt(process.env.BCRYPT_ROUNDS) || 12;
-        user.password = await bcrypt.hash(user.password, saltRounds);
-      }
+    secondName() {
+      return this.segundo_nombre;
+    },
+    lastName() {
+      return this.primer_apellido;
+    },
+    secondLastName() {
+      return this.segundo_apellido;
+    },
+    fullName() {
+      const nombres = [this.primer_nombre, this.segundo_nombre].filter(Boolean).join(' ');
+      const apellidos = [this.primer_apellido, this.segundo_apellido].filter(Boolean).join(' ');
+      return `${nombres} ${apellidos}`.trim();
+    },
+    isActive() {
+      return this.activo;
+    },
+    role() {
+      return 'surveyor'; // Default role for compatibility
+    },
+    status() {
+      return this.activo ? 'active' : 'inactive';
     }
   }
 });
 
-// Instance methods
-User.prototype.validatePassword = async function(password) {
-  return await bcrypt.compare(password, this.password);
+// Hash password before creating user
+User.beforeCreate(async (user) => {
+  if (user.contrasena) {
+    user.contrasena = await bcrypt.hash(user.contrasena, 10);
+  }
+});
+
+// Hash password before updating user
+User.beforeUpdate(async (user) => {
+  if (user.changed('contrasena')) {
+    user.contrasena = await bcrypt.hash(user.contrasena, 10);
+  }
+});
+
+// Define instance methods
+User.prototype.checkPassword = async function(password) {
+  return await bcrypt.compare(password, this.contrasena);
 };
 
+User.prototype.setPassword = async function(password) {
+  this.contrasena = await bcrypt.hash(password, 10);
+};
+
+// Override toJSON to hide password and add compatibility fields
 User.prototype.toJSON = function() {
   const values = { ...this.get() };
-  delete values.password;
+  delete values.contrasena;
+  
+  // Add virtual properties for compatibility
+  values.email = this.correo_electronico;
+  values.firstName = this.primer_nombre;
+  values.secondName = this.segundo_nombre;
+  values.lastName = this.primer_apellido;
+  values.secondLastName = this.segundo_apellido;
+  values.isActive = this.activo;
+  values.role = 'surveyor';
+  values.status = this.activo ? 'active' : 'inactive';
+  
   return values;
 };
 

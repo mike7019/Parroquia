@@ -207,6 +207,7 @@ npm run migrate      # Ejecuta migraciones
 npm run migrate:undo # Revierte última migración
 npm run seed         # Ejecuta seeders
 npm run seed:undo    # Revierte seeders
+npm run db:fix       # Repara problemas de foreign keys y esquema
 
 # Testing
 npm test                    # Ejecuta todos los tests
@@ -264,6 +265,64 @@ npm run test:auth:protected  # Pruebas de endpoints protegidos
 npm run test:coverage  # Genera reporte de cobertura
 
 
+```
+
+---
+
+## 🔧 Solución de Problemas
+
+### **Problemas Comunes**
+
+#### **❌ Error: "column 'id' referenced in foreign key constraint does not exist"**
+
+**Causa:** La base de datos tiene foreign keys incorrectas de migraciones anteriores.
+
+**Solución rápida:**
+```bash
+npm run db:fix
+npm start
+```
+
+**¿Qué hace el comando `db:fix`?**
+- Elimina tablas con foreign keys incorrectas
+- Limpia tipos ENUM huérfanos  
+- Permite que Sequelize recree las tablas con la estructura correcta
+- Es seguro en desarrollo (los datos de catálogo se pueden recargar)
+
+⚠️ **ADVERTENCIA para Producción:** Hacer backup antes de ejecutar
+
+#### **❌ Error: "ES Module migration files not supported"**
+
+**Solución:**
+```bash
+node runMigration.js  # Script personalizado para ES modules
+npm run db:load-catalogs  # Cargar datos de catálogo
+```
+
+#### **❌ Error: "Connection refused to PostgreSQL"**
+
+**Verificar:**
+1. PostgreSQL está ejecutándose
+2. Variables de entorno en `.env` son correctas
+3. Base de datos `parroquia_db` existe
+
+**Con Docker:**
+```bash
+docker-compose up postgres -d  # Solo PostgreSQL
+docker-compose logs postgres   # Ver logs de PostgreSQL
+```
+
+#### **❌ Error: "Port 3000 is already in use"**
+
+**Solución:**
+```bash
+# Encontrar proceso en puerto 3000
+netstat -ano | findstr :3000
+# Terminar proceso (Windows)
+taskkill /PID <PID> /F
+
+# O cambiar puerto en .env
+PORT=3001
 ```
 
 ---

@@ -13,7 +13,10 @@ import sequelize from '../config/sequelize.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userManagementRoutes.js';
 import systemRoutes from './routes/systemRoutes.js';
-import surveyRoutes from './routes/surveyRoutes.js';
+// Temporarily disabled survey routes
+// import surveyRoutes from './routes/surveyRoutes.js';
+import catalogRoutes from './routes/catalog/index.js';
+import swaggerCustomRoutes from './routes/swaggerCustomRoutes.js';
 
 // Import middlewares
 import errorHandler from './middlewares/errorHandler.js';
@@ -29,7 +32,7 @@ const PORT = process.env.PORT || 3000;
 const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
 
 // Trust proxy for rate limiting and security
-app.set('trust proxy', 1);
+app.set('trust proxy', true); // Changed to true for better IP detection
 
 // Security middlewares
 app.use(helmet({
@@ -55,16 +58,41 @@ app.use(helmet({
   xssFilter: false
 }));
 
+const corsOptions = {
+  origin: true, // permite todos los orígenes
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With',
+    'Content-Type',
+    'Accept',
+    'Authorization'
+  ]
+};
+
 // CORS configuration - Simplified and clean
-app.use(cors({
-  origin: '*', // Allow all origins for development/testing
-  credentials: false,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
-  allowedHeaders: '*',
-  exposedHeaders: ['X-Total-Count', 'Content-Range'],
-  maxAge: 86400,
-  optionsSuccessStatus: 200
-}));
+app.use(cors(corsOptions));
+
+// Custom middleware to log request IPs
+app.use((req, res, next) => {
+  const clientIP = req.headers['x-forwarded-for'] || 
+                   req.headers['x-real-ip'] || 
+                   req.connection.remoteAddress || 
+                   req.socket.remoteAddress ||
+                   (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
+                   req.ip;
+  
+  const timestamp = new Date().toISOString();
+  const method = req.method;
+  const url = req.originalUrl || req.url;
+  const userAgent = req.headers['user-agent'] || 'Unknown';
+  
+  // Log request details
+  console.log(`🌐 [${timestamp}] ${method} ${url} - IP: ${clientIP} - User-Agent: ${userAgent.substring(0, 50)}${userAgent.length > 50 ? '...' : ''}`);
+  
+  next();
+});
 
 // Logging
 if (process.env.NODE_ENV === 'production') {
@@ -73,11 +101,25 @@ if (process.env.NODE_ENV === 'production') {
   app.use(morgan('dev'));
 }
 
-// Body parsing middlewares
+// Body parsing middlewares with enhanced error handling
 app.use(express.json({ 
   limit: '10mb',
-  type: ['application/json', 'text/plain']
+  type: ['application/json', 'text/plain'],
+  verify: (req, res, buf, encoding) => {
+    // Store raw body for error reporting
+    req.rawBody = buf.toString(encoding || 'utf8');
+  }
 }));
+
+// Custom JSON error handler
+app.use((err, req, res, next) => {
+  if (err.type === 'entity.parse.failed') {
+    // Add the raw body to the error for better debugging
+    err.body = req.rawBody;
+  }
+  next(err);
+});
+
 app.use(express.urlencoded({ 
   extended: true, 
   limit: '10mb' 
@@ -114,11 +156,42 @@ app.get('/api/cors-test', (req, res) => {
   });
 });
 
+// Test IP endpoint
+app.get('/api/ip-test', (req, res) => {
+  const clientIP = req.headers['x-forwarded-for'] || 
+                   req.headers['x-real-ip'] || 
+                   req.connection.remoteAddress || 
+                   req.socket.remoteAddress ||
+                   (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
+                   req.ip;
+
+  res.json({
+    message: 'IP detection test',
+    clientIP: clientIP,
+    headers: {
+      'x-forwarded-for': req.headers['x-forwarded-for'],
+      'x-real-ip': req.headers['x-real-ip'],
+      'user-agent': req.headers['user-agent'],
+      'origin': req.headers.origin
+    },
+    connection: {
+      remoteAddress: req.connection?.remoteAddress,
+      socketRemoteAddress: req.socket?.remoteAddress
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/surveys', surveyRoutes);
+// Temporarily disabled survey routes
+// app.use('/api/surveys', surveyRoutes);
+app.use('/api/catalog', catalogRoutes);
 app.use('/api', systemRoutes);
+
+// Custom Swagger routes
+app.use('/', swaggerCustomRoutes);
 
 // Root route
 app.use('/', systemRoutes);
@@ -291,42 +364,76 @@ const displayRoutes = () => {
     // Manual route definition based on our router files
     const routes = [
       // Authentication routes
-      { method: 'POST', path: '/api/auth/register', group: 'Authentication', protected: false },
-      { method: 'POST', path: '/api/auth/login', group: 'Authentication', protected: false },
-      { method: 'POST', path: '/api/auth/refresh', group: 'Authentication', protected: false },
-      { method: 'POST', path: '/api/auth/logout', group: 'Authentication', protected: true },
-      { method: 'GET', path: '/api/auth/verify-email', group: 'Authentication', protected: false },
-      { method: 'POST', path: '/api/auth/forgot-password', group: 'Authentication', protected: false },
-      { method: 'POST', path: '/api/auth/reset-password', group: 'Authentication', protected: false },
+      { method: 'POST', path: '/api/auth/register', group: 'Authentication', protected: false, description: 'Register new user' },
+      { method: 'POST', path: '/api/auth/login', group: 'Authentication', protected: false, description: 'User login' },
+      { method: 'POST', path: '/api/auth/refresh', group: 'Authentication', protected: false, description: 'Refresh access token' },
+      { method: 'POST', path: '/api/auth/refresh-token', group: 'Authentication', protected: false, description: 'Refresh token endpoint' },
+      { method: 'POST', path: '/api/auth/logout', group: 'Authentication', protected: true, description: 'User logout' },
+      { method: 'POST', path: '/api/auth/change-password', group: 'Authentication', protected: true, description: 'Change password' },
+      { method: 'GET', path: '/api/auth/verify-email', group: 'Authentication', protected: false, description: 'Email verification' },
+      { method: 'POST', path: '/api/auth/forgot-password', group: 'Authentication', protected: false, description: 'Request password reset' },
+      { method: 'GET', path: '/api/auth/reset-password', group: 'Authentication', protected: false, description: 'Reset password form' },
+      { method: 'POST', path: '/api/auth/reset-password', group: 'Authentication', protected: false, description: 'Process password reset' },
+      { method: 'POST', path: '/api/auth/resend-verification-public', group: 'Authentication', protected: false, description: 'Resend verification (public)' },
+      { method: 'POST', path: '/api/auth/resend-verification', group: 'Authentication', protected: true, description: 'Resend verification' },
+      { method: 'GET', path: '/api/auth/profile', group: 'Authentication', protected: true, description: 'Get user profile' },
       
       // User management routes
-      { method: 'GET', path: '/api/users', group: 'User Management', protected: true },
-      { method: 'GET', path: '/api/users/deleted', group: 'User Management', protected: true },
-      { method: 'GET', path: '/api/users/:id', group: 'User Management', protected: true },
-      { method: 'PUT', path: '/api/users/:id', group: 'User Management', protected: true },
-      { method: 'DELETE', path: '/api/users/:id', group: 'User Management', protected: true },
+      { method: 'GET', path: '/api/users', group: 'User Management', protected: true, description: 'List all users' },
+      { method: 'GET', path: '/api/users/deleted', group: 'User Management', protected: true, description: 'List deleted users' },
+      { method: 'GET', path: '/api/users/:id', group: 'User Management', protected: true, description: 'Get user by ID' },
+      { method: 'PUT', path: '/api/users/:id', group: 'User Management', protected: true, description: 'Update user' },
+      { method: 'DELETE', path: '/api/users/:id', group: 'User Management', protected: true, description: 'Delete user' },
       
       // Survey routes
-      { method: 'POST', path: '/api/surveys', group: 'Surveys', protected: true },
-      { method: 'GET', path: '/api/surveys/my', group: 'Surveys', protected: true },
-      { method: 'GET', path: '/api/surveys/statistics', group: 'Surveys', protected: true },
-      { method: 'GET', path: '/api/surveys/sector/:sectorName', group: 'Surveys', protected: true },
-      { method: 'GET', path: '/api/surveys/:id', group: 'Surveys', protected: true },
-      { method: 'PUT', path: '/api/surveys/:id/stages/:stageNumber', group: 'Surveys', protected: true },
-      { method: 'POST', path: '/api/surveys/:id/members', group: 'Surveys', protected: true },
-      { method: 'PUT', path: '/api/surveys/:id/members/:memberId', group: 'Surveys', protected: true },
-      { method: 'DELETE', path: '/api/surveys/:id/members/:memberId', group: 'Surveys', protected: true },
-      { method: 'POST', path: '/api/surveys/:id/complete', group: 'Surveys', protected: true },
-      { method: 'POST', path: '/api/surveys/:id/cancel', group: 'Surveys', protected: true },
-      { method: 'POST', path: '/api/surveys/:id/auto-save', group: 'Surveys', protected: true },
-      { method: 'GET', path: '/api/surveys/:id/auto-save', group: 'Surveys', protected: true },
+      { method: 'POST', path: '/api/surveys', group: 'Surveys', protected: true, description: 'Create new survey' },
+      { method: 'GET', path: '/api/surveys/my', group: 'Surveys', protected: true, description: 'Get my surveys' },
+      { method: 'GET', path: '/api/surveys/statistics', group: 'Surveys', protected: true, description: 'Get survey statistics' },
+      { method: 'GET', path: '/api/surveys/:id', group: 'Surveys', protected: true, description: 'Get survey by ID' },
+      { method: 'PUT', path: '/api/surveys/:id/stages/:stageNumber', group: 'Surveys', protected: true, description: 'Update survey stage' },
+      { method: 'POST', path: '/api/surveys/:id/members', group: 'Surveys', protected: true, description: 'Add family member' },
+      { method: 'PUT', path: '/api/surveys/:id/members/:memberId', group: 'Surveys', protected: true, description: 'Update family member' },
+      { method: 'DELETE', path: '/api/surveys/:id/members/:memberId', group: 'Surveys', protected: true, description: 'Remove family member' },
+      { method: 'POST', path: '/api/surveys/:id/complete', group: 'Surveys', protected: true, description: 'Complete survey' },
+      { method: 'POST', path: '/api/surveys/:id/cancel', group: 'Surveys', protected: true, description: 'Cancel survey' },
+      { method: 'POST', path: '/api/surveys/:id/auto-save', group: 'Surveys', protected: true, description: 'Auto-save survey data' },
+      { method: 'GET', path: '/api/surveys/:id/auto-save', group: 'Surveys', protected: true, description: 'Get auto-saved data' },
       
-      // System routes
-      { method: 'GET', path: '/api/health', group: 'System', protected: false },
-      { method: 'GET', path: '/api/status', group: 'System', protected: false },
-      { method: 'GET', path: '/api-docs', group: 'Documentation', protected: false },
-      { method: 'GET', path: '/verify-email', group: 'Compatibility', protected: false },
-      { method: 'GET', path: '/reset-password', group: 'Compatibility', protected: false },
+      // Catalog routes - Parish & Geographic data
+      { method: 'GET', path: '/api/catalog/health', group: 'Catalog', protected: false, description: 'Catalog health check' },
+      { method: 'POST', path: '/api/catalog/parroquias', group: 'Catalog', protected: true, description: 'Create parish' },
+      { method: 'GET', path: '/api/catalog/parroquias', group: 'Catalog', protected: true, description: 'List parishes' },
+      { method: 'GET', path: '/api/catalog/parroquias/search', group: 'Catalog', protected: true, description: 'Search parishes' },
+      { method: 'GET', path: '/api/catalog/parroquias/statistics', group: 'Catalog', protected: true, description: 'Parish statistics' },
+      { method: 'GET', path: '/api/catalog/parroquias/:id', group: 'Catalog', protected: true, description: 'Get parish by ID' },
+      { method: 'PUT', path: '/api/catalog/parroquias/:id', group: 'Catalog', protected: true, description: 'Update parish' },
+      { method: 'DELETE', path: '/api/catalog/parroquias/:id', group: 'Catalog', protected: true, description: 'Delete parish' },
+      { method: 'POST', path: '/api/catalog/veredas', group: 'Catalog', protected: true, description: 'Create vereda' },
+      { method: 'GET', path: '/api/catalog/veredas', group: 'Catalog', protected: true, description: 'List veredas' },
+      { method: 'GET', path: '/api/catalog/veredas/search', group: 'Catalog', protected: true, description: 'Search veredas' },
+      { method: 'GET', path: '/api/catalog/veredas/statistics', group: 'Catalog', protected: true, description: 'Vereda statistics' },
+      { method: 'GET', path: '/api/catalog/veredas/:id', group: 'Catalog', protected: true, description: 'Get vereda by ID' },
+      { method: 'PUT', path: '/api/catalog/veredas/:id', group: 'Catalog', protected: true, description: 'Update vereda' },
+      { method: 'DELETE', path: '/api/catalog/veredas/:id', group: 'Catalog', protected: true, description: 'Delete vereda' },
+      { method: 'POST', path: '/api/catalog/sexos', group: 'Catalog', protected: true, description: 'Create gender type' },
+      { method: 'GET', path: '/api/catalog/sexos', group: 'Catalog', protected: true, description: 'List gender types' },
+      { method: 'GET', path: '/api/catalog/sexos/search', group: 'Catalog', protected: true, description: 'Search gender types' },
+      { method: 'GET', path: '/api/catalog/sexos/statistics', group: 'Catalog', protected: true, description: 'Gender statistics' },
+      { method: 'GET', path: '/api/catalog/sexos/:id', group: 'Catalog', protected: true, description: 'Get gender by ID' },
+      { method: 'PUT', path: '/api/catalog/sexos/:id', group: 'Catalog', protected: true, description: 'Update gender' },
+      { method: 'DELETE', path: '/api/catalog/sexos/:id', group: 'Catalog', protected: true, description: 'Delete gender' },
+      { method: 'GET', path: '/api/catalog/tipos-identificacion', group: 'Catalog', protected: false, description: 'List identification types' },
+      
+      // System & Infrastructure routes
+      { method: 'GET', path: '/api/health', group: 'System', protected: false, description: 'API health check' },
+      { method: 'GET', path: '/api/status', group: 'System', protected: false, description: 'System status' },
+      
+      // Documentation routes
+      { method: 'GET', path: '/api-docs', group: 'Documentation', protected: false, description: 'Swagger API documentation' },
+      
+      // Compatibility routes (legacy support)
+      { method: 'GET', path: '/verify-email', group: 'Compatibility', protected: false, description: 'Email verification (legacy)' },
+      { method: 'GET', path: '/reset-password', group: 'Compatibility', protected: false, description: 'Password reset (legacy)' },
     ];
 
     // Group routes by category
@@ -338,12 +445,23 @@ const displayRoutes = () => {
       return groups;
     }, {});
 
-    // Display routes by group
+    // Display routes by group with enhanced formatting
     Object.entries(groupedRoutes).forEach(([group, groupRoutes]) => {
-      console.log(`\n🔹 ${group}:`);
+      // Add emoji icons for each group
+      const groupIcons = {
+        'Authentication': '🔐',
+        'User Management': '👥',
+        'Surveys': '📋',
+        'Catalog': '📚',
+        'System': '⚙️',
+        'Documentation': '📖',
+        'Compatibility': '🔄'
+      };
+      
+      console.log(`\n${groupIcons[group] || '🔹'} ${group}:`);
       groupRoutes.forEach((route) => {
         const methodPadded = route.method.padEnd(8);
-        const pathPadded = route.path.padEnd(35);
+        const pathPadded = route.path.padEnd(40);
         const protectionStatus = route.protected ? '🛡️  Protected' : '🌐 Public';
         console.log(`   ${methodPadded} ${pathPadded} ${protectionStatus}`);
       });
@@ -352,22 +470,36 @@ const displayRoutes = () => {
     console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log(`📊 Total Routes: ${routes.length}`);
     
-    // Show route summary by type
+    // Enhanced route summary with totals and status counts
     const authRoutes = routes.filter(r => r.group === 'Authentication').length;
     const userRoutes = routes.filter(r => r.group === 'User Management').length;
     const surveyRoutes = routes.filter(r => r.group === 'Surveys').length;
+    const catalogRoutes = routes.filter(r => r.group === 'Catalog').length;
     const systemRoutes = routes.filter(r => r.group === 'System').length;
+    const docRoutes = routes.filter(r => r.group === 'Documentation').length;
     const compatRoutes = routes.filter(r => r.group === 'Compatibility').length;
     
+    // Count by protection status
+    const publicRoutes = routes.filter(r => !r.protected).length;
+    const protectedRoutes = routes.filter(r => r.protected).length;
+    
+    console.log(`\n📈 Route Distribution:`);
     console.log(`   • Authentication: ${authRoutes} routes`);
     console.log(`   • User Management: ${userRoutes} routes`);
     console.log(`   • Surveys: ${surveyRoutes} routes`);
+    console.log(`   • Catalog: ${catalogRoutes} routes`);
     console.log(`   • System: ${systemRoutes} routes`);
+    console.log(`   • Documentation: ${docRoutes} routes`);
     console.log(`   • Compatibility: ${compatRoutes} routes`);
+    console.log(`\n🔒 Security Status:`);
+    console.log(`   • Public endpoints: ${publicRoutes}`);
+    console.log(`   • Protected endpoints: ${protectedRoutes}`);
     console.log('');
   } else {
-    // Simplified route summary
-    console.log('📋 API Routes: Auth (7), Users (5), System (3), Compatibility (2) - Use VERBOSE_LOGGING=true for details');
+    // Simplified route summary with enhanced info
+    console.log('📋 API Routes Summary:');
+    console.log('   🔐 Authentication (13), 👥 Users (5), 📋 Surveys (12), 📚 Catalog (22), ⚙️  System (2), 📖 Docs (1), 🔄 Compatibility (2)');
+    console.log('   💡 Total: 57 endpoints | Use VERBOSE_LOGGING=true for detailed route listing');
   }
 };
 

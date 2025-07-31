@@ -9,6 +9,10 @@
     "start:https": "node src/app.js --https",
     "dev": "nodemon src/app.js",
     "dev:https": "nodemon src/app.js --https",
+    "dev:local": "cp .env.development .env && nodemon src/app.js",
+    "docker:dev": "docker-compose up --build",
+    "docker:db": "docker-compose up postgres -d",
+    "docker:down": "docker-compose down",
     "ssl:create": "node scripts/create-ssl-cert.js",
     "admin:create": "node createAdminUser.js",
     "admin:update-email": "node updateAdminEmail.js",
@@ -22,7 +26,9 @@
     "db:seed": "npx sequelize-cli db:seed:all",
     "db:create": "npx sequelize-cli db:create",
     "db:drop": "npx sequelize-cli db:drop",
-    "db:load-catalogs": "node loadCatalogData.js"
+    "db:load-catalogs": "node loadCatalogData.js",
+    "db:fix": "node scripts/fix-database.js",
+    "db:setup": "npm run db:fix && npm start"
   },
   "keywords": [
     "node",
@@ -34,6 +40,7 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "chart.js": "^4.5.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
