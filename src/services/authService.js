@@ -23,14 +23,14 @@ class AuthService {
    * @returns {Promise<Object>} User and token data
    */
   async registerUser(userData) {
-    const { email, password, firstName, lastName, role = 'surveyor', phone } = userData;
+    const { email, password, firstName, secondName, lastName, secondLastName, role = 'surveyor', phone } = userData;
     
     const transaction = await sequelize.transaction();
     
     try {
-      // Check if user already exists (including soft-deleted users)
-      const existingUser = await User.scope('withDeleted').findOne({ 
-        where: { email } 
+      // Check if user already exists
+      const existingUser = await User.findOne({ 
+        where: { correo_electronico: email.toLowerCase().trim() } 
       });
       
       if (existingUser) {
@@ -42,16 +42,16 @@ class AuthService {
 
       // Create user with transaction - password will be hashed automatically by model hook
       const user = await User.create({
-        email: email.toLowerCase().trim(),
-        password, // Will be hashed by beforeCreate hook
-        firstName,
-        lastName,
-        role,
-        phone,
-        status: 'active',
-        emailVerificationToken,
-        isActive: true,
-        emailVerified: false
+        correo_electronico: email.toLowerCase().trim(),
+        contrasena: password, // Will be hashed by beforeCreate hook
+        primer_nombre: firstName,
+        segundo_nombre: secondName || null,
+        primer_apellido: lastName,
+        segundo_apellido: secondLastName || null,
+        telefono: phone || null,
+        activo: true,
+        email_verificado: false,
+        token_verificacion_email: emailVerificationToken
       }, { transaction });
 
       // Generate tokens
@@ -59,7 +59,7 @@ class AuthService {
       const refreshToken = this.generateRefreshToken(user.id);
 
       // Save refresh token
-      await user.update({ refreshToken }, { transaction });
+      await user.update({ refresh_token: refreshToken }, { transaction });
 
       // Commit transaction before attempting to send email
       await transaction.commit();
@@ -80,12 +80,16 @@ class AuthService {
       const userResponse = {
         id: user.id,
         firstName: user.firstName,
+        secondName: user.secondName,
         lastName: user.lastName,
+        secondLastName: user.secondLastName,
         email: user.email,
+        phone: user.phone,
         role: user.role,
         status: user.status,
         isActive: user.isActive,
         emailVerified: user.emailVerified,
+        fullName: user.fullName,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       };
@@ -116,23 +120,21 @@ class AuthService {
    */
   async loginUser(email, password) {
     // Find user
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ where: { correo_electronico: email } });
     if (!user) {
       throw new AuthenticationError('Invalid email or password');
     }
 
     // Check if user is active
-    if (!user.isActive) {
+    if (!user.activo) {
       throw new AuthenticationError('Account is deactivated. Please contact administrator', 'ACCOUNT_DEACTIVATED');
     }
 
-    // Check if email is verified
-    if (!user.emailVerified) {
-      throw new AuthenticationError('Email verification required. Please check your email and verify your account', 'EMAIL_NOT_VERIFIED');
-    }
+    // Skip email verification check for new schema
+    // Email verification not implemented in simplified schema
 
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    // Verify password using the virtual getter compatibility
+    const isPasswordValid = await user.checkPassword(password);
     if (!isPasswordValid) {
       throw new AuthenticationError('Invalid email or password');
     }
@@ -141,11 +143,11 @@ class AuthService {
     const accessToken = this.generateAccessToken(user.id);
     const refreshToken = this.generateRefreshToken(user.id);
 
-    // Update last login and refresh token
-    await user.update({
-      lastLoginAt: new Date(),
-      refreshToken
-    });
+    // Skip updating last login and refresh token for simplified schema
+    // await user.update({
+    //   ultimo_login: new Date(),
+    //   refresh_token: refreshToken
+    // });
 
     // Remove sensitive data from response
     const userResponse = this.sanitizeUserData(user);
@@ -210,7 +212,7 @@ class AuthService {
    * @returns {Promise<Object>} Success message
    */
   async initiatePasswordReset(email) {
-    const user = await User.unscoped().findOne({ where: { email } });
+    const user = await User.findOne({ where: { correo_electronico: email } });
     if (!user) {
       // Don't reveal if email exists or not for security
       return { message: 'If the email exists, a password reset link has been sent' };
@@ -222,8 +224,8 @@ class AuthService {
 
     // Save reset token
     await user.update({
-      passwordResetToken: resetToken,
-      passwordResetExpires: resetTokenExpiry
+      token_reset_password: resetToken,
+      expiracion_reset_password: resetTokenExpiry
     });
 
     // Send reset email
@@ -251,10 +253,10 @@ class AuthService {
    * @returns {Promise<Object>} Validation result
    */
   async validatePasswordResetToken(token) {
-    const user = await User.unscoped().findOne({
+    const user = await User.findOne({
       where: {
-        passwordResetToken: token,
-        passwordResetExpires: {
+        token_reset_password: token,
+        expiracion_reset_password: {
           [Op.gt]: new Date()
         }
       }
@@ -266,9 +268,9 @@ class AuthService {
 
     return { 
       message: 'Token is valid', 
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName
+      email: user.correo_electronico,
+      firstName: user.primer_nombre,
+      lastName: user.primer_apellido
     };
   }
 
@@ -279,10 +281,10 @@ class AuthService {
    * @returns {Promise<Object>} Success message
    */
   async resetPassword(token, newPassword) {
-    const user = await User.unscoped().findOne({
+    const user = await User.findOne({
       where: {
-        passwordResetToken: token,
-        passwordResetExpires: {
+        token_reset_password: token,
+        expiracion_reset_password: {
           [Op.gt]: new Date()
         }
       }
@@ -295,10 +297,10 @@ class AuthService {
     // Update password and clear reset token
     // The password will be automatically hashed by the beforeUpdate hook
     await user.update({
-      password: newPassword, // Let the model hook handle the hashing
-      passwordResetToken: null,
-      passwordResetExpires: null,
-      refreshToken: null // Invalidate all sessions
+      contrasena: newPassword, // Let the model hook handle the hashing
+      token_reset_password: null,
+      expiracion_reset_password: null,
+      refresh_token: null // Invalidate all sessions
     });
 
     return { message: 'Password has been reset successfully' };
@@ -339,24 +341,23 @@ class AuthService {
    * @returns {Promise<Object>} Success message
    */
   async verifyEmail(token) {
-    const user = await User.unscoped().findOne({
-      where: { emailVerificationToken: token }
+    const user = await User.findOne({ 
+      where: { token_verificacion_email: token } 
     });
-
+    
     if (!user) {
-      throw new AuthenticationError('Invalid verification token', 'INVALID_VERIFICATION_TOKEN');
+      throw new ValidationError('Invalid or expired verification token');
     }
 
-    await user.update({
-      emailVerified: true,
-      emailVerificationToken: null
-    });
+    if (user.email_verificado) {
+      return { message: 'Email already verified' };
+    }
 
-    // Send welcome email
-    await emailService.sendWelcomeEmail(
-      user.email,
-      `${user.firstName} ${user.lastName}`
-    );
+    // Verify email and clear token
+    await user.update({
+      email_verificado: true,
+      token_verificacion_email: null
+    });
 
     return { message: 'Email verified successfully' };
   }

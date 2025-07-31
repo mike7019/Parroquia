@@ -8,9 +8,10 @@ const Sexo = sequelize.define('Sexo', {
     allowNull: false,
     autoIncrement: true
   },
-  sexo: {
-    type: DataTypes.STRING(100),
-    allowNull: true
+  descripcion: {
+    type: DataTypes.STRING(255),
+    allowNull: false,
+    comment: 'Descripción del tipo de sexo'
   }
 }, {
   sequelize,

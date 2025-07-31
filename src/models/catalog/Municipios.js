@@ -8,23 +8,30 @@ const Municipios = sequelize.define('Municipios', {
     allowNull: false,
     autoIncrement: true
   },
-  nombre: {
+  nombre_municipio: {
     type: DataTypes.STRING(255),
-    allowNull: true
+    allowNull: false
   },
   codigo_dane: {
-    type: DataTypes.STRING(20),
-    allowNull: true
+    type: DataTypes.STRING(5),
+    allowNull: false,
+    unique: true,
+    comment: 'Código DANE del municipio (5 dígitos)'
   },
-  departamento: {
-    type: DataTypes.STRING(100),
-    allowNull: true
-  }
+  id_departamento: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    references: {
+      model: 'departamentos',
+      key: 'id_departamento'
+    },
+    comment: 'ID del departamento al que pertenece el municipio'
+  },
 }, {
   sequelize,
   modelName: 'Municipios',
   tableName: 'municipios',
-  timestamps: false
+  timestamps: true
 });
 
 export default Municipios;

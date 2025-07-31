@@ -662,7 +662,7 @@ const swaggerConfig = {
             },
             tipoIdentificacion: {
               type: 'string',
-              enum: ['CC', 'TI', 'CE', 'PA', 'RC'],
+              enum: ['CC', 'TI', 'RC', 'CE', 'PP', 'PEP', 'DIE', 'CCD'],
               description: 'Tipo de documento de identidad',
               example: 'CC'
             },
@@ -843,13 +843,21 @@ const swaggerConfig = {
               description: 'Nombre de la vereda',
               example: 'La Esperanza'
             },
-            id_municipio: {
+            id_municipio_municipios: {
               type: 'integer',
-              description: 'ID del municipio',
+              description: 'ID del municipio (foreign key)',
+              example: 1
+            },
+            id_sector_sector: {
+              type: 'integer',
+              description: 'ID del sector (foreign key)',
               example: 1
             },
             municipio: {
               $ref: '#/components/schemas/Municipio'
+            },
+            sector: {
+              $ref: '#/components/schemas/Sector'
             },
             createdAt: {
               type: 'string',
@@ -862,7 +870,7 @@ const swaggerConfig = {
               description: 'Fecha de última actualización'
             }
           },
-          required: ['nombre', 'id_municipio']
+          required: ['nombre', 'id_municipio_municipios', 'id_sector_sector']
         },
         Municipio: {
           type: 'object',
@@ -872,7 +880,7 @@ const swaggerConfig = {
               description: 'ID único del municipio',
               example: 1
             },
-            nombre: {
+            nombre_municipio: {
               type: 'string',
               maxLength: 255,
               description: 'Nombre del municipio',
@@ -889,7 +897,7 @@ const swaggerConfig = {
               description: 'Fecha de última actualización'
             }
           },
-          required: ['nombre']
+          required: ['nombre_municipio']
         },
         Sexo: {
           type: 'object',
@@ -917,6 +925,206 @@ const swaggerConfig = {
             }
           },
           required: ['sexo']
+        },
+        Municipio: {
+          type: 'object',
+          properties: {
+            id_municipio: {
+              type: 'integer',
+              description: 'ID único del municipio',
+              example: 1
+            },
+            nombre_municipio: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre del municipio',
+              example: 'Bogotá'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización'
+            }
+          },
+          required: ['nombre_municipio']
+        },
+        CreateMunicipioRequest: {
+          type: 'object',
+          properties: {
+            nombre_municipio: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre del municipio',
+              example: 'Medellín'
+            }
+          },
+          required: ['nombre_municipio']
+        },
+        UpdateMunicipioRequest: {
+          type: 'object',
+          properties: {
+            nombre_municipio: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre del municipio',
+              example: 'Cali'
+            }
+          }
+        },
+        MunicipiosListResponse: {
+          type: 'object',
+          properties: {
+            municipios: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/Municipio'
+              }
+            },
+            pagination: {
+              $ref: '#/components/schemas/Pagination'
+            }
+          }
+        },
+        Sector: {
+          type: 'object',
+          properties: {
+            id_sector: {
+              type: 'integer',
+              description: 'ID único del sector',
+              example: 1
+            },
+            nombre: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre del sector',
+              example: 'Urbano'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización'
+            }
+          },
+          required: ['nombre']
+        },
+        CreateSectorRequest: {
+          type: 'object',
+          properties: {
+            nombre: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre del sector',
+              example: 'Rural'
+            }
+          },
+          required: ['nombre']
+        },
+        UpdateSectorRequest: {
+          type: 'object',
+          properties: {
+            nombre: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre del sector',
+              example: 'Semi-urbano'
+            }
+          }
+        },
+        SectorsListResponse: {
+          type: 'object',
+          properties: {
+            sectors: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/Sector'
+              }
+            },
+            pagination: {
+              $ref: '#/components/schemas/Pagination'
+            }
+          }
+        },
+        TipoIdentificacion: {
+          type: 'object',
+          properties: {
+            id_tipo_identificacion: {
+              type: 'integer',
+              description: 'ID único del tipo de identificación',
+              example: 1
+            },
+            descripcion: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Descripción del tipo de identificación',
+              example: 'Cédula de Ciudadanía'
+            },
+            codigo: {
+              type: 'string',
+              maxLength: 10,
+              description: 'Código del tipo de identificación',
+              example: 'CC'
+            }
+          },
+          required: ['descripcion', 'codigo']
+        },
+        CreateTipoIdentificacionRequest: {
+          type: 'object',
+          properties: {
+            descripcion: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Descripción del tipo de identificación',
+              example: 'Cédula de Ciudadanía'
+            },
+            codigo: {
+              type: 'string',
+              maxLength: 10,
+              description: 'Código del tipo de identificación',
+              example: 'CC'
+            }
+          },
+          required: ['descripcion', 'codigo']
+        },
+        UpdateTipoIdentificacionRequest: {
+          type: 'object',
+          properties: {
+            descripcion: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Descripción del tipo de identificación',
+              example: 'Cédula de Ciudadanía Digital'
+            },
+            codigo: {
+              type: 'string',
+              maxLength: 10,
+              description: 'Código del tipo de identificación',
+              example: 'CCD'
+            }
+          }
+        },
+        TiposIdentificacionListResponse: {
+          type: 'object',
+          properties: {
+            tiposIdentificacion: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/TipoIdentificacion'
+              }
+            },
+            pagination: {
+              $ref: '#/components/schemas/Pagination'
+            }
+          }
         },
         FamilyMember: {
           type: 'object',
@@ -947,7 +1155,12 @@ const swaggerConfig = {
             },
             tipoIdentificacion: {
               type: 'string',
-              enum: ['CC', 'TI', 'CE', 'PA', 'RC'],
+            tipoIdentificacion: {
+              type: 'string',
+              enum: ['CC', 'TI', 'RC', 'CE', 'PP', 'PEP', 'DIE', 'CCD'],
+              description: 'Tipo de documento de identidad',
+              example: 'CC'
+            },
               description: 'Tipo de identificación',
               example: 'CC'
             },
@@ -1001,6 +1214,126 @@ const swaggerConfig = {
             }
           },
           required: ['nombres', 'fechaNacimiento', 'tipoIdentificacion', 'numeroIdentificacion', 'sexo', 'situacionCivil', 'parentesco', 'estudio', 'comunidadCultural']
+        },
+        // Esquemas actualizados de Municipios
+        MunicipioBasic: {
+          type: 'object',
+          properties: {
+            id_municipio: {
+              type: 'integer',
+              description: 'ID único del municipio',
+              example: 1
+            },
+            nombre_municipio: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre del municipio',
+              example: 'Medellín'
+            },
+            codigo_dane: {
+              type: 'string',
+              maxLength: 5,
+              description: 'Código DANE del municipio (5 dígitos)',
+              example: '05001'
+            }
+          }
+        },
+        MunicipioComplete: {
+          type: 'object',
+          properties: {
+            id_municipio: {
+              type: 'integer',
+              description: 'ID único del municipio',
+              example: 1
+            },
+            nombre_municipio: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre del municipio',
+              example: 'Medellín'
+            },
+            codigo_dane: {
+              type: 'string',
+              maxLength: 5,
+              description: 'Código DANE del municipio (5 dígitos)',
+              example: '05001'
+            },
+            id_departamento: {
+              type: 'integer',
+              description: 'ID del departamento al que pertenece',
+              example: 1
+            },
+            departamentoData: {
+              type: 'object',
+              properties: {
+                id_departamento: {
+                  type: 'integer',
+                  example: 1
+                },
+                nombre: {
+                  type: 'string',
+                  example: 'Antioquia'
+                },
+                codigo_dane: {
+                  type: 'string',
+                  example: '05'
+                },
+                region: {
+                  type: 'string',
+                  example: 'Andina'
+                }
+              }
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización'
+            }
+          },
+          required: ['nombre_municipio', 'codigo_dane', 'id_departamento']
+        },
+        MunicipioInput: {
+          type: 'object',
+          properties: {
+            nombre_municipio: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre del municipio',
+              example: 'Bogotá D.C.'
+            },
+            codigo_dane: {
+              type: 'string',
+              maxLength: 5,
+              pattern: '^[0-9]{5}$',
+              description: 'Código DANE del municipio (5 dígitos)',
+              example: '11001'
+            },
+            id_departamento: {
+              type: 'integer',
+              description: 'ID del departamento al que pertenece el municipio',
+              example: 1
+            }
+          },
+          required: ['nombre_municipio', 'codigo_dane', 'id_departamento']
+        },
+        MunicipiosListResponse: {
+          type: 'object',
+          properties: {
+            municipios: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/MunicipioComplete'
+              }
+            },
+            pagination: {
+              $ref: '#/components/schemas/Pagination'
+            }
+          }
         }
       },
       responses: {
@@ -1127,6 +1460,10 @@ const swaggerConfig = {
       {
         name: 'Parroquias',
         description: 'Gestión de catálogo de parroquias'
+      },
+      {
+        name: 'Municipios',
+        description: 'Gestión de catálogo de municipios'
       },
       {
         name: 'Veredas',

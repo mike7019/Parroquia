@@ -19,8 +19,8 @@ class SexoController {
 
       res.status(201).json(
         createSuccessResponse(
-          'Sexo created successfully',
-          newSexo
+          'Sexo creado exitosamente',
+          null
         )
       );
     } catch (error) {
@@ -325,8 +325,8 @@ class SexoController {
 
       res.status(201).json(
         createSuccessResponse(
-          'Sexos created successfully',
-          result
+          'Sexos creados exitosamente',
+          null
         )
       );
     } catch (error) {

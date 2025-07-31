@@ -22,8 +22,7 @@ class SurveyController {
 
       res.status(201).json({
         status: 'success',
-        message: 'Survey created successfully',
-        data: { survey }
+        message: `Encuesta creada exitosamente`
       });
     } catch (error) {
       res.status(500).json({
@@ -156,8 +155,7 @@ class SurveyController {
 
       res.json({
         status: 'success',
-        message: 'Family member saved successfully',
-        data: { familyMember }
+        message: 'Miembro de familia agregado exitosamente'
       });
     } catch (error) {
       if (error.message.includes('not found') || error.message.includes('Unauthorized')) {

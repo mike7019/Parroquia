@@ -2,6 +2,10 @@ import express from 'express';
 import parroquiaRoutes from './parroquiaRoutes.js';
 import veredaRoutes from './veredaRoutes.js';
 import sexoRoutes from './sexoRoutes.js';
+import municipioRoutes from './municipioRoutes.js';
+// import departamentoRoutes from './departamentoRoutes.js'; // CRUD no necesario
+import sectorRoutes from './sectorRoutes.js';
+import tipoIdentificacionRoutes from './tipoIdentificacionRoutes.js';
 
 const router = express.Router();
 
@@ -34,6 +38,9 @@ const router = express.Router();
  *                     parroquias:
  *                       type: string
  *                       example: 'active'
+ *                     municipios:
+ *                       type: string
+ *                       example: 'active'
  *                     sectors:
  *                       type: string
  *                       example: 'active'
@@ -43,12 +50,19 @@ const router = express.Router();
  *                     sexos:
  *                       type: string
  *                       example: 'active'
+ *                     tiposIdentificacion:
+ *                       type: string
+ *                       example: 'active'
  */
 
 // Mount catalog routes
 router.use('/parroquias', parroquiaRoutes);
 router.use('/veredas', veredaRoutes);
 router.use('/sexos', sexoRoutes);
+router.use('/municipios', municipioRoutes);
+// router.use('/departamentos', departamentoRoutes); // CRUD no necesario
+router.use('/sectors', sectorRoutes);
+router.use('/tipos-identificacion', tipoIdentificacionRoutes);
 
 // Health check for catalog module
 router.get('/health', (req, res) => {
@@ -58,8 +72,11 @@ router.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     services: {
       parroquias: 'active',
+      municipios: 'active',
       veredas: 'active',
-      sexos: 'active'
+      sexos: 'active',
+      sectors: 'active',
+      tiposIdentificacion: 'active'
     }
   });
 });

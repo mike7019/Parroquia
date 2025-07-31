@@ -19,8 +19,8 @@ class ParroquiaController {
 
       res.status(201).json(
         createSuccessResponse(
-          'Parroquia created successfully',
-          parroquia
+          'Parroquia creada exitosamente',
+          null
         )
       );
     } catch (error) {

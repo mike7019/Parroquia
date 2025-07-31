@@ -40,7 +40,7 @@ const FamilyMember = sequelize.define('FamilyMember', {
     allowNull: false,
     field: 'tipo_identificacion',
     validate: {
-      isIn: [['CC', 'TI', 'CE', 'PA', 'RC']]
+      isIn: [['CC', 'TI', 'RC', 'CE', 'PP', 'PEP', 'DIE', 'CCD']]
     }
   },
   numeroIdentificacion: {

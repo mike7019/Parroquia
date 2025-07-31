@@ -10,15 +10,23 @@ const Veredas = sequelize.define('Veredas', {
   },
   nombre: {
     type: DataTypes.STRING(255),
-    allowNull: true
+    allowNull: false
   },
-  codigo_vereda: {
-    type: DataTypes.STRING(20),
-    allowNull: true
-  },
-  id_municipio: {
+  id_municipio_municipios: {
     type: DataTypes.BIGINT,
-    allowNull: true
+    allowNull: true,
+    references: {
+      model: 'municipios',
+      key: 'id_municipio'
+    }
+  },
+  id_sector_sector: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    references: {
+      model: 'sector',
+      key: 'id_sector'
+    }
   }
 }, {
   sequelize,

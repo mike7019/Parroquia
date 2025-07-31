@@ -8,143 +8,89 @@ const Familias = sequelize.define('Familias', {
     autoIncrement: true,
     allowNull: false
   },
-  // Existing fields from original table
-  codigo_familia: {
-    type: DataTypes.STRING(50),
-    allowNull: true
+  uuid_familia: {
+    type: DataTypes.CHAR(36),
+    allowNull: false,
+    comment: 'UUID único de la familia'
   },
   nombre_familia: {
     type: DataTypes.STRING(255),
-    allowNull: true
+    allowNull: false,
+    comment: 'Nombre de la familia'
   },
   direccion_familia: {
     type: DataTypes.STRING(255),
-    allowNull: true
+    allowNull: false,
+    comment: 'Dirección de la familia'
   },
-  numero_contacto: {
-    type: DataTypes.STRING(20),
-    allowNull: true
+  numero_contrato_epm: {
+    type: DataTypes.STRING(255),
+    allowNull: false,
+    comment: 'Número de contrato EPM'
   },
-  tutor_responsable: {
+  tratamiento_datos: {
     type: DataTypes.BOOLEAN,
-    allowNull: true
+    allowNull: true,
+    defaultValue: false,
+    comment: 'Autorización de tratamiento de datos'
   },
   observaciones: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  id_sistemas_acueducto: {
-    type: DataTypes.BIGINT,
-    allowNull: true
-  },
-  id_tipos_disposicion_basura: {
-    type: DataTypes.BIGINT,
-    allowNull: true
-  },
-  id_tipos_aguas_residuales: {
-    type: DataTypes.BIGINT,
-    allowNull: true
-  },
-  id_municipio: {
-    type: DataTypes.BIGINT,
-    allowNull: true
-  },
-  id_vereda: {
-    type: DataTypes.BIGINT,
-    allowNull: true
-  },
-  id_sector: {
-    type: DataTypes.BIGINT,
-    allowNull: true
-  },
-  // New fields according to user schema (will be added by migration)
-  jefe_familia: {
     type: DataTypes.STRING(255),
     allowNull: true,
-    comment: 'Nombre del jefe de familia'
+    comment: 'Observaciones adicionales'
   },
-  numero_miembros: {
-    type: DataTypes.INTEGER,
+  id_vereda_veredas: {
+    type: DataTypes.BIGINT,
     allowNull: true,
-    defaultValue: 0,
-    comment: 'Número de miembros en la familia',
-    validate: {
-      min: 0
+    comment: 'ID de la vereda asociada',
+    references: {
+      model: 'veredas',
+      key: 'id_vereda'
     }
-  },
-  estado_encuesta: {
-    type: DataTypes.ENUM('pendiente', 'en_proceso', 'completada', 'revisada'),
-    allowNull: true,
-    defaultValue: 'pendiente',
-    comment: 'Estado actual de la encuesta familiar'
-  },
-  fecha_encuesta: {
-    type: DataTypes.DATE,
-    allowNull: true,
-    comment: 'Fecha de realización de la encuesta'
-  },
-  encuestador: {
-    type: DataTypes.STRING(255),
-    allowNull: true,
-    comment: 'Nombre del encuestador'
   }
 }, {
   sequelize,
   modelName: 'Familias',
   tableName: 'familias',
   timestamps: true,
-  createdAt: 'created_at',
-  updatedAt: 'updated_at',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
   indexes: [
     {
-      name: 'idx_familias_estado_encuesta',
-      fields: ['estado_encuesta']
+      name: 'idx_familias_uuid',
+      fields: ['uuid_familia']
     },
     {
       name: 'idx_familias_vereda',
-      fields: ['id_vereda']
-    },
-    {
-      name: 'idx_familias_municipio',
-      fields: ['id_municipio']
-    },
-    {
-      name: 'idx_familias_codigo',
-      fields: ['codigo_familia']
+      fields: ['id_vereda_veredas']
     }
   ]
 });
 
-// Métodos de instancia
-Familias.prototype.toSafeJSON = function() {
-  const values = Object.assign({}, this.get());
-  return values;
+// Define associations
+Familias.associate = function(models) {
+  if (models.Veredas) {
+    Familias.belongsTo(models.Veredas, {
+      foreignKey: 'id_vereda_veredas',
+      targetKey: 'id_vereda',
+      as: 'vereda'
+    });
+  }
 };
 
-// Métodos estáticos
-Familias.findActiveByVereda = function(veredaId) {
-  return this.findAll({
-    include: [{
-      association: 'veredas',
-      where: { id_vereda: veredaId },
-      through: { where: { activa: true } }
-    }],
-    where: { activa: true }
+// Static methods for querying
+Familias.findByUuid = function(uuid) {
+  return this.findOne({
+    where: {
+      uuid_familia: uuid
+    }
   });
 };
 
-Familias.countByEstadoEncuesta = function(estado = null) {
-  const where = {};
-  if (estado) {
-    where.estado_encuesta = estado;
-  }
-  return this.count({ where });
-};
-
-Familias.findByCodigoFamilia = function(codigo) {
-  return this.findOne({
-    where: { 
-      codigo_familia: codigo
+Familias.findByVereda = function(veredaId) {
+  return this.findAll({
+    where: {
+      id_vereda_veredas: veredaId
     }
   });
 };

@@ -9,23 +9,22 @@ class AuthController {
    */
   async registerUser(req, res, next) {
     try {
-      const { email, password, firstName, lastName, role, phone } = req.body;
+      const { email, password, firstName, secondName, lastName, secondLastName, role, phone } = req.body;
       
       const result = await authService.registerUser({
         email,
         password,
         firstName,
+        secondName,
         lastName,
+        secondLastName,
         role,
         phone
       });
 
       res.status(201).json({
         status: 'success',
-        message: 'User registered successfully. Please check your email to verify your account.',
-        data: {
-          user: result.user
-        }
+        message: 'Usuario registrado exitosamente. Por favor revisa tu email para verificar tu cuenta.'
       });
     } catch (error) {
       next(error);

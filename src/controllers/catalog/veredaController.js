@@ -23,8 +23,8 @@ class VeredaController {
 
       res.status(201).json(
         createSuccessResponse(
-          'Vereda created successfully',
-          vereda
+          'Vereda creada exitosamente',
+          null
         )
       );
     } catch (error) {

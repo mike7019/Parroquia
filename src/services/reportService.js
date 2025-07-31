@@ -1,5 +1,7 @@
 import { Op } from 'sequelize';
-import { Survey, FamilyMember, User } from '../models/index.js';
+// Temporarily disabled English models - using only User for auth
+import { User } from '../models/index.js';
+// import { Survey, FamilyMember, User } from '../models/index.js';
 import sequelize from '../../config/sequelize.js';
 
 /**

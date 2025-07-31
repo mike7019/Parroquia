@@ -53,29 +53,7 @@ class VeredaService {
         where,
         order: [[sortBy, sortOrder]],
         limit: parseInt(limit),
-        offset: parseInt(offset),
-        include: [
-          {
-            association: 'municipio',
-            attributes: ['id_municipio', 'nombre'],
-            required: false
-          },
-          {
-            association: 'personas',
-            attributes: ['id', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'],
-            required: false
-          },
-          {
-            association: 'sectores',
-            attributes: ['id', 'name'],
-            required: false
-          },
-          {
-            association: 'familias',
-            attributes: ['id_familia', 'jefe_familia', 'numero_miembros', 'estado_encuesta'],
-            required: false
-          }
-        ]
+        offset: parseInt(offset)
       });
 
       return {
@@ -98,25 +76,7 @@ class VeredaService {
    */
   async getVeredaById(id) {
     try {
-      const vereda = await Veredas.findByPk(id, {
-        include: [
-          {
-            association: 'municipio',
-            attributes: ['id_municipio', 'nombre', 'codigo_municipio'],
-            required: false
-          },
-          {
-            association: 'personas',
-            attributes: ['id', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'],
-            required: false
-          },
-          {
-            association: 'sectores',
-            attributes: ['id', 'name', 'description'],
-            required: false
-          }
-        ]
-      });
+      const vereda = await Veredas.findByPk(id);
 
       if (!vereda) {
         throw new Error('Vereda not found');

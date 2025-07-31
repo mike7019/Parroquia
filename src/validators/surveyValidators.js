@@ -74,7 +74,7 @@ export const saveFamilyMemberValidation = [
     .withMessage('Invalid birth date format (YYYY-MM-DD)'),
   
   body('tipoIdentificacion')
-    .isIn(['CC', 'TI', 'CE', 'PA', 'RC'])
+    .isIn(['CC', 'TI', 'RC', 'CE', 'PP', 'PEP', 'DIE', 'CCD'])
     .withMessage('Invalid identification type'),
   
   body('numeroIdentificacion')

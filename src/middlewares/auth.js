@@ -33,16 +33,17 @@ const authMiddleware = {
       
       // Find user and attach to request
       try {
-        // Usar consulta SQL cruda para evitar problemas con Sequelize
-        const users = await User.sequelize.query(
-          'SELECT id, email, "firstName", "lastName", phone, role, sector, status, "surveys_completed", "isActive", "emailVerified", "lastLoginAt", "createdAt", "updatedAt" FROM users WHERE id = :userId AND status = \'active\' AND "isActive" = true LIMIT 1',
-          {
-            replacements: { userId: decoded.userId },
-            type: User.sequelize.QueryTypes.SELECT
-          }
-        );
-        
-        const user = users[0];
+        // Use the User model to query the usuarios table with Spanish field names
+        const user = await User.findOne({
+          where: {
+            id: decoded.userId,
+            activo: true
+          },
+          attributes: [
+            'id', 'correo_electronico', 'primer_nombre', 'segundo_nombre',
+            'primer_apellido', 'segundo_apellido', 'activo'
+          ]
+        });
         
         if (!user) {
           return res.status(401).json({
@@ -51,7 +52,20 @@ const authMiddleware = {
           });
         }
 
-        req.user = user;
+        // Convert to plain object with English field names for compatibility
+        req.user = {
+          id: user.id,
+          email: user.correo_electronico,
+          firstName: user.primer_nombre,
+          lastName: user.primer_apellido,
+          phone: null, // Campo no disponible en la nueva estructura
+          role: 'surveyor', // Default role
+          status: user.activo ? 'active' : 'inactive',
+          isActive: user.activo,
+          emailVerified: false, // Campo no disponible en la nueva estructura
+          lastLoginAt: null // Campo no disponible en la nueva estructura
+        };
+
         next();
       } catch (dbError) {
         console.error('❌ authenticateToken - Database error:', dbError);

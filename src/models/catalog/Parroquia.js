@@ -10,7 +10,7 @@ const Parroquia = sequelize.define('Parroquia', {
   },
   nombre: {
     type: DataTypes.STRING(255),
-    allowNull: true
+    allowNull: false
   }
 }, {
   sequelize,

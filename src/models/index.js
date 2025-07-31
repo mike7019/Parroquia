@@ -1,19 +1,25 @@
 import sequelize from '../../config/sequelize.js';
 import User from './User.js';
-import Survey from './Survey.js';
-import Family from './Family.js';
-import FamilyMember from './FamilyMember.js';
-import SurveyAuditLog from './SurveyAuditLog.js';
+// Temporarily disabled English models to use Spanish tables only
+// import Survey from './Survey.js';
+// import Family from './Family.js';
+// import FamilyMember from './FamilyMember.js';
+// import SurveyAuditLog from './SurveyAuditLog.js';
 
 // Import catalog models
 import Parroquia from './catalog/Parroquia.js';
 import Veredas from './catalog/Veredas.js';
 import Sexo from './catalog/Sexo.js';
+import Municipio from './catalog/Municipio.js';
 import Municipios from './catalog/Municipios.js';
+import Departamentos from './catalog/Departamentos.js';
+import Sector from './catalog/Sector.js';
+import TipoIdentificacion from './catalog/TipoIdentificacion.js';
 import Persona from './catalog/Persona.js';
 import Familias from './catalog/Familias.js';
 
-// Definir asociaciones para los nuevos modelos
+// Temporarily disabled associations for English models
+/*
 User.hasMany(Survey, {
   foreignKey: 'userId',
   as: 'surveys'
@@ -64,8 +70,20 @@ SurveyAuditLog.belongsTo(User, {
   foreignKey: 'userId',
   as: 'user'
 });
+*/
 
 // Catalog model associations
+// Asociaciones de Departamentos y Municipios
+Departamentos.hasMany(Municipios, {
+  foreignKey: 'id_departamento',
+  as: 'municipios'
+});
+
+Municipios.belongsTo(Departamentos, {
+  foreignKey: 'id_departamento',
+  as: 'departamentoData'
+});
+
 Parroquia.hasMany(Persona, {
   foreignKey: 'id_parroquia',
   as: 'personas'
@@ -86,14 +104,15 @@ Persona.belongsTo(Sexo, {
   as: 'sexo'
 });
 
+// Usar el modelo Municipios (más completo) en lugar de Municipio
 Municipios.hasMany(Veredas, {
-  foreignKey: 'id_municipio',
+  foreignKey: 'id_municipio_municipios',
   targetKey: 'id_municipio',
   as: 'veredas'
 });
 
 Veredas.belongsTo(Municipios, {
-  foreignKey: 'id_municipio',
+  foreignKey: 'id_municipio_municipios',
   targetKey: 'id_municipio',
   as: 'municipio'
 });
@@ -106,6 +125,19 @@ Veredas.hasMany(Persona, {
 Persona.belongsTo(Veredas, {
   foreignKey: 'id_vereda',
   as: 'vereda'
+});
+
+// Sector associations
+Sector.hasMany(Veredas, {
+  foreignKey: 'id_sector_sector',
+  targetKey: 'id_sector',
+  as: 'veredas'
+});
+
+Veredas.belongsTo(Sector, {
+  foreignKey: 'id_sector_sector',
+  targetKey: 'id_sector',
+  as: 'sector'
 });
 
 // Relación entre Municipios y Veredas
@@ -136,14 +168,18 @@ Familias.belongsToMany(Veredas, {
 export default {
   sequelize,
   User,
-  Survey,
-  Family,
-  FamilyMember,
-  SurveyAuditLog,
+  // Temporarily disabled English models
+  // Survey,
+  // Family,
+  // FamilyMember,
+  // SurveyAuditLog,
   Parroquia,
   Veredas,
   Sexo,
+  Municipio,
   Municipios,
+  Departamentos,
+  Sector,
   Persona,
   Familias
 };
@@ -151,14 +187,19 @@ export default {
 export {
   sequelize,
   User,
-  Survey,
-  Family,
-  FamilyMember,
-  SurveyAuditLog,
+  // Temporarily disabled English models
+  // Survey,
+  // Family,
+  // FamilyMember,
+  // SurveyAuditLog,
   Parroquia,
   Veredas,
   Sexo,
+  Municipio,
   Municipios,
+  Departamentos,
+  Sector,
+  TipoIdentificacion,
   Persona,
   Familias
 };

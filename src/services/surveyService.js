@@ -1,4 +1,6 @@
-import { Survey, FamilyMember, Family, User } from '../models/index.js';
+// Temporarily disabled English models - using only User for auth
+import { User } from '../models/index.js';
+// import { Survey, FamilyMember, Family, User } from '../models/index.js';
 import { v4 as uuidv4 } from 'uuid';
 import { Op } from 'sequelize';
 

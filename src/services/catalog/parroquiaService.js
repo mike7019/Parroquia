@@ -43,14 +43,7 @@ class ParroquiaService {
         where,
         order: [[sortBy, sortOrder]],
         limit: parseInt(limit),
-        offset: parseInt(offset),
-        include: [
-          {
-            association: 'personas',
-            attributes: ['id', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'],
-            required: false
-          }
-        ]
+        offset: parseInt(offset)
       });
 
       return {
@@ -73,15 +66,7 @@ class ParroquiaService {
    */
   async getParroquiaById(id) {
     try {
-      const parroquia = await Parroquia.findByPk(id, {
-        include: [
-          {
-            association: 'personas',
-            attributes: ['id', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'],
-            required: false
-          }
-        ]
-      });
+      const parroquia = await Parroquia.findByPk(id);
 
       if (!parroquia) {
         throw new Error('Parroquia not found');

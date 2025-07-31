@@ -43,14 +43,7 @@ class SexoService {
         where,
         order: [[sortBy, sortOrder]],
         limit: parseInt(limit),
-        offset: parseInt(offset),
-        include: [
-          {
-            association: 'personas',
-            attributes: ['id', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'],
-            required: false
-          }
-        ]
+        offset: parseInt(offset)
       });
 
       return {
@@ -73,15 +66,7 @@ class SexoService {
    */
   async getSexoById(id) {
     try {
-      const sexo = await Sexo.findByPk(id, {
-        include: [
-          {
-            association: 'personas',
-            attributes: ['id', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'],
-            required: false
-          }
-        ]
-      });
+      const sexo = await Sexo.findByPk(id);
 
       if (!sexo) {
         throw new Error('Sexo not found');
