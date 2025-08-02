@@ -63,17 +63,23 @@ class AuthService {
         token_verificacion_email: emailVerificationToken
       }, { transaction });
 
-      // Assign the specified role to the new user
-      const userRole = await Role.findOne({ where: { nombre: rol || 'Encuestador' } });
-      if (userRole) {
-        await sequelize.query(
-          'INSERT INTO usuarios_roles (id_usuarios, id_roles, "createdAt", "updatedAt") VALUES ($1, $2, NOW(), NOW())',
-          {
-            bind: [user.id, userRole.id],
-            transaction
-          }
-        );
+      // Assign the specified role to the new user (role is required)
+      if (!rol) {
+        throw new ValidationError('El rol es obligatorio');
       }
+      
+      const userRole = await Role.findOne({ where: { nombre: rol } });
+      if (!userRole) {
+        throw new ValidationError(`El rol '${rol}' no existe`);
+      }
+      
+      await sequelize.query(
+        'INSERT INTO usuarios_roles (id_usuarios, id_roles) VALUES ($1, $2)',
+        {
+          bind: [user.id, userRole.id],
+          transaction
+        }
+      );
 
       // Generate tokens
       const accessToken = this.generateAccessToken(user.id);

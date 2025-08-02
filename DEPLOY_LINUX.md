@@ -7,12 +7,14 @@ Esta guía te ayudará a desplegar la aplicación Parroquia API usando Docker en
 ## 📋 Prerrequisitos
 
 ### Sistema Operativo Soportado
+
 - **Ubuntu 20.04 LTS** o superior
-- **CentOS 8** o superior  
+- **CentOS 8** o superior
 - **Debian 10** o superior
 - **Red Hat Enterprise Linux 8** o superior
 
 ### Software Requerido
+
 - **Docker Engine** (versión 20.10 o superior)
 - **Docker Compose** (versión 2.0 o superior)
 - **Git** (para clonar el repositorio)
@@ -116,43 +118,47 @@ nano .env
 **Configuración para servidor de producción:**
 
 ```bash
+# Configuración para servidor de producción
+NODE_ENV=production
+PORT=3000
+
 # Base de datos
 DB_HOST=postgres
 DB_PORT=5432
 DB_NAME=parroquia_db
 DB_USER=parroquia_user
-DB_PASSWORD=UnPasswordMuySeguro123!
+DB_PASS=UnPasswordMuySeguro123!
+
+# Configuración de seguridad Bcrypt
+BCRYPT_ROUNDS=12
 
 # JWT - CAMBIAR EN PRODUCCIÓN
 JWT_SECRET=jwt_secret_super_seguro_para_produccion_123456789
 JWT_REFRESH_SECRET=refresh_secret_super_seguro_para_produccion_987654321
+JWT_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
 
-# Email para notificaciones (variables EMAIL_)
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=tu_email@gmail.com
-EMAIL_PASS=tu_app_password
-EMAIL_FROM=noreply@parroquia.com
-SEND_REAL_EMAILS=true
+# Frontend Configuration
+FRONTEND_URL=http://206.62.139.11:3000
 
-# SMTP para el servicio de email (variables SMTP_)
+# Email Configuration (SMTP)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=tu_email@gmail.com
-SMTP_PASS=tu_app_password
+SMTP_PASS=tu_app_password_de_gmail
+EMAIL_FROM=noreply@parroquia.com
 SMTP_FROM_EMAIL=noreply@parroquia.com
+SEND_REAL_EMAILS=true
 
-# Configuración del servidor
-NODE_ENV=production
-PORT=3000
-HOST=0.0.0.0
-
-# Configuración de seguridad
-CORS_ORIGIN=http://206.62.139.11:3000
-API_BASE_URL=http://206.62.139.11:3000/api
+# Logging
+VERBOSE_LOGGING=true
 ```
 
-### 4. Ejecutar Despliegue Automático
+# Ejecutar script de despliegue
+./deploy.sh
+
+# NOTA: Si es la primera vez, también puedes usar:
+chmod +x deploy.sh && ./deploy.sh
 
 ```bash
 # Ejecutar script de despliegue
@@ -160,6 +166,7 @@ API_BASE_URL=http://206.62.139.11:3000/api
 ```
 
 El script realizará automáticamente:
+
 - ✅ Verificación de Docker
 - ✅ Construcción de imágenes
 - ✅ Inicio de servicios
@@ -188,7 +195,7 @@ curl http://localhost:3000/api/health | jq
 Una vez desplegado exitosamente:
 
 - **🌐 API Base:** http://206.62.139.11:3000/api
-- **📚 Documentación:** http://206.62.139.11:3000/api-docs  
+- **📚 Documentación:** http://206.62.139.11:3000/api-docs
 - **💚 Health Check:** http://206.62.139.11:3000/api/health
 
 ## 🔄 Comandos Útiles de Administración
@@ -225,8 +232,14 @@ docker compose exec postgres pg_dump -U parroquia_user parroquia_db > backup_$(d
 # Restaurar backup
 cat backup_20250128_120000.sql | docker compose exec -T postgres psql -U parroquia_user parroquia_db
 
+# Crear directorio para backups
+mkdir -p /home/parroquia/backups
+
 # Backup automatizado (agregar a crontab)
 echo "0 2 * * * cd /home/parroquia/Parroquia && docker compose exec postgres pg_dump -U parroquia_user parroquia_db > /home/parroquia/backups/backup_\$(date +\%Y\%m\%d_\%H\%M\%S).sql" | crontab -
+
+# Verificar crontab
+crontab -l
 ```
 
 ## 🚨 Solución de Problemas
@@ -247,6 +260,7 @@ docker compose up -d
 ```
 
 ### Problema: Error de autenticación SASL
+
 **Error:** `SASL: SCRAM-SERVER-FIRST-MESSAGE: client password must be a string`
 
 **Solución:**
@@ -255,18 +269,31 @@ docker compose up -d
 # 1. Verificar variables de entorno en el contenedor
 docker compose exec api env | grep -E "(DB_|SMTP_|EMAIL_)"
 
-# 2. Si faltan variables SMTP_, agregar al archivo .env:
+# 2. Verificar que DB_PASS esté configurado (no DB_PASSWORD)
+# En el archivo .env debe ser DB_PASS, no DB_PASSWORD
+grep DB_PASS .env
+
+# 3. Si falta DB_PASS o hay inconsistencias, corregir:
+echo "DB_PASS=UnPasswordMuySeguro123!" >> .env
+
+# 4. Verificar que todas las variables SMTP estén presentes:
+grep -E "SMTP_|EMAIL_FROM|SEND_REAL_EMAILS" .env
+
+# 5. Si faltan variables, agregarlas:
 echo "SMTP_HOST=smtp.gmail.com" >> .env
 echo "SMTP_PORT=587" >> .env
 echo "SMTP_USER=tu_email@gmail.com" >> .env
 echo "SMTP_PASS=tu_app_password" >> .env
 echo "SMTP_FROM_EMAIL=noreply@parroquia.com" >> .env
+echo "EMAIL_FROM=noreply@parroquia.com" >> .env
+echo "SEND_REAL_EMAILS=true" >> .env
 
-# 3. Reiniciar servicios para cargar nuevas variables
+# 6. Reiniciar servicios para cargar nuevas variables
 docker compose down
 docker compose up -d
 
-# 4. Ejecutar migraciones nuevamente
+# 7. Esperar que los servicios estén listos y ejecutar migraciones
+sleep 30
 docker compose exec api npm run db:migrate
 ```
 
@@ -278,31 +305,73 @@ docker compose exec api npm run db:migrate
 # Verificar estado de PostgreSQL
 docker compose exec postgres pg_isready -U parroquia_user
 
-# Verificar variables de base de datos
+# Verificar variables de base de datos (usar DB_PASS, no DB_PASSWORD)
 docker compose exec api env | grep DB_
 
 # Conectar manualmente para verificar credenciales
 docker compose exec postgres psql -U parroquia_user -d parroquia_db
 
-# Si la conexión falla, reiniciar servicios
+# Si la conexión falla, verificar que DB_PASS esté configurado correctamente
+grep DB_PASS .env
+
+# Reiniciar servicios si es necesario
 docker compose restart
 
-# Esperar a que PostgreSQL esté listo
+# Esperar a que PostgreSQL esté completamente listo
+echo "Esperando a que PostgreSQL esté listo..."
 sleep 30
+
+# Verificar que la base de datos responde
+docker compose exec postgres pg_isready -U parroquia_user -d parroquia_db
+
+# Ejecutar migraciones
 docker compose exec api npm run db:migrate
 ```
 
 ## 📝 Checklist de Despliegue
 
-- [ ] Docker y Docker Compose instalados
-- [ ] Puerto 3000 disponible
-- [ ] Archivo `.env` configurado
-- [ ] Firewall configurado
+- [ ] Docker Engine (20.10+) y Docker Compose (2.0+) instalados
+- [ ] Puerto 3000 disponible en el servidor
+- [ ] Archivo `.env` configurado con variables correctas:
+  - [ ] `DB_PASS` (no `DB_PASSWORD`)
+  - [ ] Variables SMTP configuradas
+  - [ ] JWT secrets cambiados para producción
+- [ ] Firewall configurado para permitir puerto 3000
+- [ ] Script `deploy.sh` con permisos de ejecución
 - [ ] Script `deploy.sh` ejecutado exitosamente
-- [ ] Health check respondiendo 200 OK
-- [ ] Usuario administrador creado
-- [ ] Backup inicial realizado
+- [ ] Health check respondiendo 200 OK en `/api/health`
+- [ ] Documentación Swagger accesible en `/api-docs`
+- [ ] Usuario administrador creado (opcional)
+- [ ] Backup inicial configurado
+- [ ] Logs de aplicación funcionando correctamente
 
 ---
 
-**🎉 ¡Despliegue completado!** Tu API está lista en http://206.62.139.11:3000/api
+**🎉 ¡Despliegue completado!** 
+
+Tu API está lista en:
+- **API:** http://206.62.139.11:3000/api
+- **Docs:** http://206.62.139.11:3000/api-docs
+
+## 🔒 Próximos Pasos de Seguridad
+
+1. **Configurar HTTPS con Nginx:**
+   ```bash
+   sudo apt install nginx certbot python3-certbot-nginx
+   sudo certbot --nginx -d tu-dominio.com
+   ```
+
+2. **Configurar firewall:**
+   ```bash
+   sudo ufw allow 22/tcp
+   sudo ufw allow 80/tcp
+   sudo ufw allow 443/tcp
+   sudo ufw deny 3000/tcp  # Solo acceso interno
+   sudo ufw enable
+   ```
+
+3. **Monitoreo con logs:**
+   ```bash
+   # Ver logs en tiempo real
+   docker compose logs -f --tail=100
+   ```

@@ -9,6 +9,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'id_parroquia',
         as: 'personas'
       });
+
+      // Relación con Municipio - una parroquia pertenece a un municipio
+      Parroquia.belongsTo(models.Municipio, {
+        foreignKey: 'id_municipio',
+        as: 'municipio'
+      });
     }
   }
 
@@ -22,6 +28,14 @@ module.exports = (sequelize, DataTypes) => {
     nombre: {
       type: DataTypes.STRING(255),
       allowNull: true
+    },
+    id_municipio: {
+      type: DataTypes.BIGINT,
+      allowNull: true,
+      references: {
+        model: 'municipios',
+        key: 'id_municipio'
+      }
     }
   }, {
     sequelize,

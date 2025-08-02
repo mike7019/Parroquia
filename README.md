@@ -115,9 +115,8 @@ cp .env.example .env
 # 3. Levantar servicios con Docker
 docker-compose up -d
 
-# 4. IMPORTANTE: Arreglar migraciones ES Module
-# Ejecutar script de migración personalizado
-node runMigration.js
+# 4. Ejecutar migraciones de Sequelize
+npx sequelize-cli db:migrate
 
 # 5. Poblar base de datos desde cero
 npm run db:populate
@@ -147,9 +146,8 @@ npm install
 cp .env.example .env
 # Editar .env con configuración de tu DB local
 
-# 5. SOLUCIÓN para error ES Module en migraciones:
-# Ejecutar script de migración personalizado
-node runMigration.js
+# 5. Ejecutar migraciones de Sequelize
+npx sequelize-cli db:migrate
 
 # 6. Poblar base de datos completa
 npm run db:populate
@@ -278,14 +276,17 @@ npm run test:coverage  # Genera reporte de cobertura
 **Causa:** La base de datos tiene foreign keys incorrectas de migraciones anteriores.
 
 **Solución rápida:**
+
 ```bash
 npm run db:fix
 npm start
+
 ```
 
 **¿Qué hace el comando `db:fix`?**
+
 - Elimina tablas con foreign keys incorrectas
-- Limpia tipos ENUM huérfanos  
+- Limpia tipos ENUM huérfanos
 - Permite que Sequelize recree las tablas con la estructura correcta
 - Es seguro en desarrollo (los datos de catálogo se pueden recargar)
 
@@ -294,27 +295,33 @@ npm start
 #### **❌ Error: "ES Module migration files not supported"**
 
 **Solución:**
+
 ```bash
 node runMigration.js  # Script personalizado para ES modules
 npm run db:load-catalogs  # Cargar datos de catálogo
+
 ```
 
 #### **❌ Error: "Connection refused to PostgreSQL"**
 
 **Verificar:**
+
 1. PostgreSQL está ejecutándose
 2. Variables de entorno en `.env` son correctas
 3. Base de datos `parroquia_db` existe
 
 **Con Docker:**
+
 ```bash
 docker-compose up postgres -d  # Solo PostgreSQL
 docker-compose logs postgres   # Ver logs de PostgreSQL
+
 ```
 
 #### **❌ Error: "Port 3000 is already in use"**
 
 **Solución:**
+
 ```bash
 # Encontrar proceso en puerto 3000
 netstat -ano | findstr :3000
@@ -323,6 +330,7 @@ taskkill /PID <PID> /F
 
 # O cambiar puerto en .env
 PORT=3001
+
 ```
 
 ---

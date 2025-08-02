@@ -11,14 +11,27 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       // Nuevas relaciones para el sistema de encuestas
-      Familia.belongsTo(models.Municipios, {
+      Familia.belongsTo(models.Municipio, {
         foreignKey: 'id_municipio',
         as: 'municipio'
       });
 
-      Familia.belongsTo(models.Veredas, {
-        foreignKey: 'id_vereda',
+      Familia.belongsTo(models.Sector, {
+        foreignKey: 'id_sector',
+        as: 'sector'
+      });
+
+      Familia.belongsTo(models.Vereda, {
+        foreignKey: 'id_vereda_veredas',
         as: 'vereda'
+      });
+
+      // Nuevas relaciones muchos a muchos
+      Familia.belongsToMany(models.TipoVivienda, {
+        through: 'familia_tipo_vivienda',
+        foreignKey: 'id_familia',
+        otherKey: 'id_tipo_vivienda',
+        as: 'tiposVivienda'
       });
     }
   }
@@ -30,10 +43,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     // Campos actualizados según documentación
-    familyHead: {
+    apellidoFamiliar: {
       type: DataTypes.STRING(200),
       allowNull: false,
-      field: 'nombre_familia', // Mapeo al campo existente
+      field: 'apellido_familiar', // Mapeo al campo actualizado
       validate: {
         notEmpty: true,
         len: [2, 200]
@@ -58,6 +71,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(20),
       allowNull: true,
       field: 'numero_contacto', // Mapeo al campo existente
+      validate: {
+        len: [10, 20]
+      }
+    },
+    telefono: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
       validate: {
         len: [10, 20]
       }
@@ -115,10 +135,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       allowNull: true
     },
-    observaciones: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
+    // Campos eliminados: observaciones y tratamiento_datos se removieron
     // Relaciones geográficas
     id_municipio: {
       type: DataTypes.BIGINT,

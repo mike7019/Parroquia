@@ -1,8 +1,8 @@
 import express from 'express';
 import authController from '../controllers/authController.js';
-import authValidators from '../validators/authValidators.js';
 import authMiddleware from '../middlewares/auth.js';
 import validationMiddleware from '../middlewares/validation.js';
+import authValidators from '../validators/authValidators.js';
 
 const router = express.Router();
 
@@ -153,13 +153,11 @@ router.post('/register',
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.post('/login', 
+router.post('/login',
   authValidators.validateLogin,
   validationMiddleware.handleValidationErrors,
   authController.loginUser
-);
-
-/**
+);/**
  * @swagger
  * /api/auth/refresh-token:
  *   post:

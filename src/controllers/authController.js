@@ -1,13 +1,21 @@
 import authService from '../services/authService.js';
+import logger from '../utils/logger.js';
+import DatabaseErrorHandler from '../utils/databaseErrorHandler.js';
 
 /**
- * Authentication controller handling all auth-related endpoints using ES6 modules
+ * Authentication controller with enhanced error handling and logging
  */
 class AuthController {
   /**
    * Register a new user
    */
   async registerUser(req, res, next) {
+    const userLogger = logger.child({ 
+      controller: 'AuthController', 
+      action: 'registerUser',
+      ip: req.ip 
+    });
+
     try {
       const { 
         correo_electronico, 
@@ -19,16 +27,31 @@ class AuthController {
         telefono,
         rol 
       } = req.body;
+
+      userLogger.info('User registration attempt', {
+        email: correo_electronico,
+        role: rol,
+        hasPhone: !!telefono
+      });
       
-      const result = await authService.registerUser({
-        correo_electronico,
-        contrasena,
-        primer_nombre,
-        segundo_nombre,
-        primer_apellido,
-        segundo_apellido,
-        telefono,
-        rol
+      const result = await DatabaseErrorHandler.executeWithErrorHandling(
+        () => authService.registerUser({
+          correo_electronico,
+          contrasena,
+          primer_nombre,
+          segundo_nombre,
+          primer_apellido,
+          segundo_apellido,
+          telefono,
+          rol
+        }),
+        { operation: 'user_registration', email: correo_electronico }
+      );
+
+      userLogger.auth('User registered successfully', {
+        userId: result.user.id,
+        email: correo_electronico,
+        role: rol
       });
 
       res.status(201).json({
@@ -41,6 +64,10 @@ class AuthController {
         }
       });
     } catch (error) {
+      userLogger.error('User registration failed', error, {
+        email: req.body?.correo_electronico,
+        role: req.body?.rol
+      });
       next(error);
     }
   }

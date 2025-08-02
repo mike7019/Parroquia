@@ -16,7 +16,6 @@ import systemRoutes from './routes/systemRoutes.js';
 // Temporarily disabled survey routes
 // import surveyRoutes from './routes/surveyRoutes.js';
 import catalogRoutes from './routes/catalog/index.js';
-import swaggerCustomRoutes from './routes/swaggerCustomRoutes.js';
 
 // Import middlewares
 import errorHandler from './middlewares/errorHandler.js';
@@ -99,7 +98,14 @@ if (process.env.NODE_ENV === 'production') {
   app.use(morgan('combined'));
 } else if (process.env.VERBOSE_LOGGING === 'true') {
   app.use(morgan('dev'));
+  // logger.info('Development mode with verbose logging enabled', {
+  //   environment: process.env.NODE_ENV,
+  //   logLevel: process.env.LOG_LEVEL || 'info'
+  // });
 }
+
+// Request logging middleware
+// app.use(requestLogger);
 
 // Body parsing middlewares with enhanced error handling
 app.use(express.json({ 
@@ -190,9 +196,6 @@ app.use('/api/users', userRoutes);
 app.use('/api/catalog', catalogRoutes);
 app.use('/api', systemRoutes);
 
-// Custom Swagger routes
-app.use('/', swaggerCustomRoutes);
-
 // Root route
 app.use('/', systemRoutes);
 
@@ -204,6 +207,9 @@ app.use('*', (req, res) => {
     code: 'ROUTE_NOT_FOUND'
   });
 });
+
+// Error logging middleware (before error handler)
+// app.use(errorLogger);
 
 // Error handling middleware (must be last)
 app.use(errorHandler);

@@ -16,9 +16,7 @@ const UsuarioRole = sequelize.define('UsuarioRole', {
   }
 }, {
   tableName: 'usuarios_roles',
-  timestamps: true,
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  timestamps: false
 });
 
 export default UsuarioRole;

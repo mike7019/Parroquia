@@ -52,6 +52,10 @@ const authMiddleware = {
           });
         }
 
+        // Get user roles
+        const userRoles = await user.getUserRoles();
+        const primaryRole = userRoles.length > 0 ? userRoles[0] : 'Encuestador';
+
         // Convert to plain object with English field names for compatibility
         req.user = {
           id: user.id,
@@ -59,7 +63,8 @@ const authMiddleware = {
           firstName: user.primer_nombre,
           lastName: user.primer_apellido,
           phone: null, // Campo no disponible en la nueva estructura
-          role: 'surveyor', // Default role
+          role: primaryRole, // Get actual role from database
+          roles: userRoles, // All user roles
           status: user.activo ? 'active' : 'inactive',
           isActive: user.activo,
           emailVerified: false, // Campo no disponible en la nueva estructura
@@ -113,10 +118,33 @@ const authMiddleware = {
         });
       }
 
-      if (!roles.includes(req.user.role)) {
+      // Map English role names to Spanish for backward compatibility
+      const roleMapping = {
+        'admin': 'Administrador',
+        'surveyor': 'Encuestador'
+      };
+
+      // Map required roles to Spanish equivalents
+      const mappedRoles = roles.map(role => roleMapping[role] || role);
+
+      // Check if user has any of the required roles
+      if (req.user.roles && req.user.roles.length > 0) {
+        const hasRole = req.user.roles.some(userRole => {
+          const roleName = typeof userRole === 'object' ? userRole.nombre : userRole;
+          return mappedRoles.includes(roleName);
+        });
+
+        if (!hasRole) {
+          return res.status(403).json({
+            status: 'error',
+            message: 'Insufficient permissions. Required roles: ' + mappedRoles.join(', '),
+            code: 'INSUFFICIENT_PERMISSIONS'
+          });
+        }
+      } else {
         return res.status(403).json({
           status: 'error',
-          message: 'Insufficient permissions. Required roles: ' + roles.join(', '),
+          message: 'No roles assigned. Required roles: ' + mappedRoles.join(', '),
           code: 'INSUFFICIENT_PERMISSIONS'
         });
       }
