@@ -444,6 +444,70 @@ deploy() {
     return 0
 }
 
+# Function to diagnose container issues
+diagnose_container() {
+    local service=${1:-}
+    
+    if [[ -z "$service" ]]; then
+        print_error "Please specify a service to diagnose (e.g., 'diagnose nginx')"
+        return 1
+    fi
+    
+    print_status "=== Diagnosing $service container ==="
+    
+    # Get container ID
+    local container_id=$(docker-compose -f "$COMPOSE_FILE" ps -q "$service" 2>/dev/null)
+    
+    if [[ -z "$container_id" ]]; then
+        print_error "No container found for service: $service"
+        return 1
+    fi
+    
+    # Container basic info
+    print_status "Container ID: $container_id"
+    print_status "Container Status:"
+    docker inspect "$container_id" --format='{{.State.Status}} ({{.State.ExitCode}})' 2>/dev/null || echo "unknown"
+    
+    # Health check info if available
+    local health_status=$(docker inspect "$container_id" --format='{{.State.Health.Status}}' 2>/dev/null || echo "no health check")
+    if [[ "$health_status" != "no health check" ]]; then
+        print_status "Health Status: $health_status"
+        
+        # Show last health check log
+        local health_log=$(docker inspect "$container_id" --format='{{range .State.Health.Log}}{{.Output}}{{end}}' 2>/dev/null | tail -1)
+        if [[ -n "$health_log" ]]; then
+            print_status "Last Health Check Output:"
+            echo "$health_log"
+        fi
+    fi
+    
+    # Show recent logs
+    print_status "Recent logs (last 50 lines):"
+    docker logs --tail=50 "$container_id" 2>&1 || echo "No logs available"
+    
+    # If container is not running, show why it exited
+    local container_status=$(docker inspect "$container_id" --format='{{.State.Status}}' 2>/dev/null)
+    if [[ "$container_status" == "exited" ]]; then
+        print_status "Container exit reason:"
+        docker inspect "$container_id" --format='{{.State.Error}}' 2>/dev/null || echo "No error message"
+        
+        print_status "Last container execution logs:"
+        docker logs "$container_id" 2>&1 | tail -20 || echo "No execution logs"
+    fi
+    
+    # Port mapping info
+    print_status "Port mappings:"
+    docker port "$container_id" 2>/dev/null || echo "No port mappings"
+    
+    # Network info
+    print_status "Network connections:"
+    docker inspect "$container_id" --format='{{range $k, $v := .NetworkSettings.Networks}}{{$k}}: {{$v.IPAddress}}{{end}}' 2>/dev/null || echo "No network info"
+    
+    # Resource usage
+    print_status "Resource usage:"
+    docker stats --no-stream --format "CPU: {{.CPUPerc}} | Memory: {{.MemUsage}}" "$container_id" 2>/dev/null || echo "Resource info unavailable"
+}
+
 # Function to show logs
 show_logs() {
     local service=${1:-}
@@ -682,6 +746,7 @@ show_help() {
     echo -e "  ${GREEN}deploy${NC}      - Full deployment with health checks"
     echo -e "  ${GREEN}sync${NC}        - Sync npm dependencies (run npm install)"
     echo -e "  ${GREEN}logs${NC}        - Show application logs (use 'logs api' for specific service)"
+    echo -e "  ${GREEN}diagnose${NC}    - Diagnose container issues (use 'diagnose nginx' for specific service)"
     echo -e "  ${GREEN}status${NC}      - Show comprehensive system status"
     echo -e "  ${GREEN}stop${NC}        - Stop all services gracefully"
     echo -e "  ${GREEN}restart${NC}     - Restart services (use 'restart api' for specific service)"
@@ -701,6 +766,7 @@ show_help() {
     echo -e "  ${GRAY}VERBOSE=true $0 deploy${NC}"
     echo -e "  ${GRAY}$0 sync${NC}"
     echo -e "  ${GRAY}$0 logs api${NC}"
+    echo -e "  ${GRAY}$0 diagnose nginx${NC}"
     echo -e "  ${GRAY}$0 scale api=3${NC}"
     echo -e "  ${GRAY}FORCE=true $0 clean${NC}"
     echo ""
@@ -733,6 +799,9 @@ case "$COMMAND" in
         ;;
     "logs")
         show_logs "$OPTIONS"
+        ;;
+    "diagnose")
+        diagnose_container "$OPTIONS"
         ;;
     "status")
         if check_docker; then
