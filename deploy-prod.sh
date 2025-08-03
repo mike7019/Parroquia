@@ -278,9 +278,70 @@ EOF
     fi
 }
 
+# Function to sync npm dependencies
+sync_npm_dependencies() {
+    print_status "Synchronizing npm dependencies..."
+    
+    if [[ ! -f "package.json" ]]; then
+        print_error "package.json not found"
+        return 1
+    fi
+    
+    # Check if package-lock.json exists and is in sync
+    if [[ -f "package-lock.json" ]]; then
+        print_status "Checking package-lock.json sync status..."
+        
+        # Try to run npm ci to check if lockfile is in sync
+        if npm ci --dry-run &> /dev/null; then
+            print_success "package-lock.json is already in sync"
+            return 0
+        else
+            print_warning "package-lock.json is out of sync with package.json"
+        fi
+    else
+        print_warning "package-lock.json not found"
+    fi
+    
+    # Backup existing lockfile if it exists
+    if [[ -f "package-lock.json" ]]; then
+        print_status "Backing up existing package-lock.json..."
+        cp package-lock.json "package-lock.json.backup.$(date +%s)" || true
+    fi
+    
+    # Remove node_modules to ensure clean install
+    if [[ -d "node_modules" ]]; then
+        print_status "Removing existing node_modules..."
+        rm -rf node_modules
+    fi
+    
+    # Run npm install to generate new package-lock.json
+    print_status "Running npm install to sync dependencies..."
+    if npm install; then
+        print_success "Dependencies synchronized successfully"
+        
+        # Verify the sync
+        if npm ci --dry-run &> /dev/null; then
+            print_success "package-lock.json sync verified"
+            return 0
+        else
+            print_error "package-lock.json sync verification failed"
+            return 1
+        fi
+    else
+        print_error "npm install failed"
+        return 1
+    fi
+}
+
 # Function to build and deploy
 deploy() {
     print_status "Starting production deployment..."
+    
+    # Sync npm dependencies first
+    if ! sync_npm_dependencies; then
+        print_error "Failed to sync npm dependencies"
+        return 1
+    fi
     
     # Pre-deployment cleanup
     print_status "Performing pre-deployment cleanup..."
@@ -619,6 +680,7 @@ show_help() {
     echo ""
     echo -e "${BLUE}Commands:${NC}"
     echo -e "  ${GREEN}deploy${NC}      - Full deployment with health checks"
+    echo -e "  ${GREEN}sync${NC}        - Sync npm dependencies (run npm install)"
     echo -e "  ${GREEN}logs${NC}        - Show application logs (use 'logs api' for specific service)"
     echo -e "  ${GREEN}status${NC}      - Show comprehensive system status"
     echo -e "  ${GREEN}stop${NC}        - Stop all services gracefully"
@@ -637,6 +699,7 @@ show_help() {
     echo ""
     echo -e "${BLUE}Examples:${NC}"
     echo -e "  ${GRAY}VERBOSE=true $0 deploy${NC}"
+    echo -e "  ${GRAY}$0 sync${NC}"
     echo -e "  ${GRAY}$0 logs api${NC}"
     echo -e "  ${GRAY}$0 scale api=3${NC}"
     echo -e "  ${GRAY}FORCE=true $0 clean${NC}"
@@ -664,6 +727,9 @@ case "$COMMAND" in
             print_error "Prerequisites or environment validation failed"
             exit 1
         fi
+        ;;
+    "sync")
+        sync_npm_dependencies
         ;;
     "logs")
         show_logs "$OPTIONS"
