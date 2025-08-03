@@ -45,7 +45,7 @@ required_files=(
 )
 required_dirs=(
     "migrations"
-for file in "${required_files[@]}"; do
+for file in "${required_files[@]}" do
     if [ ! -f "$file" ]; then
         error "Archivo requerido no encontrado: $file"
         ((ERRORS++))
