@@ -1,10 +1,5 @@
 require('dotenv').config();
 
-// Debug: Verificar variables de entorno
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('DB_HOST:', process.env.DB_HOST);
-console.log('DB_USER:', process.env.DB_USER);
-
 module.exports = {
   development: {
     username: process.env.DB_USER || 'parroquia_user',
