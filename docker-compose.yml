@@ -9,7 +9,7 @@ services:
     environment:
       POSTGRES_DB: parroquia_db
       POSTGRES_USER: parroquia_user
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-parroquia_password}
+      POSTGRES_PASSWORD: ${DB_PASS:-parroquia_password}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -30,8 +30,28 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    env_file:
-      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=${PORT}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+      - JWT_REFRESH_EXPIRES_IN=${JWT_REFRESH_EXPIRES_IN}
+      - BCRYPT_ROUNDS=${BCRYPT_ROUNDS}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - EMAIL_FROM=${EMAIL_FROM}
+      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
+      - SEND_REAL_EMAILS=${SEND_REAL_EMAILS}
+      - VERBOSE_LOGGING=${VERBOSE_LOGGING}
     ports:
       - "3000:3000"
     networks:
