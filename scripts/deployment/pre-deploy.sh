@@ -34,23 +34,34 @@ ERRORS=0
 log "Verificando archivos necesarios..."
 
 required_files=(
-    "package.json"
-    "Dockerfile"
-    "docker-compose.yml"
+    "../../package.json"
+    "../../Dockerfile"
+    "../../docker-compose.yml"
     "src/app.js"
     "config/sequelize.js"
-    "migrations"
-    "createAdminUser.js"
-    "loadCatalogData.js"
+    "../database/createAdminUser.js"
+    "../utilities/loadCatalogData.js"
     "scripts/deployment/deploy.sh"
 )
-
+required_dirs=(
+    "migrations"
 for file in "${required_files[@]}"; do
-    if [ ! -e "$file" ]; then
+    if [ ! -f "$file" ]; then
         error "Archivo requerido no encontrado: $file"
         ((ERRORS++))
     else
         log "✓ $file"
+    fi
+done
+
+for dir in "${required_dirs[@]}"; do
+    if [ ! -d "$dir" ]; then
+        error "Directorio requerido no encontrado: $dir"
+        ((ERRORS++))
+    else
+        log "✓ $dir"
+    fi
+done
     fi
 done
 
