@@ -37,15 +37,18 @@ required_files=(
     "../../package.json"
     "../../Dockerfile"
     "../../docker-compose.yml"
-    "src/app.js"
-    "config/sequelize.js"
-    "../database/createAdminUser.js"
-    "../utilities/loadCatalogData.js"
-    "scripts/deployment/deploy.sh"
+    "../../src/app.js"
+    "../../config/sequelize.js"
+    "../../scripts/database/createAdminUser.js"
+    "../../scripts/utilities/loadCatalogData.js"
+    "../../scripts/deployment/deploy.sh"
 )
+
 required_dirs=(
     "migrations"
-for file in "${required_files[@]}" do
+)
+
+for file in "${required_files[@]}"; do
     if [ ! -f "$file" ]; then
         error "Archivo requerido no encontrado: $file"
         ((ERRORS++))
@@ -60,8 +63,6 @@ for dir in "${required_dirs[@]}"; do
         ((ERRORS++))
     else
         log "✓ $dir"
-    fi
-done
     fi
 done
 
@@ -141,8 +142,8 @@ fi
 log "Verificando sintaxis de archivos JavaScript..."
 js_files=(
     "src/app.js"
-    "createAdminUser.js"
-    "loadCatalogData.js"
+    "scripts/database/createAdminUser.js"
+    "scripts/utilities/loadCatalogData.js"
 )
 
 for js_file in "${js_files[@]}"; do
@@ -153,6 +154,8 @@ for js_file in "${js_files[@]}"; do
             error "Error de sintaxis en $js_file"
             ((ERRORS++))
         fi
+    else
+        warn "Archivo JavaScript opcional no encontrado: $js_file"
     fi
 done
 
