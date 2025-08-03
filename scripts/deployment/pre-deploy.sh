@@ -129,10 +129,10 @@ fi
 
 # Verificar que las migraciones están ordenadas
 log "Verificando migraciones..."
-migration_count=$(ls migrations/*.cjs 2>/dev/null | wc -l)
+migration_count=$(ls ../../migrations/*.cjs 2>/dev/null | wc -l)
 if [ $migration_count -gt 0 ]; then
     log "✓ $migration_count migraciones encontradas"
-    ls migrations/*.cjs | sort
+    ls ../../migrations/*.cjs | sort
 else
     error "No se encontraron migraciones"
     ((ERRORS++))
@@ -141,9 +141,9 @@ fi
 # Verificar sintaxis de archivos JavaScript principales
 log "Verificando sintaxis de archivos JavaScript..."
 js_files=(
-    "src/app.js"
-    "scripts/database/createAdminUser.js"
-    "scripts/utilities/loadCatalogData.js"
+    "../../src/app.js"
+    "../../scripts/database/createAdminUser.js"
+    "../../scripts/utilities/loadCatalogData.js"
 )
 
 for js_file in "${js_files[@]}"; do
@@ -177,11 +177,11 @@ fi
 
 # Verificar permisos de archivos de script
 log "Verificando permisos de scripts..."
-if [ -x "scripts/deployment/deploy.sh" ]; then
-    log "✓ scripts/deployment/deploy.sh es ejecutable"
+if [ -x "deploy.sh" ]; then
+    log "✓ deploy.sh es ejecutable"
 else
-    warn "scripts/deployment/deploy.sh no es ejecutable. Aplicando permisos..."
-    chmod +x scripts/deployment/deploy.sh
+    warn "deploy.sh no es ejecutable. Aplicando permisos..."
+    chmod +x deploy.sh
 fi
 
 # Verificar espacio en disco
