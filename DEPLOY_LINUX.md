@@ -102,67 +102,88 @@ git clone https://github.com/mike7019/Parroquia.git
 cd Parroquia
 
 # Dar permisos de ejecución al script
-chmod +x deploy.sh
+chmod +x scripts/deployment/deploy.sh
 ```
 
-### 3. Configurar Variables de Entorno
+### 3. Configurar Variables de Entorno en .bashrc
 
 ```bash
-# Crear archivo de configuración
-cp .env.example .env
+# Editar archivo .bashrc para agregar variables de entorno
+nano ~/.bashrc
 
-# Editar configuración
-nano .env
+# Verificar configuración de variables de entorno
+./scripts/deployment/check-environment.sh
 ```
 
 **Configuración para servidor de producción:**
 
 ```bash
-# Configuración para servidor de producción
-NODE_ENV=production
-PORT=3000
+# Variables de entorno para .bashrc - AGREGAR AL FINAL del archivo ~/.bashrc
 
-# Base de datos
-DB_HOST=postgres
-DB_PORT=5432
-DB_NAME=parroquia_db
-DB_USER=parroquia_user
-DB_PASS=UnPasswordMuySeguro123!
+# Configuración de la aplicación
+export NODE_ENV=production
+export PORT=3000
+export VERBOSE_LOGGING=true
 
-# Configuración de seguridad Bcrypt
-BCRYPT_ROUNDS=12
+# Configuración de base de datos
+export DB_HOST=postgres
+export DB_PORT=5432
+export DB_NAME=parroquia_db
+export DB_USER=parroquia_user
+export DB_PASS=UnPasswordMuySeguro123!
 
-# JWT - CAMBIAR EN PRODUCCIÓN
-JWT_SECRET=jwt_secret_super_seguro_para_produccion_123456789
-JWT_REFRESH_SECRET=refresh_secret_super_seguro_para_produccion_987654321
-JWT_EXPIRES_IN=15m
-JWT_REFRESH_EXPIRES_IN=7d
+# Configuración de seguridad - CAMBIAR EN PRODUCCIÓN
+export BCRYPT_ROUNDS=12
+export JWT_SECRET=jwt_secret_super_seguro_para_produccion_123456789
+export JWT_REFRESH_SECRET=refresh_secret_super_seguro_para_produccion_987654321
+export JWT_EXPIRES_IN=15m
+export JWT_REFRESH_EXPIRES_IN=7d
 
-# Frontend Configuration
-FRONTEND_URL=http://206.62.139.11:3000
+# Configuración del frontend
+export FRONTEND_URL=http://206.62.139.11:3000
 
-# Email Configuration (SMTP)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=tu_email@gmail.com
-SMTP_PASS=tu_app_password_de_gmail
-EMAIL_FROM=noreply@parroquia.com
-SMTP_FROM_EMAIL=noreply@parroquia.com
-SEND_REAL_EMAILS=true
+# Configuración de email (SMTP)
+export SMTP_HOST=smtp.gmail.com
+export SMTP_PORT=587
+export SMTP_USER=tu_email@gmail.com
+export SMTP_PASS=tu_app_password_de_gmail
+export EMAIL_FROM=noreply@parroquia.com
+export SMTP_FROM_EMAIL=noreply@parroquia.com
+export SEND_REAL_EMAILS=true
 
-# Logging
-VERBOSE_LOGGING=true
+# Después de agregar las variables, ejecutar:
+# source ~/.bashrc
 ```
 
-# Ejecutar script de despliegue
-./deploy.sh
+### 5. Ejecutar Script de Despliegue
+
+### 4. Verificar Variables de Entorno
+
+```bash
+# Recargar variables de entorno
+source ~/.bashrc
+
+# Verificar que las variables están cargadas
+echo "NODE_ENV: $NODE_ENV"
+echo "DB_HOST: $DB_HOST"  
+echo "JWT_SECRET configurado: $(if [ -n "$JWT_SECRET" ]; then echo "✓"; else echo "✗"; fi)"
+
+# Ejecutar script de verificación completa
+./scripts/deployment/check-environment.sh
+
+# Ejecutar pre-deploy para verificación completa
+./scripts/deployment/pre-deploy.sh
+```
+
+./scripts/deployment/deploy.sh
 
 # NOTA: Si es la primera vez, también puedes usar:
-chmod +x deploy.sh && ./deploy.sh
+
+chmod +x scripts/deployment/deploy.sh && ./scripts/deployment/deploy.sh
 
 ```bash
 # Ejecutar script de despliegue
-./deploy.sh
+./scripts/deployment/deploy.sh
 ```
 
 El script realizará automáticamente:
@@ -333,9 +354,10 @@ docker compose exec api npm run db:migrate
 - [ ] Docker Engine (20.10+) y Docker Compose (2.0+) instalados
 - [ ] Puerto 3000 disponible en el servidor
 - [ ] Archivo `.env` configurado con variables correctas:
-  - [ ] `DB_PASS` (no `DB_PASSWORD`)
-  - [ ] Variables SMTP configuradas
-  - [ ] JWT secrets cambiados para producción
+   - [ ] `DB_PASS` (no `DB_PASSWORD`)
+   - [ ] Variables SMTP configuradas
+   - [ ] JWT secrets cambiados para producción
+
 - [ ] Firewall configurado para permitir puerto 3000
 - [ ] Script `deploy.sh` con permisos de ejecución
 - [ ] Script `deploy.sh` ejecutado exitosamente
@@ -347,31 +369,38 @@ docker compose exec api npm run db:migrate
 
 ---
 
-**🎉 ¡Despliegue completado!** 
+**🎉 ¡Despliegue completado!**
 
 Tu API está lista en:
+
 - **API:** http://206.62.139.11:3000/api
 - **Docs:** http://206.62.139.11:3000/api-docs
 
 ## 🔒 Próximos Pasos de Seguridad
 
 1. **Configurar HTTPS con Nginx:**
-   ```bash
-   sudo apt install nginx certbot python3-certbot-nginx
-   sudo certbot --nginx -d tu-dominio.com
-   ```
+
+```bash
+sudo apt install nginx certbot python3-certbot-nginx
+sudo certbot --nginx -d tu-dominio.com
+
+```
 
 2. **Configurar firewall:**
-   ```bash
-   sudo ufw allow 22/tcp
-   sudo ufw allow 80/tcp
-   sudo ufw allow 443/tcp
-   sudo ufw deny 3000/tcp  # Solo acceso interno
-   sudo ufw enable
-   ```
+
+```bash
+sudo ufw allow 22/tcp
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw deny 3000/tcp  # Solo acceso interno
+sudo ufw enable
+
+```
 
 3. **Monitoreo con logs:**
-   ```bash
-   # Ver logs en tiempo real
-   docker compose logs -f --tail=100
-   ```
+
+```bash
+# Ver logs en tiempo real
+docker compose logs -f --tail=100
+
+```

@@ -37,13 +37,12 @@ required_files=(
     "package.json"
     "Dockerfile"
     "docker-compose.yml"
-    ".env.production"
     "src/app.js"
     "config/sequelize.js"
     "migrations"
     "createAdminUser.js"
     "loadCatalogData.js"
-    "deploy.sh"
+    "scripts/deployment/deploy.sh"
 )
 
 for file in "${required_files[@]}"; do
@@ -71,39 +70,49 @@ else
     log "✓ Docker Compose instalado: $(docker-compose --version)"
 fi
 
-# Verificar que el archivo .env existe o crear uno desde .env.production
-log "Verificando archivo .env..."
-if [ ! -f ".env" ]; then
-    warn "Archivo .env no existe. Copiando desde .env.production..."
-    cp .env.production .env
-    warn "IMPORTANTE: Edita el archivo .env con configuraciones específicas de producción"
-else
-    log "✓ Archivo .env existe"
+# Verificar variables de entorno críticas (desde .bashrc)
+log "Verificando variables de entorno críticas..."
+
+# Verificar variables requeridas
+required_vars=(
+    "NODE_ENV"
+    "PORT"
+    "DB_HOST"
+    "DB_PORT"
+    "DB_NAME"
+    "DB_USER"
+    "DB_PASS"
+    "JWT_SECRET"
+    "JWT_REFRESH_SECRET"
+)
+
+missing_vars=()
+
+for var in "${required_vars[@]}"; do
+    if [ -z "${!var}" ]; then
+        missing_vars+=("$var")
+        error "Variable de entorno requerida no encontrada: $var"
+        ((ERRORS++))
+    else
+        log "✓ $var configurado"
+    fi
+done
+
+if [ ${#missing_vars[@]} -gt 0 ]; then
+    echo ""
+    error "Las siguientes variables de entorno son requeridas:"
+    printf '%s\n' "${missing_vars[@]}"
+    echo ""
+    echo -e "${YELLOW}Agrega estas variables a tu .bashrc y ejecuta 'source ~/.bashrc'${NC}"
 fi
 
-# Verificar configuración crítica en .env
-log "Verificando configuración crítica..."
-if [ -f ".env" ]; then
-    # Verificar JWT secrets
-    if grep -q "parroquia_jwt_secret_muy_seguro" .env; then
-        warn "JWT_SECRET usa valor por defecto. Cámbialo por uno único."
-    else
-        log "✓ JWT_SECRET configurado"
-    fi
-    
-    # Verificar password de base de datos
-    if grep -q "DB_PASSWORD=admin" .env; then
-        warn "DB_PASSWORD usa valor por defecto. Cámbialo por uno seguro."
-    else
-        log "✓ DB_PASSWORD configurado"
-    fi
-    
-    # Verificar APP_URL
-    if grep -q "APP_URL=" .env; then
-        log "✓ APP_URL configurado"
-    else
-        warn "APP_URL no está configurado"
-    fi
+# Verificar valores de seguridad
+if [ ! -z "$JWT_SECRET" ] && [ "$JWT_SECRET" = "parroquia_jwt_secret_muy_seguro" ]; then
+    warn "JWT_SECRET usa valor por defecto. Cámbialo por uno único."
+fi
+
+if [ ! -z "$DB_PASS" ] && [ "$DB_PASS" = "admin" ]; then
+    warn "DB_PASS usa valor por defecto. Cámbialo por uno seguro."
 fi
 
 # Verificar que las migraciones están ordenadas
@@ -154,11 +163,11 @@ fi
 
 # Verificar permisos de archivos de script
 log "Verificando permisos de scripts..."
-if [ -x "deploy.sh" ]; then
-    log "✓ deploy.sh es ejecutable"
+if [ -x "scripts/deployment/deploy.sh" ]; then
+    log "✓ scripts/deployment/deploy.sh es ejecutable"
 else
-    warn "deploy.sh no es ejecutable. Aplicando permisos..."
-    chmod +x deploy.sh
+    warn "scripts/deployment/deploy.sh no es ejecutable. Aplicando permisos..."
+    chmod +x scripts/deployment/deploy.sh
 fi
 
 # Verificar espacio en disco
@@ -177,7 +186,7 @@ if [ $ERRORS -eq 0 ]; then
     log "✅ Pre-deploy completado exitosamente!"
     echo ""
     echo -e "${BLUE}🚀 Sistema listo para deploy. Ejecuta:${NC}"
-    echo -e "${BLUE}   ./deploy.sh${NC}"
+    echo -e "${BLUE}   ./scripts/deployment/deploy.sh${NC}"
     echo ""
 else
     error "❌ Pre-deploy completado con $ERRORS errores"
@@ -188,10 +197,10 @@ else
 fi
 
 echo -e "${YELLOW}📝 Checklist final:${NC}"
-echo "  1. ✓ Archivo .env configurado con valores de producción"
+echo "  1. ✓ Variables de entorno configuradas en .bashrc"
 echo "  2. ✓ JWT secrets únicos y seguros" 
 echo "  3. ✓ Password de base de datos seguro"
-echo "  4. ✓ APP_URL configurado correctamente"
+echo "  4. ✓ Variables críticas presentes en el sistema"
 echo "  5. ✓ Puertos disponibles (3000, 5432)"
 echo "  6. ✓ Docker y Docker Compose instalados"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

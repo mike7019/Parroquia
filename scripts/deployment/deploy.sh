@@ -38,13 +38,33 @@ if ! command -v docker-compose &> /dev/null; then
     exit 1
 fi
 
-# Verificar que existe el archivo .env
-if [ ! -f ".env" ]; then
-    warn "El archivo .env no existe. Creando uno desde .env.production..."
-    cp .env.production .env
-    warn "Por favor edita el archivo .env con tus configuraciones antes de continuar."
-    echo -e "${BLUE}Presiona Enter cuando hayas configurado el archivo .env...${NC}"
-    read
+# Verificar variables de entorno críticas
+log "Verificando variables de entorno críticas..."
+required_vars=(
+    "NODE_ENV"
+    "PORT"
+    "DB_HOST"
+    "DB_PORT"  
+    "DB_NAME"
+    "DB_USER"
+    "DB_PASS"
+    "JWT_SECRET"
+    "JWT_REFRESH_SECRET"
+)
+
+missing_vars=()
+for var in "${required_vars[@]}"; do
+    if [ -z "${!var}" ]; then
+        missing_vars+=("$var")
+    fi
+done
+
+if [ ${#missing_vars[@]} -gt 0 ]; then
+    error "Variables de entorno faltantes: ${missing_vars[*]}"
+    error "Asegúrate de que las variables estén configuradas en .bashrc y ejecuta 'source ~/.bashrc'"
+    exit 1
+else
+    log "✓ Todas las variables de entorno críticas están configuradas"
 fi
 
 # Crear directorios necesarios
