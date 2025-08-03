@@ -22,17 +22,19 @@ services:
       timeout: 5s
       retries: 5
 
-  # Parroquia API Application
+  # Parroquia API Application with PM2
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.pm2
     container_name: parroquia-api
     restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      - NODE_ENV=${NODE_ENV:-production}
-      - PORT=${PORT:-3000}
+      - NODE_ENV=production
+      - PORT=3000
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_NAME=parroquia_db
@@ -43,7 +45,7 @@ services:
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-15m}
       - JWT_REFRESH_EXPIRES_IN=${JWT_REFRESH_EXPIRES_IN:-7d}
       - BCRYPT_ROUNDS=${BCRYPT_ROUNDS:-12}
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - FRONTEND_URL=${FRONTEND_URL:-http://206.62.139.100}
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT:-587}
       - SMTP_USER=${SMTP_USER}
@@ -52,18 +54,38 @@ services:
       - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
       - SEND_REAL_EMAILS=${SEND_REAL_EMAILS:-false}
       - VERBOSE_LOGGING=${VERBOSE_LOGGING:-true}
-    ports:
-      - "3000:3000"
     networks:
       - parroquia-network
     volumes:
       - app_logs:/app/logs
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      test: ["CMD", "pm2", "ping"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: parroquia-nginx
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.docker.conf:/etc/nginx/nginx.conf:ro
+      - nginx_logs:/var/log/nginx
+    networks:
+      - parroquia-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/nginx-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
   parroquia-network:
@@ -73,4 +95,6 @@ volumes:
   postgres_data:
     driver: local
   app_logs:
+    driver: local
+  nginx_logs:
     driver: local
