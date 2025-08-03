@@ -45,7 +45,7 @@ required_files=(
 )
 
 required_dirs=(
-    "migrations"
+    "../../migrations"
 )
 
 for file in "${required_files[@]}"; do
