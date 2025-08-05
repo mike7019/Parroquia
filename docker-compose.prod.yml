@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: parroquia-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: parroquia_db
+      POSTGRES_USER: parroquia_user
+      POSTGRES_PASSWORD: "ParroquiaSecure2025"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - parroquia-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U parroquia_user -d parroquia_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Parroquia API Application with PM2
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.pm2
+    container_name: parroquia-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=parroquia_db
+      - DB_USER=parroquia_user
+      - DB_PASS=ParroquiaSecure2025
+      - JWT_SECRET=${JWT_SECRET:-default_jwt_secret}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-default_refresh_secret}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-15m}
+      - JWT_REFRESH_EXPIRES_IN=${JWT_REFRESH_EXPIRES_IN:-7d}
+      - BCRYPT_ROUNDS=${BCRYPT_ROUNDS:-12}
+      - FRONTEND_URL=${FRONTEND_URL:-http://206.62.139.100}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - EMAIL_FROM=${EMAIL_FROM}
+      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
+      - SEND_REAL_EMAILS=${SEND_REAL_EMAILS:-false}
+      - VERBOSE_LOGGING=${VERBOSE_LOGGING:-true}
+    networks:
+      - parroquia-network
+    volumes:
+      - app_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "pm2", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: parroquia-nginx
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.docker.conf:/etc/nginx/nginx.conf:ro
+      - nginx_logs:/var/log/nginx
+    networks:
+      - parroquia-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/nginx-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  parroquia-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  app_logs:
+    driver: local
+  nginx_logs:
+    driver: local

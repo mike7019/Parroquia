@@ -1,0 +1,332 @@
+import express from 'express';
+import sequelize from '../../config/sequelize.js';
+
+const router = express.Router();
+
+/**
+ * @swagger
+ * tags:
+ *   name: System
+ *   description: Endpoints del sistema y verificación de salud
+ */
+
+/**
+ * @swagger
+ * /api/health:
+ *   get:
+ *     tags: [System]
+ *     summary: Verificación de salud del API
+ *     description: Endpoint para verificar que el API está funcionando correctamente
+ *     responses:
+ *       200:
+ *         description: API funcionando correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "OK"
+ *                 message:
+ *                   type: string
+ *                   example: "Parroquia API is running"
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2025-07-16T15:30:00.000Z"
+ *                 version:
+ *                   type: string
+ *                   example: "1.0.0"
+ *                 environment:
+ *                   type: string
+ *                   example: "development"
+ *                 uptime:
+ *                   type: number
+ *                   example: 3600.5
+ *             example:
+ *               status: "OK"
+ *               message: "Parroquia API is running"
+ *               timestamp: "2025-07-16T15:30:00.000Z"
+ *               version: "1.0.0"
+ *               environment: "development"
+ *               uptime: 3600.5
+ */
+router.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    message: 'Parroquia API is running',
+    timestamp: new Date().toISOString(),
+    version: process.env.npm_package_version || '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    uptime: process.uptime()
+  });
+});
+
+/**
+ * @swagger
+ * /api/status:
+ *   get:
+ *     tags: [System]
+ *     summary: Estado detallado del sistema
+ *     description: Endpoint para verificar el estado de los servicios del sistema incluyendo base de datos
+ *     responses:
+ *       200:
+ *         description: Todos los servicios funcionando correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "OK"
+ *                 services:
+ *                   type: object
+ *                   properties:
+ *                     database:
+ *                       type: string
+ *                       example: "connected"
+ *                     api:
+ *                       type: string
+ *                       example: "running"
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *             example:
+ *               status: "OK"
+ *               services:
+ *                 database: "connected"
+ *                 api: "running"
+ *               timestamp: "2025-07-16T15:30:00.000Z"
+ *       503:
+ *         description: Uno o más servicios no están disponibles
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "ERROR"
+ *                 services:
+ *                   type: object
+ *                   properties:
+ *                     database:
+ *                       type: string
+ *                       example: "disconnected"
+ *                     api:
+ *                       type: string
+ *                       example: "running"
+ *                 error:
+ *                   type: string
+ *                   example: "Connection to database failed"
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *             example:
+ *               status: "ERROR"
+ *               services:
+ *                 database: "disconnected"
+ *                 api: "running"
+ *               error: "Connection to database failed"
+ *               timestamp: "2025-07-16T15:30:00.000Z"
+ */
+router.get('/status', async (req, res) => {
+  try {
+    // Test database connection
+    await sequelize.authenticate();
+    
+    res.status(200).json({
+      status: 'OK',
+      services: {
+        database: 'connected',
+        api: 'running'
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: 'ERROR',
+      services: {
+        database: 'disconnected',
+        api: 'running'
+      },
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     tags: [System]
+ *     summary: Información del API
+ *     description: Endpoint raíz que proporciona información básica del API y enlaces útiles
+ *     responses:
+ *       200:
+ *         description: Información del API
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Welcome to Parroquia API"
+ *                 documentation:
+ *                   type: string
+ *                   example: "/api-docs"
+ *                 health:
+ *                   type: string
+ *                   example: "/api/health"
+ *                 status:
+ *                   type: string
+ *                   example: "/api/status"
+ *             example:
+ *               message: "Welcome to Parroquia API"
+ *               documentation: "/api-docs"
+ *               health: "/api/health"
+ *               status: "/api/status"
+ */
+
+/**
+ * Email verification compatibility route
+ * Redirects /verify-email to /api/auth/verify-email for backward compatibility
+ */
+router.get('/verify-email', (req, res) => {
+  const token = req.query.token;
+  if (!token) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Token de verificación requerido',
+      code: 'TOKEN_REQUIRED'
+    });
+  }
+  
+  // Redirect to the proper API endpoint
+  res.redirect(301, `/api/auth/verify-email?token=${encodeURIComponent(token)}`);
+});
+
+/**
+ * Password reset compatibility route  
+ * Redirects /reset-password to /api/auth/reset-password for backward compatibility
+ */
+router.get('/reset-password', (req, res) => {
+  const token = req.query.token;
+  if (!token) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Token de restablecimiento requerido',
+      code: 'TOKEN_REQUIRED'
+    });
+  }
+  
+  // Redirect to the proper API endpoint
+  res.redirect(301, `/api/auth/reset-password?token=${encodeURIComponent(token)}`);
+});
+
+/**
+ * @swagger
+ * /api/swagger-debug:
+ *   get:
+ *     summary: Debug endpoint for Swagger schema issues
+ *     tags: [System]
+ *     responses:
+ *       200:
+ *         description: Swagger debug information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 sectorInputSchema:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                       example: "Sector San José"
+ *                     description:
+ *                       type: string
+ *                       example: "Descripción del sector"
+ *                     coordinator:
+ *                       type: integer
+ *                       example: 2
+ *                     status:
+ *                       type: string
+ *                       enum: [active, inactive]
+ *                       example: "active"
+ *                     code:
+ *                       type: string
+ *                       example: "SEC001"
+ *                     municipioId:
+ *                       type: integer
+ *                       example: 1
+ *                     veredaId:
+ *                       type: integer
+ *                       example: 1
+ *                 message:
+ *                   type: string
+ *                   example: Schema verification successful
+ */
+router.get('/swagger-debug', (req, res) => {
+  try {
+    // Obtener el schema SectorInput directamente
+    const sectorInputExample = {
+      name: "Sector de Prueba",
+      description: "Este es un sector de prueba para verificar el schema",
+      coordinator: 1,
+      status: "active",
+      code: "TEST001",
+      municipioId: 1,
+      veredaId: 1
+    };
+
+    res.json({
+      status: 'success',
+      message: 'Schema verification successful',
+      timestamp: new Date().toISOString(),
+      sectorInputSchema: {
+        type: 'object',
+        required: ['name'],
+        properties: {
+          name: { type: 'string', example: 'La Esperanza' },
+          description: { type: 'string', example: 'Sector ubicado en la zona norte' },
+          coordinator: { type: 'integer', example: 2 },
+          status: { type: 'string', enum: ['active', 'inactive'], example: 'active' },
+          code: { type: 'string', example: 'SEC001' },
+          municipioId: { type: 'integer', example: 1 },
+          veredaId: { type: 'integer', example: 1 }
+        }
+      },
+      sectorInputExample: sectorInputExample,
+      schemaValidation: {
+        hasRequiredFields: sectorInputExample.name ? true : false,
+        allFieldsPresent: Object.keys(sectorInputExample).length === 7,
+        validStatus: ['active', 'inactive'].includes(sectorInputExample.status)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Schema verification failed',
+      error: error.message
+    });
+  }
+});
+
+router.get('/', (req, res) => {
+  res.json({
+    message: 'Welcome to Parroquia API',
+    documentation: '/api-docs',
+    health: '/api/health',
+    status: '/api/status'
+  });
+});
+
+export default router;
