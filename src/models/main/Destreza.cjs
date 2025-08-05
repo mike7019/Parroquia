@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   Destreza.init({
-    id_destrezas: {
+    id_destreza: {
       type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true,

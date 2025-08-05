@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
 
       Familia.belongsTo(models.Sector, {
         foreignKey: 'id_sector',
-        as: 'sector'
+        as: 'sectorInfo'
       });
 
       Familia.belongsTo(models.Vereda, {

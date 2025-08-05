@@ -2,77 +2,16 @@ import sequelize from '../../config/sequelize.js';
 import User from './Usuario.js';
 import Role from './Role.js';
 import UsuarioRole from './UsuarioRole.js';
-// Temporarily disabled English models to use Spanish tables only
-// import Survey from './Survey.js';
-// import Family from './Family.js';
-// import FamilyMember from './FamilyMember.js';
-// import SurveyAuditLog from './SurveyAuditLog.js';
-
-// Import catalog models
-import Parroquia from './catalog/Parroquia.js';
+// import Parroquia from './catalog/Parroquia.js'; // ELIMINADO - duplicado
 import Veredas from './catalog/Veredas.js';
-import Sexo from './catalog/Sexo.js';
-import Municipio from './catalog/Municipio.js';
+// import Sexo from './catalog/Sexo.js'; // ELIMINADO - duplicado
+// import Municipio from './catalog/Municipio.js'; // ELIMINADO - duplicado
 import Municipios from './catalog/Municipios.js';
 import Departamentos from './catalog/Departamentos.js';
-import Sector from './catalog/Sector.js';
+// import Sector from './catalog/Sector.js'; // ELIMINADO - duplicado
 import TipoIdentificacion from './catalog/TipoIdentificacion.js';
-import Persona from './catalog/Persona.js';
+// import Persona from './catalog/Persona.js'; // ELIMINADO - duplicado
 import Familias from './catalog/Familias.js';
-
-// Temporarily disabled associations for English models
-/*
-User.hasMany(Survey, {
-  foreignKey: 'userId',
-  as: 'surveys'
-});
-
-Survey.belongsTo(User, {
-  foreignKey: 'userId',
-  as: 'surveyor'
-});
-
-Survey.belongsTo(Family, {
-  foreignKey: 'familyId',
-  as: 'family'
-});
-
-Family.hasMany(Survey, {
-  foreignKey: 'familyId',
-  as: 'surveys'
-});
-
-Survey.hasMany(FamilyMember, {
-  foreignKey: 'surveyId',
-  as: 'members'
-});
-
-FamilyMember.belongsTo(Survey, {
-  foreignKey: 'surveyId',
-  as: 'survey'
-});
-
-// SurveyAuditLog associations
-Survey.hasMany(SurveyAuditLog, {
-  foreignKey: 'surveyId',
-  as: 'auditLogs'
-});
-
-SurveyAuditLog.belongsTo(Survey, {
-  foreignKey: 'surveyId',
-  as: 'survey'
-});
-
-User.hasMany(SurveyAuditLog, {
-  foreignKey: 'userId',
-  as: 'auditLogs'
-});
-
-SurveyAuditLog.belongsTo(User, {
-  foreignKey: 'userId',
-  as: 'user'
-});
-*/
 
 // Catalog model associations
 // Asociaciones de Departamentos y Municipios
@@ -86,6 +25,8 @@ Municipios.belongsTo(Departamentos, {
   as: 'departamentoData'
 });
 
+// Asociaciones comentadas - los modelos están duplicados en main/
+/*
 Parroquia.hasMany(Persona, {
   foreignKey: 'id_parroquia',
   as: 'personas'
@@ -105,6 +46,7 @@ Persona.belongsTo(Sexo, {
   foreignKey: 'id_sexo',
   as: 'sexo'
 });
+*/
 
 // Usar el modelo Municipios (más completo) en lugar de Municipio
 Municipios.hasMany(Veredas, {
@@ -119,6 +61,8 @@ Veredas.belongsTo(Municipios, {
   as: 'municipio'
 });
 
+// Asociaciones comentadas - modelos duplicados en main/
+/*
 Veredas.hasMany(Persona, {
   foreignKey: 'id_vereda',
   as: 'personas'
@@ -141,6 +85,7 @@ Veredas.belongsTo(Sector, {
   targetKey: 'id_sector',
   as: 'sector'
 });
+*/
 
 // Relación entre Municipios y Veredas
 // Asociaciones many-to-many entre Veredas y Familias
@@ -170,19 +115,14 @@ Familias.belongsToMany(Veredas, {
 export default {
   sequelize,
   User,
-  // Temporarily disabled English models
-  // Survey,
-  // Family,
-  // FamilyMember,
-  // SurveyAuditLog,
-  Parroquia,
+  // Parroquia, // ELIMINADO - duplicado
   Veredas,
-  Sexo,
-  Municipio,
+  // Sexo, // ELIMINADO - duplicado
+  // Municipio, // ELIMINADO - duplicado
   Municipios,
   Departamentos,
-  Sector,
-  Persona,
+  // Sector, // ELIMINADO - duplicado
+  // Persona, // ELIMINADO - duplicado
   Familias
 };
 
@@ -206,19 +146,9 @@ export {
   User,
   Role,
   UsuarioRole,
-  // Temporarily disabled English models
-  // Survey,
-  // Family,
-  // FamilyMember,
-  // SurveyAuditLog,
-  Parroquia,
   Veredas,
-  Sexo,
-  Municipio,
   Municipios,
   Departamentos,
-  Sector,
   TipoIdentificacion,
-  Persona,
   Familias
 };

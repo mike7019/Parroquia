@@ -39,29 +39,18 @@ module.exports = (sequelize, DataTypes) => {
     descripcion: {
       type: DataTypes.TEXT,
       allowNull: true
-    },
-    categoria: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
-      validate: {
-        len: {
-          args: [0, 100],
-          msg: 'La categoría no puede exceder 100 caracteres'
-        }
-      }
     }
   }, {
     sequelize,
     modelName: 'Profesion',
     tableName: 'profesiones',
     timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
     indexes: [
       {
         unique: true,
         fields: ['nombre']
-      },
-      {
-        fields: ['categoria']
       }
     ]
   });

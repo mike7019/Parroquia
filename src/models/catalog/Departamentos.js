@@ -10,13 +10,11 @@ const Departamentos = sequelize.define('Departamentos', {
   },
   nombre: {
     type: DataTypes.STRING(100),
-    allowNull: false,
-    unique: true
+    allowNull: false
   },
   codigo_dane: {
     type: DataTypes.STRING(2),
     allowNull: false,
-    unique: true,
     comment: 'Código DANE del departamento (2 dígitos)'
   },
   region: {

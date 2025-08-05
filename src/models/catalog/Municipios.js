@@ -15,7 +15,6 @@ const Municipios = sequelize.define('Municipios', {
   codigo_dane: {
     type: DataTypes.STRING(5),
     allowNull: false,
-    unique: true,
     comment: 'Código DANE del municipio (5 dígitos)'
   },
   id_departamento: {
