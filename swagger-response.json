@@ -1,0 +1,6990 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Parroquia API",
+    "version": "1.0.0",
+    "description": "Sistema de gestión parroquial - API REST completa con autenticación y gestión de usuarios",
+    "contact": {
+      "name": "API Support",
+      "email": "support@parroquia.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    },
+    {
+      "url": "http://206.62.139.100:3000/",
+      "description": "Test server"
+    },
+    {
+      "url": "https://api.parroquia.com",
+      "description": "Production server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter JWT token"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID único del usuario (UUID)",
+            "example": "2acc2c01-91d8-4d3a-a184-f002304620ec"
+          },
+          "correo_electronico": {
+            "type": "string",
+            "format": "email",
+            "description": "Correo electrónico del usuario",
+            "example": "usuario@example.com"
+          },
+          "primer_nombre": {
+            "type": "string",
+            "description": "Primer nombre del usuario",
+            "example": "Juan"
+          },
+          "segundo_nombre": {
+            "type": "string",
+            "nullable": true,
+            "description": "Segundo nombre del usuario (opcional)",
+            "example": "Carlos"
+          },
+          "primer_apellido": {
+            "type": "string",
+            "description": "Primer apellido del usuario",
+            "example": "Pérez"
+          },
+          "segundo_apellido": {
+            "type": "string",
+            "nullable": true,
+            "description": "Segundo apellido del usuario (opcional)",
+            "example": "García"
+          },
+          "activo": {
+            "type": "boolean",
+            "description": "Estado activo del usuario",
+            "example": true
+          },
+          "email_verificado": {
+            "type": "boolean",
+            "description": "Si el email ha sido verificado",
+            "example": true
+          },
+          "fecha_verificacion_email": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Fecha de verificación del email",
+            "example": "2025-07-31T10:30:00.000Z"
+          },
+          "expira_token_reset": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Fecha de expiración del token de reset",
+            "example": "2025-07-31T12:30:00.000Z"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Lista de roles asignados al usuario",
+            "example": [
+              "Administrador"
+            ]
+          }
+        }
+      },
+      "Role": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID único del rol",
+            "example": "00000000-0000-0000-0000-000000000001"
+          },
+          "nombre": {
+            "type": "string",
+            "enum": [
+              "Administrador",
+              "Encuestador"
+            ],
+            "description": "Nombre del rol",
+            "example": "Encuestador"
+          },
+          "descripcion": {
+            "type": "string",
+            "description": "Descripción del rol y sus permisos",
+            "example": "Usuario con permisos para realizar encuestas"
+          }
+        }
+      },
+      "UserInput": {
+        "type": "object",
+        "required": [
+          "primer_nombre",
+          "primer_apellido",
+          "correo_electronico",
+          "contrasena",
+          "rol"
+        ],
+        "properties": {
+          "primer_nombre": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "description": "Primer nombre del usuario",
+            "example": "Diego",
+            "pattern": "^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$"
+          },
+          "segundo_nombre": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "nullable": true,
+            "description": "Segundo nombre del usuario (opcional)",
+            "example": "Carlos",
+            "pattern": "^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$"
+          },
+          "primer_apellido": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "description": "Primer apellido del usuario",
+            "example": "Garcia",
+            "pattern": "^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$"
+          },
+          "segundo_apellido": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "nullable": true,
+            "description": "Segundo apellido del usuario (opcional)",
+            "example": "López",
+            "pattern": "^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$"
+          },
+          "correo_electronico": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 100,
+            "description": "Correo electrónico único",
+            "example": "diego.garcia5105@yopmail.com"
+          },
+          "contrasena": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 100,
+            "description": "Contraseña (8-100 caracteres, debe incluir mayúsculas, minúsculas, números y símbolos)",
+            "example": "Fuerte789&",
+            "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$"
+          },
+          "telefono": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 20,
+            "nullable": true,
+            "description": "Número de teléfono del usuario (opcional, 10-20 caracteres)",
+            "example": "+57 300 456 7890",
+            "pattern": "^[\\+]?[0-9\\s\\-\\(\\)]+$"
+          },
+          "rol": {
+            "type": "string",
+            "enum": [
+              "Administrador",
+              "Encuestador"
+            ],
+            "description": "Rol del usuario en el sistema",
+            "example": "Encuestador"
+          }
+        }
+      },
+      "UserUpdate": {
+        "type": "object",
+        "properties": {
+          "primer_nombre": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "description": "Primer nombre del usuario (opcional para actualización)",
+            "example": "Juan",
+            "pattern": "^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$"
+          },
+          "segundo_nombre": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "nullable": true,
+            "description": "Segundo nombre del usuario (opcional)",
+            "example": "Carlos",
+            "pattern": "^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$"
+          },
+          "primer_apellido": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "description": "Primer apellido del usuario (opcional para actualización)",
+            "example": "Pérez",
+            "pattern": "^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$"
+          },
+          "segundo_apellido": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "nullable": true,
+            "description": "Segundo apellido del usuario (opcional)",
+            "example": "García",
+            "pattern": "^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$"
+          },
+          "correo_electronico": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 100,
+            "description": "Correo electrónico único (opcional para actualización)",
+            "example": "juan.perez@yopmail.com"
+          },
+          "telefono": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 20,
+            "description": "Número de teléfono del usuario (opcional)",
+            "example": "+57 300 123 4567",
+            "pattern": "^[\\+]?[0-9\\s\\-\\(\\)]+$"
+          }
+        }
+      },
+      "LoginInput": {
+        "type": "object",
+        "required": [
+          "correo_electronico",
+          "contrasena"
+        ],
+        "properties": {
+          "correo_electronico": {
+            "type": "string",
+            "format": "email",
+            "description": "Correo electrónico",
+            "example": "ana.herrera8687@yopmail.com"
+          },
+          "contrasena": {
+            "type": "string",
+            "description": "Contraseña",
+            "example": "Segura456@"
+          }
+        }
+      },
+      "TokenResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Token de acceso JWT",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Token de actualización",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "expiresIn": {
+            "type": "integer",
+            "description": "Tiempo de expiración en segundos",
+            "example": 900
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "RefreshTokenInput": {
+        "type": "object",
+        "required": [
+          "refreshToken"
+        ],
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "Token de actualización JWT válido",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "pattern": "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_.+/=]*$"
+          }
+        }
+      },
+      "ForgotPasswordInput": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 100,
+            "description": "Correo electrónico para restablecer contraseña",
+            "example": "usuario@example.com"
+          }
+        }
+      },
+      "PasswordResetInput": {
+        "type": "object",
+        "required": [
+          "token",
+          "newPassword"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 64,
+            "description": "Token de restablecimiento de contraseña (32-64 caracteres alfanuméricos)",
+            "example": "a1b2c3d4e5f6789012345678901234567890abcdef123456789012345678901234",
+            "pattern": "^[a-zA-Z0-9]+$"
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 100,
+            "description": "Nueva contraseña (8-100 caracteres, debe incluir mayúsculas, minúsculas, números y símbolos)",
+            "example": "NuevaPassword123!",
+            "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$"
+          }
+        }
+      },
+      "ChangePasswordInput": {
+        "type": "object",
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ],
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Contraseña actual",
+            "example": "MiPasswordActual123!"
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 100,
+            "description": "Nueva contraseña (8-100 caracteres, debe incluir mayúsculas, minúsculas, números y símbolos, diferente a la actual)",
+            "example": "MiNuevaPassword456!",
+            "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$"
+          }
+        }
+      },
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "success",
+              "error"
+            ],
+            "description": "Estado de la respuesta",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "description": "Mensaje descriptivo",
+            "example": "Operación realizada exitosamente"
+          },
+          "data": {
+            "type": "object",
+            "description": "Datos de respuesta (opcional)"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "error"
+            ],
+            "example": "error"
+          },
+          "message": {
+            "type": "string",
+            "description": "Mensaje de error",
+            "example": "Ha ocurrido un error"
+          },
+          "code": {
+            "type": "string",
+            "description": "Código de error específico",
+            "example": "VALIDATION_ERROR"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "description": "Campo que causó el error",
+                  "example": "email"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Mensaje específico del error",
+                  "example": "El formato del email no es válido"
+                }
+              }
+            },
+            "description": "Detalles específicos de errores de validación"
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "currentPage": {
+            "type": "integer",
+            "description": "Página actual",
+            "example": 1
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "Total de páginas",
+            "example": 10
+          },
+          "totalItems": {
+            "type": "integer",
+            "description": "Total de elementos",
+            "example": 100
+          },
+          "itemsPerPage": {
+            "type": "integer",
+            "description": "Elementos por página",
+            "example": 10
+          },
+          "hasNext": {
+            "type": "boolean",
+            "description": "Si hay página siguiente",
+            "example": true
+          },
+          "hasPrev": {
+            "type": "boolean",
+            "description": "Si hay página anterior",
+            "example": false
+          }
+        }
+      },
+      "ParroquiaResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/Parroquia"
+              }
+            }
+          }
+        ]
+      },
+      "ParroquiasListResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Parroquia"
+                }
+              },
+              "pagination": {
+                "$ref": "#/components/schemas/Pagination"
+              }
+            }
+          }
+        ]
+      },
+      "VeredaResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/Vereda"
+              }
+            }
+          }
+        ]
+      },
+      "VeredasListResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Vereda"
+                }
+              },
+              "pagination": {
+                "$ref": "#/components/schemas/Pagination"
+              }
+            }
+          }
+        ]
+      },
+      "SexoResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/Sexo"
+              }
+            }
+          }
+        ]
+      },
+      "SexosListResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Sexo"
+                }
+              },
+              "pagination": {
+                "$ref": "#/components/schemas/Pagination"
+              }
+            }
+          }
+        ]
+      },
+      "Survey": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID único de la encuesta",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "userId": {
+            "type": "integer",
+            "description": "ID del encuestador",
+            "example": 1
+          },
+          "familyId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID de la familia (opcional)",
+            "example": "123e4567-e89b-12d3-a456-426614174001"
+          },
+          "familyHead": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Nombre del jefe de familia",
+            "example": "María González Pérez"
+          },
+          "address": {
+            "type": "string",
+            "description": "Dirección de la familia",
+            "example": "Calle 15 #23-45, Barrio Centro"
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 20,
+            "description": "Teléfono de contacto",
+            "example": "3001234567"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Correo electrónico",
+            "example": "maria.gonzalez@email.com"
+          },
+          "familySize": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Tamaño de la familia",
+            "example": 4
+          },
+          "housingType": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Tipo de vivienda",
+            "example": "Casa propia"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "in_progress",
+              "completed",
+              "cancelled"
+            ],
+            "description": "Estado de la encuesta",
+            "example": "in_progress"
+          },
+          "currentStage": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Etapa actual",
+            "example": 2
+          },
+          "totalStages": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Total de etapas",
+            "example": 4
+          },
+          "progress": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Porcentaje de progreso",
+            "example": 50
+          },
+          "observations": {
+            "type": "string",
+            "description": "Observaciones adicionales",
+            "example": "Familia muy colaborativa"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de creación"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de última actualización"
+          }
+        },
+        "required": [
+          "familyHead",
+          "address",
+          "familySize",
+          "housingType"
+        ]
+      },
+      "CreateSurveyRequest": {
+        "type": "object",
+        "properties": {
+          "familyHead": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Nombre del jefe de familia",
+            "example": "María González Pérez"
+          },
+          "address": {
+            "type": "string",
+            "description": "Dirección de la familia",
+            "example": "Calle 15 #23-45, Barrio Centro"
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 20,
+            "description": "Teléfono de contacto",
+            "example": "3001234567"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Correo electrónico",
+            "example": "maria.gonzalez@email.com"
+          },
+          "familySize": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Tamaño de la familia",
+            "example": 4
+          },
+          "housingType": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Tipo de vivienda",
+            "example": "Casa propia"
+          },
+          "observations": {
+            "type": "string",
+            "description": "Observaciones adicionales",
+            "example": "Familia muy colaborativa"
+          }
+        },
+        "required": [
+          "familyHead",
+          "address",
+          "familySize",
+          "housingType"
+        ]
+      },
+      "CreateSurveyInput": {
+        "$ref": "#/components/schemas/CreateSurveyRequest"
+      },
+      "StageDataInput": {
+        "type": "object",
+        "properties": {
+          "stageData": {
+            "type": "object",
+            "description": "Data específica de la etapa de la encuesta",
+            "additionalProperties": true,
+            "example": {
+              "generalInfo": {
+                "interviewDate": "2025-07-20",
+                "interviewerNotes": "Familia muy colaborativa"
+              },
+              "economicData": {
+                "monthlyIncome": 1500000,
+                "employmentStatus": "empleado",
+                "occupation": "comerciante"
+              }
+            }
+          },
+          "currentStage": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Etapa actual de la encuesta",
+            "example": 2
+          },
+          "isComplete": {
+            "type": "boolean",
+            "description": "Indica si la etapa está completa",
+            "example": true
+          }
+        },
+        "required": [
+          "stageData"
+        ]
+      },
+      "FamiliaInput": {
+        "type": "object",
+        "required": [
+          "nombre_familia",
+          "direccion_familia",
+          "tratamiento_datos"
+        ],
+        "properties": {
+          "nombre_familia": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Nombre de familia",
+            "example": "Familia González Pérez"
+          },
+          "direccion_familia": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Dirección de la familia",
+            "example": "Calle 15 #23-45, Barrio Centro"
+          },
+          "numero_contrato_epm": {
+            "type": "string",
+            "maxLength": 50,
+            "nullable": true,
+            "description": "Número de contrato EPM (opcional)",
+            "example": "EPM123456789"
+          },
+          "telefono_familiar": {
+            "type": "string",
+            "description": "Teléfono familiar válido para Colombia (opcional)",
+            "example": "3001234567",
+            "pattern": "^3[0-9]{9}$"
+          },
+          "tratamiento_datos": {
+            "type": "boolean",
+            "description": "Aceptación del tratamiento de datos personales",
+            "example": true
+          }
+        }
+      },
+      "PersonaInput": {
+        "type": "object",
+        "required": [
+          "primer_nombre",
+          "primer_apellido",
+          "identificacion",
+          "telefono",
+          "correo_electronico",
+          "fecha_nacimiento",
+          "direccion"
+        ],
+        "properties": {
+          "primer_nombre": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "description": "Primer nombre de la persona",
+            "example": "María",
+            "pattern": "^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$"
+          },
+          "segundo_nombre": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "nullable": true,
+            "description": "Segundo nombre de la persona (opcional)",
+            "example": "Elena",
+            "pattern": "^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$"
+          },
+          "primer_apellido": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "description": "Primer apellido de la persona",
+            "example": "González",
+            "pattern": "^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$"
+          },
+          "segundo_apellido": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "nullable": true,
+            "description": "Segundo apellido de la persona (opcional)",
+            "example": "Pérez",
+            "pattern": "^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$"
+          },
+          "identificacion": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 20,
+            "description": "Número de identificación (6-20 caracteres alfanuméricos)",
+            "example": "12345678",
+            "pattern": "^[a-zA-Z0-9]+$"
+          },
+          "telefono": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 20,
+            "description": "Número de teléfono (10-20 caracteres)",
+            "example": "+57 300 123 4567",
+            "pattern": "^[\\+]?[0-9\\s\\-\\(\\)]+$"
+          },
+          "correo_electronico": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 100,
+            "description": "Correo electrónico",
+            "example": "maria.gonzalez@example.com"
+          },
+          "fecha_nacimiento": {
+            "type": "string",
+            "format": "date",
+            "description": "Fecha de nacimiento (YYYY-MM-DD)",
+            "example": "1985-05-15"
+          },
+          "direccion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Dirección de residencia",
+            "example": "Carrera 10 #5-25, Apartamento 3B"
+          }
+        }
+      },
+      "FamilyMemberInput": {
+        "type": "object",
+        "properties": {
+          "nombres": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Nombres completos del miembro de la familia",
+            "example": "Carlos"
+          },
+          "apellidos": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Apellidos del miembro de la familia",
+            "example": "González"
+          },
+          "tipoIdentificacion": {
+            "type": "string",
+            "enum": [
+              "CC",
+              "TI",
+              "RC",
+              "CE",
+              "PP",
+              "PEP",
+              "DIE",
+              "CCD"
+            ],
+            "description": "Tipo de documento de identidad",
+            "example": "CC"
+          },
+          "numeroIdentificacion": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "Número de documento de identidad",
+            "example": "12345678"
+          },
+          "fechaNacimiento": {
+            "type": "string",
+            "format": "date",
+            "description": "Fecha de nacimiento",
+            "example": "1990-05-15"
+          },
+          "sexo": {
+            "type": "string",
+            "enum": [
+              "M",
+              "F",
+              "Otro"
+            ],
+            "description": "Sexo del miembro",
+            "example": "M"
+          },
+          "situacionCivil": {
+            "type": "string",
+            "enum": [
+              "Soltero",
+              "Soltera",
+              "Casado",
+              "Casada",
+              "Divorciado",
+              "Divorciada",
+              "Viudo",
+              "Viuda",
+              "Unión Libre"
+            ],
+            "description": "Estado civil",
+            "example": "Soltero"
+          },
+          "parentesco": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Relación con el jefe de familia",
+            "example": "Hijo"
+          },
+          "estudio": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Nivel educativo",
+            "example": "Secundaria completa"
+          },
+          "comunidadCultural": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Comunidad cultural",
+            "example": "Ninguna"
+          },
+          "ocupacion": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Ocupación laboral",
+            "example": "Estudiante"
+          },
+          "telefono": {
+            "type": "string",
+            "maxLength": 20,
+            "description": "Teléfono de contacto",
+            "example": "3001234567"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Correo electrónico",
+            "example": "carlos.gonzalez@email.com"
+          },
+          "talla": {
+            "type": "object",
+            "description": "Tallas del miembro (al menos una requerida)",
+            "properties": {
+              "camisa": {
+                "type": "string",
+                "description": "Talla de camisa",
+                "example": "M"
+              },
+              "pantalon": {
+                "type": "string",
+                "description": "Talla de pantalón",
+                "example": "32"
+              },
+              "calzado": {
+                "type": "string",
+                "description": "Talla de calzado",
+                "example": "42"
+              }
+            }
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Indica si el miembro está activo",
+            "example": true
+          }
+        },
+        "required": [
+          "nombres",
+          "apellidos",
+          "tipoIdentificacion",
+          "numeroIdentificacion",
+          "fechaNacimiento",
+          "sexo",
+          "situacionCivil",
+          "parentesco",
+          "estudio",
+          "comunidadCultural",
+          "talla"
+        ]
+      },
+      "VeredaInput": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Nombre de la vereda",
+            "example": "El Alamo"
+          },
+          "codigo_vereda": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "Código único de la vereda (opcional)",
+            "example": "001"
+          },
+          "id_municipio": {
+            "type": "integer",
+            "description": "ID del municipio al que pertenece la vereda (opcional)",
+            "example": 1
+          }
+        },
+        "required": [
+          "nombre"
+        ]
+      },
+      "ParroquiaInput": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Nombre de la parroquia",
+            "example": "Parroquia San José"
+          }
+        },
+        "required": [
+          "nombre"
+        ]
+      },
+      "SexoInput": {
+        "type": "object",
+        "properties": {
+          "sexo": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Nombre del sexo/género",
+            "example": "Masculino"
+          }
+        },
+        "required": [
+          "sexo"
+        ]
+      },
+      "Parroquia": {
+        "type": "object",
+        "properties": {
+          "id_parroquia": {
+            "type": "integer",
+            "description": "ID único de la parroquia",
+            "example": 1
+          },
+          "nombre": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Nombre de la parroquia",
+            "example": "San José"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de creación"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de última actualización"
+          }
+        },
+        "required": [
+          "nombre"
+        ]
+      },
+      "Vereda": {
+        "type": "object",
+        "properties": {
+          "id_vereda": {
+            "type": "integer",
+            "description": "ID único de la vereda",
+            "example": 1
+          },
+          "nombre": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Nombre de la vereda",
+            "example": "La Esperanza"
+          },
+          "id_municipio_municipios": {
+            "type": "integer",
+            "description": "ID del municipio (foreign key)",
+            "example": 1
+          },
+          "id_sector_sector": {
+            "type": "integer",
+            "description": "ID del sector (foreign key)",
+            "example": 1
+          },
+          "municipio": {
+            "$ref": "#/components/schemas/Municipio"
+          },
+          "sector": {
+            "$ref": "#/components/schemas/Sector"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de creación"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de última actualización"
+          }
+        },
+        "required": [
+          "nombre",
+          "id_municipio_municipios",
+          "id_sector_sector"
+        ]
+      },
+      "Municipio": {
+        "type": "object",
+        "properties": {
+          "id_municipio": {
+            "type": "integer",
+            "description": "ID único del municipio",
+            "example": 1
+          },
+          "nombre_municipio": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Nombre del municipio",
+            "example": "Bogotá"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de creación"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de última actualización"
+          }
+        },
+        "required": [
+          "nombre_municipio"
+        ]
+      },
+      "Sexo": {
+        "type": "object",
+        "properties": {
+          "id_sexo": {
+            "type": "integer",
+            "description": "ID único del sexo",
+            "example": 1
+          },
+          "descripcion": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Descripción del tipo de sexo",
+            "example": "Masculino"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de creación"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de última actualización"
+          }
+        },
+        "required": [
+          "sexo"
+        ]
+      },
+      "CreateMunicipioRequest": {
+        "type": "object",
+        "properties": {
+          "nombre_municipio": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Nombre del municipio",
+            "example": "Medellín"
+          }
+        },
+        "required": [
+          "nombre_municipio"
+        ]
+      },
+      "UpdateMunicipioRequest": {
+        "type": "object",
+        "properties": {
+          "nombre_municipio": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Nombre del municipio",
+            "example": "Cali"
+          }
+        }
+      },
+      "MunicipiosListResponse": {
+        "type": "object",
+        "properties": {
+          "municipios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MunicipioComplete"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "Departamento": {
+        "type": "object",
+        "properties": {
+          "id_departamento": {
+            "type": "integer",
+            "description": "ID único del departamento",
+            "example": 1
+          },
+          "nombre": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Nombre del departamento",
+            "example": "Antioquia"
+          },
+          "codigo_dane": {
+            "type": "string",
+            "maxLength": 2,
+            "description": "Código DANE del departamento (2 dígitos)",
+            "example": "05"
+          },
+          "region": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Región geográfica del departamento",
+            "example": "Región Andina"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de creación"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de última actualización"
+          }
+        },
+        "required": [
+          "nombre",
+          "codigo_dane"
+        ]
+      },
+      "DepartamentoInput": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Nombre del departamento",
+            "example": "Antioquia"
+          },
+          "codigo_dane": {
+            "type": "string",
+            "maxLength": 2,
+            "description": "Código DANE del departamento (2 dígitos)",
+            "example": "05"
+          },
+          "region": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Región geográfica del departamento",
+            "example": "Región Andina"
+          }
+        },
+        "required": [
+          "nombre",
+          "codigo_dane"
+        ]
+      },
+      "DepartamentosListResponse": {
+        "type": "object",
+        "properties": {
+          "departamentos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Departamento"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "Sector": {
+        "type": "object",
+        "properties": {
+          "id_sector": {
+            "type": "integer",
+            "description": "ID único del sector",
+            "example": 1
+          },
+          "nombre": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Nombre del sector",
+            "example": "Urbano"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de creación"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de última actualización"
+          }
+        },
+        "required": [
+          "nombre"
+        ]
+      },
+      "CreateSectorRequest": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Nombre del sector",
+            "example": "Rural"
+          }
+        },
+        "required": [
+          "nombre"
+        ]
+      },
+      "UpdateSectorRequest": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Nombre del sector",
+            "example": "Semi-urbano"
+          }
+        }
+      },
+      "SectorsListResponse": {
+        "type": "object",
+        "properties": {
+          "sectors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Sector"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "TipoIdentificacion": {
+        "type": "object",
+        "properties": {
+          "id_tipo_identificacion": {
+            "type": "integer",
+            "description": "ID único del tipo de identificación",
+            "example": 1
+          },
+          "descripcion": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Descripción del tipo de identificación",
+            "example": "Cédula de Ciudadanía"
+          },
+          "codigo": {
+            "type": "string",
+            "maxLength": 10,
+            "description": "Código del tipo de identificación",
+            "example": "CC"
+          }
+        },
+        "required": [
+          "descripcion",
+          "codigo"
+        ]
+      },
+      "CreateTipoIdentificacionRequest": {
+        "type": "object",
+        "properties": {
+          "descripcion": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Descripción del tipo de identificación",
+            "example": "Cédula de Ciudadanía"
+          },
+          "codigo": {
+            "type": "string",
+            "maxLength": 10,
+            "description": "Código del tipo de identificación",
+            "example": "CC"
+          }
+        },
+        "required": [
+          "descripcion",
+          "codigo"
+        ]
+      },
+      "UpdateTipoIdentificacionRequest": {
+        "type": "object",
+        "properties": {
+          "descripcion": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Descripción del tipo de identificación",
+            "example": "Cédula de Ciudadanía Digital"
+          },
+          "codigo": {
+            "type": "string",
+            "maxLength": 10,
+            "description": "Código del tipo de identificación",
+            "example": "CCD"
+          }
+        }
+      },
+      "TiposIdentificacionListResponse": {
+        "type": "object",
+        "properties": {
+          "tiposIdentificacion": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TipoIdentificacion"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "FamilyMember": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID único del miembro",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "surveyId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID de la encuesta",
+            "example": "123e4567-e89b-12d3-a456-426614174001"
+          },
+          "nombres": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Nombres completos",
+            "example": "Carlos Eduardo González López"
+          },
+          "fechaNacimiento": {
+            "type": "string",
+            "format": "date",
+            "description": "Fecha de nacimiento",
+            "example": "1985-03-15"
+          },
+          "tipoIdentificacion": {
+            "type": "string",
+            "tipoIdentificacion": {
+              "type": "string",
+              "enum": [
+                "CC",
+                "TI",
+                "RC",
+                "CE",
+                "PP",
+                "PEP",
+                "DIE",
+                "CCD"
+              ],
+              "description": "Tipo de documento de identidad",
+              "example": "CC"
+            },
+            "description": "Tipo de identificación",
+            "example": "CC"
+          },
+          "numeroIdentificacion": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "Número de identificación",
+            "example": "12345678"
+          },
+          "sexo": {
+            "type": "string",
+            "enum": [
+              "M",
+              "F",
+              "Otro"
+            ],
+            "description": "Sexo",
+            "example": "M"
+          },
+          "situacionCivil": {
+            "type": "string",
+            "enum": [
+              "Soltero",
+              "Soltera",
+              "Casado",
+              "Casada",
+              "Divorciado",
+              "Divorciada",
+              "Viudo",
+              "Viuda",
+              "Unión Libre"
+            ],
+            "description": "Situación civil",
+            "example": "Casado"
+          },
+          "parentesco": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Parentesco con el jefe de familia",
+            "example": "Jefe de familia"
+          },
+          "estudio": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Nivel educativo",
+            "example": "Universitario completo"
+          },
+          "comunidadCultural": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Comunidad cultural",
+            "example": "Ninguna"
+          },
+          "telefono": {
+            "type": "string",
+            "maxLength": 20,
+            "description": "Teléfono personal",
+            "example": "3009876543"
+          },
+          "correoElectronico": {
+            "type": "string",
+            "format": "email",
+            "description": "Correo electrónico",
+            "example": "carlos.gonzalez@email.com"
+          }
+        },
+        "required": [
+          "nombres",
+          "fechaNacimiento",
+          "tipoIdentificacion",
+          "numeroIdentificacion",
+          "sexo",
+          "situacionCivil",
+          "parentesco",
+          "estudio",
+          "comunidadCultural"
+        ]
+      },
+      "MunicipioBasic": {
+        "type": "object",
+        "properties": {
+          "id_municipio": {
+            "type": "integer",
+            "description": "ID único del municipio",
+            "example": 1
+          },
+          "nombre_municipio": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Nombre del municipio",
+            "example": "Medellín"
+          },
+          "codigo_dane": {
+            "type": "string",
+            "maxLength": 5,
+            "description": "Código DANE del municipio (5 dígitos)",
+            "example": "05001"
+          }
+        }
+      },
+      "MunicipioComplete": {
+        "type": "object",
+        "properties": {
+          "id_municipio": {
+            "type": "integer",
+            "description": "ID único del municipio",
+            "example": 1
+          },
+          "nombre_municipio": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Nombre del municipio",
+            "example": "Medellín"
+          },
+          "codigo_dane": {
+            "type": "string",
+            "maxLength": 5,
+            "description": "Código DANE del municipio (5 dígitos)",
+            "example": "05001"
+          },
+          "id_departamento": {
+            "type": "integer",
+            "description": "ID del departamento al que pertenece",
+            "example": 1
+          },
+          "departamentoData": {
+            "type": "object",
+            "properties": {
+              "id_departamento": {
+                "type": "integer",
+                "example": 1
+              },
+              "nombre": {
+                "type": "string",
+                "example": "Antioquia"
+              },
+              "codigo_dane": {
+                "type": "string",
+                "example": "05"
+              },
+              "region": {
+                "type": "string",
+                "example": "Andina"
+              }
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de creación"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de última actualización"
+          }
+        },
+        "required": [
+          "nombre_municipio",
+          "codigo_dane",
+          "id_departamento"
+        ]
+      },
+      "MunicipioInput": {
+        "type": "object",
+        "properties": {
+          "nombre_municipio": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Nombre del municipio",
+            "example": "Bogotá D.C."
+          },
+          "codigo_dane": {
+            "type": "string",
+            "maxLength": 5,
+            "pattern": "^[0-9]{5}$",
+            "description": "Código DANE del municipio (5 dígitos)",
+            "example": "11001"
+          },
+          "id_departamento": {
+            "type": "integer",
+            "description": "ID del departamento al que pertenece el municipio",
+            "example": 1
+          }
+        },
+        "required": [
+          "nombre_municipio",
+          "codigo_dane",
+          "id_departamento"
+        ]
+      }
+    },
+    "responses": {
+      "UnauthorizedError": {
+        "description": "Token de acceso requerido o inválido",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "error",
+              "message": "Token de acceso requerido",
+              "code": "UNAUTHORIZED"
+            }
+          }
+        }
+      },
+      "ForbiddenError": {
+        "description": "Acceso denegado - permisos insuficientes",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "error",
+              "message": "Acceso denegado",
+              "code": "FORBIDDEN"
+            }
+          }
+        }
+      },
+      "NotFoundError": {
+        "description": "Recurso no encontrado",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "error",
+              "message": "Usuario no encontrado",
+              "code": "NOT_FOUND"
+            }
+          }
+        }
+      },
+      "ValidationError": {
+        "description": "Error de validación en los datos enviados",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "error",
+              "message": "Errores de validación",
+              "code": "VALIDATION_ERROR",
+              "errors": [
+                {
+                  "field": "email",
+                  "message": "El formato del email no es válido"
+                },
+                {
+                  "field": "password",
+                  "message": "La contraseña debe tener al menos 8 caracteres"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "ConflictError": {
+        "description": "Conflicto - el recurso ya existe o hay un conflicto con el estado actual",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "error",
+              "message": "El email ya está registrado",
+              "code": "CONFLICT"
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Error interno del servidor",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "error",
+              "message": "Error interno del servidor",
+              "code": "INTERNAL_SERVER_ERROR"
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Endpoints de autenticación y gestión de cuentas"
+    },
+    {
+      "name": "Users",
+      "description": "Operaciones de gestión de usuarios"
+    },
+    {
+      "name": "Surveys",
+      "description": "Gestión de encuestas y familias"
+    },
+    {
+      "name": "Parroquias",
+      "description": "Gestión de catálogo de parroquias"
+    },
+    {
+      "name": "Municipios",
+      "description": "Gestión de catálogo de municipios"
+    },
+    {
+      "name": "Veredas",
+      "description": "Gestión de catálogo de veredas"
+    },
+    {
+      "name": "Sexos",
+      "description": "Gestión de catálogo de sexos"
+    },
+    {
+      "name": "Catalog",
+      "description": "Operaciones generales de catálogos"
+    },
+    {
+      "name": "System",
+      "description": "Endpoints del sistema y verificación de salud"
+    }
+  ],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Registrar un nuevo usuario",
+        "description": "Crear una nueva cuenta de usuario con verificación por email",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserInput"
+              },
+              "example": {
+                "primer_nombre": "Diego",
+                "segundo_nombre": "Carlos",
+                "primer_apellido": "Garcia",
+                "segundo_apellido": "López",
+                "correo_electronico": "diego.garcia5105@yopmail.com",
+                "contrasena": "Fuerte789&",
+                "telefono": "+57 300 456 7890",
+                "rol": "Encuestador"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuario registrado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "user": {
+                              "$ref": "#/components/schemas/User"
+                            },
+                            "emailSent": {
+                              "type": "boolean",
+                              "description": "Si se envió el email de verificación"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "status": "success",
+                  "message": "Usuario registrado exitosamente. Revisa tu email para verificar tu cuenta.",
+                  "data": {
+                    "user": {
+                      "id": "2acc2c01-91d8-4d3a-a184-f002304620ec",
+                      "correo_electronico": "carlos.martinez1024@yopmail.com",
+                      "primer_nombre": "Carlos",
+                      "segundo_nombre": "Alberto",
+                      "primer_apellido": "Martínez",
+                      "segundo_apellido": "Silva",
+                      "activo": true,
+                      "email_verificado": false,
+                      "roles": [
+                        "Encuestador"
+                      ]
+                    },
+                    "emailSent": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "409": {
+            "description": "Email ya registrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "error",
+                  "message": "El email ya está registrado",
+                  "code": "EMAIL_ALREADY_EXISTS"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Iniciar sesión",
+        "description": "Autenticar usuario y devolver tokens JWT",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginInput"
+              },
+              "example": {
+                "correo_electronico": "admin@parroquia.com",
+                "contrasena": "admin123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login exitoso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/TokenResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "status": "success",
+                  "message": "Login exitoso",
+                  "data": {
+                    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "user": {
+                      "id": "2f21d967-0ed6-4357-8876-c648550b3908",
+                      "correo_electronico": "admin@parroquia.com",
+                      "primer_nombre": "Admin",
+                      "segundo_nombre": null,
+                      "primer_apellido": "Sistema",
+                      "segundo_apellido": null,
+                      "activo": true,
+                      "email_verificado": false,
+                      "roles": [
+                        "Administrador"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "description": "Credenciales inválidas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "error",
+                  "message": "Email o contraseña incorrectos",
+                  "code": "INVALID_CREDENTIALS"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Cuenta inactiva o email no verificado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "error",
+                  "message": "Cuenta inactiva. Contacta al administrador.",
+                  "code": "ACCOUNT_INACTIVE"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/refresh-token": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Renovar token de acceso",
+        "description": "Obtener un nuevo token de acceso usando el refresh token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenInput"
+              },
+              "example": {
+                "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token renovado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "accessToken": {
+                              "type": "string"
+                            },
+                            "expiresIn": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "status": "success",
+                  "message": "Token renovado exitosamente",
+                  "data": {
+                    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "expiresIn": 900
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "description": "Refresh token inválido o expirado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "error",
+                  "message": "Refresh token inválido o expirado",
+                  "code": "INVALID_REFRESH_TOKEN"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/forgot-password": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Solicitar recuperación de contraseña",
+        "description": "Iniciar proceso de recuperación de contraseña enviando email",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordInput"
+              },
+              "example": {
+                "email": "carlos.vargas4169@yopmail.com"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email de recuperación enviado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                },
+                "example": {
+                  "status": "success",
+                  "message": "Si el email existe, recibirás instrucciones para restablecer tu contraseña"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/reset-password": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Restablecer contraseña",
+        "description": "Restablecer contraseña usando token de recuperación",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetInput"
+              },
+              "example": {
+                "token": "abc123def456ghi789",
+                "newPassword": "NuevaPassword123!"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contraseña restablecida exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                },
+                "example": {
+                  "status": "success",
+                  "message": "Contraseña restablecida exitosamente"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "description": "Token inválido o expirado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "error",
+                  "message": "Token de recuperación inválido o expirado",
+                  "code": "INVALID_RESET_TOKEN"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/verify-email": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Verificar dirección de email",
+        "description": "Verificar email del usuario usando token de verificación",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token de verificación de email",
+            "example": "abc123def456ghi789"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Email verificado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                },
+                "example": {
+                  "status": "success",
+                  "message": "Email verificado exitosamente"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Token requerido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "error",
+                  "message": "Token de verificación requerido",
+                  "code": "TOKEN_REQUIRED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "error",
+                  "message": "Token de verificación inválido",
+                  "code": "INVALID_VERIFICATION_TOKEN"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/resend-verification-public": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Reenviar email de verificación (público)",
+        "description": "Reenvía el email de verificación para usuarios que no han verificado su email. No requiere autenticación.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Email del usuario",
+                    "example": "laura.vargas7551@yopmail.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email de verificación reenviado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                },
+                "example": {
+                  "status": "success",
+                  "message": "Verification email sent successfully. Please check your email"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                },
+                "example": {
+                  "status": "error",
+                  "message": "Validation failed",
+                  "errors": [
+                    {
+                      "field": "email",
+                      "message": "Please provide a valid email address"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "error",
+                  "message": "User not found",
+                  "code": "NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Email ya está verificado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "fail",
+                  "message": "Email is already verified",
+                  "code": "CONFLICT"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Cerrar sesión",
+        "description": "Cerrar sesión del usuario e invalidar refresh token",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logout exitoso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                },
+                "example": {
+                  "status": "success",
+                  "message": "Logout exitoso"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/change-password": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Cambiar contraseña",
+        "description": "Cambiar contraseña para usuario autenticado",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordInput"
+              },
+              "example": {
+                "currentPassword": "MiPasswordActual123!",
+                "newPassword": "MiNuevaPassword456!"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contraseña cambiada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                },
+                "example": {
+                  "status": "success",
+                  "message": "Contraseña cambiada exitosamente"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "description": "Contraseña actual incorrecta o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "error",
+                  "message": "Contraseña actual incorrecta",
+                  "code": "INVALID_CURRENT_PASSWORD"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/resend-verification": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Reenviar verificación de email",
+        "description": "Reenviar enlace de verificación de email",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Email de verificación reenviado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                },
+                "example": {
+                  "status": "success",
+                  "message": "Email de verificación reenviado"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email ya verificado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "error",
+                  "message": "El email ya está verificado",
+                  "code": "EMAIL_ALREADY_VERIFIED"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/profile": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Obtener perfil de usuario actual",
+        "description": "Obtener el perfil del usuario actualmente autenticado",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Perfil obtenido exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "user": {
+                              "$ref": "#/components/schemas/User"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "status": "success",
+                  "message": "Perfil obtenido exitosamente",
+                  "data": {
+                    "user": {
+                      "id": 1,
+                      "firstName": "Sofía",
+                      "lastName": "Flores",
+                      "email": "sofía.flores3129@yopmail.com",
+                      "role": "surveyor",
+                      "isActive": true,
+                      "emailVerified": true,
+                      "lastLogin": "2025-07-16T10:30:00.000Z",
+                      "createdAt": "2025-07-16T08:00:00.000Z",
+                      "updatedAt": "2025-07-16T10:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/dev/get-verification-token": {
+      "get": {
+        "tags": [
+          "Development"
+        ],
+        "summary": "Obtener token de verificación (SOLO DESARROLLO)",
+        "description": "Endpoint para obtener el token de verificación de email en modo desarrollo",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "email"
+            },
+            "description": "Email del usuario"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token de verificación obtenido exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "email": {
+                              "type": "string"
+                            },
+                            "token": {
+                              "type": "string"
+                            },
+                            "verificationUrl": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "403": {
+            "description": "No disponible en producción"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/api/reports/statistics/advanced": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Obtener estadísticas avanzadas",
+        "description": "Retorna estadísticas detalladas de las encuestas con métricas avanzadas",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "in_progress",
+                "completed",
+                "cancelled"
+              ]
+            },
+            "description": "Filtrar por estado de la encuesta"
+          },
+          {
+            "in": "query",
+            "name": "sector",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtrar por sector"
+          },
+          {
+            "in": "query",
+            "name": "userId",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filtrar por encuestador"
+          },
+          {
+            "in": "query",
+            "name": "dateFrom",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Fecha de inicio (YYYY-MM-DD)"
+          },
+          {
+            "in": "query",
+            "name": "dateTo",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Fecha de fin (YYYY-MM-DD)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estadísticas avanzadas obtenidas exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "totalSurveys": {
+                              "type": "integer",
+                              "description": "Total de encuestas",
+                              "example": 150
+                            },
+                            "completedSurveys": {
+                              "type": "integer",
+                              "description": "Encuestas completadas",
+                              "example": 45
+                            },
+                            "inProgressSurveys": {
+                              "type": "integer",
+                              "description": "Encuestas en progreso",
+                              "example": 80
+                            },
+                            "cancelledSurveys": {
+                              "type": "integer",
+                              "description": "Encuestas canceladas",
+                              "example": 5
+                            },
+                            "totalFamilies": {
+                              "type": "integer",
+                              "description": "Total de familias",
+                              "example": 600
+                            },
+                            "totalMembers": {
+                              "type": "integer",
+                              "description": "Total de miembros",
+                              "example": 2400
+                            },
+                            "averageFamilySize": {
+                              "type": "string",
+                              "description": "Tamaño promedio de familia",
+                              "example": "4.2"
+                            },
+                            "averageProgress": {
+                              "type": "string",
+                              "description": "Progreso promedio",
+                              "example": "65.5"
+                            },
+                            "completionRate": {
+                              "type": "string",
+                              "description": "Tasa de finalización",
+                              "example": "30.0"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/reports/dashboard": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Obtener estadísticas para dashboard",
+        "description": "Retorna estadísticas formateadas para mostrar en el dashboard principal",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "in_progress",
+                "completed",
+                "cancelled"
+              ]
+            },
+            "description": "Filtrar por estado de la encuesta"
+          },
+          {
+            "in": "query",
+            "name": "sector",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtrar por sector"
+          },
+          {
+            "in": "query",
+            "name": "userId",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filtrar por encuestador"
+          },
+          {
+            "in": "query",
+            "name": "dateFrom",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Fecha de inicio (YYYY-MM-DD)"
+          },
+          {
+            "in": "query",
+            "name": "dateTo",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Fecha de fin (YYYY-MM-DD)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estadísticas del dashboard obtenidas exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "overview": {
+                              "type": "object",
+                              "properties": {
+                                "totalSurveys": {
+                                  "type": "integer",
+                                  "example": 150
+                                },
+                                "completedSurveys": {
+                                  "type": "integer",
+                                  "example": 45
+                                },
+                                "inProgressSurveys": {
+                                  "type": "integer",
+                                  "example": 80
+                                },
+                                "completionRate": {
+                                  "type": "number",
+                                  "example": 30
+                                }
+                              }
+                            },
+                            "family": {
+                              "type": "object",
+                              "properties": {
+                                "totalFamilies": {
+                                  "type": "integer",
+                                  "example": 600
+                                },
+                                "totalMembers": {
+                                  "type": "integer",
+                                  "example": 2400
+                                },
+                                "averageFamilySize": {
+                                  "type": "number",
+                                  "example": 4.2
+                                }
+                              }
+                            },
+                            "progress": {
+                              "type": "object",
+                              "properties": {
+                                "averageProgress": {
+                                  "type": "number",
+                                  "example": 65.5
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/surveys": {
+      "post": {
+        "summary": "Create a new survey",
+        "tags": [
+          "Surveys"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSurveyRequest"
+              },
+              "example": {
+                "sector": "La Esperanza",
+                "familyHead": "María González Pérez",
+                "address": "Calle 15 #23-45, Barrio Centro",
+                "phone": "3001234567",
+                "email": "maria.gonzalez@email.com",
+                "familySize": 4,
+                "housingType": "Casa propia",
+                "observations": "Familia muy colaborativa"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Survey created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Survey created successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "survey": {
+                          "$ref": "#/components/schemas/Survey"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/surveys/my": {
+      "get": {
+        "summary": "Get surveys created by current user",
+        "tags": [
+          "Surveys"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "description": "Items per page"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "in_progress",
+                "completed",
+                "cancelled"
+              ]
+            },
+            "description": "Filter by status"
+          },
+          {
+            "in": "query",
+            "name": "sector",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by sector"
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "createdAt",
+                "updatedAt",
+                "familyHead",
+                "sector",
+                "progress"
+              ]
+            },
+            "description": "Sort field"
+          },
+          {
+            "in": "query",
+            "name": "sort_order",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            },
+            "description": "Sort order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Surveys retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "surveys": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Survey"
+                          }
+                        },
+                        "pagination": {
+                          "$ref": "#/components/schemas/Pagination"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/surveys/statistics": {
+      "get": {
+        "summary": "Get survey statistics",
+        "tags": [
+          "Surveys"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sector",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by sector (admin only)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistics retrieved successfully"
+          }
+        }
+      }
+    },
+    "/api/surveys/{id}": {
+      "get": {
+        "summary": "Get survey by ID",
+        "tags": [
+          "Surveys"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Survey ID"
+          },
+          {
+            "in": "query",
+            "name": "include_relations",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Include related data"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Survey retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "survey": {
+                          "$ref": "#/components/schemas/Survey"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "Survey not found"
+          }
+        }
+      }
+    },
+    "/api/surveys/{id}/stages/{stageNumber}": {
+      "put": {
+        "summary": "Save survey stage data",
+        "tags": [
+          "Surveys"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Survey ID"
+          },
+          {
+            "in": "path",
+            "name": "stageNumber",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            },
+            "description": "Stage number"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StageDataInput"
+              },
+              "example": {
+                "stageData": {
+                  "generalInfo": {
+                    "interviewDate": "2025-07-20",
+                    "interviewerNotes": "Familia muy colaborativa"
+                  },
+                  "economicData": {
+                    "monthlyIncome": 1500000,
+                    "employmentStatus": "empleado",
+                    "occupation": "comerciante"
+                  }
+                },
+                "currentStage": 2,
+                "isComplete": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stage data saved successfully"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "403": {
+            "description": "Unauthorized to edit this survey"
+          },
+          "404": {
+            "description": "Survey not found"
+          }
+        }
+      }
+    },
+    "/api/surveys/{id}/members": {
+      "post": {
+        "summary": "Add family member to survey",
+        "tags": [
+          "Surveys"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Survey ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FamilyMemberInput"
+              },
+              "example": {
+                "nombres": "Carlos",
+                "apellidos": "González",
+                "tipoIdentificacion": "CC",
+                "numeroIdentificacion": "12345678",
+                "fechaNacimiento": "1990-05-15",
+                "sexo": "M",
+                "situacionCivil": "Soltero",
+                "parentesco": "Hijo",
+                "estudio": "Secundaria completa",
+                "comunidadCultural": "Ninguna",
+                "ocupacion": "Estudiante",
+                "telefono": "3001234567",
+                "email": "carlos.gonzalez@email.com",
+                "talla": {
+                  "camisa": "M",
+                  "pantalon": "32",
+                  "calzado": "42"
+                },
+                "isActive": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Family member saved successfully"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "403": {
+            "description": "Unauthorized to edit this survey"
+          },
+          "404": {
+            "description": "Survey not found"
+          }
+        }
+      }
+    },
+    "/api/surveys/{id}/members/{memberId}": {
+      "put": {
+        "summary": "Update family member",
+        "tags": [
+          "Surveys"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Survey ID"
+          },
+          {
+            "in": "path",
+            "name": "memberId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Member ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FamilyMemberInput"
+              },
+              "example": {
+                "nombres": "Ana",
+                "apellidos": "González",
+                "tipoIdentificacion": "CC",
+                "numeroIdentificacion": "87654321",
+                "fechaNacimiento": "1985-08-20",
+                "sexo": "F",
+                "situacionCivil": "Casada",
+                "parentesco": "Esposa",
+                "estudio": "Universidad completa",
+                "comunidadCultural": "Ninguna",
+                "ocupacion": "Profesora",
+                "telefono": "3009876543",
+                "email": "ana.gonzalez@email.com",
+                "talla": {
+                  "camisa": "S",
+                  "pantalon": "28",
+                  "calzado": "38"
+                },
+                "isActive": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Family member updated successfully"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete family member",
+        "tags": [
+          "Surveys"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Survey ID"
+          },
+          {
+            "in": "path",
+            "name": "memberId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Member ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Family member deleted successfully"
+          }
+        }
+      }
+    },
+    "/api/surveys/{id}/complete": {
+      "post": {
+        "summary": "Complete survey",
+        "tags": [
+          "Surveys"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Survey ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Survey completed successfully"
+          },
+          "400": {
+            "description": "Survey incomplete or validation error"
+          },
+          "403": {
+            "description": "Unauthorized to complete this survey"
+          },
+          "404": {
+            "description": "Survey not found"
+          }
+        }
+      }
+    },
+    "/api/surveys/{id}/cancel": {
+      "post": {
+        "summary": "Cancel survey",
+        "tags": [
+          "Surveys"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Survey ID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "description": "Reason for cancellation"
+                  }
+                }
+              },
+              "example": {
+                "reason": "La familia se mudó de la zona"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Survey cancelled successfully"
+          },
+          "400": {
+            "description": "Cannot cancel completed survey"
+          },
+          "403": {
+            "description": "Unauthorized to cancel this survey"
+          },
+          "404": {
+            "description": "Survey not found"
+          }
+        }
+      }
+    },
+    "/api/surveys/{id}/auto-save": {
+      "post": {
+        "summary": "Auto-save survey data",
+        "tags": [
+          "Surveys"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Survey ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Temporary data to save"
+              },
+              "example": {
+                "tempData": {
+                  "basicInfo": {
+                    "familyHead": "María González",
+                    "address": "Calle 15 #23-45",
+                    "phone": "3001234567"
+                  },
+                  "currentStep": 2,
+                  "lastModified": "2025-07-20T10:30:00.000Z",
+                  "isDraft": true
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Data auto-saved successfully"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get auto-saved data",
+        "tags": [
+          "Surveys"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Survey ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Auto-saved data retrieved successfully"
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Verificación de salud del API",
+        "description": "Endpoint para verificar que el API está funcionando correctamente",
+        "responses": {
+          "200": {
+            "description": "API funcionando correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "OK"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Parroquia API is running"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-07-16T15:30:00.000Z"
+                    },
+                    "version": {
+                      "type": "string",
+                      "example": "1.0.0"
+                    },
+                    "environment": {
+                      "type": "string",
+                      "example": "development"
+                    },
+                    "uptime": {
+                      "type": "number",
+                      "example": 3600.5
+                    }
+                  }
+                },
+                "example": {
+                  "status": "OK",
+                  "message": "Parroquia API is running",
+                  "timestamp": "2025-07-16T15:30:00.000Z",
+                  "version": "1.0.0",
+                  "environment": "development",
+                  "uptime": 3600.5
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/status": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Estado detallado del sistema",
+        "description": "Endpoint para verificar el estado de los servicios del sistema incluyendo base de datos",
+        "responses": {
+          "200": {
+            "description": "Todos los servicios funcionando correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "OK"
+                    },
+                    "services": {
+                      "type": "object",
+                      "properties": {
+                        "database": {
+                          "type": "string",
+                          "example": "connected"
+                        },
+                        "api": {
+                          "type": "string",
+                          "example": "running"
+                        }
+                      }
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                },
+                "example": {
+                  "status": "OK",
+                  "services": {
+                    "database": "connected",
+                    "api": "running"
+                  },
+                  "timestamp": "2025-07-16T15:30:00.000Z"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Uno o más servicios no están disponibles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ERROR"
+                    },
+                    "services": {
+                      "type": "object",
+                      "properties": {
+                        "database": {
+                          "type": "string",
+                          "example": "disconnected"
+                        },
+                        "api": {
+                          "type": "string",
+                          "example": "running"
+                        }
+                      }
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Connection to database failed"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                },
+                "example": {
+                  "status": "ERROR",
+                  "services": {
+                    "database": "disconnected",
+                    "api": "running"
+                  },
+                  "error": "Connection to database failed",
+                  "timestamp": "2025-07-16T15:30:00.000Z"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Información del API",
+        "description": "Endpoint raíz que proporciona información básica del API y enlaces útiles",
+        "responses": {
+          "200": {
+            "description": "Información del API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Welcome to Parroquia API"
+                    },
+                    "documentation": {
+                      "type": "string",
+                      "example": "/api-docs"
+                    },
+                    "health": {
+                      "type": "string",
+                      "example": "/api/health"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "/api/status"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "Welcome to Parroquia API",
+                  "documentation": "/api-docs",
+                  "health": "/api/health",
+                  "status": "/api/status"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/swagger-debug": {
+      "get": {
+        "summary": "Debug endpoint for Swagger schema issues",
+        "tags": [
+          "System"
+        ],
+        "responses": {
+          "200": {
+            "description": "Swagger debug information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "sectorInputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "example": "Sector San José"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "Descripción del sector"
+                        },
+                        "coordinator": {
+                          "type": "integer",
+                          "example": 2
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "active",
+                            "inactive"
+                          ],
+                          "example": "active"
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "SEC001"
+                        },
+                        "municipioId": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "veredaId": {
+                          "type": "integer",
+                          "example": 1
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Schema verification successful"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "summary": "Obtener todos los usuarios activos",
+        "description": "Recupera una lista de todos los usuarios activos del sistema (solo administradores)",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de usuarios obtenida exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "users": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/User"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/users/deleted": {
+      "get": {
+        "summary": "Obtener usuarios eliminados",
+        "description": "Recupera una lista de todos los usuarios eliminados (soft delete) del sistema (solo administradores)",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de usuarios eliminados obtenida exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "users": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/User"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "summary": "Obtener usuario por ID",
+        "description": "Recupera un usuario específico por su ID (administrador o propietario)",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "ID único del usuario (UUID)",
+            "example": "31cb8fe4-bb24-4ad8-af66-d8c900d13c2a"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuario obtenido exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "user": {
+                              "$ref": "#/components/schemas/User"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualizar usuario",
+        "description": "Actualiza la información de un usuario existente (administrador o propietario)",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "ID único del usuario (UUID)",
+            "example": "31cb8fe4-bb24-4ad8-af66-d8c900d13c2a"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdate"
+              },
+              "example": {
+                "firstName": "Juan Carlos",
+                "lastName": "Pérez García",
+                "email": "juan.carlos@yopmail.com",
+                "role": "surveyor"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuario actualizado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "user": {
+                              "$ref": "#/components/schemas/User"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar usuario",
+        "description": "Elimina un usuario del sistema (soft delete - solo administradores)",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "ID único del usuario (UUID)",
+            "example": "31cb8fe4-bb24-4ad8-af66-d8c900d13c2a"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuario eliminado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "nullable": true,
+                          "example": null
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/catalog/departamentos": {
+      "post": {
+        "summary": "Create a new departamento",
+        "tags": [
+          "Departamentos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DepartamentoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Departamento created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all departamentos with pagination",
+        "tags": [
+          "Departamentos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Number of items per page"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term for name, codigo DANE, or region"
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "default": "nombre"
+            },
+            "description": "Field to sort by"
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "default": "ASC"
+            },
+            "description": "Sort order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Departamentos retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DepartamentosListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/departamentos/{id}": {
+      "get": {
+        "summary": "Get departamento by ID",
+        "tags": [
+          "Departamentos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Departamento ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Departamento retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Departamento not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update departamento",
+        "tags": [
+          "Departamentos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Departamento ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DepartamentoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Departamento updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Departamento not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete departamento",
+        "tags": [
+          "Departamentos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Departamento ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Departamento deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Departamento not found"
+          },
+          "409": {
+            "description": "Cannot delete departamento with associated municipios"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/departamentos/codigo-dane/{codigo_dane}": {
+      "get": {
+        "summary": "Get departamento by codigo DANE",
+        "tags": [
+          "Departamentos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "codigo_dane",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Codigo DANE (2 digits)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Departamento retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Departamento not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/departamentos/region/{region}": {
+      "get": {
+        "summary": "Get departamentos by region",
+        "tags": [
+          "Departamentos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "region",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Region name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Departamentos by region retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/health": {
+      "get": {
+        "summary": "Health check for catalog module",
+        "tags": [
+          "Catalog"
+        ],
+        "responses": {
+          "200": {
+            "description": "Catalog API is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Catalog API is healthy"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "services": {
+                      "type": "object",
+                      "properties": {
+                        "parroquias": {
+                          "type": "string",
+                          "example": "active"
+                        },
+                        "municipios": {
+                          "type": "string",
+                          "example": "active"
+                        },
+                        "sectors": {
+                          "type": "string",
+                          "example": "active"
+                        },
+                        "veredas": {
+                          "type": "string",
+                          "example": "active"
+                        },
+                        "sexos": {
+                          "type": "string",
+                          "example": "active"
+                        },
+                        "tiposIdentificacion": {
+                          "type": "string",
+                          "example": "active"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/catalog/municipios": {
+      "post": {
+        "summary": "Create a new municipio",
+        "tags": [
+          "Municipios"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MunicipioInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Municipio created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all municipios with pagination",
+        "tags": [
+          "Municipios"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Items per page"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term for municipio name"
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "default": "id_municipio"
+            },
+            "description": "Field to sort by"
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "default": "ASC"
+            },
+            "description": "Sort order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Municipios retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "municipios": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/Municipio"
+                              }
+                            },
+                            "pagination": {
+                              "$ref": "#/components/schemas/Pagination"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/municipios/bulk": {
+      "post": {
+        "summary": "Bulk create municipios",
+        "tags": [
+          "Municipios"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "municipios"
+                ],
+                "properties": {
+                  "municipios": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/components/schemas/MunicipioInput"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Municipios created successfully"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/municipios/{id}": {
+      "get": {
+        "summary": "Get municipio by ID",
+        "tags": [
+          "Municipios"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Municipio ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Municipio retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Municipio"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Municipio not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update municipio",
+        "tags": [
+          "Municipios"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Municipio ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MunicipioInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Municipio updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Municipio"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Municipio not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete municipio",
+        "tags": [
+          "Municipios"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Municipio ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Municipio deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Municipio not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/municipios/codigo-dane/{codigo_dane}": {
+      "get": {
+        "summary": "Get municipio by codigo DANE",
+        "tags": [
+          "Municipios"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "codigo_dane",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Codigo DANE (5 digits)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Municipio retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Municipio not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/municipios/departamento/{id_departamento}": {
+      "get": {
+        "summary": "Get municipios by departamento",
+        "tags": [
+          "Municipios"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id_departamento",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Departamento ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Municipios by departamento retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/municipios/search/codigo-dane/{pattern}": {
+      "get": {
+        "summary": "Search municipios by codigo DANE pattern",
+        "tags": [
+          "Municipios"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pattern",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search pattern for codigo DANE"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Municipios search completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/parroquias": {
+      "post": {
+        "summary": "Create a new parroquia",
+        "tags": [
+          "Parroquias"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParroquiaInput"
+              },
+              "example": {
+                "nombre": "Parroquia San José"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Parroquia created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParroquiaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all parroquias with pagination",
+        "tags": [
+          "Parroquias"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Items per page"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term"
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "default": "id_parroquia"
+            },
+            "description": "Field to sort by"
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "default": "ASC"
+            },
+            "description": "Sort order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parroquias retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParroquiasListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/catalog/parroquias/search": {
+      "get": {
+        "summary": "Search parroquias",
+        "tags": [
+          "Parroquias"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term (minimum 2 characters)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search completed successfully"
+          },
+          "400": {
+            "description": "Search term too short"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/parroquias/statistics": {
+      "get": {
+        "summary": "Get parroquia statistics",
+        "tags": [
+          "Parroquias"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistics retrieved successfully"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/parroquias/{id}": {
+      "get": {
+        "summary": "Get parroquia by ID",
+        "tags": [
+          "Parroquias"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Parroquia ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parroquia retrieved successfully"
+          },
+          "404": {
+            "description": "Parroquia not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update parroquia",
+        "tags": [
+          "Parroquias"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Parroquia ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParroquiaInput"
+              },
+              "example": {
+                "nombre": "Parroquia San José Actualizada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Parroquia updated successfully"
+          },
+          "404": {
+            "description": "Parroquia not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete parroquia",
+        "tags": [
+          "Parroquias"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Parroquia ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parroquia deleted successfully"
+          },
+          "404": {
+            "description": "Parroquia not found"
+          },
+          "409": {
+            "description": "Cannot delete - has associated records"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/sectors": {
+      "post": {
+        "summary": "Create a new sector",
+        "tags": [
+          "Sectors"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSectorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sector created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Sector created successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Sector"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Sector name already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all sectors with pagination",
+        "tags": [
+          "Sectors"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Items per page"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "inactive"
+              ]
+            },
+            "description": "Filter by status"
+          },
+          {
+            "in": "query",
+            "name": "coordinatorId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by coordinator"
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "default": "createdAt"
+            },
+            "description": "Field to sort by"
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "default": "DESC"
+            },
+            "description": "Sort order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sectors retrieved successfully"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/sectors/search": {
+      "get": {
+        "summary": "Search sectors",
+        "tags": [
+          "Sectors"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term (minimum 2 characters)"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "inactive"
+              ]
+            },
+            "description": "Filter by status"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Maximum results"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search completed successfully"
+          },
+          "400": {
+            "description": "Search term too short"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/sectors/statistics": {
+      "get": {
+        "summary": "Get sector statistics",
+        "tags": [
+          "Sectors"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sectorId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Get statistics for specific sector"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistics retrieved successfully"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/sectors/coordinator/{coordinatorId}": {
+      "get": {
+        "summary": "Get sectors by coordinator",
+        "tags": [
+          "Sectors"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "coordinatorId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Coordinator user ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Coordinator sectors retrieved successfully"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/sectors/{id}": {
+      "get": {
+        "summary": "Get sector by ID",
+        "tags": [
+          "Sectors"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Sector ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sector retrieved successfully"
+          },
+          "404": {
+            "description": "Sector not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update sector",
+        "tags": [
+          "Sectors"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Sector ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Sector San José"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Descripción del sector"
+                  },
+                  "coordinator": {
+                    "type": "integer",
+                    "example": 2
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "inactive"
+                    ],
+                    "example": "active"
+                  },
+                  "code": {
+                    "type": "string",
+                    "example": "SEC001"
+                  },
+                  "municipioId": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "veredaId": {
+                    "type": "integer",
+                    "example": 1
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "example": {
+                  "name": "Sector San José",
+                  "description": "Sector ubicado en el centro",
+                  "coordinator": 2,
+                  "status": "active",
+                  "code": "SJ001",
+                  "municipioId": 1,
+                  "veredaId": 1
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sector updated successfully"
+          },
+          "404": {
+            "description": "Sector not found"
+          },
+          "409": {
+            "description": "Sector name already exists"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete sector",
+        "tags": [
+          "Sectors"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Sector ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sector deleted successfully"
+          },
+          "404": {
+            "description": "Sector not found"
+          },
+          "409": {
+            "description": "Cannot delete - has associated records"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/sectors/{id}/assign-coordinator": {
+      "put": {
+        "summary": "Assign coordinator to sector",
+        "tags": [
+          "Sectors"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Sector ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "coordinatorId"
+                ],
+                "properties": {
+                  "coordinatorId": {
+                    "type": "string",
+                    "description": "Coordinator user ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Coordinator assigned successfully"
+          },
+          "400": {
+            "description": "Validation error or user is not a coordinator"
+          },
+          "404": {
+            "description": "Sector or coordinator not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/sectors/{sectorName}/update-stats": {
+      "put": {
+        "summary": "Update sector survey statistics",
+        "tags": [
+          "Sectors"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sectorName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Sector name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistics updated successfully"
+          },
+          "404": {
+            "description": "Sector not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/sectors/bulk": {
+      "post": {
+        "summary": "Bulk create sectors",
+        "tags": [
+          "Sectors"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sectors": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/CreateSectorRequest"
+                    }
+                  }
+                },
+                "required": [
+                  "sectors"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sectors created successfully"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/sexos": {
+      "post": {
+        "summary": "Create a new sexo",
+        "tags": [
+          "Sexos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SexoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sexo created successfully"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all sexos with pagination",
+        "tags": [
+          "Sexos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Items per page"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term"
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "default": "id_sexo"
+            },
+            "description": "Field to sort by"
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "default": "ASC"
+            },
+            "description": "Sort order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sexos retrieved successfully"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/sexos/bulk": {
+      "post": {
+        "summary": "Bulk create sexos (for initial setup)",
+        "tags": [
+          "Sexos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "sexos"
+                ],
+                "properties": {
+                  "sexos": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "sexo": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "description": "Array of sexos to create"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sexos created successfully"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/sexos/select": {
+      "get": {
+        "summary": "Get sexos formatted for select/dropdown",
+        "tags": [
+          "Sexos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sexos for select retrieved successfully"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/sexos/search": {
+      "get": {
+        "summary": "Search sexos",
+        "tags": [
+          "Sexos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search completed successfully"
+          },
+          "400": {
+            "description": "Search term is required"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/sexos/statistics": {
+      "get": {
+        "summary": "Get sexo statistics",
+        "tags": [
+          "Sexos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistics retrieved successfully"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/sexos/name/{name}": {
+      "get": {
+        "summary": "Get sexo by name",
+        "tags": [
+          "Sexos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Sexo name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sexo retrieved successfully"
+          },
+          "404": {
+            "description": "Sexo not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/sexos/{id}": {
+      "get": {
+        "summary": "Get sexo by ID",
+        "tags": [
+          "Sexos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Sexo ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sexo retrieved successfully"
+          },
+          "404": {
+            "description": "Sexo not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update sexo",
+        "tags": [
+          "Sexos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Sexo ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SexoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sexo updated successfully"
+          },
+          "404": {
+            "description": "Sexo not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete sexo",
+        "tags": [
+          "Sexos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Sexo ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sexo deleted successfully"
+          },
+          "404": {
+            "description": "Sexo not found"
+          },
+          "409": {
+            "description": "Cannot delete - has associated records"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/sexos/{id}/details": {
+      "get": {
+        "summary": "Get sexo with details including persona counts",
+        "tags": [
+          "Sexos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Sexo ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sexo details retrieved successfully"
+          },
+          "404": {
+            "description": "Sexo not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/tipos-identificacion": {
+      "get": {
+        "summary": "Obtener todos los tipos de identificación",
+        "description": "Obtiene una lista de todos los tipos de identificación disponibles",
+        "tags": [
+          "Tipos de Identificación"
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de tipos de identificación obtenida correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1
+                          },
+                          "codigo": {
+                            "type": "string",
+                            "example": "CC"
+                          },
+                          "descripcion": {
+                            "type": "string",
+                            "example": "Cédula de Ciudadanía"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Error interno del servidor"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/catalog/veredas": {
+      "post": {
+        "summary": "Create a new vereda",
+        "tags": [
+          "Veredas"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VeredaInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Vereda created successfully"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all veredas with pagination",
+        "tags": [
+          "Veredas"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Items per page"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term"
+          },
+          {
+            "in": "query",
+            "name": "municipioId",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by municipio"
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "default": "id_vereda"
+            },
+            "description": "Field to sort by"
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "default": "ASC"
+            },
+            "description": "Sort order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Veredas retrieved successfully"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/veredas/search": {
+      "get": {
+        "summary": "Search veredas",
+        "tags": [
+          "Veredas"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term (minimum 2 characters)"
+          },
+          {
+            "in": "query",
+            "name": "municipioId",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by municipio"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Maximum results"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search completed successfully"
+          },
+          "400": {
+            "description": "Search term too short"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/veredas/statistics": {
+      "get": {
+        "summary": "Get vereda statistics",
+        "tags": [
+          "Veredas"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "veredaId",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Get statistics for specific vereda"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistics retrieved successfully"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/veredas/municipio/{municipioId}": {
+      "get": {
+        "summary": "Get veredas by municipio",
+        "tags": [
+          "Veredas"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "municipioId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Municipio ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Veredas by municipio retrieved successfully"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/veredas/{id}": {
+      "get": {
+        "summary": "Get vereda by ID",
+        "tags": [
+          "Veredas"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Vereda ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vereda retrieved successfully"
+          },
+          "404": {
+            "description": "Vereda not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update vereda",
+        "tags": [
+          "Veredas"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Vereda ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VeredaInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vereda updated successfully"
+          },
+          "404": {
+            "description": "Vereda not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete vereda",
+        "tags": [
+          "Veredas"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Vereda ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vereda deleted successfully"
+          },
+          "404": {
+            "description": "Vereda not found"
+          },
+          "409": {
+            "description": "Cannot delete - has associated records"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/catalog/veredas/{id}/details": {
+      "get": {
+        "summary": "Get vereda with full details including counts",
+        "tags": [
+          "Veredas"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Vereda ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vereda details retrieved successfully"
+          },
+          "404": {
+            "description": "Vereda not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    }
+  }
+}

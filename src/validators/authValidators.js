@@ -191,8 +191,8 @@ const authValidators = {
    */
   validateUserId: [
     param('id')
-      .isInt({ min: 1 })
-      .withMessage('User ID must be a positive integer')
+      .isUUID()
+      .withMessage('User ID must be a valid UUID')
   ],
 
   /**

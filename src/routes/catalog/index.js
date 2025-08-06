@@ -68,7 +68,7 @@ router.use('/tipos-identificacion', tipoIdentificacionRoutes);
 router.get('/health', (req, res) => {
   res.json({
     success: true,
-    message: 'Catalog API is healthy',
+    message: 'Catalog API is healthy - All services active',
     timestamp: new Date().toISOString(),
     services: {
       parroquias: 'active',

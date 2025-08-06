@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       // Relación con Familia - un sector puede tener muchas familias
       Sector.hasMany(models.Familia, {
         foreignKey: 'id_sector',
-        as: 'familias'
+        as: 'familiasSector'
       });
     }
   }

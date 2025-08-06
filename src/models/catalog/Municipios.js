@@ -30,7 +30,9 @@ const Municipios = sequelize.define('Municipios', {
   sequelize,
   modelName: 'Municipios',
   tableName: 'municipios',
-  timestamps: true
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at'
 });
 
 export default Municipios;

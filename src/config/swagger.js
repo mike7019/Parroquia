@@ -146,47 +146,58 @@ const swaggerConfig = {
               minLength: 2,
               maxLength: 50,
               description: 'Primer nombre del usuario',
-              example: 'Diego'
+              example: 'Diego',
+              pattern: '^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$'
             },
             segundo_nombre: {
               type: 'string',
               minLength: 2,
               maxLength: 50,
+              nullable: true,
               description: 'Segundo nombre del usuario (opcional)',
-              example: 'Carlos'
+              example: 'Carlos',
+              pattern: '^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$'
             },
             primer_apellido: {
               type: 'string',
               minLength: 2,
               maxLength: 50,
               description: 'Primer apellido del usuario',
-              example: 'Garcia'
+              example: 'Garcia',
+              pattern: '^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$'
             },
             segundo_apellido: {
               type: 'string',
               minLength: 2,
               maxLength: 50,
+              nullable: true,
               description: 'Segundo apellido del usuario (opcional)',
-              example: 'López'
+              example: 'López',
+              pattern: '^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$'
             },
             correo_electronico: {
               type: 'string',
               format: 'email',
+              maxLength: 100,
               description: 'Correo electrónico único',
               example: 'diego.garcia5105@yopmail.com'
             },
             contrasena: {
               type: 'string',
               minLength: 8,
-              description: 'Contraseña (mínimo 8 caracteres, debe incluir mayúsculas, minúsculas, números y símbolos)',
-              example: 'MiPassword123!'
+              maxLength: 100,
+              description: 'Contraseña (8-100 caracteres, debe incluir mayúsculas, minúsculas, números y símbolos)',
+              example: 'Fuerte789&',
+              pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$'
             },
             telefono: {
               type: 'string',
               minLength: 10,
               maxLength: 20,
-              description: 'Número de teléfono del usuario',
-              example: '+57 300 123 4567'
+              nullable: true,
+              description: 'Número de teléfono del usuario (opcional, 10-20 caracteres)',
+              example: '+57 300 456 7890',
+              pattern: '^[\\+]?[0-9\\s\\-\\(\\)]+$'
             },
             rol: {
               type: 'string',
@@ -199,43 +210,54 @@ const swaggerConfig = {
         UserUpdate: {
           type: 'object',
           properties: {
-            firstName: {
+            primer_nombre: {
               type: 'string',
               minLength: 2,
               maxLength: 50,
-              description: 'Primer nombre del usuario',
-              example: 'Juan'
+              description: 'Primer nombre del usuario (opcional para actualización)',
+              example: 'Juan',
+              pattern: '^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$'
             },
-            lastName: {
+            segundo_nombre: {
               type: 'string',
               minLength: 2,
               maxLength: 50,
-              description: 'Apellido del usuario',
-              example: 'Pérez'
+              nullable: true,
+              description: 'Segundo nombre del usuario (opcional)',
+              example: 'Carlos',
+              pattern: '^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$'
             },
-            email: {
+            primer_apellido: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 50,
+              description: 'Primer apellido del usuario (opcional para actualización)',
+              example: 'Pérez',
+              pattern: '^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$'
+            },
+            segundo_apellido: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 50,
+              nullable: true,
+              description: 'Segundo apellido del usuario (opcional)',
+              example: 'García',
+              pattern: '^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$'
+            },
+            correo_electronico: {
               type: 'string',
               format: 'email',
-              description: 'Correo electrónico único',
+              maxLength: 100,
+              description: 'Correo electrónico único (opcional para actualización)',
               example: 'juan.perez@yopmail.com'
             },
-            phone: {
+            telefono: {
               type: 'string',
               minLength: 10,
               maxLength: 20,
-              description: 'Número de teléfono del usuario',
-              example: '+57 300 123 4567'
-            },
-            role: {
-              type: 'string',
-              enum: ['admin', 'coordinator', 'surveyor'],
-              description: 'Rol del usuario',
-              example: 'surveyor'
-            },
-            isActive: {
-              type: 'boolean',
-              description: 'Estado activo del usuario',
-              example: true
+              description: 'Número de teléfono del usuario (opcional)',
+              example: '+57 300 123 4567',
+              pattern: '^[\\+]?[0-9\\s\\-\\(\\)]+$'
             }
           }
         },
@@ -279,20 +301,50 @@ const swaggerConfig = {
             }
           }
         },
+        RefreshTokenInput: {
+          type: 'object',
+          required: ['refreshToken'],
+          properties: {
+            refreshToken: {
+              type: 'string',
+              description: 'Token de actualización JWT válido',
+              example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+              pattern: '^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_.+/=]*$'
+            }
+          }
+        },
+        ForgotPasswordInput: {
+          type: 'object',
+          required: ['email'],
+          properties: {
+            email: {
+              type: 'string',
+              format: 'email',
+              maxLength: 100,
+              description: 'Correo electrónico para restablecer contraseña',
+              example: 'usuario@example.com'
+            }
+          }
+        },
         PasswordResetInput: {
           type: 'object',
           required: ['token', 'newPassword'],
           properties: {
             token: {
               type: 'string',
-              description: 'Token de restablecimiento de contraseña',
-              example: 'abc123def456ghi789'
+              minLength: 32,
+              maxLength: 64,
+              description: 'Token de restablecimiento de contraseña (32-64 caracteres alfanuméricos)',
+              example: 'a1b2c3d4e5f6789012345678901234567890abcdef123456789012345678901234',
+              pattern: '^[a-zA-Z0-9]+$'
             },
             newPassword: {
               type: 'string',
               minLength: 8,
-              description: 'Nueva contraseña',
-              example: 'NuevaPassword123!'
+              maxLength: 100,
+              description: 'Nueva contraseña (8-100 caracteres, debe incluir mayúsculas, minúsculas, números y símbolos)',
+              example: 'NuevaPassword123!',
+              pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$'
             }
           }
         },
@@ -302,14 +354,17 @@ const swaggerConfig = {
           properties: {
             currentPassword: {
               type: 'string',
+              maxLength: 100,
               description: 'Contraseña actual',
               example: 'MiPasswordActual123!'
             },
             newPassword: {
               type: 'string',
               minLength: 8,
-              description: 'Nueva contraseña',
-              example: 'MiNuevaPassword456!'
+              maxLength: 100,
+              description: 'Nueva contraseña (8-100 caracteres, debe incluir mayúsculas, minúsculas, números y símbolos, diferente a la actual)',
+              example: 'MiNuevaPassword456!',
+              pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$'
             }
           }
         },
@@ -686,6 +741,120 @@ const swaggerConfig = {
           },
           required: ['stageData']
         },
+        FamiliaInput: {
+          type: 'object',
+          required: ['nombre_familia', 'direccion_familia', 'tratamiento_datos'],
+          properties: {
+            nombre_familia: {
+              type: 'string',
+              minLength: 1,
+              maxLength: 255,
+              description: 'Nombre de familia',
+              example: 'Familia González Pérez'
+            },
+            direccion_familia: {
+              type: 'string',
+              minLength: 1,
+              maxLength: 255,
+              description: 'Dirección de la familia',
+              example: 'Calle 15 #23-45, Barrio Centro'
+            },
+            numero_contrato_epm: {
+              type: 'string',
+              maxLength: 50,
+              nullable: true,
+              description: 'Número de contrato EPM (opcional)',
+              example: 'EPM123456789'
+            },
+            telefono_familiar: {
+              type: 'string',
+              description: 'Teléfono familiar válido para Colombia (opcional)',
+              example: '3001234567',
+              pattern: '^3[0-9]{9}$'
+            },
+            tratamiento_datos: {
+              type: 'boolean',
+              description: 'Aceptación del tratamiento de datos personales',
+              example: true
+            }
+          }
+        },
+        PersonaInput: {
+          type: 'object',
+          required: ['primer_nombre', 'primer_apellido', 'identificacion', 'telefono', 'correo_electronico', 'fecha_nacimiento', 'direccion'],
+          properties: {
+            primer_nombre: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 50,
+              description: 'Primer nombre de la persona',
+              example: 'María',
+              pattern: '^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$'
+            },
+            segundo_nombre: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 50,
+              nullable: true,
+              description: 'Segundo nombre de la persona (opcional)',
+              example: 'Elena',
+              pattern: '^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$'
+            },
+            primer_apellido: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 50,
+              description: 'Primer apellido de la persona',
+              example: 'González',
+              pattern: '^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$'
+            },
+            segundo_apellido: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 50,
+              nullable: true,
+              description: 'Segundo apellido de la persona (opcional)',
+              example: 'Pérez',
+              pattern: '^[a-zA-ZÀ-ÿ\\u00f1\\u00d1\\s]+$'
+            },
+            identificacion: {
+              type: 'string',
+              minLength: 6,
+              maxLength: 20,
+              description: 'Número de identificación (6-20 caracteres alfanuméricos)',
+              example: '12345678',
+              pattern: '^[a-zA-Z0-9]+$'
+            },
+            telefono: {
+              type: 'string',
+              minLength: 10,
+              maxLength: 20,
+              description: 'Número de teléfono (10-20 caracteres)',
+              example: '+57 300 123 4567',
+              pattern: '^[\\+]?[0-9\\s\\-\\(\\)]+$'
+            },
+            correo_electronico: {
+              type: 'string',
+              format: 'email',
+              maxLength: 100,
+              description: 'Correo electrónico',
+              example: 'maria.gonzalez@example.com'
+            },
+            fecha_nacimiento: {
+              type: 'string',
+              format: 'date',
+              description: 'Fecha de nacimiento (YYYY-MM-DD)',
+              example: '1985-05-15'
+            },
+            direccion: {
+              type: 'string',
+              minLength: 1,
+              maxLength: 255,
+              description: 'Dirección de residencia',
+              example: 'Carrera 10 #5-25, Apartamento 3B'
+            }
+          }
+        },
         FamilyMemberInput: {
           type: 'object',
           properties: {
@@ -856,16 +1025,6 @@ const swaggerConfig = {
               maxLength: 255,
               description: 'Nombre de la parroquia',
               example: 'San José'
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de creación'
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de última actualización'
             }
           },
           required: ['nombre']
@@ -899,16 +1058,6 @@ const swaggerConfig = {
             },
             sector: {
               $ref: '#/components/schemas/Sector'
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de creación'
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de última actualización'
             }
           },
           required: ['nombre', 'id_municipio_municipios', 'id_sector_sector']
@@ -927,15 +1076,16 @@ const swaggerConfig = {
               description: 'Nombre del municipio',
               example: 'Bogotá'
             },
-            createdAt: {
+            codigo_dane: {
               type: 'string',
-              format: 'date-time',
-              description: 'Fecha de creación'
+              maxLength: 5,
+              description: 'Código DANE del municipio (5 dígitos)',
+              example: '05001'
             },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de última actualización'
+            id_departamento: {
+              type: 'integer',
+              description: 'ID del departamento al que pertenece',
+              example: 1
             }
           },
           required: ['nombre_municipio']
@@ -953,46 +1103,9 @@ const swaggerConfig = {
               maxLength: 255,
               description: 'Descripción del tipo de sexo',
               example: 'Masculino'
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de creación'
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de última actualización'
             }
           },
-          required: ['sexo']
-        },
-        Municipio: {
-          type: 'object',
-          properties: {
-            id_municipio: {
-              type: 'integer',
-              description: 'ID único del municipio',
-              example: 1
-            },
-            nombre_municipio: {
-              type: 'string',
-              maxLength: 255,
-              description: 'Nombre del municipio',
-              example: 'Bogotá'
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de creación'
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de última actualización'
-            }
-          },
-          required: ['nombre_municipio']
+          required: ['descripcion']
         },
         CreateMunicipioRequest: {
           type: 'object',
@@ -1050,22 +1163,6 @@ const swaggerConfig = {
               maxLength: 2,
               description: 'Código DANE del departamento (2 dígitos)',
               example: '05'
-            },
-            region: {
-              type: 'string',
-              maxLength: 100,
-              description: 'Región geográfica del departamento',
-              example: 'Región Andina'
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de creación'
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de última actualización'
             }
           },
           required: ['nombre', 'codigo_dane']
@@ -1084,12 +1181,6 @@ const swaggerConfig = {
               maxLength: 2,
               description: 'Código DANE del departamento (2 dígitos)',
               example: '05'
-            },
-            region: {
-              type: 'string',
-              maxLength: 100,
-              description: 'Región geográfica del departamento',
-              example: 'Región Andina'
             }
           },
           required: ['nombre', 'codigo_dane']
@@ -1121,16 +1212,6 @@ const swaggerConfig = {
               maxLength: 255,
               description: 'Nombre del sector',
               example: 'Urbano'
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de creación'
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de última actualización'
             }
           },
           required: ['nombre']
@@ -1395,22 +1476,8 @@ const swaggerConfig = {
                 codigo_dane: {
                   type: 'string',
                   example: '05'
-                },
-                region: {
-                  type: 'string',
-                  example: 'Andina'
                 }
               }
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de creación'
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de última actualización'
             }
           },
           required: ['nombre_municipio', 'codigo_dane', 'id_departamento']

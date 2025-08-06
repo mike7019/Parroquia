@@ -5,50 +5,56 @@ module.exports = (sequelize, DataTypes) => {
   class Persona extends Model {
     static associate(models) {
       // Relación con Familia (una persona pertenece a una familia)
-      Persona.belongsTo(models.Familia, {
-        foreignKey: 'id_familia_familias',
-        as: 'familia'
-      });
+      if (models.Familia) {
+        Persona.belongsTo(models.Familia, {
+          foreignKey: 'id_familia_familias',
+          as: 'familia'
+        });
+      }
 
-      // Relación con TipoIdentificacion
-      Persona.belongsTo(models.TipoIdentificacion, {
-        foreignKey: 'id_tipo_identificacion_tipo_identificacion',
-        as: 'tipoIdentificacion'
-      });
-
-      // Relación con EstadoCivil
-      Persona.belongsTo(models.EstadoCivil, {
-        foreignKey: 'id_estado_civil_estado_civil',
-        as: 'estadoCivil'
-      });
+      // Relación con TipoIdentificacion - solo si existe
+      if (models.TipoIdentificacion) {
+        Persona.belongsTo(models.TipoIdentificacion, {
+          foreignKey: 'id_tipo_identificacion_tipo_identificacion',
+          as: 'tipoIdentificacion'
+        });
+      }
 
       // Relación con Profesion
-      Persona.belongsTo(models.Profesion, {
-        foreignKey: 'id_profesion',
-        as: 'profesion'
-      });
+      if (models.Profesion) {
+        Persona.belongsTo(models.Profesion, {
+          foreignKey: 'id_profesion',
+          as: 'profesion'
+        });
+      }
 
       // Relación con Sexo
-      Persona.belongsTo(models.Sexo, {
-        foreignKey: 'id_sexo',
-        as: 'sexoRelacion'
-      });
+      if (models.Sexo) {
+        Persona.belongsTo(models.Sexo, {
+          foreignKey: 'id_sexo',
+          as: 'sexoPersona'
+        });
+      }
 
       // Relación muchos a muchos con Enfermedad
-      Persona.belongsToMany(models.Enfermedad, {
-        through: 'persona_enfermedad',
-        foreignKey: 'id_persona',
-        otherKey: 'id_enfermedad',
-        as: 'enfermedades'
-      });
+      if (models.Enfermedad) {
+        Persona.belongsToMany(models.Enfermedad, {
+          through: 'persona_enfermedad',
+          foreignKey: 'id_persona',
+          otherKey: 'id_enfermedad',
+          as: 'enfermedades'
+        });
+      }
 
       // Relación muchos a muchos con Destreza
-      Persona.belongsToMany(models.Destreza, {
-        through: 'persona_destreza',
-        foreignKey: 'id_personas_personas',
-        otherKey: 'id_destrezas_destrezas',
-        as: 'destrezas'
-      });
+      if (models.Destreza) {
+        Persona.belongsToMany(models.Destreza, {
+          through: 'persona_destreza',  
+          foreignKey: 'id_personas_personas',
+          otherKey: 'id_destrezas_destrezas',
+          as: 'destrezas'
+        });
+      }
     }
 
     // Método para obtener información completa del sexo

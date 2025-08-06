@@ -1,6 +1,9 @@
-import { Parroquia } from '../../models/index.js';
-import { Op } from 'sequelize';
+// import { Parroquia } from '../../models/index.js'; // TEMPORALMENTE DESACTIVADO
 import sequelize from '../../../config/sequelize.js';
+import { Op } from 'sequelize';
+
+// Obtener el modelo Parroquia desde Sequelize una vez que se cargue
+const getParroquiaModel = () => sequelize.models.Parroquia;
 
 class ParroquiaService {
   /**
@@ -8,7 +11,8 @@ class ParroquiaService {
    */
   async createParroquia(parroquiaData) {
     try {
-      const parroquia = await Parroquia.create({
+      const Parroquia = getParroquiaModel();
+      const parroquia = await getParroquiaModel().create({
         nombre: parroquiaData.nombre
       });
 
@@ -23,7 +27,8 @@ class ParroquiaService {
    */
   async findOrCreateParroquia(parroquiaData) {
     try {
-      const [parroquia, created] = await Parroquia.findOrCreate({
+      const Parroquia = getParroquiaModel();
+      const [parroquia, created] = await getParroquiaModel().findOrCreate({
         where: { nombre: parroquiaData.nombre },
         defaults: { nombre: parroquiaData.nombre }
       });
@@ -55,7 +60,7 @@ class ParroquiaService {
 
       const offset = (page - 1) * limit;
 
-      const result = await Parroquia.findAndCountAll({
+      const result = await getParroquiaModel().findAndCountAll({
         where,
         order: [[sortBy, sortOrder]],
         limit: parseInt(limit),
@@ -82,7 +87,7 @@ class ParroquiaService {
    */
   async getParroquiaById(id) {
     try {
-      const parroquia = await Parroquia.findByPk(id);
+      const parroquia = await getParroquiaModel().findByPk(id);
 
       if (!parroquia) {
         throw new Error('Parroquia not found');
@@ -99,7 +104,7 @@ class ParroquiaService {
    */
   async updateParroquia(id, updateData) {
     try {
-      const parroquia = await Parroquia.findByPk(id);
+      const parroquia = await getParroquiaModel().findByPk(id);
       
       if (!parroquia) {
         throw new Error('Parroquia not found');
@@ -120,14 +125,14 @@ class ParroquiaService {
    */
   async deleteParroquia(id) {
     try {
-      const parroquia = await Parroquia.findByPk(id);
+      const parroquia = await getParroquiaModel().findByPk(id);
       
       if (!parroquia) {
         throw new Error('Parroquia not found');
       }
 
       // Check if parroquia has associated personas
-      const personasCount = await Parroquia.count({
+      const personasCount = await getParroquiaModel().count({
         include: [{
           association: 'personas',
           required: true
@@ -156,14 +161,14 @@ class ParroquiaService {
         parroquiasWithPersonas,
         totalPersonas
       ] = await Promise.all([
-        Parroquia.count(),
-        Parroquia.count({
+        getParroquiaModel().count(),
+        getParroquiaModel().count({
           include: [{
             association: 'personas',
             required: true
           }]
         }),
-        Parroquia.findAll({
+        getParroquiaModel().findAll({
           attributes: [
             'id_parroquia',
             'nombre',
@@ -174,7 +179,7 @@ class ParroquiaService {
             attributes: [],
             required: false
           }],
-          group: ['Parroquia.id_parroquia', 'Parroquia.nombre'],
+          group: ['getParroquiaModel().id_parroquia', 'getParroquiaModel().nombre'],
           raw: true
         })
       ]);
@@ -195,7 +200,7 @@ class ParroquiaService {
    */
   async searchParroquias(searchTerm) {
     try {
-      const parroquias = await Parroquia.findAll({
+      const parroquias = await getParroquiaModel().findAll({
         where: {
           nombre: { [Op.iLike]: `%${searchTerm}%` }
         },

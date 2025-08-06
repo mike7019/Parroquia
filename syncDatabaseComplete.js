@@ -133,7 +133,12 @@ async function syncDatabase() {
     console.error('❌ Error al sincronizar la base de datos:', error);
     console.error('Stack trace:', error.stack);
   } finally {
-    await sequelize.close();
+    try {
+      await sequelize.close();
+      console.log('🔌 Conexión a la base de datos cerrada correctamente');
+    } catch (closeError) {
+      console.warn('⚠️  Error cerrando conexión:', closeError.message);
+    }
   }
 }
 
@@ -166,21 +171,76 @@ async function syncDatabaseWithForce() {
   }
 }
 
-// Ejecutar según argumentos de línea de comandos
+// Ejecutar según argumentos de línea de comandos - solo si se ejecuta directamente
 const args = process.argv.slice(2);
 const mode = args[0] || 'basic';
 
-switch (mode) {
-  case 'alter':
-    syncDatabaseWithAlter();
-    break;
-  case 'force':
-    syncDatabaseWithForce();
-    break;
-  case 'basic':
-  default:
-    syncDatabase();
-    break;
+// Solo ejecutar la sincronización si este archivo se ejecuta directamente (no cuando se importa)
+if (process.argv[1] === new URL(import.meta.url).pathname) {
+  switch (mode) {
+    case 'alter':
+      syncDatabaseWithAlter();
+      break;
+    case 'force':
+      syncDatabaseWithForce();
+      break;
+    case 'basic':
+    default:
+      syncDatabase();
+      break;
+  }
+}
+
+// Función para cargar todos los modelos sin sincronizar (para usar en app.js)
+export async function loadAllModels() {
+  try {
+    console.log('📦 Cargando todos los modelos...');
+    
+    await loadMainModels();
+    
+    // Configurar asociaciones con mejor manejo de errores
+    console.log('🔗 Configurando asociaciones...');
+    const modelNames = Object.keys(sequelize.models);
+    let associationsConfigured = 0;
+    
+    modelNames.forEach(modelName => {
+      if (sequelize.models[modelName].associate) {
+        try {
+          // Solo configurar asociaciones para modelos específicos para evitar conflictos
+          const safeModels = ['Encuesta', 'Enfermedad', 'Familia', 'FamiliaDisposicionBasura', 
+                             'FamiliaSistemaAcueducto', 'FamiliaTipoAguasResiduales', 'FamiliaTipoVivienda',
+                             'PersonaEnfermedad', 'Profesion', 'Sexo', 'SistemaAcueducto', 
+                             'TipoAguasResiduales', 'TipoDisposicionBasura', 'TipoVivienda'];
+          
+          if (safeModels.includes(modelName) || modelName === 'Persona') {
+            sequelize.models[modelName].associate(sequelize.models);
+            associationsConfigured++;
+          } else {
+            // Skip conflicting models temporarily
+            console.log(`⏭️  Saltando asociaciones para ${modelName} (evitando conflictos)`);
+          }
+        } catch (error) {
+          // Solo advertir sobre asociaciones problemáticas, no fallar
+          console.log(`⚠️  Asociación problemática en ${modelName}: ${error.message}`);
+        }
+      }
+    });
+    
+    console.log(`✅ Asociaciones configuradas: ${associationsConfigured}/${modelNames.length}`);
+    console.log(`📈 Total de modelos cargados: ${modelNames.length}`);
+    
+    return {
+      success: true,
+      modelsLoaded: modelNames.length,
+      associationsConfigured
+    };
+  } catch (error) {
+    console.error('❌ Error cargando modelos:', error.message);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
 }
 
 export { syncDatabase, syncDatabaseWithAlter, syncDatabaseWithForce };

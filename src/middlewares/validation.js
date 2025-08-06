@@ -8,9 +8,15 @@ const validationMiddleware = {
    * Handle validation errors from express-validator
    */
   handleValidationErrors(req, res, next) {
+    console.log('🔍 DEBUG handleValidationErrors: Iniciando validación');
+    console.log('- URL:', req.url);
+    console.log('- Params:', req.params);
+    
     const errors = validationResult(req);
+    console.log('- Errores encontrados:', errors.isEmpty() ? 'Ninguno' : errors.array().length);
     
     if (!errors.isEmpty()) {
+      console.log('❌ Errores de validación:', errors.array());
       const formattedErrors = errors.array().map(error => ({
         field: error.path || error.param,
         message: error.msg,
@@ -26,6 +32,7 @@ const validationMiddleware = {
       });
     }
     
+    console.log('✅ Validación exitosa, llamando next()');
     next();
   },
 

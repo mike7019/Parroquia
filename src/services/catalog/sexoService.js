@@ -1,6 +1,9 @@
-import { Sexo } from '../../models/index.js';
-import { Op } from 'sequelize';
+// import { Sexo } from '../../models/index.js'; // TEMPORALMENTE DESACTIVADO
 import sequelize from '../../../config/sequelize.js';
+import { Op } from 'sequelize';
+
+// Obtener el modelo Sexo desde Sequelize una vez que se cargue
+const getSexoModel = () => sequelize.models.Sexo;
 
 class SexoService {
   /**
@@ -8,7 +11,7 @@ class SexoService {
    */
   async createSexo(sexoData) {
     try {
-      const sexo = await Sexo.create({
+      const sexo = await getSexoModel().create({
         descripcion: sexoData.sexo
       });
 
@@ -23,7 +26,7 @@ class SexoService {
    */
   async findOrCreateSexo(sexoData) {
     try {
-      const [sexo, created] = await Sexo.findOrCreate({
+      const [sexo, created] = await getSexoModel().findOrCreate({
         where: { descripcion: sexoData.sexo },
         defaults: { descripcion: sexoData.sexo }
       });
@@ -55,7 +58,7 @@ class SexoService {
 
       const offset = (page - 1) * limit;
 
-      const result = await Sexo.findAndCountAll({
+      const result = await getSexoModel().findAndCountAll({
         where,
         order: [[sortBy, sortOrder]],
         limit: parseInt(limit),
@@ -82,7 +85,7 @@ class SexoService {
    */
   async getSexoById(id) {
     try {
-      const sexo = await Sexo.findByPk(id);
+      const sexo = await getSexoModel().findByPk(id);
 
       if (!sexo) {
         throw new Error('Sexo not found');
@@ -99,7 +102,7 @@ class SexoService {
    */
   async updateSexo(id, updateData) {
     try {
-      const sexo = await Sexo.findByPk(id);
+      const sexo = await getSexoModel().findByPk(id);
       
       if (!sexo) {
         throw new Error('Sexo not found');
@@ -120,14 +123,14 @@ class SexoService {
    */
   async deleteSexo(id) {
     try {
-      const sexo = await Sexo.findByPk(id);
+      const sexo = await getSexoModel().findByPk(id);
       
       if (!sexo) {
         throw new Error('Sexo not found');
       }
 
       // Check if sexo has associated personas
-      const personasCount = await Sexo.count({
+      const personasCount = await getSexoModel().count({
         include: [{
           association: 'personas',
           required: true
@@ -151,7 +154,7 @@ class SexoService {
    */
   async getSexoStatistics() {
     try {
-      const statistics = await Sexo.findAll({
+      const statistics = await getSexoModel().findAll({
         attributes: [
           'id_sexo',
           'sexo',
@@ -164,11 +167,11 @@ class SexoService {
             required: false
           }
         ],
-        group: ['Sexo.id_sexo', 'Sexo.sexo'],
+        group: ['getSexoModel().id_sexo', 'getSexoModel().sexo'],
         raw: true
       });
 
-      const totalSexos = await Sexo.count();
+      const totalSexos = await getSexoModel().count();
       const totalPersonas = statistics.reduce((sum, s) => sum + parseInt(s.personasCount || 0), 0);
 
       return {
@@ -186,7 +189,7 @@ class SexoService {
    */
   async searchSexos(searchTerm) {
     try {
-      const sexos = await Sexo.findAll({
+      const sexos = await getSexoModel().findAll({
         where: {
           sexo: { [Op.iLike]: `%${searchTerm}%` }
         },
@@ -205,14 +208,14 @@ class SexoService {
    */
   async getSexoDetails(id) {
     try {
-      const sexo = await Sexo.findByPk(id);
+      const sexo = await getSexoModel().findByPk(id);
 
       if (!sexo) {
         throw new Error('Sexo not found');
       }
 
       // Get persona count
-      const personasCount = await Sexo.count({
+      const personasCount = await getSexoModel().count({
         include: [{
           association: 'personas',
           required: true
@@ -236,7 +239,7 @@ class SexoService {
    */
   async getSexosForSelect() {
     try {
-      const sexos = await Sexo.findAll({
+      const sexos = await getSexoModel().findAll({
         attributes: ['id_sexo', 'sexo'],
         order: [['sexo', 'ASC']]
       });
@@ -257,7 +260,7 @@ class SexoService {
    */
   async validateSexoExists(id) {
     try {
-      const sexo = await Sexo.findByPk(id);
+      const sexo = await getSexoModel().findByPk(id);
       return !!sexo;
     } catch (error) {
       throw new Error(`Error validating sexo: ${error.message}`);
@@ -269,7 +272,7 @@ class SexoService {
    */
   async getSexoByName(sexoName) {
     try {
-      const sexo = await Sexo.findOne({
+      const sexo = await getSexoModel().findOne({
         where: {
           sexo: { [Op.iLike]: sexoName }
         }
@@ -286,7 +289,7 @@ class SexoService {
    */
   async bulkCreateSexos(sexosData) {
     try {
-      const sexos = await Sexo.bulkCreate(
+      const sexos = await getSexoModel().bulkCreate(
         sexosData.map(sexo => ({
           sexo: sexo.sexo || sexo.name || sexo
         })),

@@ -16,17 +16,14 @@ const Departamentos = sequelize.define('Departamentos', {
     type: DataTypes.STRING(2),
     allowNull: false,
     comment: 'Código DANE del departamento (2 dígitos)'
-  },
-  region: {
-    type: DataTypes.STRING(100),
-    allowNull: true,
-    comment: 'Región geográfica del departamento'
   }
 }, {
   sequelize,
   modelName: 'Departamentos',
   tableName: 'departamentos',
-  timestamps: true
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at'
 });
 
 export default Departamentos;

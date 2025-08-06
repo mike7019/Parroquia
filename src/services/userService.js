@@ -2,7 +2,7 @@ import { Op } from 'sequelize';
 import sequelize from '../../config/sequelize.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import User from '../models/Usuario.js';
+import { Usuario } from '../models/index.js';
 import { 
   NotFoundError, 
   ConflictError, 
@@ -20,9 +20,9 @@ class UserService {
    */
   static async getAllUsers() {
     try {
-      const users = await User.findAll({
-        attributes: { exclude: ['password', 'refreshToken', 'emailVerificationToken', 'passwordResetToken'] },
-        order: [['createdAt', 'DESC']]
+      const users = await Usuario.findAll({
+        attributes: { exclude: ['contrasena', 'token_recuperacion', 'token_verificacion_email', 'token_expiracion'] },
+        order: [['created_at', 'DESC']]
       });
       
       return users;
@@ -38,8 +38,8 @@ class UserService {
    */
   static async getUserById(userId) {
     try {
-      const user = await User.findByPk(userId, {
-        attributes: { exclude: ['password', 'refreshToken', 'emailVerificationToken', 'passwordResetToken'] }
+      const user = await Usuario.findByPk(userId, {
+        attributes: { exclude: ['contrasena', 'token_recuperacion', 'token_verificacion_email', 'token_expiracion'] }
       });
 
       if (!user) {
@@ -67,40 +67,60 @@ class UserService {
     
     try {
       // Authorization: Only admin can edit any user, users can only edit themselves
-      if (currentUser.role !== 'admin' && currentUser.id !== parseInt(userId)) {
+      if (currentUser.role !== 'Administrador' && currentUser.id !== userId) {
         throw new UnauthorizedError('You can only edit your own profile');
       }
 
       // Find user to update
-      const user = await User.scope('withDeleted').findByPk(userId, { transaction });
+      const user = await Usuario.scope('withDeleted').findByPk(userId, { transaction });
       if (!user) {
         throw new NotFoundError('User not found');
       }
 
       // Check if user is trying to update to deleted status (not allowed via this method)
-      if (updateData.status === 'deleted') {
+      if (updateData.status === 'deleted' || updateData.activo === false) {
         throw new ValidationError('Use delete endpoint to remove users');
       }
 
-      // Validate allowed fields for update
-      const allowedFields = ['firstName', 'lastName', 'email', 'role', 'status'];
+      // Validate allowed fields for update and map to Spanish field names
+      const allowedFields = ['firstName', 'lastName', 'email', 'role', 'phone'];
       const updateFields = {};
       
       for (const field of allowedFields) {
         if (updateData[field] !== undefined) {
-          // Only admin can change role and status
-          if ((field === 'role' || field === 'status') && currentUser.role !== 'admin') {
-            throw new UnauthorizedError('Only administrators can modify user roles or status');
+          // Only admin can change role
+          if (field === 'role' && currentUser.role !== 'Administrador') {
+            throw new UnauthorizedError('Only administrators can modify user roles');
           }
-          updateFields[field] = updateData[field];
+          
+          // Map English field names to Spanish model field names
+          switch (field) {
+            case 'firstName':
+              updateFields.primer_nombre = updateData[field];
+              break;
+            case 'lastName':
+              updateFields.primer_apellido = updateData[field];
+              break;
+            case 'email':
+              updateFields.correo_electronico = updateData[field];
+              break;
+            case 'phone':
+              updateFields.telefono = updateData[field];
+              break;
+            case 'role':
+              // Role will be handled through associations, not as a direct field
+              // For now, we'll store it to handle later if needed
+              updateFields._role = updateData[field];
+              break;
+          }
         }
       }
 
       // If email is being changed, check for conflicts
-      if (updateFields.email && updateFields.email !== user.email) {
-        const existingUser = await User.scope('withDeleted').findOne({
+      if (updateFields.correo_electronico && updateFields.correo_electronico !== user.correo_electronico) {
+        const existingUser = await Usuario.scope('withDeleted').findOne({
           where: {
-            email: updateFields.email.toLowerCase().trim(),
+            correo_electronico: updateFields.correo_electronico.toLowerCase().trim(),
             id: { [Op.ne]: userId }
           }
         }, { transaction });
@@ -110,9 +130,12 @@ class UserService {
         }
         
         // If email changes, mark as unverified
-        updateFields.emailVerified = false;
-        updateFields.email = updateFields.email.toLowerCase().trim();
+        updateFields.email_verificado = false;
+        updateFields.correo_electronico = updateFields.correo_electronico.toLowerCase().trim();
       }
+
+      // Remove the role field from update fields as it needs special handling
+      delete updateFields._role;
 
       // Update user
       await user.update(updateFields, { transaction });
@@ -121,8 +144,8 @@ class UserService {
       await transaction.commit();
 
       // Return updated user without sensitive data
-      const updatedUser = await User.findByPk(userId, {
-        attributes: { exclude: ['password', 'refreshToken', 'emailVerificationToken', 'passwordResetToken'] }
+      const updatedUser = await Usuario.findByPk(userId, {
+        attributes: { exclude: ['contrasena', 'token_recuperacion', 'token_verificacion_email', 'token_expiracion'] }
       });
 
       return updatedUser;
@@ -152,33 +175,32 @@ class UserService {
     
     try {
       // Authorization: Only admin can delete users
-      if (currentUser.role !== 'admin') {
+      if (currentUser.role !== 'Administrador') {
         throw new UnauthorizedError('Only administrators can delete users');
       }
 
       // Prevent admin from deleting themselves
-      if (currentUser.id === parseInt(userId)) {
+      if (currentUser.id === userId) {
         throw new ValidationError('You cannot delete your own account');
       }
 
       // Find user to delete
-      const user = await User.scope('withDeleted').findByPk(userId, { transaction });
+      const user = await Usuario.scope('withDeleted').findByPk(userId, { transaction });
       if (!user) {
         throw new NotFoundError('User not found');
       }
 
-      if (user.status === 'deleted') {
+      if (!user.activo) {
         throw new ValidationError('User is already deleted');
       }
 
-      // Soft delete: change status to 'deleted'
+      // Soft delete: change activo to false
       await user.update({
-        status: 'deleted',
-        isActive: false,
+        activo: false,
         // Clear sensitive data
-        refreshToken: null,
-        emailVerificationToken: null,
-        passwordResetToken: null
+        token_recuperacion: null,
+        token_verificacion_email: null,
+        token_expiracion: null
       }, { transaction });
 
       // Commit transaction
@@ -206,13 +228,13 @@ class UserService {
   static async getDeletedUsers(currentUser) {
     try {
       // Authorization: Only admin can view deleted users
-      if (currentUser.role !== 'admin') {
+      if (currentUser.role !== 'Administrador') {
         throw new UnauthorizedError('Only administrators can view deleted users');
       }
 
-      const deletedUsers = await User.scope('deleted').findAll({
-        attributes: { exclude: ['password', 'refreshToken', 'emailVerificationToken', 'passwordResetToken'] },
-        order: [['updatedAt', 'DESC']]
+      const deletedUsers = await Usuario.scope('deleted').findAll({
+        attributes: { exclude: ['contrasena', 'token_recuperacion', 'token_verificacion_email', 'token_expiracion'] },
+        order: [['updated_at', 'DESC']]
       });
       
       return deletedUsers;

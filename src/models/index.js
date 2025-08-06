@@ -1,19 +1,19 @@
 import sequelize from '../../config/sequelize.js';
-import User from './Usuario.js';
+import Usuario from './Usuario.js';
 import Role from './Role.js';
 import UsuarioRole from './UsuarioRole.js';
-// import Parroquia from './catalog/Parroquia.js'; // ELIMINADO - duplicado
+import Parroquia from './catalog/Parroquia.js';
 import Veredas from './catalog/Veredas.js';
-// import Sexo from './catalog/Sexo.js'; // ELIMINADO - duplicado
-// import Municipio from './catalog/Municipio.js'; // ELIMINADO - duplicado
+import Sexo from './catalog/Sexo.js';
 import Municipios from './catalog/Municipios.js';
 import Departamentos from './catalog/Departamentos.js';
-// import Sector from './catalog/Sector.js'; // ELIMINADO - duplicado
+import Sector from './catalog/Sector.js';
 import TipoIdentificacion from './catalog/TipoIdentificacion.js';
-// import Persona from './catalog/Persona.js'; // ELIMINADO - duplicado
 import Familias from './catalog/Familias.js';
 
 // Catalog model associations
+// COMENTADO: Asociaciones movidas a src/models/catalog/index.js para evitar duplicados
+/*
 // Asociaciones de Departamentos y Municipios
 Departamentos.hasMany(Municipios, {
   foreignKey: 'id_departamento',
@@ -24,6 +24,7 @@ Municipios.belongsTo(Departamentos, {
   foreignKey: 'id_departamento',
   as: 'departamentoData'
 });
+*/
 
 // Asociaciones comentadas - los modelos están duplicados en main/
 /*
@@ -48,6 +49,8 @@ Persona.belongsTo(Sexo, {
 });
 */
 
+// COMENTADO: Todas las asociaciones movidas a archivos específicos para evitar duplicados
+/*
 // Usar el modelo Municipios (más completo) en lugar de Municipio
 Municipios.hasMany(Veredas, {
   foreignKey: 'id_municipio_municipios',
@@ -60,6 +63,7 @@ Veredas.belongsTo(Municipios, {
   targetKey: 'id_municipio',
   as: 'municipio'
 });
+*/
 
 // Asociaciones comentadas - modelos duplicados en main/
 /*
@@ -87,7 +91,8 @@ Veredas.belongsTo(Sector, {
 });
 */
 
-// Relación entre Municipios y Veredas
+// COMENTADO: Asociaciones many-to-many movidas para evitar duplicados
+/*
 // Asociaciones many-to-many entre Veredas y Familias
 Veredas.belongsToMany(Familias, {
   through: {
@@ -110,11 +115,12 @@ Familias.belongsToMany(Veredas, {
   as: 'veredas',
   timestamps: false
 });
+*/
 
 // Re-export everything including new models
 export default {
   sequelize,
-  User,
+  Usuario,
   // Parroquia, // ELIMINADO - duplicado
   Veredas,
   // Sexo, // ELIMINADO - duplicado
@@ -126,15 +132,15 @@ export default {
   Familias
 };
 
-// Define associations between User and Role
-User.belongsToMany(Role, {
+// Define associations between Usuario and Role
+Usuario.belongsToMany(Role, {
   through: UsuarioRole,
   foreignKey: 'id_usuarios',
   otherKey: 'id_roles',
   as: 'roles'
 });
 
-Role.belongsToMany(User, {
+Role.belongsToMany(Usuario, {
   through: UsuarioRole,
   foreignKey: 'id_roles',
   otherKey: 'id_usuarios',
@@ -143,12 +149,15 @@ Role.belongsToMany(User, {
 
 export {
   sequelize,
-  User,
+  Usuario,
   Role,
   UsuarioRole,
+  Parroquia,
   Veredas,
+  Sexo,
   Municipios,
   Departamentos,
+  Sector,
   TipoIdentificacion,
   Familias
 };

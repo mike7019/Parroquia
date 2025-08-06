@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import { Op } from 'sequelize';
 import sequelize from '../../config/sequelize.js';
-import { User, Role } from '../models/index.js';
+import { Usuario, Role } from '../models/index.js';
 import emailService from './emailService.js';
 import { 
   AuthenticationError, 
@@ -38,7 +38,7 @@ class AuthService {
     
     try {
       // Check if user already exists
-      const existingUser = await User.findOne({ 
+      const existingUser = await Usuario.findOne({ 
         where: { correo_electronico: correo_electronico.toLowerCase().trim() } 
       });
       
@@ -50,7 +50,7 @@ class AuthService {
       const emailVerificationToken = crypto.randomBytes(32).toString('hex');
 
       // Create user with transaction - password will be hashed automatically by model hook
-      const user = await User.create({
+      const user = await Usuario.create({
         correo_electronico: correo_electronico.toLowerCase().trim(),
         contrasena: contrasena, // Will be hashed by beforeCreate hook
         primer_nombre: primer_nombre,
@@ -73,13 +73,8 @@ class AuthService {
         throw new ValidationError(`El rol '${rol}' no existe`);
       }
       
-      await sequelize.query(
-        'INSERT INTO usuarios_roles (id_usuarios, id_roles) VALUES ($1, $2)',
-        {
-          bind: [user.id, userRole.id],
-          transaction
-        }
-      );
+      // Use Sequelize association method instead of raw SQL to handle timestamps properly
+      await user.addRole(userRole, { transaction });
 
       // Generate tokens
       const accessToken = this.generateAccessToken(user.id);
@@ -105,7 +100,7 @@ class AuthService {
       }
 
       // Get user with roles for response
-      const userWithRoles = await User.findByPk(user.id, {
+      const userWithRoles = await Usuario.findByPk(user.id, {
         include: [{
           model: Role,
           as: 'roles',
@@ -139,7 +134,7 @@ class AuthService {
    */
   async loginUser(email, password) {
     // Find user with roles included
-    const user = await User.findOne({ 
+    const user = await Usuario.findOne({ 
       where: { correo_electronico: email },
       include: [{
         model: Role,
@@ -192,7 +187,7 @@ class AuthService {
    * @returns {Promise<boolean>} Success status
    */
   async logoutUser(userId) {
-    await User.update(
+    await Usuario.update(
       { refreshToken: null },
       { where: { id: userId } }
     );
@@ -210,7 +205,7 @@ class AuthService {
       const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
       
       // Find user and verify refresh token
-      const user = await User.findOne({
+      const user = await Usuario.findOne({
         where: {
           id: decoded.userId,
           refreshToken,
@@ -239,7 +234,7 @@ class AuthService {
    * @returns {Promise<Object>} Success message
    */
   async initiatePasswordReset(email) {
-    const user = await User.findOne({ where: { correo_electronico: email } });
+    const user = await Usuario.findOne({ where: { correo_electronico: email } });
     if (!user) {
       // Don't reveal if email exists or not for security
       return { message: 'If the email exists, a password reset link has been sent' };
@@ -280,7 +275,7 @@ class AuthService {
    * @returns {Promise<Object>} Validation result
    */
   async validatePasswordResetToken(token) {
-    const user = await User.findOne({
+    const user = await Usuario.findOne({
       where: {
         token_reset_password: token,
         expiracion_reset_password: {
@@ -308,7 +303,7 @@ class AuthService {
    * @returns {Promise<Object>} Success message
    */
   async resetPassword(token, newPassword) {
-    const user = await User.findOne({
+    const user = await Usuario.findOne({
       where: {
         token_reset_password: token,
         expiracion_reset_password: {
@@ -341,7 +336,7 @@ class AuthService {
    * @returns {Promise<Object>} Success message
    */
   async changePassword(userId, currentPassword, newPassword) {
-    const user = await User.findByPk(userId);
+    const user = await Usuario.findByPk(userId);
     if (!user) {
       throw new NotFoundError('User not found');
     }
@@ -368,7 +363,7 @@ class AuthService {
    * @returns {Promise<Object>} Success message
    */
   async verifyEmail(token) {
-    const user = await User.findOne({ 
+    const user = await Usuario.findOne({ 
       where: { token_verificacion_email: token } 
     });
     
@@ -395,7 +390,7 @@ class AuthService {
    * @returns {Promise<Object>} User profile data
    */
   async getUserProfile(userId) {
-    const user = await User.findByPk(userId);
+    const user = await Usuario.findByPk(userId);
     if (!user) {
       throw new NotFoundError('User not found');
     }
@@ -412,14 +407,14 @@ class AuthService {
   async updateUserProfile(userId, updateData) {
     const { firstName, lastName, email } = updateData;
 
-    const user = await User.findByPk(userId);
+    const user = await Usuario.findByPk(userId);
     if (!user) {
       throw new NotFoundError('User not found');
     }
 
     // Check if email is being changed and if it's already taken
     if (email && email !== user.email) {
-      const existingUser = await User.findOne({ where: { email } });
+      const existingUser = await Usuario.findOne({ where: { email } });
       if (existingUser) {
         throw new ConflictError('Email is already in use');
       }
@@ -437,10 +432,10 @@ class AuthService {
 
     // Send verification email if email was changed
     if (email && email !== user.email) {
-      const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${updatedUser.emailVerificationToken}`;
+      const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${updatedUsuario.emailVerificationToken}`;
       await emailService.sendEmailVerificationEmail(
-        updatedUser.email,
-        `${updatedUser.firstName} ${updatedUser.lastName}`,
+        updatedUsuario.email,
+        `${updatedUsuario.firstName} ${updatedUsuario.lastName}`,
         verificationUrl
       );
     }
@@ -454,7 +449,7 @@ class AuthService {
    * @returns {Promise<Object>} Success message
    */
   async deactivateUser(userId) {
-    const user = await User.findByPk(userId);
+    const user = await Usuario.findByPk(userId);
     if (!user) {
       throw new NotFoundError('User not found');
     }
@@ -473,7 +468,7 @@ class AuthService {
    * @returns {Promise<Object>} Success message
    */
   async activateUser(userId) {
-    const user = await User.findByPk(userId);
+    const user = await Usuario.findByPk(userId);
     if (!user) {
       throw new NotFoundError('User not found');
     }
@@ -537,11 +532,11 @@ class AuthService {
       ];
     }
 
-    const { count, rows: users } = await User.findAndCountAll({
+    const { count, rows: users } = await Usuario.findAndCountAll({
       where: whereClause,
       limit: parseInt(limit),
       offset: parseInt(offset),
-      order: [['createdAt', 'DESC']],
+      order: [['created_at', 'DESC']],
       attributes: { exclude: ['password', 'refreshToken', 'passwordResetToken', 'emailVerificationToken'] }
     });
 
@@ -585,7 +580,7 @@ class AuthService {
    * @returns {Promise<Object>} Success message
    */
   async resendEmailVerification(email) {
-    const user = await User.unscoped().findOne({ where: { email } });
+    const user = await Usuario.unscoped().findOne({ where: { email } });
     if (!user) {
       throw new NotFoundError('User not found');
     }
@@ -624,7 +619,7 @@ class AuthService {
       throw new Error('This method is only available in development mode');
     }
 
-    const user = await User.findOne({ where: { email } });
+    const user = await Usuario.findOne({ where: { email } });
     if (!user) {
       throw new NotFoundError('User not found');
     }

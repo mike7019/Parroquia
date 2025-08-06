@@ -1,5 +1,11 @@
-import Sector from '../../models/catalog/Sector.js';
+import sequelize from '../../../config/sequelize.js';
 import { Op } from 'sequelize';
+// Obtener el modelo Sector desde Sequelize una vez que se cargue
+const getSectorModel = () => sequelize.models.Sector;
+
+
+// Obtener el modelo Sector desde Sequelize
+const Sector = sequelize.models.Sector;
 
 class SectorService {
   /**
@@ -7,7 +13,7 @@ class SectorService {
    */
   async createSector(sectorData) {
     try {
-      const sector = await Sector.create(sectorData);
+      const sector = await getSectorModel().create(sectorData);
       return sector;
     } catch (error) {
       throw new Error(`Error creating sector: ${error.message}`);
@@ -19,7 +25,7 @@ class SectorService {
    */
   async findOrCreateSector(sectorData) {
     try {
-      const [sector, created] = await Sector.findOrCreate({
+      const [sector, created] = await getSectorModel().findOrCreate({
         where: { nombre: sectorData.nombre },
         defaults: sectorData
       });
@@ -52,7 +58,7 @@ class SectorService {
         };
       }
 
-      const { count, rows } = await Sector.findAndCountAll({
+      const { count, rows } = await getSectorModel().findAndCountAll({
         where: whereClause,
         order: [[sortBy, sortOrder]],
         limit: parseInt(limit),
@@ -82,7 +88,7 @@ class SectorService {
    */
   async getSectorById(id) {
     try {
-      const sector = await Sector.findByPk(id);
+      const sector = await getSectorModel().findByPk(id);
       if (!sector) {
         throw new Error('Sector not found');
       }
@@ -97,7 +103,7 @@ class SectorService {
    */
   async updateSector(id, updateData) {
     try {
-      const sector = await Sector.findByPk(id);
+      const sector = await getSectorModel().findByPk(id);
       if (!sector) {
         throw new Error('Sector not found');
       }
@@ -114,7 +120,7 @@ class SectorService {
    */
   async deleteSector(id) {
     try {
-      const sector = await Sector.findByPk(id);
+      const sector = await getSectorModel().findByPk(id);
       if (!sector) {
         throw new Error('Sector not found');
       }
@@ -131,7 +137,7 @@ class SectorService {
    */
   async bulkCreateSectors(sectorsData) {
     try {
-      const sectors = await Sector.bulkCreate(sectorsData, {
+      const sectors = await getSectorModel().bulkCreate(sectorsData, {
         validate: true,
         returning: true
       });
@@ -146,7 +152,7 @@ class SectorService {
    */
   async getSectorsCount() {
     try {
-      const count = await Sector.count();
+      const count = await getSectorModel().count();
       return count;
     } catch (error) {
       throw new Error(`Error counting sectors: ${error.message}`);
@@ -164,7 +170,7 @@ class SectorService {
         whereClause.id_sector = { [Op.ne]: excludeId };
       }
 
-      const sector = await Sector.findOne({ where: whereClause });
+      const sector = await getSectorModel().findOne({ where: whereClause });
       return !!sector;
     } catch (error) {
       throw new Error(`Error checking sector existence: ${error.message}`);

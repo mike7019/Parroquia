@@ -47,7 +47,7 @@ class SurveyController {
       );
 
       // Check if user has permission to view this survey
-      if (survey.userId !== req.user.id && req.user.role !== 'admin') {
+      if (survey.userId !== req.user.id && req.user.role !== 'Administrador') {
         return res.status(403).json({
           status: 'error',
           message: 'Access denied'
@@ -382,7 +382,7 @@ class SurveyController {
 
       const survey = await surveyService.getSurveyById(id, false);
       
-      if (survey.userId !== userId && req.user.role !== 'admin') {
+      if (survey.userId !== userId && req.user.role !== 'Administrador') {
         return res.status(403).json({
           status: 'error',
           message: 'Unauthorized to cancel this survey'

@@ -104,9 +104,10 @@ router.get('/deleted',
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
- *         description: ID único del usuario
- *         example: 1
+ *           type: string
+ *           format: uuid
+ *         description: ID único del usuario (UUID)
+ *         example: "31cb8fe4-bb24-4ad8-af66-d8c900d13c2a"
  *     responses:
  *       200:
  *         description: Usuario obtenido exitosamente
@@ -156,9 +157,10 @@ router.get('/:id',
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
- *         description: ID único del usuario
- *         example: 1
+ *           type: string
+ *           format: uuid
+ *         description: ID único del usuario (UUID)
+ *         example: "31cb8fe4-bb24-4ad8-af66-d8c900d13c2a"
  *     requestBody:
  *       required: true
  *       content:
@@ -221,9 +223,10 @@ router.put('/:id',
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
- *         description: ID único del usuario
- *         example: 1
+ *           type: string
+ *           format: uuid
+ *         description: ID único del usuario (UUID)
+ *         example: "31cb8fe4-bb24-4ad8-af66-d8c900d13c2a"
  *     responses:
  *       200:
  *         description: Usuario eliminado exitosamente

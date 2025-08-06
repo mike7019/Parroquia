@@ -8,6 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import sequelize from '../config/sequelize.js';
+import { loadAllModels } from '../syncDatabaseComplete.js';
 
 // Import routes
 import authRoutes from './routes/authRoutes.js';
@@ -226,6 +227,10 @@ const startServer = async () => {
       )
     ]);
     console.log('✅ Database connection established successfully');
+
+    // Load all models from subcarpetas
+    console.log('📦 Loading all models...');
+    await loadAllModels();
 
     // Sync database (be careful in production)
     if (process.env.NODE_ENV !== 'production') {

@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import User from '../models/Usuario.js';
+import { Usuario } from '../models/index.js';
 
 /**
  * Authentication middleware using ES6 modules
@@ -33,8 +33,8 @@ const authMiddleware = {
       
       // Find user and attach to request
       try {
-        // Use the User model to query the usuarios table with Spanish field names
-        const user = await User.findOne({
+        // Use the Usuario model to query the usuarios table with Spanish field names
+        const user = await Usuario.findOne({
           where: {
             id: decoded.userId,
             activo: true
@@ -159,18 +159,30 @@ const authMiddleware = {
    */
   requireOwnershipOrAdmin(userIdParam = 'id') {
     return (req, res, next) => {
+      console.log('🔍 DEBUG requireOwnershipOrAdmin:');
+      console.log('- req.user existe:', !!req.user);
+      
       if (!req.user) {
+        console.log('❌ No hay usuario autenticado');
         return res.status(401).json({
           status: 'error',
           message: 'Authentication required'
         });
       }
 
-      const resourceUserId = parseInt(req.params[userIdParam]);
+      const resourceUserId = req.params[userIdParam];
       const currentUserId = req.user.id;
-      const isAdmin = req.user.role === 'admin';
+      const userRole = req.user.role;
+      const isAdmin = req.user.role === 'Administrador';
+      
+      console.log('- resourceUserId:', resourceUserId);
+      console.log('- currentUserId:', currentUserId);
+      console.log('- userRole:', userRole);
+      console.log('- isAdmin:', isAdmin);
+      console.log('- Son el mismo usuario:', resourceUserId === currentUserId);
 
       if (!isAdmin && resourceUserId !== currentUserId) {
+        console.log('❌ Acceso denegado: no es admin y no es el mismo usuario');
         return res.status(403).json({
           status: 'error',
           message: 'You can only access your own resources',
@@ -178,6 +190,7 @@ const authMiddleware = {
         });
       }
 
+      console.log('✅ Acceso permitido, llamando next()');
       next();
     };
   },
@@ -197,8 +210,8 @@ const authMiddleware = {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       
       if (decoded.type === 'access') {
-        const user = await User.findByPk(decoded.userId);
-        if (user && user.isActive) {
+        const user = await Usuario.findByPk(decoded.userId);
+        if (user && user.activo) {
           req.user = user;
         }
       }

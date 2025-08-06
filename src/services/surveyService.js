@@ -1,5 +1,5 @@
 // Temporarily disabled English models - using only User for auth
-import { User } from '../models/index.js';
+import { Usuario } from '../models/index.js';
 // import { Survey, FamilyMember, Family, User } from '../models/index.js';
 import { v4 as uuidv4 } from 'uuid';
 import { Op } from 'sequelize';
@@ -86,13 +86,13 @@ class SurveyService {
       }
 
       // Check if user has permission to edit this survey
-      const user = await User.findByPk(userId);
+      const user = await Usuario.findByPk(userId);
       if (!user) {
         throw new Error('User not found');
       }
 
       // Allow if user is owner OR admin
-      if (survey.userId !== userId && user.role !== 'admin') {
+      if (survey.userId !== userId && user.role !== 'Administrador') {
         throw new Error('Unauthorized to edit this survey');
       }
 
@@ -149,13 +149,13 @@ class SurveyService {
       }
 
       // Check if user has permission to edit this survey
-      const user = await User.findByPk(userId);
+      const user = await Usuario.findByPk(userId);
       if (!user) {
         throw new Error('User not found');
       }
 
       // Allow if user is owner OR admin
-      if (survey.userId !== userId && user.role !== 'admin') {
+      if (survey.userId !== userId && user.role !== 'Administrador') {
         throw new Error('Unauthorized to edit this survey');
       }
 
@@ -228,13 +228,13 @@ class SurveyService {
       }
 
       // Check if user has permission to edit this survey
-      const user = await User.findByPk(userId);
+      const user = await Usuario.findByPk(userId);
       if (!user) {
         throw new Error('User not found');
       }
 
       // Allow if user is owner OR admin
-      if (survey.userId !== userId && user.role !== 'admin') {
+      if (survey.userId !== userId && user.role !== 'Administrador') {
         throw new Error('Unauthorized to edit this survey');
       }
 
@@ -323,7 +323,7 @@ class SurveyService {
       });
 
       // Update user's completed surveys count
-      const user = await User.findByPk(userId);
+      const user = await Usuario.findByPk(userId);
       if (user) {
         await user.update({
           surveysCompleted: (user.surveysCompleted || 0) + 1
@@ -435,13 +435,13 @@ class SurveyService {
       }
 
       // Check if user has permission to edit this survey
-      const user = await User.findByPk(userId);
+      const user = await Usuario.findByPk(userId);
       if (!user) {
         throw new Error('User not found');
       }
 
       // Allow if user is owner OR admin
-      if (survey.userId !== userId && user.role !== 'admin') {
+      if (survey.userId !== userId && user.role !== 'Administrador') {
         throw new Error('Unauthorized to edit this survey');
       }
 

@@ -2,7 +2,7 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../../config/sequelize.js';
 import bcrypt from 'bcrypt';
 
-const User = sequelize.define('User', {
+const Usuario = sequelize.define('Usuario', {
   id: {
     type: DataTypes.UUID,
     primaryKey: true,
@@ -64,7 +64,7 @@ const User = sequelize.define('User', {
     field: 'numero_documento'
   },
   telefono: {
-    type: DataTypes.STRING(15),
+    type: DataTypes.STRING(20),
     allowNull: true,
     field: 'telefono'
   },
@@ -98,36 +98,75 @@ const User = sequelize.define('User', {
     type: DataTypes.DATE,
     allowNull: true,
     field: 'token_expiracion'
+  },
+  email_verificado: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+    field: 'email_verificado'
+  },
+  token_verificacion_email: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    field: 'token_verificacion_email'
+  },
+  fecha_verificacion_email: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'fecha_verificacion_email'
+  },
+  expira_token_reset: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'expira_token_reset'
   }
 }, {
   tableName: 'usuarios',
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
-  underscored: false
+  underscored: true, // Esto fuerza el uso de snake_case
+  scopes: {
+    // Default scope excludes deleted users
+    defaultScope: {
+      where: {
+        activo: true
+      }
+    },
+    // Scope to include deleted users
+    withDeleted: {
+      where: {}
+    },
+    // Scope to only show deleted users
+    deleted: {
+      where: {
+        activo: false
+      }
+    }
+  }
 });
 
 // Define instance methods
-User.prototype.checkPassword = async function(password) {
+Usuario.prototype.checkPassword = async function(password) {
   return await bcrypt.compare(password, this.contrasena);
 };
 
-User.prototype.setPassword = async function(password) {
+Usuario.prototype.setPassword = async function(password) {
   this.contrasena = await bcrypt.hash(password, 10);
 };
 
-User.prototype.getUserRoles = async function() {
+Usuario.prototype.getUserRoles = async function() {
   const roles = await this.getRoles();
   return roles.map(role => role.nombre);
 };
 
-User.prototype.hasRole = async function(roleName) {
+Usuario.prototype.hasRole = async function(roleName) {
   const roles = await this.getRoles();
   return roles.some(role => role.nombre === roleName);
 };
 
 // Custom toJSON method - only Spanish fields
-User.prototype.toJSON = function() {
+Usuario.prototype.toJSON = function() {
   const values = { ...this.dataValues };
   
   // Remove sensitive fields
@@ -144,17 +183,17 @@ User.prototype.toJSON = function() {
 };
 
 // Hash password before creating user
-User.beforeCreate(async (user) => {
+Usuario.beforeCreate(async (user) => {
   if (user.contrasena) {
     user.contrasena = await bcrypt.hash(user.contrasena, 10);
   }
 });
 
 // Hash password before updating user
-User.beforeUpdate(async (user) => {
+Usuario.beforeUpdate(async (user) => {
   if (user.changed('contrasena')) {
     user.contrasena = await bcrypt.hash(user.contrasena, 10);
   }
 });
 
-export default User;
+export default Usuario;
