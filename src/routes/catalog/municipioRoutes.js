@@ -22,6 +22,19 @@ const router = express.Router();
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/MunicipioInput'
+ *           examples:
+ *             valid_request:
+ *               summary: Valid municipio creation request
+ *               value:
+ *                 nombre_municipio: "Medellín"
+ *                 codigo_dane: "05001"
+ *                 id_departamento: 1
+ *             invalid_departamento:
+ *               summary: Invalid departamento ID (will fail)
+ *               value:
+ *                 nombre_municipio: "Test Municipio"
+ *                 codigo_dane: "05999"
+ *                 id_departamento: 999
  *     responses:
  *       201:
  *         description: Municipio created successfully
@@ -29,10 +42,60 @@ const router = express.Router();
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ApiResponse'
+ *             example:
+ *               success: true
+ *               message: "Municipio creado exitosamente"
+ *               data: null
+ *               timestamp: "2025-08-08T02:08:28.701Z"
  *       400:
- *         description: Validation error
+ *         description: Validation error - Missing required fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               error:
+ *                 message: "nombre_municipio, codigo_dane, and id_departamento are required"
+ *                 code: "VALIDATION_ERROR"
+ *                 timestamp: "2025-08-08T02:08:28.701Z"
+ *       409:
+ *         description: Conflict - Municipio already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               error:
+ *                 message: "Municipio ya existe con ese nombre o código DANE"
+ *                 code: "DUPLICATE_ERROR"
+ *                 timestamp: "2025-08-08T02:08:28.701Z"
  *       500:
- *         description: Server error
+ *         description: Server error - Including invalid departamento ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               invalid_departamento:
+ *                 summary: Invalid departamento ID error
+ *                 value:
+ *                   success: false
+ *                   error:
+ *                     message: "Error creating municipio"
+ *                     code: "CREATE_ERROR"
+ *                     timestamp: "2025-08-08T02:08:28.701Z"
+ *                     details: "Error finding or creating municipio: Departamento with ID 999 does not exist"
+ *               general_error:
+ *                 summary: General server error
+ *                 value:
+ *                   success: false
+ *                   error:
+ *                     message: "Error creating municipio"
+ *                     code: "CREATE_ERROR"
+ *                     timestamp: "2025-08-08T02:08:28.701Z"
+ *                     details: "Internal server error"
  */
 router.post('/', municipioController.createMunicipio);
 
@@ -131,6 +194,37 @@ router.post('/bulk', municipioController.bulkCreateMunicipios);
  *         description: Server error
  */
 router.get('/', municipioController.getAllMunicipios);
+
+/**
+ * @swagger
+ * /api/catalog/municipios/departamentos:
+ *   get:
+ *     summary: Get all available departamentos
+ *     tags: [Municipios]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Departamentos retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Departamento'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get('/departamentos', municipioController.getAllDepartamentos);
 
 /**
  * @swagger

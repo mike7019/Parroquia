@@ -412,6 +412,26 @@ const displayRoutes = () => {
       
       // Catalog routes - Parish & Geographic data
       { method: 'GET', path: '/api/catalog/health', group: 'Catalog', protected: false, description: 'Catalog health check' },
+      
+      // Departamentos routes
+      { method: 'POST', path: '/api/catalog/departamentos', group: 'Catalog', protected: true, description: 'Create department' },
+      { method: 'GET', path: '/api/catalog/departamentos', group: 'Catalog', protected: true, description: 'List departments' },
+      { method: 'GET', path: '/api/catalog/departamentos/search', group: 'Catalog', protected: true, description: 'Search departments' },
+      { method: 'GET', path: '/api/catalog/departamentos/statistics', group: 'Catalog', protected: true, description: 'Department statistics' },
+      { method: 'GET', path: '/api/catalog/departamentos/:id', group: 'Catalog', protected: true, description: 'Get department by ID' },
+      { method: 'PUT', path: '/api/catalog/departamentos/:id', group: 'Catalog', protected: true, description: 'Update department' },
+      { method: 'DELETE', path: '/api/catalog/departamentos/:id', group: 'Catalog', protected: true, description: 'Delete department' },
+      
+      // Municipios routes
+      { method: 'POST', path: '/api/catalog/municipios', group: 'Catalog', protected: true, description: 'Create municipality' },
+      { method: 'GET', path: '/api/catalog/municipios', group: 'Catalog', protected: true, description: 'List municipalities' },
+      { method: 'GET', path: '/api/catalog/municipios/search', group: 'Catalog', protected: true, description: 'Search municipalities' },
+      { method: 'GET', path: '/api/catalog/municipios/statistics', group: 'Catalog', protected: true, description: 'Municipality statistics' },
+      { method: 'GET', path: '/api/catalog/municipios/:id', group: 'Catalog', protected: true, description: 'Get municipality by ID' },
+      { method: 'PUT', path: '/api/catalog/municipios/:id', group: 'Catalog', protected: true, description: 'Update municipality' },
+      { method: 'DELETE', path: '/api/catalog/municipios/:id', group: 'Catalog', protected: true, description: 'Delete municipality' },
+      
+      // Parroquias routes
       { method: 'POST', path: '/api/catalog/parroquias', group: 'Catalog', protected: true, description: 'Create parish' },
       { method: 'GET', path: '/api/catalog/parroquias', group: 'Catalog', protected: true, description: 'List parishes' },
       { method: 'GET', path: '/api/catalog/parroquias/search', group: 'Catalog', protected: true, description: 'Search parishes' },
@@ -419,6 +439,17 @@ const displayRoutes = () => {
       { method: 'GET', path: '/api/catalog/parroquias/:id', group: 'Catalog', protected: true, description: 'Get parish by ID' },
       { method: 'PUT', path: '/api/catalog/parroquias/:id', group: 'Catalog', protected: true, description: 'Update parish' },
       { method: 'DELETE', path: '/api/catalog/parroquias/:id', group: 'Catalog', protected: true, description: 'Delete parish' },
+      
+      // Sectores routes
+      { method: 'POST', path: '/api/catalog/sectores', group: 'Catalog', protected: true, description: 'Create sector' },
+      { method: 'GET', path: '/api/catalog/sectores', group: 'Catalog', protected: true, description: 'List sectors' },
+      { method: 'GET', path: '/api/catalog/sectores/search', group: 'Catalog', protected: true, description: 'Search sectors' },
+      { method: 'GET', path: '/api/catalog/sectores/statistics', group: 'Catalog', protected: true, description: 'Sector statistics' },
+      { method: 'GET', path: '/api/catalog/sectores/:id', group: 'Catalog', protected: true, description: 'Get sector by ID' },
+      { method: 'PUT', path: '/api/catalog/sectores/:id', group: 'Catalog', protected: true, description: 'Update sector' },
+      { method: 'DELETE', path: '/api/catalog/sectores/:id', group: 'Catalog', protected: true, description: 'Delete sector' },
+      
+      // Veredas routes
       { method: 'POST', path: '/api/catalog/veredas', group: 'Catalog', protected: true, description: 'Create vereda' },
       { method: 'GET', path: '/api/catalog/veredas', group: 'Catalog', protected: true, description: 'List veredas' },
       { method: 'GET', path: '/api/catalog/veredas/search', group: 'Catalog', protected: true, description: 'Search veredas' },
@@ -426,6 +457,8 @@ const displayRoutes = () => {
       { method: 'GET', path: '/api/catalog/veredas/:id', group: 'Catalog', protected: true, description: 'Get vereda by ID' },
       { method: 'PUT', path: '/api/catalog/veredas/:id', group: 'Catalog', protected: true, description: 'Update vereda' },
       { method: 'DELETE', path: '/api/catalog/veredas/:id', group: 'Catalog', protected: true, description: 'Delete vereda' },
+      
+      // Sexos routes
       { method: 'POST', path: '/api/catalog/sexos', group: 'Catalog', protected: true, description: 'Create gender type' },
       { method: 'GET', path: '/api/catalog/sexos', group: 'Catalog', protected: true, description: 'List gender types' },
       { method: 'GET', path: '/api/catalog/sexos/search', group: 'Catalog', protected: true, description: 'Search gender types' },
@@ -433,6 +466,8 @@ const displayRoutes = () => {
       { method: 'GET', path: '/api/catalog/sexos/:id', group: 'Catalog', protected: true, description: 'Get gender by ID' },
       { method: 'PUT', path: '/api/catalog/sexos/:id', group: 'Catalog', protected: true, description: 'Update gender' },
       { method: 'DELETE', path: '/api/catalog/sexos/:id', group: 'Catalog', protected: true, description: 'Delete gender' },
+      
+      // Tipos de identificación routes
       { method: 'GET', path: '/api/catalog/tipos-identificacion', group: 'Catalog', protected: false, description: 'List identification types' },
       
       // System & Infrastructure routes

@@ -1,5 +1,6 @@
 import sequelize from './config/sequelize.js';
 import './src/models/index.js'; // Importar todos los modelos
+import { runConfigSeeders } from './src/seeders/configSeeder.js';
 
 async function syncDatabaseForce() {
   try {
@@ -14,8 +15,18 @@ async function syncDatabaseForce() {
     await sequelize.sync({ force: true });
     console.log('✅ Base de datos recreada completamente - TODOS LOS DATOS ANTERIORES HAN SIDO ELIMINADOS');
     
-    console.log('🌱 Ahora puedes ejecutar seeders para agregar datos iniciales:');
-    console.log('   npm run db:seed');
+    // Ejecutar seeders de configuración automáticamente después de FORCE
+    console.log('\n🌱 Ejecutando seeders de configuración automáticamente...');
+    try {
+      const seederResults = await runConfigSeeders();
+      console.log(`✅ Seeders ejecutados: ${seederResults.success}/${seederResults.total} exitosos`);
+      if (seederResults.errors > 0) {
+        console.warn(`⚠️  ${seederResults.errors} seeders tuvieron errores`);
+      }
+    } catch (error) {
+      console.error('❌ Error ejecutando seeders de configuración:', error.message);
+      console.log('🔧 Puedes ejecutar manualmente: node runSeeders.js');
+    }
     
   } catch (error) {
     console.error('❌ Error al recrear la base de datos:', error);

@@ -280,6 +280,30 @@ class MunicipioController {
       );
     }
   }
+
+  /**
+   * Get all available departamentos
+   */
+  async getAllDepartamentos(req, res) {
+    try {
+      const departamentos = await municipioService.getAllDepartamentos();
+
+      res.json(
+        createSuccessResponse(
+          'Departamentos retrieved successfully',
+          departamentos
+        )
+      );
+    } catch (error) {
+      res.status(500).json(
+        createErrorResponse(
+          'Error retrieving departamentos',
+          error.message,
+          'FETCH_ERROR'
+        )
+      );
+    }
+  }
 }
 
 export default new MunicipioController();

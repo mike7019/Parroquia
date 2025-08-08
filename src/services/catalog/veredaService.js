@@ -18,7 +18,7 @@ class VeredaService {
         defaults: {
           nombre: veredaData.nombre,
           codigo_vereda: veredaData.codigo_vereda,
-          id_municipio: veredaData.id_municipio
+          id_municipio_municipios: veredaData.id_municipio
         }
       });
 
@@ -39,7 +39,7 @@ class VeredaService {
       const vereda = await Veredas.create({
         nombre: veredaData.nombre,
         codigo_vereda: veredaData.codigo_vereda,
-        id_municipio: veredaData.id_municipio
+        id_municipio_municipios: veredaData.id_municipio
       });
 
       return vereda;
@@ -72,7 +72,7 @@ class VeredaService {
       }
 
       if (municipioId) {
-        where.id_municipio = municipioId;
+        where.id_municipio_municipios = municipioId;
       }
 
       const offset = (page - 1) * limit;
@@ -131,7 +131,7 @@ class VeredaService {
       
       if (updateData.nombre !== undefined) updateFields.nombre = updateData.nombre;
       if (updateData.codigo_vereda !== undefined) updateFields.codigo_vereda = updateData.codigo_vereda;
-      if (updateData.id_municipio !== undefined) updateFields.id_municipio = updateData.id_municipio;
+      if (updateData.id_municipio !== undefined) updateFields.id_municipio_municipios = updateData.id_municipio;
 
       await vereda.update(updateFields);
 
@@ -181,7 +181,7 @@ class VeredaService {
   async getVeredasByMunicipio(municipioId) {
     try {
       const veredas = await Veredas.findAll({
-        where: { id_municipio: municipioId },
+        where: { id_municipio_municipios: municipioId },
         include: [
           {
             association: 'municipio',
@@ -273,7 +273,7 @@ class VeredaService {
       };
 
       if (municipioId) {
-        where.id_municipio = municipioId;
+        where.id_municipio_municipios = municipioId;
       }
 
       const veredas = await Veredas.findAll({

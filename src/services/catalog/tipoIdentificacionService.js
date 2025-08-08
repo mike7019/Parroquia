@@ -6,7 +6,7 @@ import { TipoIdentificacion } from '../../models/catalog/index.js';
 const getAllTiposIdentificacion = async () => {
     try {
         const tiposIdentificacion = await TipoIdentificacion.findAll({
-            order: [['descripcion', 'ASC']]
+            order: [['nombre', 'ASC']]
         });
         
         return tiposIdentificacion;

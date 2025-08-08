@@ -9,32 +9,39 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   TipoDisposicionBasura.init({
-    id_tipos_disposicion_basura: {
+    id_tipo_disposicion_basura: {
       type: DataTypes.BIGINT,
       primaryKey: true,
+      autoIncrement: true,
       allowNull: false
     },
-    metodo: {
+    nombre: {
       type: DataTypes.STRING(255),
       allowNull: false,
       validate: {
         notNull: {
-          msg: 'El método es requerido'
+          msg: 'El nombre es requerido'
         },
         notEmpty: {
-          msg: 'El método no puede estar vacío'
+          msg: 'El nombre no puede estar vacío'
         },
         len: {
           args: [2, 255],
-          msg: 'El método debe tener entre 2 y 255 caracteres'
+          msg: 'El nombre debe tener entre 2 y 255 caracteres'
         }
       }
+    },
+    descripcion: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   }, {
     sequelize,
     modelName: 'TipoDisposicionBasura',
     tableName: 'tipos_disposicion_basura',
-    timestamps: true
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
   });
 
   return TipoDisposicionBasura;

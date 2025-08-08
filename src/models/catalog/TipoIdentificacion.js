@@ -8,20 +8,25 @@ const TipoIdentificacion = sequelize.define('TipoIdentificacion', {
     allowNull: false,
     autoIncrement: true
   },
-  descripcion: {
-    type: DataTypes.STRING(255),
+  nombre: {
+    type: DataTypes.STRING,
     allowNull: false
   },
   codigo: {
-    type: DataTypes.STRING(10),
-    allowNull: false,
-    unique: true
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  descripcion: {
+    type: DataTypes.TEXT,
+    allowNull: true
   }
 }, {
   sequelize,
   modelName: 'TipoIdentificacion',
-  tableName: 'tipo_identificacion',
-  timestamps: false
+  tableName: 'tipos_identificacion',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at'
 });
 
 export default TipoIdentificacion;

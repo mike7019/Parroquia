@@ -1,4 +1,4 @@
-import { Municipios, Departamentos } from '../../models/index.js';
+import { Municipios, Departamentos } from '../../models/catalog/index.js';
 import { Op } from 'sequelize';
 import sequelize from '../../../config/sequelize.js';
 
@@ -8,6 +8,14 @@ class MunicipioService {
    */
   async findOrCreateMunicipio(municipioData) {
     try {
+      // Validate that the departamento exists
+      if (municipioData.id_departamento) {
+        const departamento = await Departamentos.findByPk(municipioData.id_departamento);
+        if (!departamento) {
+          throw new Error(`Departamento with ID ${municipioData.id_departamento} does not exist`);
+        }
+      }
+
       const [municipio, created] = await Municipios.findOrCreate({
         where: {
           [Op.or]: [
@@ -32,6 +40,14 @@ class MunicipioService {
    */
   async createMunicipio(municipioData) {
     try {
+      // Validate that the departamento exists
+      if (municipioData.id_departamento) {
+        const departamento = await Departamentos.findByPk(municipioData.id_departamento);
+        if (!departamento) {
+          throw new Error(`Departamento with ID ${municipioData.id_departamento} does not exist`);
+        }
+      }
+
       const municipio = await Municipios.create(municipioData);
 
       // Devolver el municipio con su departamento
@@ -77,8 +93,8 @@ class MunicipioService {
         offset: parseInt(offset),
         include: [
           {
-            association: 'departamentoData',
-            attributes: ['id_departamento', 'nombre', 'codigo_dane', 'region']
+            association: 'departamento',
+            attributes: ['id_departamento', 'nombre', 'codigo_dane']
           }
         ]
       });
@@ -106,8 +122,8 @@ class MunicipioService {
       const municipio = await Municipios.findByPk(id, {
         include: [
           {
-            association: 'departamentoData',
-            attributes: ['id_departamento', 'nombre', 'codigo_dane', 'region']
+            association: 'departamento',
+            attributes: ['id_departamento', 'nombre', 'codigo_dane']
           }
         ]
       });
@@ -131,8 +147,8 @@ class MunicipioService {
         where: { codigo_dane },
         include: [
           {
-            association: 'departamentoData',
-            attributes: ['id_departamento', 'nombre', 'codigo_dane', 'region']
+            association: 'departamento',
+            attributes: ['id_departamento', 'nombre', 'codigo_dane']
           }
         ]
       });
@@ -221,11 +237,11 @@ class MunicipioService {
     try {
       const municipios = await Municipios.findAll({
         where: { id_departamento },
-        order: [['nombre', 'ASC']],
+        order: [['nombre_municipio', 'ASC']],
         include: [
           {
-            association: 'departamentoData',
-            attributes: ['id_departamento', 'nombre', 'codigo_dane', 'region']
+            association: 'departamento',
+            attributes: ['id_departamento', 'nombre', 'codigo_dane']
           }
         ]
       });
@@ -248,8 +264,8 @@ class MunicipioService {
         order: [['codigo_dane', 'ASC']],
         include: [
           {
-            association: 'departamentoData',
-            attributes: ['id_departamento', 'nombre', 'codigo_dane', 'region']
+            association: 'departamento',
+            attributes: ['id_departamento', 'nombre', 'codigo_dane']
           }
         ]
       });
@@ -257,6 +273,21 @@ class MunicipioService {
       return municipios;
     } catch (error) {
       throw new Error(`Error searching municipios by codigo DANE: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get all available departamentos
+   */
+  async getAllDepartamentos() {
+    try {
+      const departamentos = await Departamentos.findAll({
+        order: [['nombre', 'ASC']]
+      });
+
+      return departamentos;
+    } catch (error) {
+      throw new Error(`Error fetching departamentos: ${error.message}`);
     }
   }
 }

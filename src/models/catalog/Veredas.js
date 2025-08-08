@@ -12,6 +12,11 @@ const Veredas = sequelize.define('Veredas', {
     type: DataTypes.STRING(255),
     allowNull: false
   },
+  codigo_vereda: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    unique: true
+  },
   id_municipio_municipios: {
     type: DataTypes.BIGINT,
     allowNull: true,

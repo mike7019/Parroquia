@@ -996,9 +996,44 @@ const swaggerConfig = {
               maxLength: 255,
               description: 'Nombre de la parroquia',
               example: 'Parroquia San José'
+            },
+            id_municipio: {
+              type: 'integer',
+              description: 'ID del municipio al que pertenece la parroquia',
+              example: 1
+            },
+            descripcion: {
+              type: 'string',
+              description: 'Descripción opcional de la parroquia',
+              example: 'Parroquia ubicada en el centro del municipio'
+            },
+            direccion: {
+              type: 'string',
+              maxLength: 500,
+              description: 'Dirección física de la parroquia',
+              example: 'Carrera 50 # 45-32'
+            },
+            telefono: {
+              type: 'string',
+              maxLength: 20,
+              description: 'Número de teléfono de contacto',
+              example: '+57 4 123-4567'
+            },
+            email: {
+              type: 'string',
+              format: 'email',
+              maxLength: 100,
+              description: 'Correo electrónico de contacto',
+              example: 'contacto@parroquiasanjose.com'
+            },
+            activo: {
+              type: 'boolean',
+              description: 'Estado activo/inactivo de la parroquia',
+              example: true,
+              default: true
             }
           },
-          required: ['nombre']
+          required: ['nombre', 'id_municipio']
         },
         SexoInput: {
           type: 'object',
@@ -1025,9 +1060,59 @@ const swaggerConfig = {
               maxLength: 255,
               description: 'Nombre de la parroquia',
               example: 'San José'
+            },
+            id_municipio: {
+              type: 'integer',
+              description: 'ID del municipio al que pertenece la parroquia',
+              example: 1
+            },
+            descripcion: {
+              type: 'string',
+              description: 'Descripción opcional de la parroquia',
+              example: 'Parroquia ubicada en el centro del municipio'
+            },
+            direccion: {
+              type: 'string',
+              maxLength: 500,
+              description: 'Dirección física de la parroquia',
+              example: 'Carrera 50 # 45-32'
+            },
+            telefono: {
+              type: 'string',
+              maxLength: 20,
+              description: 'Número de teléfono de contacto',
+              example: '+57 4 123-4567'
+            },
+            email: {
+              type: 'string',
+              format: 'email',
+              maxLength: 100,
+              description: 'Correo electrónico de contacto',
+              example: 'contacto@parroquiasanjose.com'
+            },
+            activo: {
+              type: 'boolean',
+              description: 'Estado activo/inactivo de la parroquia',
+              example: true
+            },
+            fecha_creacion: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación del registro',
+              example: '2024-01-15T10:30:00Z'
+            },
+            fecha_actualizacion: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización del registro',
+              example: '2024-01-15T10:30:00Z'
+            },
+            municipio: {
+              $ref: '#/components/schemas/Municipio',
+              description: 'Información del municipio al que pertenece la parroquia'
             }
           },
-          required: ['nombre']
+          required: ['nombre', 'id_municipio']
         },
         Vereda: {
           type: 'object',
@@ -1161,8 +1246,22 @@ const swaggerConfig = {
             codigo_dane: {
               type: 'string',
               maxLength: 2,
-              description: 'Código DANE del departamento (2 dígitos)',
+              minLength: 2,
+              pattern: '^[0-9]{2}$',
+              description: 'Código DANE del departamento (exactamente 2 dígitos)',
               example: '05'
+            },
+            created_at: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación',
+              example: '2025-08-05T05:48:36.065Z'
+            },
+            updated_at: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización',
+              example: '2025-08-05T05:48:36.065Z'
             }
           },
           required: ['nombre', 'codigo_dane']
@@ -1211,10 +1310,80 @@ const swaggerConfig = {
               type: 'string',
               maxLength: 255,
               description: 'Nombre del sector',
-              example: 'Urbano'
+              example: 'Sector San José'
+            },
+            descripcion: {
+              type: 'string',
+              maxLength: 500,
+              description: 'Descripción detallada del sector',
+              example: 'Sector ubicado en la zona central de la parroquia'
+            },
+            codigo: {
+              type: 'string',
+              maxLength: 20,
+              description: 'Código único del sector',
+              example: 'SEC001'
+            },
+            estado: {
+              type: 'string',
+              enum: ['activo', 'inactivo'],
+              description: 'Estado del sector',
+              example: 'activo'
+            },
+            veredas: {
+              type: 'array',
+              description: 'Lista de veredas que pertenecen a este sector',
+              items: {
+                $ref: '#/components/schemas/VeredaSimple'
+              }
+            },
+            created_at: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación',
+              example: '2025-01-15T10:30:00Z'
+            },
+            updated_at: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización',
+              example: '2025-01-15T10:30:00Z'
             }
           },
           required: ['nombre']
+        },
+        VeredaSimple: {
+          type: 'object',
+          properties: {
+            id_vereda: {
+              type: 'integer',
+              description: 'ID único de la vereda',
+              example: 1
+            },
+            nombre: {
+              type: 'string',
+              description: 'Nombre de la vereda',
+              example: 'Centro'
+            },
+            codigo_vereda: {
+              type: 'string',
+              description: 'Código de la vereda',
+              example: 'V001'
+            },
+            municipio: {
+              type: 'object',
+              properties: {
+                id_municipio: {
+                  type: 'integer',
+                  example: 1
+                },
+                nombre_municipio: {
+                  type: 'string',
+                  example: 'Bogotá'
+                }
+              }
+            }
+          }
         },
         CreateSectorRequest: {
           type: 'object',
@@ -1222,11 +1391,45 @@ const swaggerConfig = {
             nombre: {
               type: 'string',
               maxLength: 255,
-              description: 'Nombre del sector',
-              example: 'Rural'
+              description: 'Nombre del sector (obligatorio)',
+              example: 'Sector San José'
+            },
+            descripcion: {
+              type: 'string',
+              maxLength: 500,
+              description: 'Descripción detallada del sector (opcional)',
+              example: 'Sector ubicado en la zona central de la parroquia, incluye las principales calles comerciales'
+            },
+            codigo: {
+              type: 'string',
+              maxLength: 20,
+              description: 'Código único del sector (opcional)',
+              example: 'SEC001'
+            },
+            estado: {
+              type: 'string',
+              enum: ['activo', 'inactivo'],
+              description: 'Estado del sector (opcional, por defecto: activo)',
+              example: 'activo',
+              default: 'activo'
+            },
+            veredas_ids: {
+              type: 'array',
+              description: 'Array de IDs de veredas que pertenecerán a este sector (opcional)',
+              items: {
+                type: 'integer'
+              },
+              example: [1, 2, 3]
             }
           },
-          required: ['nombre']
+          required: ['nombre'],
+          example: {
+            nombre: 'Sector San José',
+            descripcion: 'Sector ubicado en la zona central',
+            codigo: 'SEC001',
+            estado: 'activo',
+            veredas_ids: [1, 2]
+          }
         },
         UpdateSectorRequest: {
           type: 'object',
@@ -1235,8 +1438,41 @@ const swaggerConfig = {
               type: 'string',
               maxLength: 255,
               description: 'Nombre del sector',
-              example: 'Semi-urbano'
+              example: 'Sector San José Actualizado'
+            },
+            descripcion: {
+              type: 'string',
+              maxLength: 500,
+              description: 'Descripción detallada del sector',
+              example: 'Sector ubicado en la zona central, actualizado con nuevas características'
+            },
+            codigo: {
+              type: 'string',
+              maxLength: 20,
+              description: 'Código único del sector',
+              example: 'SEC001-UPD'
+            },
+            estado: {
+              type: 'string',
+              enum: ['activo', 'inactivo'],
+              description: 'Estado del sector',
+              example: 'activo'
+            },
+            veredas_ids: {
+              type: 'array',
+              description: 'Array de IDs de veredas que pertenecerán a este sector',
+              items: {
+                type: 'integer'
+              },
+              example: [1, 2, 4]
             }
+          },
+          example: {
+            nombre: 'Sector San José Actualizado',
+            descripcion: 'Descripción actualizada del sector',
+            codigo: 'SEC001-UPD',
+            estado: 'activo',
+            veredas_ids: [1, 2, 4]
           }
         },
         SectorsListResponse: {
@@ -1462,8 +1698,9 @@ const swaggerConfig = {
               description: 'ID del departamento al que pertenece',
               example: 1
             },
-            departamentoData: {
+            departamento: {
               type: 'object',
+              description: 'Información del departamento asociado',
               properties: {
                 id_departamento: {
                   type: 'integer',
@@ -1478,6 +1715,18 @@ const swaggerConfig = {
                   example: '05'
                 }
               }
+            },
+            created_at: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación',
+              example: '2025-08-05T05:48:36.065Z'
+            },
+            updated_at: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización',
+              example: '2025-08-05T05:48:36.065Z'
             }
           },
           required: ['nombre_municipio', 'codigo_dane', 'id_departamento']
@@ -1488,19 +1737,22 @@ const swaggerConfig = {
             nombre_municipio: {
               type: 'string',
               maxLength: 255,
+              minLength: 1,
               description: 'Nombre del municipio',
               example: 'Bogotá D.C.'
             },
             codigo_dane: {
               type: 'string',
               maxLength: 5,
+              minLength: 5,
               pattern: '^[0-9]{5}$',
-              description: 'Código DANE del municipio (5 dígitos)',
+              description: 'Código DANE del municipio (exactamente 5 dígitos)',
               example: '11001'
             },
             id_departamento: {
               type: 'integer',
-              description: 'ID del departamento al que pertenece el municipio',
+              minimum: 1,
+              description: 'ID del departamento al que pertenece el municipio. Use GET /api/catalog/municipios/departamentos para obtener IDs válidos.',
               example: 1
             }
           },
@@ -1519,6 +1771,95 @@ const swaggerConfig = {
               $ref: '#/components/schemas/Pagination'
             }
           }
+        },
+        Enfermedad: {
+          type: 'object',
+          properties: {
+            id_enfermedad: {
+              type: 'integer',
+              description: 'ID único de la enfermedad',
+              example: 1
+            },
+            nombre: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre de la enfermedad',
+              example: 'Diabetes tipo 2'
+            },
+            descripcion: {
+              type: 'string',
+              nullable: true,
+              description: 'Descripción detallada de la enfermedad',
+              example: 'Trastorno metabólico caracterizado por altos niveles de glucosa en sangre'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación del registro',
+              example: '2025-08-07T10:30:00.000Z'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización del registro',
+              example: '2025-08-07T10:30:00.000Z'
+            }
+          },
+          required: ['id_enfermedad', 'nombre']
+        },
+        EnfermedadInput: {
+          type: 'object',
+          properties: {
+            nombre: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre de la enfermedad',
+              example: 'Diabetes tipo 2'
+            },
+            descripcion: {
+              type: 'string',
+              nullable: true,
+              description: 'Descripción detallada de la enfermedad',
+              example: 'Trastorno metabólico caracterizado por altos niveles de glucosa en sangre'
+            }
+          },
+          required: ['nombre']
+        },
+        EnfermedadWithPersonas: {
+          allOf: [
+            {
+              $ref: '#/components/schemas/Enfermedad'
+            },
+            {
+              type: 'object',
+              properties: {
+                personas: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      id_persona: {
+                        type: 'integer',
+                        description: 'ID de la persona',
+                        example: 1
+                      },
+                      primer_nombre: {
+                        type: 'string',
+                        description: 'Primer nombre de la persona',
+                        example: 'Juan'
+                      },
+                      primer_apellido: {
+                        type: 'string',
+                        description: 'Primer apellido de la persona',
+                        example: 'Pérez'
+                      }
+                    }
+                  },
+                  description: 'Lista de personas asociadas con esta enfermedad'
+                }
+              }
+            }
+          ]
         }
       },
       responses: {
@@ -1648,7 +1989,7 @@ const swaggerConfig = {
       },
       {
         name: 'Municipios',
-        description: 'Gestión de catálogo de municipios'
+        description: 'Gestión de catálogo de municipios. **Flujo recomendado:** 1) Use GET /municipios/departamentos para obtener IDs válidos de departamentos, 2) Use el id_departamento en las operaciones de creación de municipios.'
       },
       {
         name: 'Veredas',
@@ -1657,6 +1998,10 @@ const swaggerConfig = {
       {
         name: 'Sexos',
         description: 'Gestión de catálogo de sexos'
+      },
+      {
+        name: 'Enfermedades',
+        description: 'Gestión de catálogo de enfermedades. **Funcionalidades:** CRUD completo, búsqueda por nombre/descripción, asociación con personas, gestión de relaciones muchos a muchos.'
       },
       {
         name: 'Catalog',

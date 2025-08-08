@@ -6,6 +6,7 @@ import municipioRoutes from './municipioRoutes.js';
 import departamentoRoutes from './departamentoRoutes.js';
 import sectorRoutes from './sectorRoutes.js';
 import tipoIdentificacionRoutes from './tipoIdentificacionRoutes.js';
+import enfermedadRoutes from './enfermedadRoutes.js';
 
 const router = express.Router();
 
@@ -53,6 +54,9 @@ const router = express.Router();
  *                     tiposIdentificacion:
  *                       type: string
  *                       example: 'active'
+ *                     enfermedades:
+ *                       type: string
+ *                       example: 'active'
  */
 
 // Mount catalog routes
@@ -63,6 +67,7 @@ router.use('/municipios', municipioRoutes);
 router.use('/departamentos', departamentoRoutes);
 router.use('/sectors', sectorRoutes);
 router.use('/tipos-identificacion', tipoIdentificacionRoutes);
+router.use('/enfermedades', enfermedadRoutes);
 
 // Health check for catalog module
 router.get('/health', (req, res) => {
@@ -77,7 +82,8 @@ router.get('/health', (req, res) => {
       veredas: 'active',
       sexos: 'active',
       sectors: 'active',
-      tiposIdentificacion: 'active'
+      tiposIdentificacion: 'active',
+      enfermedades: 'active'
     }
   });
 });

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs';
 import { createRequire } from 'module';
+import { runConfigSeeders } from './src/seeders/configSeeder.js';
 
 // Crear require para módulos CommonJS
 const require = createRequire(import.meta.url);
@@ -89,6 +90,18 @@ async function syncDatabase() {
     await sequelize.sync();
     console.log('✅ Base de datos sincronizada correctamente');
     
+    // Ejecutar seeders de configuración
+    console.log('\n🌱 Ejecutando seeders de configuración...');
+    try {
+      const seederResults = await runConfigSeeders();
+      console.log(`✅ Seeders ejecutados: ${seederResults.success}/${seederResults.total} exitosos`);
+      if (seederResults.errors > 0) {
+        console.warn(`⚠️  ${seederResults.errors} seeders tuvieron errores`);
+      }
+    } catch (error) {
+      console.error('❌ Error ejecutando seeders de configuración:', error.message);
+    }
+    
     // Mostrar tablas creadas/verificadas usando QueryTypes.SELECT
     try {
       const results = await sequelize.query(
@@ -149,6 +162,18 @@ async function syncDatabaseWithAlter() {
     await loadMainModels();
     await sequelize.sync({ alter: true });
     console.log('✅ Base de datos sincronizada con ALTER');
+    
+    // Ejecutar seeders de configuración
+    console.log('\n🌱 Ejecutando seeders de configuración...');
+    try {
+      const seederResults = await runConfigSeeders();
+      console.log(`✅ Seeders ejecutados: ${seederResults.success}/${seederResults.total} exitosos`);
+      if (seederResults.errors > 0) {
+        console.warn(`⚠️  ${seederResults.errors} seeders tuvieron errores`);
+      }
+    } catch (error) {
+      console.error('❌ Error ejecutando seeders de configuración:', error.message);
+    }
   } catch (error) {
     console.error('❌ Error al sincronizar con ALTER:', error);
   } finally {
@@ -164,6 +189,18 @@ async function syncDatabaseWithForce() {
     await loadMainModels();
     await sequelize.sync({ force: true });
     console.log('✅ Base de datos recreada completamente');
+    
+    // Ejecutar seeders de configuración (obligatorio después de FORCE)
+    console.log('\n🌱 Ejecutando seeders de configuración...');
+    try {
+      const seederResults = await runConfigSeeders();
+      console.log(`✅ Seeders ejecutados: ${seederResults.success}/${seederResults.total} exitosos`);
+      if (seederResults.errors > 0) {
+        console.warn(`⚠️  ${seederResults.errors} seeders tuvieron errores`);
+      }
+    } catch (error) {
+      console.error('❌ Error ejecutando seeders de configuración:', error.message);
+    }
   } catch (error) {
     console.error('❌ Error al sincronizar con FORCE:', error);
   } finally {

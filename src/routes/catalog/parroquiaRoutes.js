@@ -22,8 +22,22 @@ router.use(authenticateToken);
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/ParroquiaInput'
- *           example:
- *             nombre: "Parroquia San José"
+ *           examples:
+ *             basic_parroquia:
+ *               summary: Parroquia básica (solo requeridos)
+ *               value:
+ *                 nombre: "Parroquia San José"
+ *                 id_municipio: 1
+ *             complete_parroquia:
+ *               summary: Parroquia completa
+ *               value:
+ *                 nombre: "Parroquia San José"
+ *                 id_municipio: 1
+ *                 descripcion: "Parroquia ubicada en el centro del municipio"
+ *                 direccion: "Carrera 50 # 45-32"
+ *                 telefono: "+57 4 123-4567"
+ *                 email: "contacto@parroquiasanjose.com"
+ *                 activo: true
  *     responses:
  *       201:
  *         description: Parroquia created successfully
@@ -32,7 +46,13 @@ router.use(authenticateToken);
  *             schema:
  *               $ref: '#/components/schemas/ParroquiaResponse'
  *       400:
- *         description: Validation error
+ *         description: Validation error - missing required fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Municipio not found
  *         content:
  *           application/json:
  *             schema:
@@ -71,12 +91,18 @@ router.post('/', parroquiaController.createParroquia);
  *         name: search
  *         schema:
  *           type: string
- *         description: Search term
+ *         description: Search term for name or description
+ *       - in: query
+ *         name: id_municipio
+ *         schema:
+ *           type: integer
+ *         description: Filter by municipio ID
  *       - in: query
  *         name: sortBy
  *         schema:
  *           type: string
  *           default: id_parroquia
+ *           enum: [id_parroquia, nombre, fecha_creacion, fecha_actualizacion]
  *         description: Field to sort by
  *       - in: query
  *         name: sortOrder
@@ -87,7 +113,7 @@ router.post('/', parroquiaController.createParroquia);
  *         description: Sort order
  *     responses:
  *       200:
- *         description: Parroquias retrieved successfully
+ *         description: Parroquias retrieved successfully (includes municipio data)
  *         content:
  *           application/json:
  *             schema:
@@ -187,14 +213,56 @@ router.get('/:id', parroquiaController.getParroquiaById);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/ParroquiaInput'
- *           example:
- *             nombre: "Parroquia San José Actualizada"
+ *             type: object
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *                 maxLength: 255
+ *                 description: 'Nombre de la parroquia'
+ *               id_municipio:
+ *                 type: integer
+ *                 description: 'ID del municipio al que pertenece la parroquia'
+ *               descripcion:
+ *                 type: string
+ *                 description: 'Descripción opcional de la parroquia'
+ *               direccion:
+ *                 type: string
+ *                 maxLength: 500
+ *                 description: 'Dirección física de la parroquia'
+ *               telefono:
+ *                 type: string
+ *                 maxLength: 20
+ *                 description: 'Número de teléfono de contacto'
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 maxLength: 100
+ *                 description: 'Correo electrónico de contacto'
+ *               activo:
+ *                 type: boolean
+ *                 description: 'Estado activo/inactivo de la parroquia'
+ *           examples:
+ *             partial_update:
+ *               summary: Actualización parcial
+ *               value:
+ *                 nombre: "Parroquia San José Actualizada"
+ *                 descripcion: "Descripción actualizada"
+ *             change_municipio:
+ *               summary: Cambio de municipio
+ *               value:
+ *                 id_municipio: 2
+ *                 direccion: "Nueva dirección en el municipio 2"
  *     responses:
  *       200:
  *         description: Parroquia updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ParroquiaResponse'
+ *       400:
+ *         description: Validation error
  *       404:
- *         description: Parroquia not found
+ *         description: Parroquia or Municipio not found
  *       500:
  *         description: Server error
  */
@@ -226,5 +294,41 @@ router.put('/:id', parroquiaController.updateParroquia);
  *         description: Server error
  */
 router.delete('/:id', parroquiaController.deleteParroquia);
+
+/**
+ * @swagger
+ * /api/catalog/parroquias/municipio/{municipioId}:
+ *   get:
+ *     summary: Get parroquias by municipio
+ *     tags: [Parroquias]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: municipioId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Municipio ID
+ *     responses:
+ *       200:
+ *         description: Parroquias by municipio retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Parroquia'
+ *       400:
+ *         description: Municipio ID is required
+ *       500:
+ *         description: Server error
+ */
+router.get('/municipio/:municipioId', parroquiaController.getParroquiasByMunicipio);
 
 export default router;

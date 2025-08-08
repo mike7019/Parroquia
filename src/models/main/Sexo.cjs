@@ -66,6 +66,9 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'Sexo',
     tableName: 'sexos',
     timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    underscored: true,
     indexes: [
       {
         unique: true,

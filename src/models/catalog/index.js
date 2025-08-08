@@ -18,6 +18,17 @@ Municipios.belongsTo(Departamentos, {
     as: 'departamento'
 });
 
+// Asociación entre Municipios y Parroquias
+Municipios.hasMany(Parroquia, {
+    foreignKey: 'id_municipio',
+    as: 'parroquias'
+});
+
+Parroquia.belongsTo(Municipios, {
+    foreignKey: 'id_municipio',
+    as: 'municipio'
+});
+
 Municipios.hasMany(Veredas, {
     foreignKey: 'id_municipio_municipios',
     as: 'veredas'

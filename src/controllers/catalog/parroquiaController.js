@@ -7,7 +7,7 @@ class ParroquiaController {
    */
   async createParroquia(req, res) {
     try {
-      const { nombre } = req.body;
+      const { nombre, id_municipio, descripcion, direccion, telefono, email, activo } = req.body;
 
       if (!nombre) {
         return res.status(400).json(
@@ -15,23 +15,31 @@ class ParroquiaController {
         );
       }
 
-      // Usar findOrCreate para evitar duplicados
-      const result = await parroquiaService.findOrCreateParroquia({ nombre });
-      
-      if (!result.created) {
-        return res.status(409).json(
-          createErrorResponse('Parroquia con este nombre ya existe', null, 'DUPLICATE_ERROR')
+      if (!id_municipio) {
+        return res.status(400).json(
+          createErrorResponse('ID de municipio es requerido', null, 'VALIDATION_ERROR')
         );
       }
+
+      const parroquia = await parroquiaService.createParroquia({ 
+        nombre, 
+        id_municipio, 
+        descripcion, 
+        direccion, 
+        telefono, 
+        email, 
+        activo 
+      });
 
       res.status(201).json(
         createSuccessResponse(
           'Parroquia creada exitosamente',
-          null
+          parroquia
         )
       );
     } catch (error) {
-      res.status(500).json(
+      const statusCode = error.message.includes('does not exist') ? 404 : 500;
+      res.status(statusCode).json(
         createErrorResponse(
           'Error creating parroquia',
           error.message,
@@ -51,7 +59,8 @@ class ParroquiaController {
         limit = 10,
         search,
         sortBy = 'id_parroquia',
-        sortOrder = 'ASC'
+        sortOrder = 'ASC',
+        id_municipio
       } = req.query;
 
       const result = await parroquiaService.getAllParroquias({
@@ -59,7 +68,8 @@ class ParroquiaController {
         limit: parseInt(limit),
         search,
         sortBy,
-        sortOrder
+        sortOrder,
+        id_municipio: id_municipio ? parseInt(id_municipio) : null
       });
 
       res.json(
@@ -219,6 +229,42 @@ class ParroquiaController {
           'Error searching parroquias',
           error.message,
           'SEARCH_ERROR'
+        )
+      );
+    }
+  }
+
+  /**
+   * Get parroquias by municipio
+   */
+  async getParroquiasByMunicipio(req, res) {
+    try {
+      const { municipioId } = req.params;
+
+      if (!municipioId) {
+        return res.status(400).json(
+          createErrorResponse(
+            'Municipio ID is required',
+            null,
+            'VALIDATION_ERROR'
+          )
+        );
+      }
+
+      const parroquias = await parroquiaService.getParroquiasByMunicipio(municipioId);
+
+      res.json(
+        createSuccessResponse(
+          'Parroquias by municipio retrieved successfully',
+          parroquias
+        )
+      );
+    } catch (error) {
+      res.status(500).json(
+        createErrorResponse(
+          'Error retrieving parroquias by municipio',
+          error.message,
+          'FETCH_ERROR'
         )
       );
     }

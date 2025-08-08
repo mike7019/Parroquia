@@ -15,6 +15,22 @@ class VeredaController {
         );
       }
 
+      // Validate that municipio exists if id_municipio is provided
+      if (id_municipio) {
+        const { Municipios } = await import('../../models/index.js');
+        const municipioExists = await Municipios.findByPk(id_municipio);
+        
+        if (!municipioExists) {
+          return res.status(400).json(
+            createErrorResponse(
+              `Municipio with ID ${id_municipio} does not exist`,
+              null,
+              'VALIDATION_ERROR'
+            )
+          );
+        }
+      }
+
       const result = await veredaService.findOrCreateVereda({
         nombre,
         codigo_vereda,
