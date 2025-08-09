@@ -26,7 +26,8 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile.pm2
+      dockerfile: Dockerfile
+      target: production
     container_name: parroquia-api
     restart: unless-stopped
     depends_on:
@@ -40,8 +41,8 @@ services:
       - DB_NAME=parroquia_db
       - DB_USER=parroquia_user
       - DB_PASS=ParroquiaSecure2025
-      - JWT_SECRET=${JWT_SECRET:-default_jwt_secret}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-default_refresh_secret}
+      - JWT_SECRET=${JWT_SECRET:-default_jwt_secret_change_in_production}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-default_refresh_secret_change_in_production}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-15m}
       - JWT_REFRESH_EXPIRES_IN=${JWT_REFRESH_EXPIRES_IN:-7d}
       - BCRYPT_ROUNDS=${BCRYPT_ROUNDS:-12}
@@ -54,16 +55,20 @@ services:
       - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
       - SEND_REAL_EMAILS=${SEND_REAL_EMAILS:-false}
       - VERBOSE_LOGGING=${VERBOSE_LOGGING:-true}
+      - PM2_PUBLIC_KEY=${PM2_PUBLIC_KEY:-}
+      - PM2_SECRET_KEY=${PM2_SECRET_KEY:-}
     networks:
       - parroquia-network
     volumes:
       - app_logs:/app/logs
+      - app_temp:/app/temp
+      - app_uploads:/app/uploads
     healthcheck:
-      test: ["CMD", "pm2", "ping"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
-      timeout: 10s
+      timeout: 15s
       retries: 3
-      start_period: 60s
+      start_period: 120s
 
   # Nginx Reverse Proxy
   nginx:
@@ -95,6 +100,10 @@ volumes:
   postgres_data:
     driver: local
   app_logs:
+    driver: local
+  app_temp:
+    driver: local
+  app_uploads:
     driver: local
   nginx_logs:
     driver: local

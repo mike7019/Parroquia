@@ -5,14 +5,19 @@ yarn-debug.log*
 yarn-error.log*
 
 # Environment files
+.env
 .env.local
+.env.development
 .env.development.local
+.env.test
 .env.test.local
+.env.production
 .env.production.local
 
 # Logs
 logs
 *.log
+pm2-*.log
 
 # Runtime data
 pids
@@ -43,9 +48,6 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
-
 # IDE files
 .vscode/
 .idea/
@@ -65,32 +67,61 @@ Thumbs.db
 # Git
 .git
 .gitignore
+.gitattributes
 
-# Docker
-Dockerfile
+# Docker files
+Dockerfile*
 .dockerignore
 docker-compose*.yml
 
 # Documentation
 README.md
 *.md
+docs/
+CHANGELOG*
 
 # Test files
 tests/
 test/
 __tests__/
+*.test.js
+*.spec.js
 
 # Development files
 ollama/
 scripts/
-*.test.js
-*.spec.js
+jenkins/
+temp-archive/
 
 # Temporary files
 temp/
 tmp/
+uploads/
+*.tmp
+*.temp
+
+# PowerShell and shell scripts
+*.ps1
+*.sh
+*.http
 
 # SSL certificates (should be mounted as volumes)
 *.pem
 *.key
 *.crt
+
+# CI/CD files
+.github/
+jenkinsfile
+.gitlab-ci.yml
+.travis.yml
+
+# Archive files
+*.zip
+*.tar.gz
+*.rar
+
+# Backup files
+*.bak
+*.backup
+*.sql
