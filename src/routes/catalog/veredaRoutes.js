@@ -36,7 +36,7 @@ router.post('/', veredaController.createVereda);
  * @swagger
  * /api/catalog/veredas:
  *   get:
- *     summary: Get all veredas with pagination
+ *     summary: Get all veredas
  *     tags: [Veredas]
  *     security:
  *       - bearerAuth: []

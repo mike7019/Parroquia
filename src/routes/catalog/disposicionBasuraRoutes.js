@@ -132,34 +132,6 @@ const router = express.Router();
  *           type: integer
  *           description: Número de familias que usan este tipo de disposición
  *           example: 15
- *     
- *     PaginationDisposicion:
- *       type: object
- *       properties:
- *         currentPage:
- *           type: integer
- *           description: Página actual
- *           example: 1
- *         totalPages:
- *           type: integer
- *           description: Total de páginas
- *           example: 3
- *         totalItems:
- *           type: integer
- *           description: Total de elementos
- *           example: 7
- *         itemsPerPage:
- *           type: integer
- *           description: Elementos por página
- *           example: 10
- *         hasNextPage:
- *           type: boolean
- *           description: Si hay página siguiente
- *           example: false
- *         hasPrevPage:
- *           type: boolean
- *           description: Si hay página anterior
- *           example: false
  */
 
 /**
@@ -228,8 +200,10 @@ const router = express.Router();
  *                       type: array
  *                       items:
  *                         $ref: '#/components/schemas/TipoDisposicionBasura'
- *                     pagination:
- *                       $ref: '#/components/schemas/PaginationDisposicion'
+ *                     total:
+ *                       type: integer
+ *                       description: Total number of items
+ *                       example: 15
  *       400:
  *         $ref: '#/components/responses/ValidationError'
  *       401:

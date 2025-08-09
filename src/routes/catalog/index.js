@@ -9,6 +9,7 @@ import tipoIdentificacionRoutes from './tipoIdentificacionRoutes.js';
 import enfermedadRoutes from './enfermedadRoutes.js';
 import disposicionBasuraRoutes from './disposicionBasuraRoutes.js';
 import aguasResidualesRoutes from './aguasResidualesRoutes.js';
+import sistemaAcueductoRoutes from './sistemaAcueductoRoutes.js';
 
 const router = express.Router();
 
@@ -59,6 +60,9 @@ const router = express.Router();
  *                     enfermedades:
  *                       type: string
  *                       example: 'active'
+ *                     sistemasAcueducto:
+ *                       type: string
+ *                       example: 'active'
  */
 
 // Mount catalog routes
@@ -72,6 +76,7 @@ router.use('/tipos-identificacion', tipoIdentificacionRoutes);
 router.use('/enfermedades', enfermedadRoutes);
 router.use('/disposicion-basura', disposicionBasuraRoutes);
 router.use('/aguas-residuales', aguasResidualesRoutes);
+router.use('/sistemas-acueducto', sistemaAcueductoRoutes);
 
 // Health check for catalog module
 router.get('/health', (req, res) => {
@@ -89,7 +94,8 @@ router.get('/health', (req, res) => {
       tiposIdentificacion: 'active',
       enfermedades: 'active',
       disposicionBasura: 'active',
-      aguasResiduales: 'active'
+      aguasResiduales: 'active',
+      sistemasAcueducto: 'active'
     }
   });
 });

@@ -40,7 +40,7 @@ router.post('/', departamentoController.createDepartamento);
  * @swagger
  * /api/catalog/departamentos:
  *   get:
- *     summary: Get all departamentos with pagination
+ *     summary: Get all departamentos
  *     tags: [Departamentos]
  *     security:
  *       - bearerAuth: []

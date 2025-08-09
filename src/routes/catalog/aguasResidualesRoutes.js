@@ -62,8 +62,10 @@ router.use(authenticateToken);
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/TipoAguasResiduales'
- *                 pagination:
- *                   $ref: '#/components/schemas/PaginationResponse'
+ *                 total:
+ *                   type: integer
+ *                   description: Total number of tipos de aguas residuales
+ *                   example: 5
  */
 
 /**
@@ -204,7 +206,7 @@ router.get('/stats', aguasResidualesController.getStatistics);
  * @swagger
  * /api/catalog/aguas-residuales:
  *   get:
- *     summary: Get all tipos de aguas residuales with search and pagination
+ *     summary: Get all tipos de aguas residuales
  *     tags: [Aguas Residuales]
  *     security:
  *       - bearerAuth: []
@@ -228,21 +230,6 @@ router.get('/stats', aguasResidualesController.getStatistics);
  *           enum: [ASC, DESC]
  *           default: ASC
  *         description: Sort order
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           minimum: 1
- *           default: 1
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           minimum: 1
- *           maximum: 100
- *           default: 10
- *         description: Number of items per page
  *     responses:
  *       200:
  *         description: Tipos de aguas residuales retrieved successfully

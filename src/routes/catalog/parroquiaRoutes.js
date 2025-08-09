@@ -70,7 +70,7 @@ router.post('/', parroquiaController.createParroquia);
  * @swagger
  * /api/catalog/parroquias:
  *   get:
- *     summary: Get all parroquias with pagination
+ *     summary: Get all parroquias
  *     tags: [Parroquias]
  *     security:
  *       - bearerAuth: []

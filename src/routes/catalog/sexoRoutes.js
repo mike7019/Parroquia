@@ -36,7 +36,7 @@ router.post('/', sexoController.createSexo);
  * @swagger
  * /api/catalog/sexos:
  *   get:
- *     summary: Get all sexos with pagination
+ *     summary: Get all sexos
  *     tags: [Sexos]
  *     security:
  *       - bearerAuth: []

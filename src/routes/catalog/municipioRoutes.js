@@ -136,7 +136,7 @@ router.post('/bulk', municipioController.bulkCreateMunicipios);
  * @swagger
  * /api/catalog/municipios:
  *   get:
- *     summary: Get all municipios with pagination
+ *     summary: Get all municipios
  *     tags: [Municipios]
  *     security:
  *       - bearerAuth: []
@@ -188,8 +188,10 @@ router.post('/bulk', municipioController.bulkCreateMunicipios);
  *                           type: array
  *                           items:
  *                             $ref: '#/components/schemas/Municipio'
- *                         pagination:
- *                           $ref: '#/components/schemas/Pagination'
+ *                         total:
+ *                           type: integer
+ *                           description: Total number of municipios
+ *                           example: 50
  *       500:
  *         description: Server error
  */

@@ -113,7 +113,7 @@ router.post('/', sectorController.createSector);
  * @swagger
  * /api/catalog/sectors:
  *   get:
- *     summary: Get all sectors with pagination and relationships
+ *     summary: Get all sectors with relationships
  *     description: |
  *       Obtiene todos los sectores con paginación y opcionalmente incluye las relaciones con veredas y municipios.
  *       
@@ -205,8 +205,10 @@ router.post('/', sectorController.createSector);
  *                       type: array
  *                       items:
  *                         $ref: '#/components/schemas/Sector'
- *                     pagination:
- *                       $ref: '#/components/schemas/Pagination'
+ *                     total:
+ *                       type: integer
+ *                       description: Total number of sectors
+ *                       example: 15
  *                     summary:
  *                       type: object
  *                       properties:
@@ -235,11 +237,7 @@ router.post('/', sectorController.createSector);
  *                       - id_sector: 2
  *                         nombre: "Sector Rural Norte"
  *                         estado: "activo"
- *                     pagination:
- *                       page: 1
- *                       limit: 10
- *                       total: 2
- *                       totalPages: 1
+ *                     total: 2
  *               sectores_con_veredas:
  *                 summary: Respuesta con veredas incluidas
  *                 value:

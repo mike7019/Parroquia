@@ -1,0 +1,85 @@
+### Test Sistema de Acueducto API Endpoints (No Pagination)
+### Requires a running server and valid JWT token
+
+### 1. Get All Sistemas de Acueducto
+GET http://localhost:3000/api/catalog/sistemas-acueducto
+Authorization: Bearer {{token}}
+
+### 2. Get All with Search Filter
+GET http://localhost:3000/api/catalog/sistemas-acueducto?search=agua
+Authorization: Bearer {{token}}
+
+### 3. Get All with Sorting
+GET http://localhost:3000/api/catalog/sistemas-acueducto?sortBy=nombre&sortOrder=DESC
+Authorization: Bearer {{token}}
+
+### 4. Get Sistema de Acueducto by ID
+GET http://localhost:3000/api/catalog/sistemas-acueducto/1
+Authorization: Bearer {{token}}
+
+### 5. Create New Sistema de Acueducto
+POST http://localhost:3000/api/catalog/sistemas-acueducto
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre": "Pozo Artesanal",
+  "descripcion": "Sistema de agua de pozo artesanal para uso doméstico"
+}
+
+### 6. Update Sistema de Acueducto
+PUT http://localhost:3000/api/catalog/sistemas-acueducto/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre": "Acueducto Público Actualizado",
+  "descripcion": "Sistema actualizado de agua potable municipal"
+}
+
+### 7. Search Sistemas de Acueducto
+GET http://localhost:3000/api/catalog/sistemas-acueducto/search?query=agua
+Authorization: Bearer {{token}}
+
+### 8. Get Unique Nombres
+GET http://localhost:3000/api/catalog/sistemas-acueducto/nombres
+Authorization: Bearer {{token}}
+
+### 9. Get Statistics
+GET http://localhost:3000/api/catalog/sistemas-acueducto/statistics
+Authorization: Bearer {{token}}
+
+### 10. Get Sistemas by Name
+GET http://localhost:3000/api/catalog/sistemas-acueducto/nombre/Acueducto%20Público
+Authorization: Bearer {{token}}
+
+### 11. Bulk Create Sistemas de Acueducto
+POST http://localhost:3000/api/catalog/sistemas-acueducto/bulk
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "sistemas": [
+    {
+      "nombre": "Agua de Lluvia",
+      "descripcion": "Sistema de recolección de agua lluvia"
+    },
+    {
+      "nombre": "Agua Embotellada",
+      "descripcion": "Suministro de agua embotellada"
+    }
+  ]
+}
+
+### 12. Delete Sistema de Acueducto
+DELETE http://localhost:3000/api/catalog/sistemas-acueducto/99
+Authorization: Bearer {{token}}
+
+### 13. Test with Invalid Data
+POST http://localhost:3000/api/catalog/sistemas-acueducto
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "descripcion": "Sistema sin nombre - debe fallar"
+}
