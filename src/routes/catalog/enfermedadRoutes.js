@@ -59,23 +59,11 @@ router.post('/', enfermedadController.createEnfermedad);
  * @swagger
  * /api/catalog/enfermedades:
  *   get:
- *     summary: Get all enfermedades with pagination and search
+ *     summary: Get all enfermedades with search
  *     tags: [Enfermedades]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Items per page
  *       - in: query
  *         name: search
  *         schema:
@@ -111,8 +99,9 @@ router.post('/', enfermedadController.createEnfermedad);
  *                           type: array
  *                           items:
  *                             $ref: '#/components/schemas/Enfermedad'
- *                         pagination:
- *                           $ref: '#/components/schemas/Pagination'
+ *                         totalCount:
+ *                           type: integer
+ *                           description: Total number of enfermedades
  *       500:
  *         description: Server error
  *         content:

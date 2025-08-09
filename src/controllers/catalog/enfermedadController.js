@@ -41,21 +41,17 @@ class EnfermedadController {
   }
 
   /**
-   * Get all enfermedades with pagination and search
+   * Get all enfermedades with search
    */
   async getAllEnfermedades(req, res) {
     try {
       const {
-        page = 1,
-        limit = 10,
         search,
         sortBy = 'id_enfermedad',
         sortOrder = 'ASC'
       } = req.query;
 
       const result = await enfermedadService.getAllEnfermedades({
-        page: parseInt(page),
-        limit: parseInt(limit),
         search,
         sortBy,
         sortOrder

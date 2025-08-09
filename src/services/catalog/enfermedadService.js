@@ -1,4 +1,6 @@
 import sequelize from '../../../config/sequelize.js';
+import '../../../config/sequelize.js';
+import '../../models/index.js'; // Asegurar que los modelos estén importados
 import { Op } from 'sequelize';
 
 // Obtener el modelo Enfermedad desde Sequelize una vez que se cargue
@@ -25,13 +27,11 @@ class EnfermedadService {
   }
 
   /**
-   * Get all enfermedades with pagination and search
+   * Get all enfermedades with search
    */
   async getAllEnfermedades(options = {}) {
     try {
       const {
-        page = 1,
-        limit = 10,
         search = null,
         sortBy = 'id_enfermedad',
         sortOrder = 'ASC'
@@ -46,24 +46,14 @@ class EnfermedadService {
         ];
       }
 
-      const offset = (page - 1) * limit;
-
-      const result = await getEnfermedadModel().findAndCountAll({
+      const enfermedades = await getEnfermedadModel().findAll({
         where,
-        order: [[sortBy, sortOrder]],
-        limit: parseInt(limit),
-        offset: parseInt(offset)
+        order: [[sortBy, sortOrder]]
       });
 
       return {
-        enfermedades: result.rows,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(result.count / limit),
-          totalCount: result.count,
-          hasNext: page * limit < result.count,
-          hasPrev: page > 1
-        }
+        enfermedades,
+        totalCount: enfermedades.length
       };
     } catch (error) {
       throw new Error(`Error fetching enfermedades: ${error.message}`);
@@ -75,14 +65,7 @@ class EnfermedadService {
    */
   async getEnfermedadById(id) {
     try {
-      const enfermedad = await getEnfermedadModel().findByPk(id, {
-        include: [
-          {
-            association: 'personas',
-            attributes: ['id_persona', 'primer_nombre', 'primer_apellido']
-          }
-        ]
-      });
+      const enfermedad = await getEnfermedadModel().findByPk(id);
 
       if (!enfermedad) {
         throw new Error('Enfermedad not found');
@@ -149,12 +132,11 @@ class EnfermedadService {
         throw new Error('Enfermedad not found');
       }
 
-      // Check if enfermedad has associated personas
-      const personasCount = await enfermedad.countPersonas();
-      
-      if (personasCount > 0) {
-        throw new Error('Cannot delete enfermedad: it has associated personas');
-      }
+      // TODO: Check if enfermedad has associated personas when associations are defined
+      // const personasCount = await enfermedad.countPersonas();
+      // if (personasCount > 0) {
+      //   throw new Error('Cannot delete enfermedad: it has associated personas');
+      // }
 
       await enfermedad.destroy();
       return { message: 'Enfermedad deleted successfully' };

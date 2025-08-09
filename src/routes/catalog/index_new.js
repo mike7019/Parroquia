@@ -7,8 +7,6 @@ import departamentoRoutes from './departamentoRoutes.js';
 import sectorRoutes from './sectorRoutes.js';
 import tipoIdentificacionRoutes from './tipoIdentificacionRoutes.js';
 import enfermedadRoutes from './enfermedadRoutes.js';
-import disposicionBasuraRoutes from './disposicionBasuraRoutes.js';
-import aguasResidualesRoutes from './aguasResidualesRoutes.js';
 
 const router = express.Router();
 
@@ -70,8 +68,6 @@ router.use('/departamentos', departamentoRoutes);
 router.use('/sectors', sectorRoutes);
 router.use('/tipos-identificacion', tipoIdentificacionRoutes);
 router.use('/enfermedades', enfermedadRoutes);
-router.use('/disposicion-basura', disposicionBasuraRoutes);
-router.use('/aguas-residuales', aguasResidualesRoutes);
 
 // Health check for catalog module
 router.get('/health', (req, res) => {
@@ -87,9 +83,7 @@ router.get('/health', (req, res) => {
       sexos: 'active',
       sectors: 'active',
       tiposIdentificacion: 'active',
-      enfermedades: 'active',
-      disposicionBasura: 'active',
-      aguasResiduales: 'active'
+      enfermedades: 'active'
     }
   });
 });

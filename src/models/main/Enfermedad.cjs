@@ -47,6 +47,8 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'Enfermedad',
     tableName: 'enfermedades',
     timestamps: true,
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
     indexes: [
       {
         unique: true,

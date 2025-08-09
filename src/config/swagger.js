@@ -2004,6 +2004,10 @@ const swaggerConfig = {
         description: 'Gestión de catálogo de enfermedades. **Funcionalidades:** CRUD completo, búsqueda por nombre/descripción, asociación con personas, gestión de relaciones muchos a muchos.'
       },
       {
+        name: 'Aguas Residuales',
+        description: 'Gestión de catálogo de tipos de aguas residuales. **Funcionalidades:** CRUD completo, búsqueda por nombre/descripción, gestión de métodos de tratamiento de aguas residuales.'
+      },
+      {
         name: 'Catalog',
         description: 'Operaciones generales de catálogos'
       },

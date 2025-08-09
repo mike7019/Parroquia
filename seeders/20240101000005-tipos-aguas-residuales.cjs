@@ -46,9 +46,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-  },
-
-  async down(queryInterface, Sequelize) {
     await queryInterface.bulkDelete('tipos_aguas_residuales', null, {});
   }
 };

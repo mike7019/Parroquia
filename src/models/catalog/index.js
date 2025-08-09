@@ -6,6 +6,9 @@ import Veredas from './Veredas.js';
 import Municipios from './Municipios.js';
 import Departamentos from './Departamentos.js';
 import Familias from './Familias.js';
+import TipoDisposicionBasura from './TipoDisposicionBasura.js';
+import FamiliaDisposicionBasura from './FamiliaDisposicionBasura.js';
+import TipoAguasResiduales from './TipoAguasResiduales.js';
 
 // Definir asociaciones
 Departamentos.hasMany(Municipios, {
@@ -49,6 +52,27 @@ Veredas.belongsTo(Sector, {
     as: 'sector'
 });
 
+// Asociaciones para Disposición de Basura
+TipoDisposicionBasura.hasMany(FamiliaDisposicionBasura, {
+    foreignKey: 'id_tipo_disposicion_basura',
+    as: 'FamiliaDisposicionBasuras'
+});
+
+FamiliaDisposicionBasura.belongsTo(TipoDisposicionBasura, {
+    foreignKey: 'id_tipo_disposicion_basura',
+    as: 'TipoDisposicionBasura'
+});
+
+Familias.hasMany(FamiliaDisposicionBasura, {
+    foreignKey: 'id_familia',
+    as: 'DisposicionBasuras'
+});
+
+FamiliaDisposicionBasura.belongsTo(Familias, {
+    foreignKey: 'id_familia',
+    as: 'Familia'
+});
+
 export {
     TipoIdentificacion,
     Parroquia,
@@ -57,5 +81,8 @@ export {
     Veredas,
     Municipios,
     Departamentos,
-    Familias
+    Familias,
+    TipoDisposicionBasura,
+    FamiliaDisposicionBasura,
+    TipoAguasResiduales
 };

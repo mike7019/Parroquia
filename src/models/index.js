@@ -9,6 +9,7 @@ import Municipios from './catalog/Municipios.js';
 import Departamentos from './catalog/Departamentos.js';
 import Sector from './catalog/Sector.js';
 import TipoIdentificacion from './catalog/TipoIdentificacion.js';
+import Enfermedad from './catalog/Enfermedad.js';
 import Familias from './catalog/Familias.js';
 
 // Catalog model associations
@@ -159,5 +160,6 @@ export {
   Departamentos,
   Sector,
   TipoIdentificacion,
+  Enfermedad,
   Familias
 };

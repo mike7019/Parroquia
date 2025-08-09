@@ -467,6 +467,25 @@ const displayRoutes = () => {
       { method: 'PUT', path: '/api/catalog/sexos/:id', group: 'Catalog', protected: true, description: 'Update gender' },
       { method: 'DELETE', path: '/api/catalog/sexos/:id', group: 'Catalog', protected: true, description: 'Delete gender' },
       
+      // Enfermedades routes
+      { method: 'POST', path: '/api/catalog/enfermedades', group: 'Catalog', protected: true, description: 'Create disease' },
+      { method: 'GET', path: '/api/catalog/enfermedades', group: 'Catalog', protected: true, description: 'List diseases (no pagination)' },
+      { method: 'GET', path: '/api/catalog/enfermedades/:id', group: 'Catalog', protected: true, description: 'Get disease by ID' },
+      { method: 'PUT', path: '/api/catalog/enfermedades/:id', group: 'Catalog', protected: true, description: 'Update disease' },
+      { method: 'DELETE', path: '/api/catalog/enfermedades/:id', group: 'Catalog', protected: true, description: 'Delete disease' },
+      { method: 'GET', path: '/api/catalog/enfermedades/persona/:personaId', group: 'Catalog', protected: true, description: 'Get diseases by person' },
+      { method: 'POST', path: '/api/catalog/enfermedades/:enfermedadId/persona/:personaId', group: 'Catalog', protected: true, description: 'Associate disease with person' },
+      { method: 'DELETE', path: '/api/catalog/enfermedades/:enfermedadId/persona/:personaId', group: 'Catalog', protected: true, description: 'Remove disease from person' },
+      
+      // Aguas Residuales routes
+      { method: 'POST', path: '/api/catalog/aguas-residuales', group: 'Catalog', protected: true, description: 'Create wastewater type' },
+      { method: 'GET', path: '/api/catalog/aguas-residuales', group: 'Catalog', protected: true, description: 'List wastewater types' },
+      { method: 'GET', path: '/api/catalog/aguas-residuales/search', group: 'Catalog', protected: true, description: 'Search wastewater types' },
+      { method: 'GET', path: '/api/catalog/aguas-residuales/stats', group: 'Catalog', protected: true, description: 'Get wastewater types statistics' },
+      { method: 'GET', path: '/api/catalog/aguas-residuales/:id', group: 'Catalog', protected: true, description: 'Get wastewater type by ID' },
+      { method: 'PUT', path: '/api/catalog/aguas-residuales/:id', group: 'Catalog', protected: true, description: 'Update wastewater type' },
+      { method: 'DELETE', path: '/api/catalog/aguas-residuales/:id', group: 'Catalog', protected: true, description: 'Delete wastewater type' },
+      
       // Tipos de identificación routes
       { method: 'GET', path: '/api/catalog/tipos-identificacion', group: 'Catalog', protected: false, description: 'List identification types' },
       
