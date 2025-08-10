@@ -55,7 +55,173 @@ function Test-Docker {
     }
 }
 
-# Check if docker-compose is available
+# Check and free ports required by the application
+function Test-AndFreePorts {
+    $requiredPorts = @(80, 443, 8080, 8443, 3000, 5432)
+    $portsToFree = @()
+    
+    Write-Log "Checking for port conflicts..."
+    
+    foreach ($port in $requiredPorts) {
+        $portInUse = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue
+        
+        if ($portInUse) {
+            Write-Log "Port $port is currently in use"
+            
+            # Check if it's used by Docker
+            $dockerProcesses = Get-Process -Name "*docker*" -ErrorAction SilentlyContinue
+            $isDockerPort = $false
+            
+            foreach ($process in $dockerProcesses) {
+                $processConnections = Get-NetTCPConnection -OwningProcess $process.Id -LocalPort $port -ErrorAction SilentlyContinue
+                if ($processConnections) {
+                    $isDockerPort = $true
+                    break
+                }
+            }
+            
+            if ($isDockerPort) {
+                Write-Log "Port $port is used by Docker containers - will be freed during container stop"
+                $portsToFree += $port
+            } else {
+                $processInfo = Get-NetTCPConnection -LocalPort $port | Select-Object -First 1
+                Write-Warning "Port $port is used by non-Docker process: PID $($processInfo.OwningProcess)"
+                
+                $response = Read-Host "Do you want to try to free port $port? (y/N)"
+                if ($response -eq 'y' -or $response -eq 'Y') {
+                    Stop-ProcessUsingPort -Port $port
+                } else {
+                    Write-Warning "Continuing without freeing port $port - deployment may fail"
+                }
+            }
+        } else {
+            Write-Log "Port $port is available"
+        }
+    }
+    
+    if ($portsToFree.Count -gt 0) {
+        Write-Log "Ports that will be freed during container restart: $($portsToFree -join ', ')"
+    }
+}
+
+# Stop process using a specific port
+function Stop-ProcessUsingPort {
+    param([int]$Port)
+    
+    Write-Log "Attempting to free port $Port..."
+    
+    $connection = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue | Select-Object -First 1
+    
+    if ($connection) {
+        $processId = $connection.OwningProcess
+        $process = Get-Process -Id $processId -ErrorAction SilentlyContinue
+        
+        if ($process) {
+            Write-Log "Found process $($process.ProcessName) (PID: $processId) using port $Port"
+            
+            if ($process.ProcessName -eq "nginx") {
+                Write-Log "Stopping nginx service on port $Port"
+                Stop-Service nginx -ErrorAction SilentlyContinue
+            } else {
+                $response = Read-Host "Kill process $($process.ProcessName) (PID: $processId)? (y/N)"
+                if ($response -eq 'y' -or $response -eq 'Y') {
+                    try {
+                        Stop-Process -Id $processId -Force
+                        Write-Success "Process $processId terminated"
+                    }
+                    catch {
+                        Write-Warning "Could not terminate process $processId`: $_"
+                    }
+                }
+            }
+        }
+    }
+    
+    Start-Sleep -Seconds 2
+    
+    $stillInUse = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue
+    if ($stillInUse) {
+        Write-Warning "Port $Port is still in use after cleanup attempt"
+    } else {
+        Write-Success "Port $Port is now available"
+    }
+}
+
+# Stop and cleanup Docker containers
+function Stop-AndCleanupContainers {
+    Write-Log "Stopping and cleaning up existing containers..."
+    
+    # Stop current project containers
+    if (Test-Path $ComposeFile) {
+        try {
+            docker-compose -f $ComposeFile down --remove-orphans
+        }
+        catch {
+            Write-Warning "No existing containers to stop"
+        }
+    }
+    
+    # Stop containers using required ports
+    $requiredPorts = @(80, 443, 8080, 8443, 3000, 5432)
+    $containersToStop = @()
+    
+    foreach ($port in $requiredPorts) {
+        $containers = docker ps --format "{{.ID}} {{.Ports}}" | Where-Object { $_ -match ":$port" }
+        foreach ($container in $containers) {
+            $containerId = ($container -split " ")[0]
+            if ($containerId -and $containersToStop -notcontains $containerId) {
+                $containersToStop += $containerId
+            }
+        }
+    }
+    
+    if ($containersToStop.Count -gt 0) {
+        Write-Log "Found containers using required ports, stopping them..."
+        foreach ($containerId in $containersToStop) {
+            Write-Log "Stopping container: $containerId"
+            docker stop $containerId
+        }
+    }
+    
+    # Clean up
+    docker container prune -f
+    docker network prune -f
+    
+    Write-Success "Container cleanup completed"
+}
+
+# Verify ports are free
+function Test-PortsFree {
+    $requiredPorts = @(80, 443, 8080, 8443)
+    $blockedPorts = @()
+    
+    foreach ($port in $requiredPorts) {
+        $portInUse = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue
+        if ($portInUse) {
+            $blockedPorts += $port
+        }
+    }
+    
+    if ($blockedPorts.Count -gt 0) {
+        Write-Warning "The following ports are still in use: $($blockedPorts -join ', ')"
+        Write-Log "Waiting 5 seconds for ports to be released..."
+        Start-Sleep -Seconds 5
+        
+        $stillBlocked = @()
+        foreach ($port in $blockedPorts) {
+            $portInUse = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue
+            if ($portInUse) {
+                $stillBlocked += $port
+            }
+        }
+        
+        if ($stillBlocked.Count -gt 0) {
+            Write-ErrorAndExit "Ports still in use after cleanup: $($stillBlocked -join ', '). Please check manually and try again."
+        }
+    }
+    
+    Write-Success "All required ports are available"
+}
 function Test-DockerCompose {
     try {
         docker-compose --version | Out-Null
@@ -104,6 +270,12 @@ function Backup-Database {
 function Start-Deployment {
     Write-Log "Starting deployment process..."
     
+    # Check and free ports before deployment
+    Test-AndFreePorts
+    
+    # Stop and cleanup existing containers
+    Stop-AndCleanupContainers
+    
     # Pull latest changes (if using git)
     if (Test-Path ".git") {
         Write-Log "Pulling latest changes from git..."
@@ -115,23 +287,12 @@ function Start-Deployment {
         }
     }
     
-    # Stop existing containers
-    Write-Log "Stopping existing containers..."
-    try {
-        docker-compose -f $ComposeFile down
-    }
-    catch {
-        Write-Warning "No existing containers to stop"
-    }
+    # Additional cleanup to ensure ports are free
+    Write-Log "Final port cleanup before deployment..."
+    Start-Sleep -Seconds 2
     
-    # Remove old images (optional)
-    Write-Log "Cleaning up old images..."
-    try {
-        docker system prune -f
-    }
-    catch {
-        Write-Warning "Docker cleanup failed"
-    }
+    # Verify ports are free before starting
+    Test-PortsFree
     
     # Build and start services
     Write-Log "Building and starting services..."
