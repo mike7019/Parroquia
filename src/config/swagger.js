@@ -26,7 +26,7 @@ const swaggerConfig = {
         description: 'Development server'
       },
       {
-        url: 'http://206.62.139.100:3000/',
+        url: 'http://206.62.139.100:80/',
         description: 'Test server'
       },
       {
