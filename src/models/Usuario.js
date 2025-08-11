@@ -119,11 +119,6 @@ const Usuario = sequelize.define('Usuario', {
     type: DataTypes.DATE,
     allowNull: true,
     field: 'expira_token_reset'
-  },
-  refresh_token: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-    field: 'refresh_token'
   }
 }, {
   tableName: 'usuarios',

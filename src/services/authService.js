@@ -165,10 +165,9 @@ class AuthService {
     const accessToken = this.generateAccessToken(user.id);
     const refreshToken = this.generateRefreshToken(user.id);
 
-    // Update last login and refresh token
+    // Update last login only (don't store refresh token in database)
     await user.update({
-      fecha_ultimo_acceso: new Date(),
-      refresh_token: refreshToken
+      fecha_ultimo_acceso: new Date()
     });
 
     // Return user data with roles (toJSON will handle sanitization)
@@ -182,15 +181,13 @@ class AuthService {
   }
 
   /**
-   * Logs out user by invalidating refresh token
+   * Logs out user
    * @param {number} userId - User ID
    * @returns {Promise<boolean>} Success status
    */
   async logoutUser(userId) {
-    await Usuario.update(
-      { refresh_token: null },
-      { where: { id: userId } }
-    );
+    // Since we don't store refresh tokens in database, 
+    // logout is handled client-side by removing tokens
     return true;
   }
 
@@ -205,19 +202,18 @@ class AuthService {
       const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
       console.log('🔍 Decoded refresh token:', { userId: decoded.userId, type: decoded.type });
       
-      // Find user and verify refresh token
+      // Verify user exists and is active (no need to check refresh_token in database)
       const user = await Usuario.findOne({
         where: {
           id: decoded.userId,
-          refresh_token: refreshToken,
           activo: true
         }
       });
 
-      console.log('🔍 User lookup result:', user ? 'Found' : 'Not found');
+      console.log('🔍 User lookup result:', user ? 'Found and active' : 'Not found or inactive');
 
       if (!user) {
-        console.log('❌ Refresh token validation failed - user not found or token mismatch');
+        console.log('❌ Refresh token validation failed - user not found or inactive');
         throw new AuthenticationError('Invalid refresh token', 'INVALID_REFRESH_TOKEN');
       }
 
@@ -336,8 +332,8 @@ class AuthService {
     await user.update({
       contrasena: newPassword, // Let the model hook handle the hashing
       token_reset_password: null,
-      expiracion_reset_password: null,
-      refresh_token: null // Invalidate all sessions
+      expiracion_reset_password: null
+      // Don't invalidate sessions since refresh tokens aren't stored in DB
     });
 
     return { message: 'Password has been reset successfully' };
@@ -365,8 +361,8 @@ class AuthService {
     // Update password and invalidate all sessions
     // The password will be automatically hashed by the beforeUpdate hook
     await user.update({
-      contrasena: newPassword, // Let the model hook handle the hashing
-      refresh_token: null
+      contrasena: newPassword // Let the model hook handle the hashing
+      // Don't invalidate sessions since refresh tokens aren't stored in DB
     });
 
     return { message: 'Password changed successfully' };
@@ -470,8 +466,8 @@ class AuthService {
     }
 
     await user.update({
-      activo: false,
-      refresh_token: null
+      activo: false
+      // Don't clear refresh_token since we don't store it in DB
     });
 
     return { message: 'Account deactivated successfully' };
@@ -579,7 +575,6 @@ class AuthService {
     const userData = user.toJSON ? user.toJSON() : user;
     const {
       contrasena,
-      refresh_token,
       token_recuperacion,
       token_expiracion,
       token_verificacion_email,
