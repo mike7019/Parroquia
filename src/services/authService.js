@@ -203,6 +203,7 @@ class AuthService {
     try {
       // Verify refresh token
       const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+      console.log('🔍 Decoded refresh token:', { userId: decoded.userId, type: decoded.type });
       
       // Find user and verify refresh token
       const user = await Usuario.findOne({
@@ -213,18 +214,32 @@ class AuthService {
         }
       });
 
+      console.log('🔍 User lookup result:', user ? 'Found' : 'Not found');
+
       if (!user) {
+        console.log('❌ Refresh token validation failed - user not found or token mismatch');
         throw new AuthenticationError('Invalid refresh token', 'INVALID_REFRESH_TOKEN');
       }
 
       // Generate new access token
       const newAccessToken = this.generateAccessToken(user.id);
 
+      console.log('✅ Refresh token successful for user:', decoded.userId);
+
       return {
         accessToken: newAccessToken
       };
     } catch (error) {
-      throw new AuthenticationError('Invalid refresh token', 'INVALID_REFRESH_TOKEN');
+      console.log('❌ Refresh token error:', error.message);
+      if (error.name === 'JsonWebTokenError') {
+        throw new AuthenticationError('Invalid refresh token format', 'INVALID_REFRESH_TOKEN');
+      } else if (error.name === 'TokenExpiredError') {
+        throw new AuthenticationError('Refresh token expired', 'REFRESH_TOKEN_EXPIRED');
+      } else if (error instanceof AuthenticationError) {
+        throw error;
+      } else {
+        throw new AuthenticationError('Invalid refresh token', 'INVALID_REFRESH_TOKEN');
+      }
     }
   }
 
