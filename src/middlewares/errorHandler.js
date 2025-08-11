@@ -1,4 +1,4 @@
-import { AppError } from '../utils/errors.js';
+import { AppError, ConflictError, ValidationError, NotFoundError, AuthenticationError, AuthorizationError } from '../utils/errors.js';
 import DatabaseErrorHandler from '../utils/databaseErrorHandler.js';
 import logger from '../utils/logger.js';
 
@@ -20,15 +20,20 @@ const errorHandler = (err, req, res, next) => {
   // Log del error con contexto completo
   logger.error('Request error occurred', err, requestContext);
 
-  // Handle Sequelize database errors first
+  // Handle all custom application errors first (including ConflictError, ValidationError, etc.)
+  if (err instanceof AppError || 
+      err instanceof ConflictError || 
+      err instanceof ValidationError || 
+      err instanceof NotFoundError || 
+      err instanceof AuthenticationError || 
+      err instanceof AuthorizationError) {
+    return handleAppError(err, res);
+  }
+
+  // Handle Sequelize database errors
   if (err.name?.startsWith('Sequelize')) {
     const databaseError = DatabaseErrorHandler.handleSequelizeError(err, requestContext);
     return handleAppError(databaseError, res);
-  }
-
-  // Handle custom application errors
-  if (err instanceof AppError) {
-    return handleAppError(err, res);
   }
 
   function handleAppError(appError, response) {
