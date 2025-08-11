@@ -165,11 +165,11 @@ class AuthService {
     const accessToken = this.generateAccessToken(user.id);
     const refreshToken = this.generateRefreshToken(user.id);
 
-    // Skip updating last login and refresh token for simplified schema
-    // await user.update({
-    //   ultimo_login: new Date(),
-    //   refresh_token: refreshToken
-    // });
+    // Update last login and refresh token
+    await user.update({
+      fecha_ultimo_acceso: new Date(),
+      refresh_token: refreshToken
+    });
 
     // Return user data with roles (toJSON will handle sanitization)
     const userResponse = user.toJSON();
@@ -188,7 +188,7 @@ class AuthService {
    */
   async logoutUser(userId) {
     await Usuario.update(
-      { refreshToken: null },
+      { refresh_token: null },
       { where: { id: userId } }
     );
     return true;
@@ -208,8 +208,8 @@ class AuthService {
       const user = await Usuario.findOne({
         where: {
           id: decoded.userId,
-          refreshToken,
-          isActive: true
+          refresh_token: refreshToken,
+          activo: true
         }
       });
 
@@ -350,8 +350,8 @@ class AuthService {
     // Update password and invalidate all sessions
     // The password will be automatically hashed by the beforeUpdate hook
     await user.update({
-      password: newPassword, // Let the model hook handle the hashing
-      refreshToken: null
+      contrasena: newPassword, // Let the model hook handle the hashing
+      refresh_token: null
     });
 
     return { message: 'Password changed successfully' };
@@ -455,8 +455,8 @@ class AuthService {
     }
 
     await user.update({
-      isActive: false,
-      refreshToken: null
+      activo: false,
+      refresh_token: null
     });
 
     return { message: 'Account deactivated successfully' };
@@ -537,7 +537,7 @@ class AuthService {
       limit: parseInt(limit),
       offset: parseInt(offset),
       order: [['created_at', 'DESC']],
-      attributes: { exclude: ['password', 'refreshToken', 'passwordResetToken', 'emailVerificationToken'] }
+      attributes: { exclude: ['contrasena', 'refresh_token', 'token_recuperacion', 'token_verificacion_email'] }
     });
 
     const totalPages = Math.ceil(count / limit);
@@ -563,11 +563,11 @@ class AuthService {
   sanitizeUserData(user) {
     const userData = user.toJSON ? user.toJSON() : user;
     const {
-      password,
-      refreshToken,
-      passwordResetToken,
-      passwordResetExpires,
-      emailVerificationToken,
+      contrasena,
+      refresh_token,
+      token_recuperacion,
+      token_expiracion,
+      token_verificacion_email,
       ...sanitizedUser
     } = userData;
     
