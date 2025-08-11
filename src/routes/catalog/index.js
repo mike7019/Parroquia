@@ -11,6 +11,8 @@ import disposicionBasuraRoutes from './disposicionBasuraRoutes.js';
 import aguasResidualesRoutes from './aguasResidualesRoutes.js';
 import sistemaAcueductoRoutes from './sistemaAcueductoRoutes.js';
 import tipoViviendaRoutes from './tipoViviendaRoutes.js';
+import parentescoRoutes from './parentescoRoutes.js';
+import situacionCivilRoutes from './situacionCivilRoutes.js';
 
 const router = express.Router();
 
@@ -67,6 +69,12 @@ const router = express.Router();
  *                     tiposVivienda:
  *                       type: string
  *                       example: 'active'
+ *                     parentescos:
+ *                       type: string
+ *                       example: 'active'
+ *                     situacionesCiviles:
+ *                       type: string
+ *                       example: 'active'
  */
 
 // Mount catalog routes
@@ -82,6 +90,8 @@ router.use('/disposicion-basura', disposicionBasuraRoutes);
 router.use('/aguas-residuales', aguasResidualesRoutes);
 router.use('/sistemas-acueducto', sistemaAcueductoRoutes);
 router.use('/tipos-vivienda', tipoViviendaRoutes);
+router.use('/parentescos', parentescoRoutes);
+router.use('/situaciones-civiles', situacionCivilRoutes);
 
 // Health check for catalog module
 router.get('/health', (req, res) => {
@@ -102,7 +112,8 @@ router.get('/health', (req, res) => {
       aguasResiduales: 'active',
       sistemasAcueducto: 'active',
       tiposVivienda: 'active',
-      tiposVivienda: 'active'
+      parentescos: 'active',
+      situacionesCiviles: 'active'
     }
   });
 });

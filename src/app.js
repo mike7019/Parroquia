@@ -15,6 +15,8 @@ import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userManagementRoutes.js';
 import systemRoutes from './routes/systemRoutes.js';
 import catalogRoutes from './routes/catalog/index.js';
+import parentescoRoutes from './routes/catalog/parentescoRoutes.js';
+import situacionCivilRoutes from './routes/catalog/situacionCivilRoutes.js';
 
 // Import middlewares
 import errorHandler from './middlewares/errorHandler.js';
@@ -191,6 +193,8 @@ app.get('/api/ip-test', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/catalog', catalogRoutes);
+app.use('/api/parentescos', parentescoRoutes); // Direct access for compatibility
+app.use('/api/situaciones-civiles', situacionCivilRoutes); // Direct access for compatibility
 app.use('/api', systemRoutes);
 
 // Root route
@@ -471,6 +475,15 @@ const displayRoutes = () => {
       // Tipos de identificación routes
       { method: 'GET', path: '/api/catalog/tipos-identificacion', group: 'Catalog', protected: false, description: 'List identification types' },
       
+      // Parentescos routes
+      { method: 'GET', path: '/api/catalog/parentescos/stats', group: 'Catalog', protected: true, description: 'Get parentesco statistics' },
+      { method: 'GET', path: '/api/catalog/parentescos', group: 'Catalog', protected: true, description: 'List parentescos' },
+      { method: 'POST', path: '/api/catalog/parentescos', group: 'Catalog', protected: true, description: 'Create parentesco' },
+      { method: 'GET', path: '/api/catalog/parentescos/:id', group: 'Catalog', protected: true, description: 'Get parentesco by ID' },
+      { method: 'PUT', path: '/api/catalog/parentescos/:id', group: 'Catalog', protected: true, description: 'Update parentesco' },
+      { method: 'DELETE', path: '/api/catalog/parentescos/:id', group: 'Catalog', protected: true, description: 'Delete parentesco' },
+      { method: 'PATCH', path: '/api/catalog/parentescos/:id/restore', group: 'Catalog', protected: true, description: 'Restore parentesco' },
+      
       // System & Infrastructure routes
       { method: 'GET', path: '/api/health', group: 'System', protected: false, description: 'API health check' },
       { method: 'GET', path: '/api/status', group: 'System', protected: false, description: 'System status' },
@@ -542,8 +555,8 @@ const displayRoutes = () => {
   } else {
     // Simplified route summary with enhanced info
     console.log('📋 API Routes Summary:');
-    console.log('   🔐 Authentication (13), 👥 Users (5),  Catalog (22), ⚙️  System (2), 📖 Docs (1), 🔄 Compatibility (2)');
-    console.log('   💡 Total: 45 endpoints | Use VERBOSE_LOGGING=true for detailed route listing');
+    console.log('   🔐 Authentication (13), 👥 Users (5), 📚 Catalog (29), ⚙️  System (2), 📖 Docs (1), 🔄 Compatibility (2)');
+    console.log('   💡 Total: 52 endpoints | Use VERBOSE_LOGGING=true for detailed route listing');
   }
 };
 

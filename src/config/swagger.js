@@ -2061,6 +2061,176 @@ const swaggerConfig = {
               }
             }
           ]
+        },
+        Parentesco: {
+          type: 'object',
+          properties: {
+            id_parentesco: {
+              type: 'integer',
+              description: 'ID único del parentesco',
+              example: 1
+            },
+            nombre: {
+              type: 'string',
+              description: 'Nombre del tipo de parentesco',
+              example: 'Padre',
+              maxLength: 255
+            },
+            descripcion: {
+              type: 'string',
+              nullable: true,
+              description: 'Descripción opcional del parentesco',
+              example: 'Padre biológico o adoptivo',
+              maxLength: 500
+            },
+            activo: {
+              type: 'boolean',
+              description: 'Estado del parentesco (activo/inactivo)',
+              example: true
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación',
+              example: '2025-08-10T10:30:00.000Z'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización',
+              example: '2025-08-10T10:30:00.000Z'
+            }
+          },
+          required: ['id_parentesco', 'nombre', 'activo']
+        },
+        ParentescoInput: {
+          type: 'object',
+          properties: {
+            nombre: {
+              type: 'string',
+              description: 'Nombre del tipo de parentesco',
+              example: 'Madre',
+              minLength: 2,
+              maxLength: 255
+            },
+            descripcion: {
+              type: 'string',
+              nullable: true,
+              description: 'Descripción opcional del parentesco',
+              example: 'Madre biológica o adoptiva',
+              maxLength: 500
+            }
+          },
+          required: ['nombre']
+        },
+        ParentescoUpdate: {
+          type: 'object',
+          properties: {
+            nombre: {
+              type: 'string',
+              description: 'Nombre del tipo de parentesco',
+              example: 'Hijo',
+              minLength: 2,
+              maxLength: 255
+            },
+            descripcion: {
+              type: 'string',
+              nullable: true,
+              description: 'Descripción opcional del parentesco',
+              example: 'Hijo biológico o adoptivo',
+              maxLength: 500
+            },
+            activo: {
+              type: 'boolean',
+              description: 'Estado del parentesco',
+              example: true
+            }
+          }
+        },
+        ParentescoResponse: {
+          allOf: [
+            { $ref: '#/components/schemas/ApiResponse' },
+            {
+              type: 'object',
+              properties: {
+                data: {
+                  type: 'object',
+                  properties: {
+                    parentesco: {
+                      $ref: '#/components/schemas/Parentesco'
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        ParentescosListResponse: {
+          allOf: [
+            { $ref: '#/components/schemas/ApiResponse' },
+            {
+              type: 'object',
+              properties: {
+                data: {
+                  type: 'object',
+                  properties: {
+                    parentescos: {
+                      type: 'array',
+                      items: {
+                        $ref: '#/components/schemas/Parentesco'
+                      }
+                    },
+                    pagination: {
+                      $ref: '#/components/schemas/PaginationInfo'
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        EstadisticasParentesco: {
+          type: 'object',
+          properties: {
+            total: {
+              type: 'integer',
+              description: 'Total de parentescos registrados',
+              example: 30
+            },
+            activos: {
+              type: 'integer',
+              description: 'Número de parentescos activos',
+              example: 28
+            },
+            inactivos: {
+              type: 'integer',
+              description: 'Número de parentescos inactivos',
+              example: 2
+            },
+            porcentajeActivos: {
+              type: 'integer',
+              description: 'Porcentaje de parentescos activos',
+              example: 93
+            }
+          }
+        },
+        EstadisticasParentescoResponse: {
+          allOf: [
+            { $ref: '#/components/schemas/ApiResponse' },
+            {
+              type: 'object',
+              properties: {
+                data: {
+                  type: 'object',
+                  properties: {
+                    stats: {
+                      $ref: '#/components/schemas/EstadisticasParentesco'
+                    }
+                  }
+                }
+              }
+            }
+          ]
         }
       },
       responses: {
@@ -2211,6 +2381,10 @@ const swaggerConfig = {
       {
         name: 'Tipos de Vivienda',
         description: 'Gestión de catálogo de tipos de vivienda. **Funcionalidades:** CRUD completo, búsqueda por nombre/descripción, activación/desactivación, estadísticas de uso.'
+      },
+      {
+        name: 'Parentescos',
+        description: 'Gestión de catálogo de tipos de parentesco. **Funcionalidades:** CRUD completo, búsqueda por nombre, paginación, soft delete, restauración, estadísticas. Incluye 30 tipos de parentesco precargados (padre, madre, hijo, hermano, etc.).'
       },
       {
         name: 'Catalog',
