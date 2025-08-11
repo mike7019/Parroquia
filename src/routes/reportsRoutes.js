@@ -1,50 +1,43 @@
 import express from 'express';
-import { getAdvancedStatistics, getDashboardStats } from '../controllers/reportsController.js';
+import { getBasicStatistics, getDashboardStats } from '../controllers/reportsController.js';
 import authMiddleware from '../middlewares/auth.js';
 
 const router = express.Router();
 
 /**
  * @swagger
- * /api/reports/statistics/advanced:
+ * /api/reports/statistics/basic:
  *   get:
  *     tags: [Reports]
- *     summary: Obtener estadísticas avanzadas
- *     description: Retorna estadísticas detalladas de las encuestas con métricas avanzadas
+ *     summary: Obtener estadísticas básicas de usuarios
+ *     description: Retorna estadísticas básicas de los usuarios del sistema
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: status
+ *         name: active
+ *         schema:
+ *           type: boolean
+ *         description: Filtrar por usuarios activos/inactivos
+ *       - in: query
+ *         name: role
  *         schema:
  *           type: string
- *           enum: [draft, in_progress, completed, cancelled]
- *         description: Filtrar por estado de la encuesta
+ *           enum: [Administrador, Encuestador]
+ *         description: Filtrar por rol de usuario
  *       - in: query
- *         name: sector
+ *         name: email
  *         schema:
  *           type: string
- *         description: Filtrar por sector
+ *         description: Filtrar por email (búsqueda parcial)
  *       - in: query
- *         name: userId
- *         schema:
- *           type: integer
- *         description: Filtrar por encuestador
- *       - in: query
- *         name: dateFrom
+ *         name: name
  *         schema:
  *           type: string
- *           format: date
- *         description: Fecha de inicio (YYYY-MM-DD)
- *       - in: query
- *         name: dateTo
- *         schema:
- *           type: string
- *           format: date
- *         description: Fecha de fin (YYYY-MM-DD)
+ *         description: Filtrar por nombre (búsqueda parcial)
  *     responses:
  *       200:
- *         description: Estadísticas avanzadas obtenidas exitosamente
+ *         description: Estadísticas básicas obtenidas exitosamente
  *         content:
  *           application/json:
  *             schema:
@@ -55,50 +48,38 @@ const router = express.Router();
  *                     data:
  *                       type: object
  *                       properties:
- *                         totalSurveys:
+ *                         totalUsers:
  *                           type: integer
- *                           description: Total de encuestas
- *                           example: 150
- *                         completedSurveys:
+ *                           description: Total de usuarios
+ *                           example: 25
+ *                         activeUsers:
  *                           type: integer
- *                           description: Encuestas completadas
- *                           example: 45
- *                         inProgressSurveys:
+ *                           description: Usuarios activos
+ *                           example: 20
+ *                         inactiveUsers:
  *                           type: integer
- *                           description: Encuestas en progreso
- *                           example: 80
- *                         cancelledSurveys:
- *                           type: integer
- *                           description: Encuestas canceladas
+ *                           description: Usuarios inactivos
  *                           example: 5
- *                         totalFamilies:
- *                           type: integer
- *                           description: Total de familias
- *                           example: 600
- *                         totalMembers:
- *                           type: integer
- *                           description: Total de miembros
- *                           example: 2400
- *                         averageFamilySize:
- *                           type: string
- *                           description: Tamaño promedio de familia
- *                           example: "4.2"
- *                         averageProgress:
- *                           type: string
- *                           description: Progreso promedio
- *                           example: "65.5"
- *                         completionRate:
- *                           type: string
- *                           description: Tasa de finalización
- *                           example: "30.0"
+ *                         roleDistribution:
+ *                           type: array
+ *                           description: Distribución por roles
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               role:
+ *                                 type: string
+ *                                 example: "Administrador"
+ *                               count:
+ *                                 type: integer
+ *                                 example: 3
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/statistics/advanced',
+router.get('/statistics/basic',
   authMiddleware.authenticate,
-  getAdvancedStatistics
+  getBasicStatistics
 );
 
 /**
@@ -112,33 +93,16 @@ router.get('/statistics/advanced',
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: status
+ *         name: active
+ *         schema:
+ *           type: boolean
+ *         description: Filtrar por usuarios activos/inactivos
+ *       - in: query
+ *         name: role
  *         schema:
  *           type: string
- *           enum: [draft, in_progress, completed, cancelled]
- *         description: Filtrar por estado de la encuesta
- *       - in: query
- *         name: sector
- *         schema:
- *           type: string
- *         description: Filtrar por sector
- *       - in: query
- *         name: userId
- *         schema:
- *           type: integer
- *         description: Filtrar por encuestador
- *       - in: query
- *         name: dateFrom
- *         schema:
- *           type: string
- *           format: date
- *         description: Fecha de inicio (YYYY-MM-DD)
- *       - in: query
- *         name: dateTo
- *         schema:
- *           type: string
- *           format: date
- *         description: Fecha de fin (YYYY-MM-DD)
+ *           enum: [Administrador, Encuestador]
+ *         description: Filtrar por rol de usuario
  *     responses:
  *       200:
  *         description: Estadísticas del dashboard obtenidas exitosamente
@@ -155,36 +119,29 @@ router.get('/statistics/advanced',
  *                         overview:
  *                           type: object
  *                           properties:
- *                             totalSurveys:
+ *                             totalUsers:
  *                               type: integer
- *                               example: 150
- *                             completedSurveys:
+ *                               example: 25
+ *                             activeUsers:
  *                               type: integer
- *                               example: 45
- *                             inProgressSurveys:
+ *                               example: 20
+ *                             inactiveUsers:
  *                               type: integer
- *                               example: 80
- *                             completionRate:
- *                               type: number
- *                               example: 30.0
- *                         family:
- *                           type: object
- *                           properties:
- *                             totalFamilies:
- *                               type: integer
- *                               example: 600
- *                             totalMembers:
- *                               type: integer
- *                               example: 2400
- *                             averageFamilySize:
- *                               type: number
- *                               example: 4.2
- *                         progress:
- *                           type: object
- *                           properties:
- *                             averageProgress:
- *                               type: number
- *                               example: 65.5
+ *                               example: 5
+ *                             activationRate:
+ *                               type: string
+ *                               example: "80.00"
+ *                         roles:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               role:
+ *                                 type: string
+ *                                 example: "Administrador"
+ *                               count:
+ *                                 type: integer
+ *                                 example: 3
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  *       500:

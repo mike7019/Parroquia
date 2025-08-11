@@ -14,8 +14,6 @@ import { loadAllModels } from '../syncDatabaseComplete.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userManagementRoutes.js';
 import systemRoutes from './routes/systemRoutes.js';
-// Temporarily disabled survey routes
-// import surveyRoutes from './routes/surveyRoutes.js';
 import catalogRoutes from './routes/catalog/index.js';
 
 // Import middlewares
@@ -192,8 +190,6 @@ app.get('/api/ip-test', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-// Temporarily disabled survey routes
-// app.use('/api/surveys', surveyRoutes);
 app.use('/api/catalog', catalogRoutes);
 app.use('/api', systemRoutes);
 
@@ -396,20 +392,6 @@ const displayRoutes = () => {
       { method: 'PUT', path: '/api/users/:id', group: 'User Management', protected: true, description: 'Update user' },
       { method: 'DELETE', path: '/api/users/:id', group: 'User Management', protected: true, description: 'Delete user' },
       
-      // Survey routes
-      { method: 'POST', path: '/api/surveys', group: 'Surveys', protected: true, description: 'Create new survey' },
-      { method: 'GET', path: '/api/surveys/my', group: 'Surveys', protected: true, description: 'Get my surveys' },
-      { method: 'GET', path: '/api/surveys/statistics', group: 'Surveys', protected: true, description: 'Get survey statistics' },
-      { method: 'GET', path: '/api/surveys/:id', group: 'Surveys', protected: true, description: 'Get survey by ID' },
-      { method: 'PUT', path: '/api/surveys/:id/stages/:stageNumber', group: 'Surveys', protected: true, description: 'Update survey stage' },
-      { method: 'POST', path: '/api/surveys/:id/members', group: 'Surveys', protected: true, description: 'Add family member' },
-      { method: 'PUT', path: '/api/surveys/:id/members/:memberId', group: 'Surveys', protected: true, description: 'Update family member' },
-      { method: 'DELETE', path: '/api/surveys/:id/members/:memberId', group: 'Surveys', protected: true, description: 'Remove family member' },
-      { method: 'POST', path: '/api/surveys/:id/complete', group: 'Surveys', protected: true, description: 'Complete survey' },
-      { method: 'POST', path: '/api/surveys/:id/cancel', group: 'Surveys', protected: true, description: 'Cancel survey' },
-      { method: 'POST', path: '/api/surveys/:id/auto-save', group: 'Surveys', protected: true, description: 'Auto-save survey data' },
-      { method: 'GET', path: '/api/surveys/:id/auto-save', group: 'Surveys', protected: true, description: 'Get auto-saved data' },
-      
       // Catalog routes - Parish & Geographic data
       { method: 'GET', path: '/api/catalog/health', group: 'Catalog', protected: false, description: 'Catalog health check' },
       
@@ -516,7 +498,6 @@ const displayRoutes = () => {
       const groupIcons = {
         'Authentication': '🔐',
         'User Management': '👥',
-        'Surveys': '📋',
         'Catalog': '📚',
         'System': '⚙️',
         'Documentation': '📖',
@@ -538,7 +519,6 @@ const displayRoutes = () => {
     // Enhanced route summary with totals and status counts
     const authRoutes = routes.filter(r => r.group === 'Authentication').length;
     const userRoutes = routes.filter(r => r.group === 'User Management').length;
-    const surveyRoutes = routes.filter(r => r.group === 'Surveys').length;
     const catalogRoutes = routes.filter(r => r.group === 'Catalog').length;
     const systemRoutes = routes.filter(r => r.group === 'System').length;
     const docRoutes = routes.filter(r => r.group === 'Documentation').length;
@@ -551,7 +531,6 @@ const displayRoutes = () => {
     console.log(`\n📈 Route Distribution:`);
     console.log(`   • Authentication: ${authRoutes} routes`);
     console.log(`   • User Management: ${userRoutes} routes`);
-    console.log(`   • Surveys: ${surveyRoutes} routes`);
     console.log(`   • Catalog: ${catalogRoutes} routes`);
     console.log(`   • System: ${systemRoutes} routes`);
     console.log(`   • Documentation: ${docRoutes} routes`);
@@ -563,8 +542,8 @@ const displayRoutes = () => {
   } else {
     // Simplified route summary with enhanced info
     console.log('📋 API Routes Summary:');
-    console.log('   🔐 Authentication (13), 👥 Users (5), 📋 Surveys (12), 📚 Catalog (22), ⚙️  System (2), 📖 Docs (1), 🔄 Compatibility (2)');
-    console.log('   💡 Total: 57 endpoints | Use VERBOSE_LOGGING=true for detailed route listing');
+    console.log('   🔐 Authentication (13), 👥 Users (5),  Catalog (22), ⚙️  System (2), 📖 Docs (1), 🔄 Compatibility (2)');
+    console.log('   💡 Total: 45 endpoints | Use VERBOSE_LOGGING=true for detailed route listing');
   }
 };
 

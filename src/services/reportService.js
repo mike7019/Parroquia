@@ -1,7 +1,5 @@
 import { Op } from 'sequelize';
-// Temporarily disabled English models - using only User for auth
 import { Usuario } from '../models/index.js';
-// import { Survey, FamilyMember, User } from '../models/index.js';
 import sequelize from '../../config/sequelize.js';
 
 /**
@@ -10,102 +8,70 @@ import sequelize from '../../config/sequelize.js';
 class ReportService {
 
   /**
-   * Generate advanced statistics
+   * Generate basic user statistics
    * @param {Object} filters - Filters to apply
    * @returns {Object} Statistics object
    */
-  async generateAdvancedStatistics(filters = {}) {
+  async generateBasicStatistics(filters = {}) {
     try {
-      const whereConditions = this.buildWhereConditions(filters);
+      const whereConditions = this.buildUserWhereConditions(filters);
 
-      // Basic counts
-      const totalSurveys = await Survey.count({ where: whereConditions });
-      const completedSurveys = await Survey.count({ 
-        where: { ...whereConditions, status: 'completed' } 
+      // Basic user counts
+      const totalUsers = await Usuario.count({ where: whereConditions });
+      const activeUsers = await Usuario.count({ 
+        where: { ...whereConditions, activo: true } 
       });
-      const inProgressSurveys = await Survey.count({ 
-        where: { ...whereConditions, status: 'in_progress' } 
-      });
-      const cancelledSurveys = await Survey.count({ 
-        where: { ...whereConditions, status: 'cancelled' } 
+      const inactiveUsers = await Usuario.count({ 
+        where: { ...whereConditions, activo: false } 
       });
 
-      // Family and members stats
-      const familySizeResult = await Survey.findAll({
+      // Role distribution
+      const roleStats = await Usuario.findAll({
         where: whereConditions,
         attributes: [
-          [sequelize.fn('SUM', sequelize.col('familySize')), 'totalFamilies'],
-          [sequelize.fn('AVG', sequelize.col('familySize')), 'averageSize'],
-          [sequelize.fn('COUNT', sequelize.col('id')), 'surveyCount']
-        ]
-      });
-
-      const totalMembers = await FamilyMember.count({
-        include: [{
-          model: Survey,
-          where: whereConditions,
-          attributes: []
-        }]
-      });
-
-      // Progress statistics
-      const progressResult = await Survey.findAll({
-        where: whereConditions,
-        attributes: [
-          [sequelize.fn('AVG', sequelize.col('progress')), 'averageProgress']
-        ]
+          'tipo_usuario',
+          [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+        ],
+        group: ['tipo_usuario']
       });
 
       return {
-        totalSurveys,
-        completedSurveys,
-        inProgressSurveys,
-        cancelledSurveys,
-        draftSurveys: totalSurveys - completedSurveys - inProgressSurveys - cancelledSurveys,
-        totalFamilies: familySizeResult[0]?.getDataValue('totalFamilies') || 0,
-        totalMembers,
-        averageFamilySize: parseFloat(familySizeResult[0]?.getDataValue('averageSize') || 0).toFixed(2),
-        averageProgress: parseFloat(progressResult[0]?.getDataValue('averageProgress') || 0).toFixed(2),
-        completionRate: totalSurveys > 0 ? ((completedSurveys / totalSurveys) * 100).toFixed(2) : 0
+        totalUsers,
+        activeUsers,
+        inactiveUsers,
+        roleDistribution: roleStats.map(stat => ({
+          role: stat.tipo_usuario,
+          count: parseInt(stat.getDataValue('count'))
+        }))
       };
     } catch (error) {
-      console.error('Error generating advanced statistics:', error);
+      console.error('Error generating basic statistics:', error);
       throw new Error('Failed to generate statistics');
     }
   }
 
   /**
-   * Build where conditions from filters
+   * Build where conditions from filters for users
    * @param {Object} filters - Filters object
    * @returns {Object} Sequelize where conditions
    */
-  buildWhereConditions(filters) {
+  buildUserWhereConditions(filters) {
     const conditions = {};
 
-    if (filters.status) {
-      conditions.status = filters.status;
+    if (filters.active !== undefined) {
+      conditions.activo = filters.active;
     }
 
-    if (filters.sector) {
-      conditions.sector = { [Op.iLike]: `%${filters.sector}%` };
+    if (filters.role) {
+      conditions.tipo_usuario = filters.role;
     }
 
-    if (filters.userId) {
-      conditions.userId = filters.userId;
+    if (filters.email) {
+      conditions.email = { [Op.iLike]: `%${filters.email}%` };
     }
 
-    if (filters.dateFrom) {
-      conditions.createdAt = conditions.createdAt || {};
-      conditions.createdAt[Op.gte] = new Date(filters.dateFrom);
-    }
-
-    if (filters.dateTo) {
-      conditions.createdAt = conditions.createdAt || {};
-      conditions.createdAt[Op.lte] = new Date(filters.dateTo);
-    }
-
-    if (filters.familyHead) {
-      conditions.familyHead = { [Op.iLike]: `%${filters.familyHead}%` };
+    if (filters.name) {
+      conditions.nombre = { [Op.iLike]: `%${filters.name}%` };
     }
 
     return conditions;

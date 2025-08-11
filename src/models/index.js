@@ -13,6 +13,9 @@ import Enfermedad from './catalog/Enfermedad.js';
 import Familias from './catalog/Familias.js';
 import TipoVivienda from './catalog/TipoVivienda.js';
 
+// Create User alias for compatibility
+const User = Usuario;
+
 // Catalog model associations
 // COMENTADO: Asociaciones movidas a src/models/catalog/index.js para evitar duplicados
 /*
@@ -119,18 +122,13 @@ Familias.belongsToMany(Veredas, {
 });
 */
 
-// Re-export everything including new models
+// Re-export everything
 export default {
   sequelize,
   Usuario,
-  // Parroquia, // ELIMINADO - duplicado
   Veredas,
-  // Sexo, // ELIMINADO - duplicado
-  // Municipio, // ELIMINADO - duplicado
   Municipios,
   Departamentos,
-  // Sector, // ELIMINADO - duplicado
-  // Persona, // ELIMINADO - duplicado
   Familias
 };
 
@@ -152,6 +150,7 @@ Role.belongsToMany(Usuario, {
 export {
   sequelize,
   Usuario,
+  User,
   Role,
   UsuarioRole,
   Parroquia,

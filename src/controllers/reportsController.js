@@ -2,13 +2,13 @@ import reportService from '../services/reportService.js';
 import { ValidationError } from '../utils/errors.js';
 
 /**
- * Get advanced statistics
+ * Get basic user statistics
  */
-export const getAdvancedStatistics = async (req, res, next) => {
+export const getBasicStatistics = async (req, res, next) => {
   try {
-    const filters = extractFilters(req.query);
+    const filters = extractUserFilters(req.query);
     
-    const statistics = await reportService.generateAdvancedStatistics(filters);
+    const statistics = await reportService.generateBasicStatistics(filters);
     
     res.json({
       status: 'success',
@@ -21,30 +21,23 @@ export const getAdvancedStatistics = async (req, res, next) => {
 };
 
 /**
- * Get dashboard summary statistics
+ * Get dashboard summary statistics for users
  */
 export const getDashboardStats = async (req, res, next) => {
   try {
-    const filters = extractFilters(req.query);
+    const filters = extractUserFilters(req.query);
     
-    const stats = await reportService.generateAdvancedStatistics(filters);
+    const stats = await reportService.generateBasicStatistics(filters);
     
     // Format for dashboard display
     const dashboardData = {
       overview: {
-        totalSurveys: stats.totalSurveys,
-        completedSurveys: stats.completedSurveys,
-        inProgressSurveys: stats.inProgressSurveys,
-        completionRate: parseFloat(stats.completionRate)
+        totalUsers: stats.totalUsers,
+        activeUsers: stats.activeUsers,
+        inactiveUsers: stats.inactiveUsers,
+        activationRate: stats.totalUsers > 0 ? ((stats.activeUsers / stats.totalUsers) * 100).toFixed(2) : 0
       },
-      family: {
-        totalFamilies: stats.totalFamilies,
-        totalMembers: stats.totalMembers,
-        averageFamilySize: parseFloat(stats.averageFamilySize)
-      },
-      progress: {
-        averageProgress: parseFloat(stats.averageProgress)
-      }
+      roles: stats.roleDistribution
     };
     
     res.json({
@@ -58,57 +51,36 @@ export const getDashboardStats = async (req, res, next) => {
 };
 
 /**
- * Extract and validate filters from query parameters
+ * Extract and validate filters from query parameters for users
  * @param {Object} query - Request query parameters
  * @returns {Object} Validated filters
  */
-function extractFilters(query) {
+function extractUserFilters(query) {
   const filters = {};
 
-  // Status filter
-  if (query.status) {
-    const validStatuses = ['draft', 'in_progress', 'completed', 'cancelled'];
-    if (validStatuses.includes(query.status)) {
-      filters.status = query.status;
+  // Active/inactive filter
+  if (query.active !== undefined) {
+    filters.active = query.active === 'true';
+  }
+
+  // Role filter
+  if (query.role) {
+    const validRoles = ['Administrador', 'Encuestador'];
+    if (validRoles.includes(query.role)) {
+      filters.role = query.role;
     } else {
-      throw new ValidationError(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
+      throw new ValidationError(`Invalid role. Must be one of: ${validRoles.join(', ')}`);
     }
   }
 
-  // Sector filter
-  if (query.sector) {
-    filters.sector = query.sector;
+  // Email filter
+  if (query.email) {
+    filters.email = query.email;
   }
 
-  // User ID filter
-  if (query.userId) {
-    const userId = parseInt(query.userId);
-    if (isNaN(userId)) {
-      throw new ValidationError('Invalid userId. Must be a number.');
-    }
-    filters.userId = userId;
-  }
-
-  // Date range filters
-  if (query.dateFrom) {
-    const dateFrom = new Date(query.dateFrom);
-    if (isNaN(dateFrom.getTime())) {
-      throw new ValidationError('Invalid dateFrom. Must be a valid date.');
-    }
-    filters.dateFrom = dateFrom;
-  }
-
-  if (query.dateTo) {
-    const dateTo = new Date(query.dateTo);
-    if (isNaN(dateTo.getTime())) {
-      throw new ValidationError('Invalid dateTo. Must be a valid date.');
-    }
-    filters.dateTo = dateTo;
-  }
-
-  // Family head filter
-  if (query.familyHead) {
-    filters.familyHead = query.familyHead;
+  // Name filter
+  if (query.name) {
+    filters.name = query.name;
   }
 
   return filters;
