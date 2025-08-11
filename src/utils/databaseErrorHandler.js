@@ -15,15 +15,6 @@ class DatabaseErrorHandler {
    * Mapea errores específicos de Sequelize a errores de aplicación
    */
   static handleSequelizeError(error, context = {}) {
-    // If it's already an application error, don't process it
-    if (error instanceof AppError || 
-        error instanceof ValidationError || 
-        error instanceof ConflictError || 
-        error instanceof NotFoundError || 
-        error instanceof AuthenticationError) {
-      return error;
-    }
-
     logger.database('Sequelize error occurred', {
       errorName: error.name,
       errorCode: error.original?.code,
@@ -352,22 +343,6 @@ class DatabaseErrorHandler {
       return result;
       
     } catch (error) {
-      // Check if it's already an application-level error (ConflictError, ValidationError, etc.)
-      if (error instanceof AppError || 
-          error instanceof ValidationError || 
-          error instanceof ConflictError || 
-          error instanceof NotFoundError || 
-          error instanceof AuthenticationError) {
-        // Re-throw application errors without modification
-        throw error;
-      }
-      
-      // Only handle Sequelize/database errors
-      if (error.name && error.name.startsWith('Sequelize')) {
-        throw DatabaseErrorHandler.handleSequelizeError(error, context);
-      }
-      
-      // Handle other database-related errors
       throw DatabaseErrorHandler.handleSequelizeError(error, context);
     }
   }

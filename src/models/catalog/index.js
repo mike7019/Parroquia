@@ -10,7 +10,6 @@ import TipoDisposicionBasura from './TipoDisposicionBasura.js';
 import FamiliaDisposicionBasura from './FamiliaDisposicionBasura.js';
 import TipoAguasResiduales from './TipoAguasResiduales.js';
 import TipoVivienda from './TipoVivienda.js';
-import SistemaAcueducto from './SistemaAcueducto.js';
 
 // Definir asociaciones
 Departamentos.hasMany(Municipios, {
@@ -87,6 +86,5 @@ export {
     TipoDisposicionBasura,
     FamiliaDisposicionBasura,
     TipoAguasResiduales,
-    TipoVivienda,
-    SistemaAcueducto
+    TipoVivienda
 };
