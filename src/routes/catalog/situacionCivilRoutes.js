@@ -140,9 +140,9 @@ const router = express.Router();
  *                   type: string
  *                   example: "Estadísticas obtenidas exitosamente"
  *       401:
- *         $ref: '#/components/responses/Unauthorized'
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       500:
- *         $ref: '#/components/responses/InternalError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.get('/stats', AuthMiddleware.authenticateToken, SituacionCivilController.getStats);
 
@@ -229,9 +229,9 @@ router.get('/stats', AuthMiddleware.authenticateToken, SituacionCivilController.
  *                 message:
  *                   type: string
  *       401:
- *         $ref: '#/components/responses/Unauthorized'
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       500:
- *         $ref: '#/components/responses/InternalError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.get('/', AuthMiddleware.authenticateToken, SituacionCivilController.getAll);
 
@@ -286,11 +286,11 @@ router.get('/', AuthMiddleware.authenticateToken, SituacionCivilController.getAl
  *       400:
  *         $ref: '#/components/responses/ValidationError'
  *       401:
- *         $ref: '#/components/responses/Unauthorized'
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       409:
  *         $ref: '#/components/responses/ConflictError'
  *       500:
- *         $ref: '#/components/responses/InternalError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/', AuthMiddleware.authenticateToken, SituacionCivilController.create);
 
@@ -348,9 +348,9 @@ router.post('/', AuthMiddleware.authenticateToken, SituacionCivilController.crea
  *       400:
  *         $ref: '#/components/responses/ValidationError'
  *       401:
- *         $ref: '#/components/responses/Unauthorized'
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       500:
- *         $ref: '#/components/responses/InternalError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.get('/search', AuthMiddleware.authenticateToken, SituacionCivilController.search);
 
@@ -396,11 +396,11 @@ router.get('/search', AuthMiddleware.authenticateToken, SituacionCivilController
  *       400:
  *         $ref: '#/components/responses/ValidationError'
  *       401:
- *         $ref: '#/components/responses/Unauthorized'
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       404:
- *         $ref: '#/components/responses/NotFound'
+ *         $ref: '#/components/responses/NotFoundError'
  *       500:
- *         $ref: '#/components/responses/InternalError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.get('/:id', AuthMiddleware.authenticateToken, SituacionCivilController.getById);
 
@@ -452,13 +452,13 @@ router.get('/:id', AuthMiddleware.authenticateToken, SituacionCivilController.ge
  *       400:
  *         $ref: '#/components/responses/ValidationError'
  *       401:
- *         $ref: '#/components/responses/Unauthorized'
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       404:
- *         $ref: '#/components/responses/NotFound'
+ *         $ref: '#/components/responses/NotFoundError'
  *       409:
  *         $ref: '#/components/responses/ConflictError'
  *       500:
- *         $ref: '#/components/responses/InternalError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.put('/:id', AuthMiddleware.authenticateToken, SituacionCivilController.update);
 
@@ -498,11 +498,11 @@ router.put('/:id', AuthMiddleware.authenticateToken, SituacionCivilController.up
  *       400:
  *         $ref: '#/components/responses/ValidationError'
  *       401:
- *         $ref: '#/components/responses/Unauthorized'
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       404:
- *         $ref: '#/components/responses/NotFound'
+ *         $ref: '#/components/responses/NotFoundError'
  *       500:
- *         $ref: '#/components/responses/InternalError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.delete('/:id', AuthMiddleware.authenticateToken, SituacionCivilController.delete);
 
@@ -542,13 +542,13 @@ router.delete('/:id', AuthMiddleware.authenticateToken, SituacionCivilController
  *       400:
  *         $ref: '#/components/responses/ValidationError'
  *       401:
- *         $ref: '#/components/responses/Unauthorized'
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       404:
- *         $ref: '#/components/responses/NotFound'
+ *         $ref: '#/components/responses/NotFoundError'
  *       409:
  *         $ref: '#/components/responses/ConflictError'
  *       500:
- *         $ref: '#/components/responses/InternalError'
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.patch('/:id/restore', AuthMiddleware.authenticateToken, SituacionCivilController.restore);
 
