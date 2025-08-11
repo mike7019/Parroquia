@@ -26,7 +26,7 @@ const swaggerConfig = {
         description: 'Development server'
       },
       {
-        url: 'http://206.62.139.100:80/',
+        url: 'http://206.62.139.100:3000/',
         description: 'Test server'
       },
       {
@@ -1860,6 +1860,207 @@ const swaggerConfig = {
               }
             }
           ]
+        },
+        // ========================
+        // SCHEMAS DE TIPOS DE VIVIENDA
+        // ========================
+        TipoVivienda: {
+          type: 'object',
+          properties: {
+            id_tipo_vivienda: {
+              type: 'integer',
+              description: 'ID único del tipo de vivienda',
+              example: 1
+            },
+            nombre: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre del tipo de vivienda',
+              example: 'Casa'
+            },
+            descripcion: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Descripción del tipo de vivienda',
+              example: 'Vivienda unifamiliar independiente con espacios propios'
+            },
+            activo: {
+              type: 'boolean',
+              description: 'Estado activo/inactivo del tipo de vivienda',
+              example: true
+            },
+            created_at: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación',
+              example: '2025-08-10T10:30:00.000Z'
+            },
+            updated_at: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización',
+              example: '2025-08-10T10:30:00.000Z'
+            }
+          },
+          required: ['id_tipo_vivienda', 'nombre', 'activo']
+        },
+        TipoViviendaInput: {
+          type: 'object',
+          required: ['nombre'],
+          properties: {
+            nombre: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 255,
+              description: 'Nombre del tipo de vivienda',
+              example: 'Apartamento'
+            },
+            descripcion: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Descripción opcional del tipo de vivienda',
+              example: 'Vivienda en edificio multifamiliar con servicios compartidos'
+            },
+            activo: {
+              type: 'boolean',
+              description: 'Estado activo/inactivo del tipo de vivienda',
+              example: true,
+              default: true
+            }
+          },
+          example: {
+            nombre: 'Casa Campestre',
+            descripcion: 'Vivienda rural con amplios espacios verdes',
+            activo: true
+          }
+        },
+        TipoViviendaUpdate: {
+          type: 'object',
+          properties: {
+            nombre: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 255,
+              description: 'Nombre del tipo de vivienda',
+              example: 'Casa Campestre Actualizada'
+            },
+            descripcion: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Descripción del tipo de vivienda',
+              example: 'Vivienda rural con amplios espacios verdes y jardín'
+            },
+            activo: {
+              type: 'boolean',
+              description: 'Estado activo/inactivo del tipo de vivienda',
+              example: true
+            }
+          },
+          example: {
+            nombre: 'Finca Mejorada',
+            descripcion: 'Vivienda rural de construcción moderna en zona campestre'
+          }
+        },
+        TipoViviendaResponse: {
+          allOf: [
+            { $ref: '#/components/schemas/ApiResponse' },
+            {
+              type: 'object',
+              properties: {
+                data: {
+                  type: 'object',
+                  properties: {
+                    tipo: {
+                      $ref: '#/components/schemas/TipoVivienda'
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        TiposViviendaListResponse: {
+          allOf: [
+            { $ref: '#/components/schemas/ApiResponse' },
+            {
+              type: 'object',
+              properties: {
+                data: {
+                  type: 'object',
+                  properties: {
+                    tipos: {
+                      type: 'array',
+                      items: {
+                        $ref: '#/components/schemas/TipoVivienda'
+                      }
+                    },
+                    pagination: {
+                      $ref: '#/components/schemas/Pagination'
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        TiposViviendaActivosResponse: {
+          allOf: [
+            { $ref: '#/components/schemas/ApiResponse' },
+            {
+              type: 'object',
+              properties: {
+                data: {
+                  type: 'object',
+                  properties: {
+                    tipos: {
+                      type: 'array',
+                      items: {
+                        $ref: '#/components/schemas/TipoVivienda'
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        EstadisticasTipoVivienda: {
+          type: 'object',
+          properties: {
+            totalTipos: {
+              type: 'integer',
+              description: 'Total de tipos de vivienda registrados',
+              example: 10
+            },
+            tiposActivos: {
+              type: 'integer',
+              description: 'Número de tipos de vivienda activos',
+              example: 8
+            },
+            tiposInactivos: {
+              type: 'integer',
+              description: 'Número de tipos de vivienda inactivos',
+              example: 2
+            }
+          }
+        },
+        EstadisticasTipoViviendaResponse: {
+          allOf: [
+            { $ref: '#/components/schemas/ApiResponse' },
+            {
+              type: 'object',
+              properties: {
+                data: {
+                  type: 'object',
+                  properties: {
+                    estadisticas: {
+                      $ref: '#/components/schemas/EstadisticasTipoVivienda'
+                    }
+                  }
+                }
+              }
+            }
+          ]
         }
       },
       responses: {
@@ -2006,6 +2207,10 @@ const swaggerConfig = {
       {
         name: 'Aguas Residuales',
         description: 'Gestión de catálogo de tipos de aguas residuales. **Funcionalidades:** CRUD completo, búsqueda por nombre/descripción, gestión de métodos de tratamiento de aguas residuales.'
+      },
+      {
+        name: 'Tipos de Vivienda',
+        description: 'Gestión de catálogo de tipos de vivienda. **Funcionalidades:** CRUD completo, búsqueda por nombre/descripción, activación/desactivación, estadísticas de uso.'
       },
       {
         name: 'Catalog',

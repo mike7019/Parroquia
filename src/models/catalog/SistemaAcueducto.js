@@ -11,6 +11,7 @@ const SistemaAcueducto = sequelize.define('SistemaAcueducto', {
   nombre: {
     type: DataTypes.STRING(255),
     allowNull: false,
+    unique: true,
     validate: {
       notNull: {
         msg: 'El nombre es requerido'
@@ -43,7 +44,8 @@ const SistemaAcueducto = sequelize.define('SistemaAcueducto', {
   updatedAt: 'updated_at',
   indexes: [
     {
-      fields: ['nombre']
+      fields: ['nombre'],
+      unique: true
     }
   ]
 });

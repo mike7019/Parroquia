@@ -38,14 +38,15 @@ export const getAllSistemasAcueducto = async (req, res) => {
 
     res.json(
       createSuccessResponse(
-        'Sistemas de acueducto retrieved successfully',
+        'Sistemas de acueducto obtenidos exitosamente',
         result
       )
     );
   } catch (error) {
+    console.error('Error in getAllSistemasAcueducto:', error);
     res.status(500).json(
       createErrorResponse(
-        'Error retrieving sistemas de acueducto',
+        'Error al obtener sistemas de acueducto',
         error.message,
         'FETCH_ERROR'
       )
@@ -59,31 +60,32 @@ export const getAllSistemasAcueducto = async (req, res) => {
 export const getSistemaAcueductoById = async (req, res) => {
   try {
     const { id } = req.params;
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json(
-        createErrorResponse('Valid ID is required', null, 'VALIDATION_ERROR')
-      );
-    }
-
     const sistemaAcueducto = await getSistemaAcueductoByIdService(id);
 
     res.json(
       createSuccessResponse(
-        'Sistema de acueducto retrieved successfully',
+        'Sistema de acueducto obtenido exitosamente',
         sistemaAcueducto
       )
     );
   } catch (error) {
+    console.error('Error in getSistemaAcueductoById:', error);
+    
     if (error.message.includes('not found')) {
       return res.status(404).json(
-        createErrorResponse('Sistema de acueducto not found', null, 'NOT_FOUND')
+        createErrorResponse('Sistema de acueducto no encontrado', null, 'NOT_FOUND')
+      );
+    }
+
+    if (error.message.includes('Invalid ID format')) {
+      return res.status(400).json(
+        createErrorResponse('Formato de ID inválido', null, 'VALIDATION_ERROR')
       );
     }
 
     res.status(500).json(
       createErrorResponse(
-        'Error retrieving sistema de acueducto',
+        'Error al obtener sistema de acueducto',
         error.message,
         'FETCH_ERROR'
       )
@@ -98,12 +100,6 @@ export const createSistemaAcueducto = async (req, res) => {
   try {
     const { nombre, descripcion } = req.body;
 
-    if (!nombre) {
-      return res.status(400).json(
-        createErrorResponse('Nombre is required', null, 'VALIDATION_ERROR')
-      );
-    }
-
     const sistemaAcueducto = await createSistemaAcueductoService({ 
       nombre, 
       descripcion 
@@ -116,15 +112,23 @@ export const createSistemaAcueducto = async (req, res) => {
       )
     );
   } catch (error) {
+    console.error('Error in createSistemaAcueducto:', error);
+    
     if (error.message.includes('already exists')) {
       return res.status(409).json(
-        createErrorResponse('Sistema de acueducto ya existe', null, 'DUPLICATE_ERROR')
+        createErrorResponse('El sistema de acueducto ya existe', error.message, 'DUPLICATE_ERROR')
+      );
+    }
+
+    if (error.message.includes('Validation error')) {
+      return res.status(400).json(
+        createErrorResponse('Error de validación', error.message, 'VALIDATION_ERROR')
       );
     }
     
     res.status(500).json(
       createErrorResponse(
-        'Error creating sistema de acueducto',
+        'Error al crear sistema de acueducto',
         error.message,
         'CREATE_ERROR'
       )
@@ -140,40 +144,42 @@ export const updateSistemaAcueducto = async (req, res) => {
     const { id } = req.params;
     const { nombre, descripcion } = req.body;
 
-    if (!id || isNaN(id)) {
-      return res.status(400).json(
-        createErrorResponse('Valid ID is required', null, 'VALIDATION_ERROR')
-      );
-    }
-
-    if (!nombre && descripcion === undefined) {
-      return res.status(400).json(
-        createErrorResponse('At least one field (nombre, descripcion) is required for update', null, 'VALIDATION_ERROR')
-      );
-    }
-
     const updateData = {};
-    if (nombre) updateData.nombre = nombre;
+    if (nombre !== undefined) updateData.nombre = nombre;
     if (descripcion !== undefined) updateData.descripcion = descripcion;
 
     const sistemaAcueducto = await updateSistemaAcueductoService(id, updateData);
     
     res.json(
       createSuccessResponse(
-        'Sistema de acueducto updated successfully',
+        'Sistema de acueducto actualizado exitosamente',
         sistemaAcueducto
       )
     );
   } catch (error) {
+    console.error('Error in updateSistemaAcueducto:', error);
+    
     if (error.message.includes('not found')) {
       return res.status(404).json(
-        createErrorResponse('Sistema de acueducto not found', null, 'NOT_FOUND')
+        createErrorResponse('Sistema de acueducto no encontrado', null, 'NOT_FOUND')
+      );
+    }
+
+    if (error.message.includes('already exists')) {
+      return res.status(409).json(
+        createErrorResponse('Ya existe un sistema con ese nombre', error.message, 'DUPLICATE_ERROR')
+      );
+    }
+
+    if (error.message.includes('Invalid ID format') || error.message.includes('Validation error')) {
+      return res.status(400).json(
+        createErrorResponse('Error de validación', error.message, 'VALIDATION_ERROR')
       );
     }
 
     res.status(500).json(
       createErrorResponse(
-        'Error updating sistema de acueducto',
+        'Error al actualizar sistema de acueducto',
         error.message,
         'UPDATE_ERROR'
       )
@@ -187,31 +193,32 @@ export const updateSistemaAcueducto = async (req, res) => {
 export const deleteSistemaAcueducto = async (req, res) => {
   try {
     const { id } = req.params;
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json(
-        createErrorResponse('Valid ID is required', null, 'VALIDATION_ERROR')
-      );
-    }
-
-    await deleteSistemaAcueductoService(id);
+    const result = await deleteSistemaAcueductoService(id);
 
     res.json(
       createSuccessResponse(
-        'Sistema de acueducto deleted successfully',
-        { id }
+        'Sistema de acueducto eliminado exitosamente',
+        result
       )
     );
   } catch (error) {
+    console.error('Error in deleteSistemaAcueducto:', error);
+    
     if (error.message.includes('not found')) {
       return res.status(404).json(
-        createErrorResponse('Sistema de acueducto not found', null, 'NOT_FOUND')
+        createErrorResponse('Sistema de acueducto no encontrado', null, 'NOT_FOUND')
+      );
+    }
+
+    if (error.message.includes('Invalid ID format')) {
+      return res.status(400).json(
+        createErrorResponse('Formato de ID inválido', null, 'VALIDATION_ERROR')
       );
     }
 
     res.status(500).json(
       createErrorResponse(
-        'Error deleting sistema de acueducto',
+        'Error al eliminar sistema de acueducto',
         error.message,
         'DELETE_ERROR'
       )
@@ -225,25 +232,26 @@ export const deleteSistemaAcueducto = async (req, res) => {
 export const searchSistemasAcueducto = async (req, res) => {
   try {
     const { query } = req.query;
-
-    if (!query) {
-      return res.status(400).json(
-        createErrorResponse('Search query is required', null, 'VALIDATION_ERROR')
-      );
-    }
-
     const result = await searchSistemasAcueductoService(query);
 
     res.json(
       createSuccessResponse(
-        'Search completed successfully',
+        'Búsqueda completada exitosamente',
         result
       )
     );
   } catch (error) {
+    console.error('Error in searchSistemasAcueducto:', error);
+    
+    if (error.message.includes('required')) {
+      return res.status(400).json(
+        createErrorResponse('Término de búsqueda requerido', null, 'VALIDATION_ERROR')
+      );
+    }
+
     res.status(500).json(
       createErrorResponse(
-        'Error performing search',
+        'Error al realizar la búsqueda',
         error.message,
         'SEARCH_ERROR'
       )
@@ -257,25 +265,26 @@ export const searchSistemasAcueducto = async (req, res) => {
 export const getSistemasByName = async (req, res) => {
   try {
     const { nombre } = req.params;
-
-    if (!nombre) {
-      return res.status(400).json(
-        createErrorResponse('Nombre parameter is required', null, 'VALIDATION_ERROR')
-      );
-    }
-
     const sistemas = await getSistemasByNameService(nombre);
 
     res.json(
       createSuccessResponse(
-        'Sistemas retrieved by name successfully',
+        'Sistemas obtenidos por nombre exitosamente',
         sistemas
       )
     );
   } catch (error) {
+    console.error('Error in getSistemasByName:', error);
+    
+    if (error.message.includes('required')) {
+      return res.status(400).json(
+        createErrorResponse('Parámetro nombre requerido', null, 'VALIDATION_ERROR')
+      );
+    }
+
     res.status(500).json(
       createErrorResponse(
-        'Error retrieving sistemas by name',
+        'Error al obtener sistemas por nombre',
         error.message,
         'FETCH_ERROR'
       )
@@ -292,14 +301,15 @@ export const getUniqueNombres = async (req, res) => {
 
     res.json(
       createSuccessResponse(
-        'Unique nombres retrieved successfully',
+        'Nombres únicos obtenidos exitosamente',
         nombres
       )
     );
   } catch (error) {
+    console.error('Error in getUniqueNombres:', error);
     res.status(500).json(
       createErrorResponse(
-        'Error retrieving unique nombres',
+        'Error al obtener nombres únicos',
         error.message,
         'FETCH_ERROR'
       )
@@ -316,14 +326,15 @@ export const getStatistics = async (req, res) => {
 
     res.json(
       createSuccessResponse(
-        'Statistics retrieved successfully',
+        'Estadísticas obtenidas exitosamente',
         statistics
       )
     );
   } catch (error) {
+    console.error('Error in getStatistics:', error);
     res.status(500).json(
       createErrorResponse(
-        'Error retrieving statistics',
+        'Error al obtener estadísticas',
         error.message,
         'STATS_ERROR'
       )
@@ -337,34 +348,35 @@ export const getStatistics = async (req, res) => {
 export const bulkCreateSistemasAcueducto = async (req, res) => {
   try {
     const { sistemas } = req.body;
-
-    if (!Array.isArray(sistemas) || sistemas.length === 0) {
-      return res.status(400).json(
-        createErrorResponse('Array of sistemas is required', null, 'VALIDATION_ERROR')
-      );
-    }
-
-    // Validate each sistema
-    for (const sistema of sistemas) {
-      if (!sistema.nombre) {
-        return res.status(400).json(
-          createErrorResponse('All sistemas must have a nombre', null, 'VALIDATION_ERROR')
-        );
-      }
-    }
-
     const result = await bulkCreateSistemasAcueductoService(sistemas);
 
     res.status(201).json(
       createSuccessResponse(
-        'Sistemas de acueducto created successfully',
+        'Sistemas de acueducto creados exitosamente',
         result
       )
     );
   } catch (error) {
+    console.error('Error in bulkCreateSistemasAcueducto:', error);
+    
+    if (error.message.includes('Array of sistemas is required') || 
+        error.message.includes('must have a nombre') ||
+        error.message.includes('Duplicate nombres') ||
+        error.message.includes('Bulk creation error')) {
+      return res.status(400).json(
+        createErrorResponse('Error de validación', error.message, 'VALIDATION_ERROR')
+      );
+    }
+
+    if (error.message.includes('already exist')) {
+      return res.status(409).json(
+        createErrorResponse('Sistemas duplicados', error.message, 'DUPLICATE_ERROR')
+      );
+    }
+
     res.status(500).json(
       createErrorResponse(
-        'Error creating sistemas de acueducto',
+        'Error al crear sistemas de acueducto',
         error.message,
         'BULK_CREATE_ERROR'
       )

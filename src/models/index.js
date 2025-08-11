@@ -11,6 +11,7 @@ import Sector from './catalog/Sector.js';
 import TipoIdentificacion from './catalog/TipoIdentificacion.js';
 import Enfermedad from './catalog/Enfermedad.js';
 import Familias from './catalog/Familias.js';
+import TipoVivienda from './catalog/TipoVivienda.js';
 
 // Catalog model associations
 // COMENTADO: Asociaciones movidas a src/models/catalog/index.js para evitar duplicados
@@ -161,5 +162,6 @@ export {
   Sector,
   TipoIdentificacion,
   Enfermedad,
-  Familias
+  Familias,
+  TipoVivienda
 };
