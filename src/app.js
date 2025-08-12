@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import https from 'https';
+// Force reload - estudios routes integration test
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -483,6 +484,15 @@ const displayRoutes = () => {
       { method: 'PUT', path: '/api/catalog/parentescos/:id', group: 'Catalog', protected: true, description: 'Update parentesco' },
       { method: 'DELETE', path: '/api/catalog/parentescos/:id', group: 'Catalog', protected: true, description: 'Delete parentesco' },
       { method: 'PATCH', path: '/api/catalog/parentescos/:id/restore', group: 'Catalog', protected: true, description: 'Restore parentesco' },
+      
+      // Comunidades Culturales routes
+      { method: 'POST', path: '/api/catalog/comunidades-culturales', group: 'Catalog', protected: true, description: 'Create comunidad cultural' },
+      { method: 'GET', path: '/api/catalog/comunidades-culturales', group: 'Catalog', protected: true, description: 'List comunidades culturales' },
+      { method: 'GET', path: '/api/catalog/comunidades-culturales/select', group: 'Catalog', protected: true, description: 'Get comunidades culturales for select' },
+      { method: 'GET', path: '/api/catalog/comunidades-culturales/stats', group: 'Catalog', protected: true, description: 'Get comunidades culturales statistics' },
+      { method: 'GET', path: '/api/catalog/comunidades-culturales/:id', group: 'Catalog', protected: true, description: 'Get comunidad cultural by ID' },
+      { method: 'PUT', path: '/api/catalog/comunidades-culturales/:id', group: 'Catalog', protected: true, description: 'Update comunidad cultural' },
+      { method: 'DELETE', path: '/api/catalog/comunidades-culturales/:id', group: 'Catalog', protected: true, description: 'Delete comunidad cultural' },
       
       // System & Infrastructure routes
       { method: 'GET', path: '/api/health', group: 'System', protected: false, description: 'API health check' },

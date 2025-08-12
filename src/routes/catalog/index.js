@@ -13,6 +13,8 @@ import sistemaAcueductoRoutes from './sistemaAcueductoRoutes.js';
 import tipoViviendaRoutes from './tipoViviendaRoutes.js';
 import parentescoRoutes from './parentescoRoutes.js';
 import situacionCivilRoutes from './situacionCivilRoutes.js';
+import estudioRoutes from './estudioRoutes.js';
+import comunidadCulturalRoutes from './comunidadCulturalRoutes.js';
 
 const router = express.Router();
 
@@ -75,6 +77,12 @@ const router = express.Router();
  *                     situacionesCiviles:
  *                       type: string
  *                       example: 'active'
+ *                     estudios:
+ *                       type: string
+ *                       example: 'active'
+ *                     comunidadesCulturales:
+ *                       type: string
+ *                       example: 'active'
  */
 
 // Mount catalog routes
@@ -92,6 +100,8 @@ router.use('/sistemas-acueducto', sistemaAcueductoRoutes);
 router.use('/tipos-vivienda', tipoViviendaRoutes);
 router.use('/parentescos', parentescoRoutes);
 router.use('/situaciones-civiles', situacionCivilRoutes);
+router.use('/estudios', estudioRoutes);
+router.use('/comunidades-culturales', comunidadCulturalRoutes);
 
 // Health check for catalog module
 router.get('/health', (req, res) => {
@@ -113,7 +123,9 @@ router.get('/health', (req, res) => {
       sistemasAcueducto: 'active',
       tiposVivienda: 'active',
       parentescos: 'active',
-      situacionesCiviles: 'active'
+      situacionesCiviles: 'active',
+      estudios: 'active',
+      comunidadesCulturales: 'active'
     }
   });
 });

@@ -14,6 +14,7 @@ import Familias from './catalog/Familias.js';
 import TipoVivienda from './catalog/TipoVivienda.js';
 import Parentesco from './catalog/Parentesco.js';
 import SituacionCivil from './catalog/SituacionCivil.js';
+import Estudio from './catalog/Estudio.js';
 
 // Create User alias for compatibility
 const User = Usuario;
@@ -167,5 +168,6 @@ export {
   Familias,
   TipoVivienda,
   Parentesco,
-  SituacionCivil
+  SituacionCivil,
+  Estudio
 };

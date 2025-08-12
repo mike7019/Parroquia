@@ -103,10 +103,8 @@ class TipoViviendaController {
         nombre: tipoData.nombre
       });
 
-      const nuevoTipo = await DatabaseErrorHandler.executeWithErrorHandling(
-        () => tipoViviendaService.createTipo(tipoData),
-        { operation: 'create_tipo_vivienda', nombre: tipoData.nombre }
-      );
+      // Llamar directamente al servicio sin DatabaseErrorHandler para manejar errores de duplicado
+      const nuevoTipo = await tipoViviendaService.createTipo(tipoData);
 
       controllerLogger.info('Tipo vivienda created successfully', {
         id: nuevoTipo.id_tipo_vivienda,
@@ -122,6 +120,25 @@ class TipoViviendaController {
       controllerLogger.error('Error creating tipo vivienda', error, {
         nombre: req.body?.nombre
       });
+
+      // Manejar errores específicos
+      if (error.code === 'DUPLICATE_NAME') {
+        return res.status(409).json({
+          status: 'error',
+          message: error.message,
+          code: 'DUPLICATE_NAME'
+        });
+      }
+
+      if (error.statusCode === 404) {
+        return res.status(404).json({
+          status: 'error',
+          message: error.message,
+          code: 'NOT_FOUND'
+        });
+      }
+
+      // Para otros errores, usar el handler genérico
       next(error);
     }
   }
