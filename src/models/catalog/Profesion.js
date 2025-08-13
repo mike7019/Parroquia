@@ -1,6 +1,6 @@
-const { DataTypes } = require('sequelize');
+import { DataTypes } from 'sequelize';
 
-module.exports = (sequelize) => {
+export default (sequelize) => {
   const Profesion = sequelize.define('Profesion', {
     id_profesion: {
       type: DataTypes.BIGINT,
@@ -37,26 +37,24 @@ module.exports = (sequelize) => {
     modelName: 'Profesion',
     tableName: 'profesiones',
     timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
     paranoid: false,
     indexes: [
       {
         unique: true,
         fields: ['nombre']
+      },
+      {
+        fields: ['createdAt']
       }
     ]
   });
 
   // Definir asociaciones si es necesario
   Profesion.associate = function(models) {
-    // Relación uno a muchos con Persona
-    if (models.Persona) {
-      Profesion.hasMany(models.Persona, {
-        foreignKey: 'id_profesion',
-        as: 'personas'
-      });
-    }
+    // Aquí se pueden definir asociaciones con otros modelos
+    // Por ejemplo: Profesion.hasMany(models.Persona, { foreignKey: 'id_profesion' });
   };
 
   return Profesion;
