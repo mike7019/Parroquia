@@ -204,51 +204,44 @@ export async function seedTiposVivienda() {
 export async function seedSistemasAcueducto() {
   const data = [
     {
-      proveedor: 'Acueducto Municipal',
-      metodo_abastecimiento: 'Red pública',
-      descripcion: 'Sistema de acueducto municipal o público',
+      nombre: 'Acueducto Municipal',
+      descripcion: 'Sistema de acueducto municipal o público mediante red pública',
       created_at: new Date(),
       updated_at: new Date()
     },
     {
-      proveedor: 'Pozo propio',
-      metodo_abastecimiento: 'Extracción subterránea',
-      descripcion: 'Agua extraída de pozo profundo',
+      nombre: 'Pozo Propio',
+      descripcion: 'Agua extraída de pozo profundo o artesiano privado',
       created_at: new Date(),
       updated_at: new Date()
     },
     {
-      proveedor: 'Aljibe',
-      metodo_abastecimiento: 'Almacenamiento',
-      descripcion: 'Depósito subterráneo para recoger y conservar agua',
+      nombre: 'Aljibe',
+      descripcion: 'Depósito subterráneo para recoger y conservar agua de lluvia',
       created_at: new Date(),
       updated_at: new Date()
     },
     {
-      proveedor: 'Fuente natural',
-      metodo_abastecimiento: 'Captación directa',
-      descripcion: 'Agua tomada directamente de fuente natural',
+      nombre: 'Fuente Natural',
+      descripcion: 'Agua tomada directamente de río, quebrada o manantial',
       created_at: new Date(),
       updated_at: new Date()
     },
     {
-      proveedor: 'Recolección',
-      metodo_abastecimiento: 'Captación lluvia',
-      descripcion: 'Recolección de agua de lluvia',
+      nombre: 'Recolección de Lluvia',
+      descripcion: 'Sistema de captación y almacenamiento de agua de lluvia',
       created_at: new Date(),
       updated_at: new Date()
     },
     {
-      proveedor: 'Terceros',
-      metodo_abastecimiento: 'Compra',
-      descripcion: 'Agua adquirida a terceros (carrotanques, etc.)',
+      nombre: 'Compra a Terceros',
+      descripcion: 'Agua adquirida mediante carrotanques u otros proveedores',
       created_at: new Date(),
       updated_at: new Date()
     },
     {
-      proveedor: 'Otro',
-      metodo_abastecimiento: 'Otro',
-      descripcion: 'Otro sistema de abastecimiento no especificado',
+      nombre: 'Otro Sistema',
+      descripcion: 'Otro tipo de sistema de abastecimiento de agua no especificado',
       created_at: new Date(),
       updated_at: new Date()
     }

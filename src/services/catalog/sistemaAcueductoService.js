@@ -1,54 +1,129 @@
 /**
  * Sistema de Acueducto Service
  */
+import { Op } from 'sequelize';
+import sequelize from '../../../config/sequelize.js';
 
-export const createSistemaAcueducto = async (data) => {
-  return { 
-    id_sistema_acueducto: 1, 
-    nombre: data.nombre, 
-    descripcion: data.descripcion,
-    message: 'Test implementation' 
-  };
-};
+class SistemaAcueductoService {
+  constructor() {
+    this.model = null;
+  }
 
-export const getAllSistemasAcueducto = async (options = {}) => {
-  return {
-    sistemas: [
-      { id_sistema_acueducto: 1, nombre: 'Test Sistema', descripcion: 'Test Description' }
-    ],
-    total: 1
-  };
-};
+  // Método para obtener el modelo de forma lazy
+  getModel() {
+    if (!this.model) {
+      this.model = sequelize.models.SistemaAcueducto;
+      if (!this.model) {
+        throw new Error('Modelo SistemaAcueducto no encontrado en sequelize.models');
+      }
+    }
+    return this.model;
+  }
 
-export const getSistemaAcueductoById = async (id) => {
-  return { 
-    id_sistema_acueducto: id, 
-    nombre: 'Test Sistema', 
-    descripcion: 'Test Description' 
-  };
-};
+  async createSistemaAcueducto(data) {
+    try {
+      const SistemaAcueducto = this.getModel();
+      const nuevoSistema = await SistemaAcueducto.create({
+        nombre: data.nombre,
+        descripcion: data.descripcion
+      });
+      return nuevoSistema;
+    } catch (error) {
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        throw new Error('Ya existe un sistema de acueducto con ese nombre');
+      }
+      throw error;
+    }
+  }
 
-export const updateSistemaAcueducto = async (id, updateData) => {
-  return { 
-    id_sistema_acueducto: id, 
-    ...updateData,
-    message: 'Test update' 
-  };
-};
+  async getAllSistemasAcueducto(options = {}) {
+    const { search, page = 1, limit = 50 } = options;
+    const SistemaAcueducto = this.getModel();
+    
+    const whereClause = {};
+    
+    if (search) {
+      whereClause[Op.or] = [
+        { nombre: { [Op.iLike]: `%${search}%` } },
+        { descripcion: { [Op.iLike]: `%${search}%` } }
+      ];
+    }
 
-export const deleteSistemaAcueducto = async (id) => {
-  return { message: 'Test delete', id };
-};
+    const offset = (parseInt(page) - 1) * parseInt(limit);
 
-export const searchSistemasAcueducto = async (searchTerm) => {
-  return {
-    sistemas: [
-      { id_sistema_acueducto: 1, nombre: 'Test Sistema', descripcion: 'Test Description' }
-    ],
-    total: 1,
-    searchTerm
-  };
-};
+    const { count, rows } = await SistemaAcueducto.findAndCountAll({
+      where: whereClause,
+      order: [['nombre', 'ASC']],
+      limit: parseInt(limit),
+      offset: offset
+    });
+
+    return {
+      sistemas: rows,
+      total: count,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(count / parseInt(limit))
+    };
+  }
+
+  async getSistemaAcueductoById(id) {
+    const SistemaAcueducto = this.getModel();
+    const sistema = await SistemaAcueducto.findByPk(id);
+    
+    if (!sistema) {
+      throw new Error('Sistema de acueducto no encontrado');
+    }
+    
+    return sistema;
+  }
+
+  async updateSistemaAcueducto(id, updateData) {
+    const SistemaAcueducto = this.getModel();
+    const sistema = await SistemaAcueducto.findByPk(id);
+    
+    if (!sistema) {
+      throw new Error('Sistema de acueducto no encontrado');
+    }
+
+    try {
+      await sistema.update(updateData);
+      return sistema;
+    } catch (error) {
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        throw new Error('Ya existe un sistema de acueducto con ese nombre');
+      }
+      throw error;
+    }
+  }
+
+  async deleteSistemaAcueducto(id) {
+    const SistemaAcueducto = this.getModel();
+    const sistema = await SistemaAcueducto.findByPk(id);
+    
+    if (!sistema) {
+      throw new Error('Sistema de acueducto no encontrado');
+    }
+
+    await sistema.destroy();
+    return { message: 'Sistema de acueducto eliminado exitosamente' };
+  }
+
+  async searchSistemasAcueducto(searchTerm) {
+    return await this.getAllSistemasAcueducto({ search: searchTerm });
+  }
+}
+
+// Crear instancia del servicio
+const sistemaAcueductoService = new SistemaAcueductoService();
+
+// Exportar métodos como funciones
+export const createSistemaAcueducto = (data) => sistemaAcueductoService.createSistemaAcueducto(data);
+export const getAllSistemasAcueducto = (options) => sistemaAcueductoService.getAllSistemasAcueducto(options);
+export const getSistemaAcueductoById = (id) => sistemaAcueductoService.getSistemaAcueductoById(id);
+export const updateSistemaAcueducto = (id, updateData) => sistemaAcueductoService.updateSistemaAcueducto(id, updateData);
+export const deleteSistemaAcueducto = (id) => sistemaAcueductoService.deleteSistemaAcueducto(id);
+export const searchSistemasAcueducto = (searchTerm) => sistemaAcueductoService.searchSistemasAcueducto(searchTerm);
 
 export const getSistemasByName = async (nombre) => {
   return [
