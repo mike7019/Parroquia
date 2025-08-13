@@ -37,27 +37,16 @@ router.post('/', veredaController.createVereda);
  * /api/catalog/veredas:
  *   get:
  *     summary: Get all veredas
+ *     description: Obtiene una lista completa de veredas con opciones de filtrado y búsqueda
  *     tags: [Veredas]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Items per page
- *       - in: query
  *         name: search
  *         schema:
  *           type: string
- *         description: Search term
+ *         description: Search term (nombre o código de vereda)
  *       - in: query
  *         name: municipioId
  *         schema:
@@ -79,6 +68,28 @@ router.post('/', veredaController.createVereda);
  *     responses:
  *       200:
  *         description: Veredas retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Veredas retrieved successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     veredas:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Vereda'
+ *                     total:
+ *                       type: integer
+ *                     filters:
+ *                       type: object
  *       500:
  *         description: Server error
  */

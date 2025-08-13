@@ -65,13 +65,11 @@ class VeredaController {
   }
 
   /**
-   * Get all veredas
+   * Get all veredas (sin paginación)
    */
   async getAllVeredas(req, res) {
     try {
       const {
-        page = 1,
-        limit = 10,
         search,
         municipioId,
         sortBy = 'id_vereda',
@@ -79,8 +77,6 @@ class VeredaController {
       } = req.query;
 
       const result = await veredaService.getAllVeredas({
-        page: parseInt(page),
-        limit: parseInt(limit),
         search,
         municipioId,
         sortBy,

@@ -31,41 +31,19 @@ class EstudioController {
   }
 
   /**
-   * Obtener todos los estudios con filtros
+   * Obtener todos los estudios con filtros (sin paginación)
    * GET /api/catalog/estudios
    */
   async getAll(req, res) {
     try {
       const {
-        page = 1,
-        limit = 10,
         search = '',
         includeInactive = 'false',
         orderBy = 'ordenNivel',
         orderDirection = 'ASC'
       } = req.query;
 
-      // Validaciones
-      const pageNum = parseInt(page);
-      const limitNum = parseInt(limit);
-
-      if (isNaN(pageNum) || pageNum < 1) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'El número de página debe ser un entero positivo'
-        });
-      }
-
-      if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'El límite debe ser un número entre 1 y 100'
-        });
-      }
-
       const options = {
-        page: pageNum,
-        limit: limitNum,
         search: search.trim(),
         includeInactive: includeInactive === 'true',
         orderBy,
@@ -77,10 +55,9 @@ class EstudioController {
       res.status(200).json({
         status: 'success',
         data: result.estudios,
-        pagination: result.pagination,
+        total: result.total,
         filters: result.filters,
-        total: result.pagination.totalItems,
-        message: `${result.estudios.length} estudios encontrados`
+        message: `${result.total} estudios encontrados`
       });
     } catch (error) {
       console.error('Error en getAll estudios:', error);

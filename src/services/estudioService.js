@@ -41,20 +41,17 @@ class EstudioService {
   }
 
   /**
-   * Obtener todos los estudios con filtros y paginación
+   * Obtener todos los estudios con filtros (sin paginación)
    */
   async getAllEstudios(options = {}) {
     try {
       const {
-        page = 1,
-        limit = 10,
         search = '',
         includeInactive = false,
         orderBy = 'ordenNivel',
         orderDirection = 'ASC'
       } = options;
 
-      const offset = (page - 1) * limit;
       const whereClause = {};
 
       // Filtro de búsqueda
@@ -85,26 +82,14 @@ class EstudioService {
         order.push(['orden_nivel', 'ASC'], ['nivel', 'ASC']);
       }
 
-      const { count, rows } = await Estudio.findAndCountAll({
+      const estudios = await Estudio.findAll({
         where: whereClause,
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-        order,
-        distinct: true
+        order
       });
 
-      const totalPages = Math.ceil(count / limit);
-
       return {
-        estudios: rows,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages,
-          totalItems: count,
-          itemsPerPage: parseInt(limit),
-          hasNext: page < totalPages,
-          hasPrev: page > 1
-        },
+        estudios,
+        total: estudios.length,
         filters: {
           search,
           includeInactive,

@@ -141,27 +141,12 @@ router.get('/stats', AuthMiddleware.authenticateToken, EstudioController.getStat
  * @swagger
  * /api/catalog/estudios:
  *   get:
- *     summary: Listar estudios
- *     description: Obtiene una lista paginada de estudios con opciones de filtrado y búsqueda
+ *     summary: Listar todos los estudios
+ *     description: Obtiene una lista completa de estudios con opciones de filtrado y búsqueda
  *     tags: [Estudios]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           minimum: 1
- *           default: 1
- *         description: Número de página
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           minimum: 1
- *           maximum: 100
- *           default: 10
- *         description: Elementos por página
  *       - in: query
  *         name: search
  *         schema:
@@ -202,8 +187,6 @@ router.get('/stats', AuthMiddleware.authenticateToken, EstudioController.getStat
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Estudio'
- *                 pagination:
- *                   $ref: '#/components/schemas/Pagination'
  *                 filters:
  *                   type: object
  *                   properties:

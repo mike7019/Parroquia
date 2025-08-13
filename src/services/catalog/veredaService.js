@@ -49,13 +49,11 @@ class VeredaService {
   }
 
   /**
-   * Get all veredas with pagination and search
+   * Get all veredas with filters (sin paginación)
    */
   async getAllVeredas(options = {}) {
     try {
       const {
-        page = 1,
-        limit = 10,
         search = null,
         municipioId = null,
         sortBy = 'id_vereda',
@@ -75,23 +73,19 @@ class VeredaService {
         where.id_municipio_municipios = municipioId;
       }
 
-      const offset = (page - 1) * limit;
-
-      const result = await Veredas.findAndCountAll({
+      const veredas = await Veredas.findAll({
         where,
-        order: [[sortBy, sortOrder]],
-        limit: parseInt(limit),
-        offset: parseInt(offset)
+        order: [[sortBy, sortOrder]]
       });
 
       return {
-        veredas: result.rows,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(result.count / limit),
-          totalCount: result.count,
-          hasNext: page * limit < result.count,
-          hasPrev: page > 1
+        veredas,
+        total: veredas.length,
+        filters: {
+          search,
+          municipioId,
+          sortBy,
+          sortOrder
         }
       };
     } catch (error) {
