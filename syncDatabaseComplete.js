@@ -68,6 +68,66 @@ async function loadMainModels() {
   return models;
 }
 
+// Función para limpiar tablas duplicadas vacías
+async function cleanDuplicateTables() {
+  console.log('\n🧹 Limpiando tablas duplicadas y obsoletas...');
+  
+  const tablesToClean = [
+    'sexo',           // Usar 'sexos' (plural)
+    'sector',         // Usar 'sectores' (plural)  
+    'parroquia',      // Usar 'parroquias' (plural)
+    'tipo_identificacion', // Usar 'tipos_identificacion' (plural)
+    'tipo_viviendas', // Usar 'tipos_vivienda' (con formato correcto)
+    'families',       // Usar 'familias' (en español)
+    'comunidad_cultural' // Usar 'comunidades_culturales' (plural)
+  ];
+
+  let tablesDeleted = 0;
+  let tablesSkipped = 0;
+
+  for (const tableName of tablesToClean) {
+    try {
+      // Verificar si la tabla existe
+      const [tableExists] = await sequelize.query(`
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = '${tableName}'
+      `);
+
+      if (tableExists.length > 0) {
+        // Verificar si la tabla tiene datos
+        const [rowCount] = await sequelize.query(`SELECT COUNT(*) as count FROM "${tableName}"`);
+        const count = parseInt(rowCount[0].count);
+
+        if (count === 0) {
+          // Tabla vacía, eliminar de forma segura
+          await sequelize.query(`DROP TABLE IF EXISTS "${tableName}" CASCADE`);
+          console.log(`  ✅ Eliminada tabla vacía: ${tableName}`);
+          tablesDeleted++;
+        } else {
+          console.log(`  ⚠️  Saltando tabla ${tableName} (contiene ${count} registros)`);
+          tablesSkipped++;
+        }
+      } else {
+        console.log(`  ℹ️  Tabla ${tableName} no existe (ya fue eliminada)`);
+      }
+    } catch (error) {
+      console.warn(`  ❌ Error procesando tabla ${tableName}:`, error.message);
+    }
+  }
+
+  console.log(`\n📊 Resumen de limpieza:`);
+  console.log(`  - Tablas eliminadas: ${tablesDeleted}`);
+  console.log(`  - Tablas saltadas: ${tablesSkipped}`);
+  console.log(`  - Total procesadas: ${tablesToClean.length}`);
+  
+  if (tablesDeleted > 0) {
+    console.log('✅ Base de datos limpiada exitosamente');
+  } else {
+    console.log('ℹ️  No se eliminaron tablas (ya estaba limpia)');
+  }
+}
+
 async function syncDatabase() {
   try {
     console.log('🔄 Iniciando sincronización completa de la base de datos...');
@@ -84,6 +144,9 @@ async function syncDatabase() {
     });
     
     console.log(`\n📈 Total de modelos: ${Object.keys(allModels).length}`);
+    
+    // Limpiar tablas duplicadas antes de sincronizar
+    await cleanDuplicateTables();
     
     // Sincronización básica (no elimina datos existentes)
     console.log('\n🔄 Sincronizando modelos con la base de datos...');
@@ -213,7 +276,16 @@ const args = process.argv.slice(2);
 const mode = args[0] || 'basic';
 
 // Solo ejecutar la sincronización si este archivo se ejecuta directamente (no cuando se importa)
-if (process.argv[1] === new URL(import.meta.url).pathname) {
+const currentFilePath = fileURLToPath(import.meta.url);
+const executedFilePath = process.argv[1];
+
+console.log('🔍 Debug paths:');
+console.log('  - Current file:', currentFilePath);
+console.log('  - Executed file:', executedFilePath);
+console.log('  - Are equal:', currentFilePath === executedFilePath);
+
+if (currentFilePath === executedFilePath) {
+  console.log('🚀 Ejecutando sincronización en modo:', mode);
   switch (mode) {
     case 'alter':
       syncDatabaseWithAlter();
@@ -226,6 +298,8 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
       syncDatabase();
       break;
   }
+} else {
+  console.log('📦 Archivo importado como módulo, no ejecutando sincronización');
 }
 
 // Función para cargar todos los modelos sin sincronizar (para usar en app.js)
