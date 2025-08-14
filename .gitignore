@@ -159,3 +159,6 @@ ecosystem.json
 # Generated documentation (si usas herramientas de generación de docs)
 api-docs/
 docs/generated/
+
+# Archivos archivados durante cleanup
+archive/
