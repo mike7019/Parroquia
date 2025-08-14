@@ -13,9 +13,12 @@ module.exports = (sequelize) => {
       field: 'id_talla'
     },
     tipo_prenda: {
-      type: DataTypes.ENUM('zapato', 'camisa', 'pantalon'),
+      type: DataTypes.STRING(20),
       allowNull: false,
       field: 'tipo_prenda',
+      validate: {
+        isIn: [['zapato', 'camisa', 'pantalon']]
+      },
       comment: 'Tipo de prenda: zapato, camisa o pantalón'
     },
     talla: {
@@ -31,10 +34,13 @@ module.exports = (sequelize) => {
       comment: 'Descripción adicional de la talla'
     },
     genero: {
-      type: DataTypes.ENUM('masculino', 'femenino', 'unisex'),
+      type: DataTypes.STRING(20),
       allowNull: false,
       defaultValue: 'unisex',
       field: 'genero',
+      validate: {
+        isIn: [['masculino', 'femenino', 'unisex']]
+      },
       comment: 'Género para el cual aplica la talla'
     },
     equivalencia_numerica: {

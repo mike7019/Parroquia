@@ -53,7 +53,7 @@ const FamilyMember = sequelize.define('FamilyMember', {
     }
   },
   sexo: {
-    type: DataTypes.ENUM('M', 'F', 'Otro'),
+    type: DataTypes.STRING(10),
     allowNull: false,
     validate: {
       isIn: [['M', 'F', 'Otro']]

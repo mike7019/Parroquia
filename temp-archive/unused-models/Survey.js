@@ -85,9 +85,12 @@ const Survey = sequelize.define('Survey', {
   },
   // Survey status
   status: {
-    type: DataTypes.ENUM('draft', 'in_progress', 'completed', 'cancelled'),
+    type: DataTypes.STRING(20),
     allowNull: false,
-    defaultValue: 'draft'
+    defaultValue: 'draft',
+    validate: {
+      isIn: [['draft', 'in_progress', 'completed', 'cancelled']]
+    }
   },
   currentStage: {
     type: DataTypes.INTEGER,

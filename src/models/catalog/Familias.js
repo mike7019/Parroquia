@@ -42,9 +42,12 @@ const Familias = sequelize.define('Familias', {
     allowNull: false
   },
   estado_encuesta: {
-    type: DataTypes.ENUM('pending', 'in_progress', 'completed'),
+    type: DataTypes.STRING(20),
     allowNull: false,
-    defaultValue: 'pending'
+    defaultValue: 'pending',
+    validate: {
+      isIn: [['pending', 'in_progress', 'completed']]
+    }
   },
   numero_encuestas: {
     type: DataTypes.INTEGER,

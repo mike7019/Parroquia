@@ -63,10 +63,13 @@ const Family = sequelize.define('Family', {
     }
   },
   surveyStatus: {
-    type: DataTypes.ENUM('pending', 'in_progress', 'completed'),
+    type: DataTypes.STRING(20),
     allowNull: false,
     field: 'survey_status',
-    defaultValue: 'pending'
+    defaultValue: 'pending',
+    validate: {
+      isIn: [['pending', 'in_progress', 'completed']]
+    }
   },
   surveysCount: {
     type: DataTypes.INTEGER,
