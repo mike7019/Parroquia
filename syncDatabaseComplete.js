@@ -75,7 +75,7 @@ async function cleanDuplicateTables() {
   const tablesToClean = [
     'sexo',           // Usar 'sexos' (plural)
     'sector',         // Usar 'sectores' (plural)  
-    'parroquia',      // Usar 'parroquias' (plural)
+    'parroquias',     // ✅ Eliminar (tabla redundante, usar 'parroquia' singular)
     'tipo_identificacion', // Usar 'tipos_identificacion' (plural)
     'tipo_viviendas', // Usar 'tipos_vivienda' (con formato correcto)
     'families',       // Usar 'familias' (en español)

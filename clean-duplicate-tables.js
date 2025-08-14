@@ -1,5 +1,13 @@
 /**
- * Script independiente para limpiar tablas duplicadas
+ * Sc  const duplicateTables = [
+    { old: 'sexo', new: 'sexos', description: 'Catálogo de sexos' },
+    { old: 'sector', new: 'sectores', description: 'Catálogo de sectores' },
+    { old: 'parroquias', new: 'parroquia', description: 'Catálogo de parroquias (usar singular)' },
+    { old: 'tipo_identificacion', new: 'tipos_identificacion', description: 'Tipos de identificación' },
+    { old: 'tipo_viviendas', new: 'tipos_vivienda', description: 'Tipos de vivienda' },
+    { old: 'families', new: 'familias', description: 'Registro de familias' },
+    { old: 'comunidad_cultural', new: 'comunidades_culturales', description: 'Comunidades culturales' }
+  ];pendiente para limpiar tablas duplicadas
  * Ejecuta solo la limpieza sin hacer sync completo
  */
 import sequelize from './config/sequelize.js';
