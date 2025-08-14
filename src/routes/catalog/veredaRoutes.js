@@ -115,12 +115,6 @@ router.get('/', veredaController.getAllVeredas);
  *         schema:
  *           type: integer
  *         description: Filter by municipio
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 20
- *         description: Maximum results
  *     responses:
  *       200:
  *         description: Search completed successfully

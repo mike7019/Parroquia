@@ -242,7 +242,7 @@ class VeredaController {
    */
   async searchVeredas(req, res) {
     try {
-      const { q, municipioId, limit = 20 } = req.query;
+      const { q, municipioId } = req.query;
 
       if (!q || q.length < 2) {
         return res.status(400).json(
@@ -254,7 +254,7 @@ class VeredaController {
         );
       }
 
-      const veredas = await veredaService.searchVeredas(q, { municipioId, limit });
+      const veredas = await veredaService.searchVeredas(q, { municipioId });
 
       res.json(
         createSuccessResponse(

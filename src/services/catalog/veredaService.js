@@ -8,17 +8,24 @@ class VeredaService {
    */
   async findOrCreateVereda(veredaData) {
     try {
+      // Build where conditions dynamically
+      const whereConditions = [
+        { nombre: veredaData.nombre }
+      ];
+      
+      // Only add codigo_vereda condition if it's provided
+      if (veredaData.codigo_vereda) {
+        whereConditions.push({ codigo_vereda: veredaData.codigo_vereda });
+      }
+      
       const [vereda, created] = await Veredas.findOrCreate({
         where: {
-          [Op.or]: [
-            { nombre: veredaData.nombre },
-            { codigo_vereda: veredaData.codigo_vereda }
-          ]
+          [Op.or]: whereConditions
         },
         defaults: {
           nombre: veredaData.nombre,
-          codigo_vereda: veredaData.codigo_vereda,
-          id_municipio_municipios: veredaData.id_municipio
+          codigo_vereda: veredaData.codigo_vereda || null,
+          id_municipio_municipios: veredaData.id_municipio || null
         }
       });
 
@@ -38,8 +45,8 @@ class VeredaService {
     try {
       const vereda = await Veredas.create({
         nombre: veredaData.nombre,
-        codigo_vereda: veredaData.codigo_vereda,
-        id_municipio_municipios: veredaData.id_municipio
+        codigo_vereda: veredaData.codigo_vereda || null,
+        id_municipio_municipios: veredaData.id_municipio || null
       });
 
       return vereda;
@@ -229,7 +236,7 @@ class VeredaService {
    */
   async searchVeredas(searchTerm, options = {}) {
     try {
-      const { limit = 20, municipioId = null } = options;
+      const { municipioId = null } = options;
       
       const where = {
         [Op.or]: [
@@ -244,8 +251,7 @@ class VeredaService {
 
       const veredas = await Veredas.findAll({
         where,
-        order: [['nombre', 'ASC']],
-        limit: parseInt(limit)
+        order: [['nombre', 'ASC']]
       });
 
       return veredas;
