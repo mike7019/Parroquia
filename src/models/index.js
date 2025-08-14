@@ -15,6 +15,7 @@ import TipoVivienda from './catalog/TipoVivienda.js';
 import Parentesco from './catalog/Parentesco.js';
 import SituacionCivil from './catalog/SituacionCivil.js';
 import Estudio from './catalog/Estudio.js';
+import Talla from './catalog/Talla.js';
 
 // Create User alias for compatibility
 const User = Usuario;
@@ -133,7 +134,8 @@ export default {
   Municipios,
   Departamentos,
   Familias,
-  Parentesco
+  Parentesco,
+  Talla
 };
 
 // Define associations between Usuario and Role
@@ -169,5 +171,6 @@ export {
   TipoVivienda,
   Parentesco,
   SituacionCivil,
-  Estudio
+  Estudio,
+  Talla
 };
