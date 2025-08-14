@@ -45,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'FamiliaTipoAguasResiduales',
-    tableName: 'familia_tipo_aguas_residuales',
+    tableName: 'familia_sistema_aguas_residuales',
     timestamps: true,
     indexes: [
       {

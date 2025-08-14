@@ -15,7 +15,7 @@ const Sexo = sequelize.define('Sexo', {
 }, {
   sequelize,
   modelName: 'Sexo',
-  tableName: 'sexo',
+  tableName: 'sexos',
   timestamps: false
 });
 

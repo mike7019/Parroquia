@@ -15,7 +15,7 @@ const Sector = sequelize.define('Sector', {
 }, {
   sequelize,
   modelName: 'Sector',
-  tableName: 'sector',
+  tableName: 'sectores',
   timestamps: false
 });
 
