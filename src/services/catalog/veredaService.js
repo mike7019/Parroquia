@@ -199,56 +199,28 @@ class VeredaService {
     try {
       const where = veredaId ? { id_vereda: veredaId } : {};
 
-      const statistics = await Veredas.findAll({
+      const totalVeredas = await Veredas.count({ where });
+      
+      const veredas = await Veredas.findAll({
         where,
-        attributes: [
-          'id_vereda',
-          'nombre',
-          'codigo_vereda',
-          [sequelize.fn('COUNT', sequelize.col('personas.id')), 'personasCount'],
-          [sequelize.fn('COUNT', sequelize.col('sectores.id')), 'sectoresCount']
-        ],
-        include: [
-          {
-            association: 'personas',
-            attributes: [],
-            required: false
-          },
-          {
-            association: 'sectores',
-            attributes: [],
-            required: false
-          },
-          {
-            association: 'municipio',
-            attributes: ['id_municipio', 'nombre'],
-            required: false
-          }
-        ],
-        group: [
-          'Veredas.id_vereda', 
-          'Veredas.nombre', 
-          'Veredas.codigo_vereda',
-          'municipio.id_municipio',
-          'municipio.nombre'
-        ],
-        raw: true
+        attributes: ['id_vereda', 'nombre', 'codigo_vereda', 'id_municipio_municipios'],
+        order: [['nombre', 'ASC']]
       });
 
-      if (veredaId) {
-        return statistics[0] || null;
-      }
-
-      const summary = {
-        totalVeredas: statistics.length,
-        totalPersonas: statistics.reduce((sum, v) => sum + parseInt(v.personasCount || 0), 0),
-        totalSectores: statistics.reduce((sum, v) => sum + parseInt(v.sectoresCount || 0), 0),
-        detailedStats: statistics
+      const statistics = {
+        totalVeredas,
+        veredas: veredas.map(vereda => ({
+          id: vereda.id_vereda,
+          nombre: vereda.nombre,
+          codigo: vereda.codigo_vereda,
+          municipioId: vereda.id_municipio_municipios
+        })),
+        lastUpdated: new Date().toISOString()
       };
 
-      return summary;
+      return statistics;
     } catch (error) {
-      throw new Error(`Error calculating vereda statistics: ${error.message}`);
+      throw new Error(`Error getting vereda statistics: ${error.message}`);
     }
   }
 
@@ -273,14 +245,7 @@ class VeredaService {
       const veredas = await Veredas.findAll({
         where,
         order: [['nombre', 'ASC']],
-        limit: parseInt(limit),
-        include: [
-          {
-            association: 'municipio',
-            attributes: ['id', 'nombre'],
-            required: false
-          }
-        ]
+        limit: parseInt(limit)
       });
 
       return veredas;
