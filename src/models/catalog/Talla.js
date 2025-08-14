@@ -12,8 +12,11 @@ const Talla = sequelize.define('Talla', {
     autoIncrement: true
   },
   tipo_prenda: {
-    type: DataTypes.ENUM('zapato', 'camisa', 'pantalon'),
-    allowNull: false
+    type: DataTypes.STRING(20),
+    allowNull: false,
+    validate: {
+      isIn: [['zapato', 'camisa', 'pantalon']]
+    }
   },
   talla: {
     type: DataTypes.STRING(20),
