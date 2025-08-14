@@ -10,7 +10,7 @@ class VeredaService {
     try {
       // Build where conditions dynamically
       const whereConditions = [
-        { nombre: veredaData.nombre }
+        { nombre_vereda: veredaData.nombre || veredaData.nombre_vereda }
       ];
       
       // Only add codigo_vereda condition if it's provided
@@ -23,7 +23,8 @@ class VeredaService {
           [Op.or]: whereConditions
         },
         defaults: {
-          nombre: veredaData.nombre,
+          nombre: veredaData.nombre || veredaData.nombre_vereda,
+          nombre_vereda: veredaData.nombre_vereda || veredaData.nombre,
           codigo_vereda: veredaData.codigo_vereda || null,
           id_municipio_municipios: veredaData.id_municipio || null
         }
@@ -72,6 +73,7 @@ class VeredaService {
       if (search) {
         where[Op.or] = [
           { nombre: { [Op.iLike]: `%${search}%` } },
+          { nombre_vereda: { [Op.iLike]: `%${search}%` } },
           { codigo_vereda: { [Op.iLike]: `%${search}%` } }
         ];
       }
@@ -130,7 +132,14 @@ class VeredaService {
 
       const updateFields = {};
       
-      if (updateData.nombre !== undefined) updateFields.nombre = updateData.nombre;
+      if (updateData.nombre !== undefined) {
+        updateFields.nombre = updateData.nombre;
+        updateFields.nombre_vereda = updateData.nombre; // Mantener sincronizados
+      }
+      if (updateData.nombre_vereda !== undefined) {
+        updateFields.nombre_vereda = updateData.nombre_vereda;
+        updateFields.nombre = updateData.nombre_vereda; // Mantener sincronizados
+      }
       if (updateData.codigo_vereda !== undefined) updateFields.codigo_vereda = updateData.codigo_vereda;
       if (updateData.id_municipio !== undefined) updateFields.id_municipio_municipios = updateData.id_municipio;
 
@@ -210,8 +219,8 @@ class VeredaService {
       
       const veredas = await Veredas.findAll({
         where,
-        attributes: ['id_vereda', 'nombre', 'codigo_vereda', 'id_municipio_municipios'],
-        order: [['nombre', 'ASC']]
+        attributes: ['id_vereda', 'nombre', 'nombre_vereda', 'codigo_vereda', 'id_municipio_municipios'],
+        order: [['nombre_vereda', 'ASC']]
       });
 
       const statistics = {
@@ -241,6 +250,7 @@ class VeredaService {
       const where = {
         [Op.or]: [
           { nombre: { [Op.iLike]: `%${searchTerm}%` } },
+          { nombre_vereda: { [Op.iLike]: `%${searchTerm}%` } },
           { codigo_vereda: { [Op.iLike]: `%${searchTerm}%` } }
         ]
       };
