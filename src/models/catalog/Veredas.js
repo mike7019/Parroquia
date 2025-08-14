@@ -12,10 +12,6 @@ const Veredas = sequelize.define('Veredas', {
     type: DataTypes.STRING(255),
     allowNull: false
   },
-  nombre_vereda: {
-    type: DataTypes.STRING(255),
-    allowNull: true // Permitir null inicialmente para la migración
-  },
   codigo_vereda: {
     type: DataTypes.STRING(50),
     allowNull: true,
@@ -43,27 +39,7 @@ const Veredas = sequelize.define('Veredas', {
   tableName: 'veredas',
   timestamps: true,
   createdAt: 'created_at',
-  updatedAt: 'updated_at',
-  hooks: {
-    // Sincronizar nombre_vereda con nombre al crear
-    beforeCreate: (vereda, options) => {
-      if (!vereda.nombre_vereda && vereda.nombre) {
-        vereda.nombre_vereda = vereda.nombre;
-      }
-      if (!vereda.nombre && vereda.nombre_vereda) {
-        vereda.nombre = vereda.nombre_vereda;
-      }
-    },
-    // Sincronizar nombre_vereda con nombre al actualizar
-    beforeUpdate: (vereda, options) => {
-      if (vereda.changed('nombre') && !vereda.changed('nombre_vereda')) {
-        vereda.nombre_vereda = vereda.nombre;
-      }
-      if (vereda.changed('nombre_vereda') && !vereda.changed('nombre')) {
-        vereda.nombre = vereda.nombre_vereda;
-      }
-    }
-  }
+  updatedAt: 'updated_at'
 });
 
 export default Veredas;
