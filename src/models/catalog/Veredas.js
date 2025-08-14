@@ -25,11 +25,11 @@ const Veredas = sequelize.define('Veredas', {
       key: 'id_municipio'
     }
   },
-  id_sector_sector: {
+  id_sector: {
     type: DataTypes.BIGINT,
     allowNull: true,
     references: {
-      model: 'sector',
+      model: 'sectores',
       key: 'id_sector'
     }
   }
