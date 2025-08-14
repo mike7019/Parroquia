@@ -1,7 +1,3 @@
-/**
- * Modelo Talla para operaciones de catálogo
- * Maneja tallas de zapatos, camisas y pantalones para asignar a personas
- */
 import { DataTypes } from 'sequelize';
 import sequelize from '../../../config/sequelize.js';
 
@@ -44,30 +40,12 @@ const Talla = sequelize.define('Talla', {
     defaultValue: true
   }
 }, {
+  sequelize,
+  modelName: 'Talla',
   tableName: 'tallas',
   timestamps: true,
-  underscored: true,
   createdAt: 'created_at',
-  updatedAt: 'updated_at',
-  indexes: [
-    {
-      unique: true,
-      fields: ['tipo_prenda', 'talla', 'genero'],
-      name: 'unique_talla_tipo_genero'
-    },
-    {
-      fields: ['tipo_prenda'],
-      name: 'idx_tallas_tipo_prenda'
-    },
-    {
-      fields: ['genero'],
-      name: 'idx_tallas_genero'
-    },
-    {
-      fields: ['activo'],
-      name: 'idx_tallas_activo'
-    }
-  ]
+  updatedAt: 'updated_at'
 });
 
 export default Talla;
