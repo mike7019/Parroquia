@@ -1,0 +1,1572 @@
+{
+	"info": {
+		"_postman_id": "catalog-services-2025",
+		"name": "Parroquia - Servicios de Catálogo",
+		"description": "Colección completa de todos los servicios de catálogo de la aplicación Parroquia. Incluye 18 servicios con operaciones CRUD completas.\n\n## Servicios Incluidos:\n- Profesiones\n- Enfermedades\n- Sistemas de Acueducto\n- Departamentos\n- Municipios\n- Sexos\n- Sectores\n- Parroquias\n- Veredas\n- Tipos de Identificación\n- Disposición de Basura\n- Aguas Residuales\n- Estudios\n- Comunidades Culturales\n- Parentescos\n- Situaciones Civiles\n- Tipos de Vivienda\n- Tallas\n\n## Formato de Respuesta Estandarizado:\nTodos los endpoints GET retornan:\n```json\n{\n  \"status\": \"success\",\n  \"data\": [...],\n  \"total\": number,\n  \"message\": \"Se encontraron X registros\"\n}\n```",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "🔐 Autenticación",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.token) {",
+									"        pm.collectionVariables.set('authToken', response.token);",
+									"        console.log('Token guardado:', response.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"correo_electronico\": \"admin@test.com\",\n  \"contrasena\": \"Admin123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						},
+						"description": "Endpoint para autenticación. El token se guarda automáticamente en las variables de colección."
+					}
+				}
+			],
+			"description": "Endpoints de autenticación necesarios para acceder a los servicios de catálogo."
+		},
+		{
+			"name": "👥 Profesiones",
+			"item": [
+				{
+					"name": "Obtener todas las profesiones",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/profesiones",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "profesiones"]
+						},
+						"description": "Obtiene la lista completa de profesiones disponibles."
+					}
+				},
+				{
+					"name": "Obtener profesión por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/profesiones/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "profesiones", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nueva profesión",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Ingeniero de Software\",\n  \"descripcion\": \"Profesional especializado en desarrollo de software\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/profesiones",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "profesiones"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar profesión",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Ingeniero de Software Senior\",\n  \"descripcion\": \"Profesional senior en desarrollo de software\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/profesiones/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "profesiones", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar profesión",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/profesiones/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "profesiones", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🏥 Enfermedades",
+			"item": [
+				{
+					"name": "Obtener todas las enfermedades",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/enfermedades",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "enfermedades"]
+						}
+					}
+				},
+				{
+					"name": "Obtener enfermedad por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/enfermedades/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "enfermedades", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nueva enfermedad",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Hipertensión\",\n  \"descripcion\": \"Enfermedad cardiovascular\",\n  \"tipo\": \"crónica\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/enfermedades",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "enfermedades"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar enfermedad",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Hipertensión Arterial\",\n  \"descripcion\": \"Enfermedad cardiovascular crónica\",\n  \"tipo\": \"crónica\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/enfermedades/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "enfermedades", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar enfermedad",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/enfermedades/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "enfermedades", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "💧 Sistemas de Acueducto",
+			"item": [
+				{
+					"name": "Obtener todos los sistemas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/sistemas-acueducto",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "sistemas-acueducto"]
+						}
+					}
+				},
+				{
+					"name": "Obtener sistema por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/sistemas-acueducto/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "sistemas-acueducto", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nuevo sistema",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Acueducto Municipal\",\n  \"descripcion\": \"Sistema de acueducto municipal\",\n  \"tipo\": \"municipal\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/sistemas-acueducto",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "sistemas-acueducto"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar sistema",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Acueducto Municipal Central\",\n  \"descripcion\": \"Sistema de acueducto municipal central\",\n  \"tipo\": \"municipal\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/sistemas-acueducto/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "sistemas-acueducto", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar sistema",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/sistemas-acueducto/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "sistemas-acueducto", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🗺️ Departamentos",
+			"item": [
+				{
+					"name": "Obtener todos los departamentos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/departamentos",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "departamentos"]
+						}
+					}
+				},
+				{
+					"name": "Obtener departamento por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/departamentos/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "departamentos", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nuevo departamento",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Nuevo Departamento\",\n  \"codigo_dane\": \"99\",\n  \"region\": \"Región Sur\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/departamentos",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "departamentos"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar departamento",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Departamento Actualizado\",\n  \"codigo_dane\": \"99\",\n  \"region\": \"Región Sur\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/departamentos/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "departamentos", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar departamento",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/departamentos/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "departamentos", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🏙️ Municipios",
+			"item": [
+				{
+					"name": "Obtener todos los municipios",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/municipios",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "municipios"]
+						}
+					}
+				},
+				{
+					"name": "Obtener municipio por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/municipios/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "municipios", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nuevo municipio",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre_municipio\": \"Nuevo Municipio\",\n  \"codigo_dane\": \"99001\",\n  \"id_departamento\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/municipios",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "municipios"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar municipio",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre_municipio\": \"Municipio Actualizado\",\n  \"codigo_dane\": \"99001\",\n  \"id_departamento\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/municipios/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "municipios", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar municipio",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/municipios/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "municipios", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "⚧️ Sexos",
+			"item": [
+				{
+					"name": "Obtener todos los sexos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/sexos",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "sexos"]
+						}
+					}
+				},
+				{
+					"name": "Obtener sexo por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/sexos/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "sexos", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nuevo sexo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"No binario\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/sexos",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "sexos"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar sexo",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Género No Binario\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/sexos/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "sexos", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar sexo",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/sexos/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "sexos", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🏘️ Sectores",
+			"item": [
+				{
+					"name": "Obtener todos los sectores",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/sectors",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "sectors"]
+						}
+					}
+				},
+				{
+					"name": "Obtener sector por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/sectors/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "sectors", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nuevo sector",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Sector Norte\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/sectors",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "sectors"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar sector",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Sector Norte Central\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/sectors/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "sectors", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar sector",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/sectors/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "sectors", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "⛪ Parroquias",
+			"item": [
+				{
+					"name": "Obtener todas las parroquias",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/parroquias",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "parroquias"]
+						}
+					}
+				},
+				{
+					"name": "Obtener parroquia por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/parroquias/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "parroquias", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nueva parroquia",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Nueva Parroquia\",\n  \"id_municipio\": 1,\n  \"descripcion\": \"Descripción de la parroquia\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/parroquias",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "parroquias"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar parroquia",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Parroquia Actualizada\",\n  \"id_municipio\": 1,\n  \"descripcion\": \"Descripción actualizada\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/parroquias/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "parroquias", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar parroquia",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/parroquias/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "parroquias", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🌾 Veredas",
+			"item": [
+				{
+					"name": "Obtener todas las veredas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/veredas",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "veredas"]
+						}
+					}
+				},
+				{
+					"name": "Obtener vereda por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/veredas/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "veredas", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nueva vereda",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Nueva Vereda\",\n  \"codigo\": \"VER001\",\n  \"id_municipio\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/veredas",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "veredas"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar vereda",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Vereda Actualizada\",\n  \"codigo\": \"VER001\",\n  \"id_municipio\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/veredas/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "veredas", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar vereda",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/veredas/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "veredas", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🆔 Tipos de Identificación",
+			"item": [
+				{
+					"name": "Obtener todos los tipos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/tipos-identificacion",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "tipos-identificacion"]
+						}
+					}
+				},
+				{
+					"name": "Obtener tipo por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/tipos-identificacion/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "tipos-identificacion", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nuevo tipo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Pasaporte\",\n  \"codigo\": \"PA\",\n  \"descripcion\": \"Documento de identidad internacional\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/tipos-identificacion",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "tipos-identificacion"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar tipo",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Pasaporte Internacional\",\n  \"codigo\": \"PA\",\n  \"descripcion\": \"Documento de identidad para viajes internacionales\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/tipos-identificacion/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "tipos-identificacion", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar tipo",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/tipos-identificacion/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "tipos-identificacion", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🗑️ Disposición de Basura",
+			"item": [
+				{
+					"name": "Obtener todos los tipos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/disposicion-basura/tipos",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "disposicion-basura", "tipos"]
+						}
+					}
+				},
+				{
+					"name": "Obtener tipo por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/disposicion-basura/tipos/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "disposicion-basura", "tipos", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nuevo tipo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Reciclaje\",\n  \"descripcion\": \"Separación y reciclaje de residuos\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/disposicion-basura/tipos",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "disposicion-basura", "tipos"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar tipo",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Reciclaje Selectivo\",\n  \"descripcion\": \"Separación selectiva y reciclaje de residuos\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/disposicion-basura/tipos/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "disposicion-basura", "tipos", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar tipo",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/disposicion-basura/tipos/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "disposicion-basura", "tipos", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🌊 Aguas Residuales",
+			"item": [
+				{
+					"name": "Obtener todos los tipos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/aguas-residuales",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "aguas-residuales"]
+						}
+					}
+				},
+				{
+					"name": "Obtener tipo por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/aguas-residuales/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "aguas-residuales", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nuevo tipo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Pozo Séptico\",\n  \"descripcion\": \"Sistema de tratamiento individual\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/aguas-residuales",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "aguas-residuales"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar tipo",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Sistema de Pozo Séptico\",\n  \"descripcion\": \"Sistema de tratamiento individual de aguas residuales\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/aguas-residuales/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "aguas-residuales", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar tipo",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/aguas-residuales/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "aguas-residuales", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🎓 Estudios",
+			"item": [
+				{
+					"name": "Obtener todos los estudios",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/estudios",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "estudios"]
+						}
+					}
+				},
+				{
+					"name": "Obtener estudio por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/estudios/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "estudios", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nuevo estudio",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nivel\": \"Maestría\",\n  \"descripcion\": \"Nivel de postgrado en especialización\",\n  \"ordenNivel\": 6,\n  \"activo\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/estudios",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "estudios"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar estudio",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nivel\": \"Maestría Profesional\",\n  \"descripcion\": \"Nivel de postgrado profesional\",\n  \"ordenNivel\": 6,\n  \"activo\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/estudios/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "estudios", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar estudio",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/estudios/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "estudios", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🎭 Comunidades Culturales",
+			"item": [
+				{
+					"name": "Obtener todas las comunidades",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/comunidades-culturales",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "comunidades-culturales"]
+						}
+					}
+				},
+				{
+					"name": "Obtener comunidad por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/comunidades-culturales/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "comunidades-culturales", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nueva comunidad",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Comunidad Wayuu\",\n  \"descripcion\": \"Comunidad indígena del norte de Colombia\",\n  \"activo\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/comunidades-culturales",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "comunidades-culturales"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar comunidad",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Comunidad Wayuu - La Guajira\",\n  \"descripcion\": \"Comunidad indígena del departamento de La Guajira\",\n  \"activo\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/comunidades-culturales/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "comunidades-culturales", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar comunidad",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/comunidades-culturales/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "comunidades-culturales", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "👨‍👩‍👧‍👦 Parentescos",
+			"item": [
+				{
+					"name": "Obtener todos los parentescos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/parentescos",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "parentescos"]
+						}
+					}
+				},
+				{
+					"name": "Obtener parentesco por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/parentescos/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "parentescos", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nuevo parentesco",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Primo\",\n  \"descripcion\": \"Hijo del tío o tía\",\n  \"activo\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/parentescos",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "parentescos"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar parentesco",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Primo hermano\",\n  \"descripcion\": \"Hijo del hermano o hermana de los padres\",\n  \"activo\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/parentescos/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "parentescos", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar parentesco",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/parentescos/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "parentescos", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "💒 Situaciones Civiles",
+			"item": [
+				{
+					"name": "Obtener todas las situaciones",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/situaciones-civiles",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "situaciones-civiles"]
+						}
+					}
+				},
+				{
+					"name": "Obtener situación por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/situaciones-civiles/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "situaciones-civiles", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nueva situación",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Unión Libre\",\n  \"codigo\": \"UL\",\n  \"descripcion\": \"Pareja en unión libre\",\n  \"orden\": 5,\n  \"activo\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/situaciones-civiles",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "situaciones-civiles"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar situación",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Unión Libre de Hecho\",\n  \"codigo\": \"UL\",\n  \"descripcion\": \"Pareja en convivencia sin matrimonio civil\",\n  \"orden\": 5,\n  \"activo\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/situaciones-civiles/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "situaciones-civiles", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar situación",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/situaciones-civiles/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "situaciones-civiles", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🏠 Tipos de Vivienda",
+			"item": [
+				{
+					"name": "Obtener todos los tipos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/tipos-vivienda",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "tipos-vivienda"]
+						}
+					}
+				},
+				{
+					"name": "Obtener tipo por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/tipos-vivienda/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "tipos-vivienda", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nuevo tipo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Apartamento\",\n  \"descripcion\": \"Vivienda en edificio multifamiliar\",\n  \"activo\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/tipos-vivienda",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "tipos-vivienda"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar tipo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Apartamento Residencial\",\n  \"descripcion\": \"Vivienda en conjunto residencial\",\n  \"activo\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/tipos-vivienda/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "tipos-vivienda", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar tipo",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/tipos-vivienda/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "tipos-vivienda", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "👕 Tallas",
+			"item": [
+				{
+					"name": "Obtener todas las tallas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/tallas",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "tallas"]
+						}
+					}
+				},
+				{
+					"name": "Obtener talla por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/tallas/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "tallas", "1"]
+						}
+					}
+				},
+				{
+					"name": "Crear nueva talla",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"XXL\",\n  \"descripcion\": \"Talla extra extra grande\",\n  \"tipo_prenda\": \"camisa\",\n  \"genero\": \"unisex\",\n  \"activo\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/tallas",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "tallas"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar talla",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"XXL - Extra Grande\",\n  \"descripcion\": \"Talla extra extra grande para todo tipo de prenda\",\n  \"tipo_prenda\": \"camisa\",\n  \"genero\": \"unisex\",\n  \"activo\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/tallas/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "tallas", "1"]
+						}
+					}
+				},
+				{
+					"name": "Eliminar talla",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/catalog/tallas/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "catalog", "tallas", "1"]
+						}
+					}
+				}
+			]
+		}
+	]
+}
