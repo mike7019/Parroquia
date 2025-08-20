@@ -67,7 +67,11 @@ class VeredaService {
         include: [{
           model: sequelize.models.Municipios,
           as: 'municipio',
-          attributes: ['id_municipio', 'nombre_municipio', 'codigo_dane'],
+          attributes: [
+            'id_municipio',
+            ['nombre_municipio', 'nombre'],
+            ['codigo_dane', 'codigo']
+          ],
           required: false
         }],
         order: [['id_vereda', 'ASC']]
@@ -98,7 +102,11 @@ class VeredaService {
         include: [{
           model: sequelize.models.Municipios,
           as: 'municipio',
-          attributes: ['id_municipio', 'nombre_municipio', 'codigo_dane'],
+          attributes: [
+            'id_municipio',
+            ['nombre_municipio', 'nombre'],
+            ['codigo_dane', 'codigo']
+          ],
           required: false
         }]
       });
@@ -177,7 +185,11 @@ class VeredaService {
         include: [{
           model: sequelize.models.Municipios,
           as: 'municipio',
-          attributes: ['id_municipio', 'nombre_municipio', 'codigo_dane'],
+          attributes: [
+            'id_municipio',
+            ['nombre_municipio', 'nombre'],
+            ['codigo_dane', 'codigo']
+          ],
           required: false
         }],
         order: [['nombre', 'ASC']]
@@ -244,7 +256,11 @@ class VeredaService {
         include: [{
           model: sequelize.models.Municipios,
           as: 'municipio',
-          attributes: ['id_municipio', 'nombre_municipio', 'codigo_dane'],
+          attributes: [
+            'id_municipio',
+            ['nombre_municipio', 'nombre'],
+            ['codigo_dane', 'codigo']
+          ],
           required: false
         }],
         order: [['nombre', 'ASC']]
