@@ -59,16 +59,6 @@ const disposicionBasuraValidators = {
    * Validaciones para parámetros de consulta
    */
   validateQuery: [
-    query('page')
-      .optional()
-      .isInt({ min: 1 })
-      .withMessage('La página debe ser un número entero positivo'),
-    
-    query('limit')
-      .optional()
-      .isInt({ min: 1, max: 100 })
-      .withMessage('El límite debe ser un número entero entre 1 y 100'),
-    
     query('search')
       .optional()
       .isLength({ max: 255 })

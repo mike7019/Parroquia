@@ -74,14 +74,6 @@ const validateTipoPrendaParam = [
 ];
 
 const validateQueryParams = [
-  query('page')
-    .optional()
-    .isInt({ min: 1 })
-    .withMessage('page debe ser un número entero positivo'),
-  query('limit')
-    .optional()
-    .isInt({ min: 1, max: 100 })
-    .withMessage('limit debe ser un número entre 1 y 100'),
   query('tipo_prenda')
     .optional()
     .isIn(['zapato', 'camisa', 'pantalon'])
@@ -241,19 +233,6 @@ const validateQueryParams = [
  *         schema:
  *           type: boolean
  *         description: Filtrar por estado activo
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           minimum: 1
- *         description: Número de página
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           minimum: 1
- *           maximum: 100
- *         description: Elementos por página
  *     responses:
  *       200:
  *         description: Lista de tallas obtenida exitosamente
@@ -269,25 +248,9 @@ const validateQueryParams = [
  *                   type: string
  *                   example: "Tallas obtenidas exitosamente"
  *                 data:
- *                   type: object
- *                   properties:
- *                     tallas:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/Talla'
- *                     pagination:
- *                       type: object
- *                       properties:
- *                         currentPage:
- *                           type: integer
- *                         totalPages:
- *                           type: integer
- *                         totalItems:
- *                           type: integer
- *                         hasNext:
- *                           type: boolean
- *                         hasPrev:
- *                           type: boolean
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Talla'
  *       401:
  *         description: Token no proporcionado o inválido
  *       500:

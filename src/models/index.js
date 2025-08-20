@@ -88,13 +88,13 @@ Persona.belongsTo(Veredas, {
 
 // Sector associations
 Sector.hasMany(Veredas, {
-  foreignKey: 'id_sector_sector',
+  foreignKey: 'id_sector',
   targetKey: 'id_sector',
   as: 'veredas'
 });
 
 Veredas.belongsTo(Sector, {
-  foreignKey: 'id_sector_sector',
+  foreignKey: 'id_sector',
   targetKey: 'id_sector',
   as: 'sector'
 });

@@ -1,6 +1,6 @@
 import express from 'express';
-import ParentescoController from '../../controllers/parentescoController.js';
-import AuthMiddleware from '../../middlewares/auth.js';
+import parentescoController from '../../controllers/catalog/parentescoController.js';
+import authMiddleware from '../../middlewares/auth.js';
 
 const router = express.Router();
 
@@ -99,8 +99,8 @@ const router = express.Router();
  */
 // GET /api/parentescos/stats - Obtener estadísticas (debe ir antes que /:id)
 router.get('/stats',
-  AuthMiddleware.authenticateToken,
-  ParentescoController.getParentescoStats
+  authMiddleware.authenticateToken,
+  parentescoController.getParentescosMasUtilizados
 );
 
 /**
@@ -161,8 +161,8 @@ router.get('/stats',
  */
 // GET /api/parentescos - Obtener todos los parentescos
 router.get('/',
-  AuthMiddleware.authenticateToken,
-  ParentescoController.getAllParentescos
+  authMiddleware.authenticateToken,
+  parentescoController.getAllParentescos
 );
 
 /**
@@ -209,8 +209,8 @@ router.get('/',
  */
 // POST /api/parentescos - Crear nuevo parentesco
 router.post('/',
-  AuthMiddleware.authenticateToken,
-  ParentescoController.createParentesco
+  authMiddleware.authenticateToken,
+  parentescoController.createParentesco
 );
 
 /**
@@ -248,8 +248,8 @@ router.post('/',
  */
 // GET /api/parentescos/:id - Obtener parentesco por ID
 router.get('/:id',
-  AuthMiddleware.authenticateToken,
-  ParentescoController.getParentescoById
+  authMiddleware.authenticateToken,
+  parentescoController.getParentescoById
 );
 
 /**
@@ -299,8 +299,8 @@ router.get('/:id',
  */
 // PUT /api/parentescos/:id - Actualizar parentesco
 router.put('/:id',
-  AuthMiddleware.authenticateToken,
-  ParentescoController.updateParentesco
+  authMiddleware.authenticateToken,
+  parentescoController.updateParentesco
 );
 
 /**
@@ -338,8 +338,8 @@ router.put('/:id',
  */
 // DELETE /api/parentescos/:id - Eliminar parentesco (soft delete)
 router.delete('/:id',
-  AuthMiddleware.authenticateToken,
-  ParentescoController.deleteParentesco
+  authMiddleware.authenticateToken,
+  parentescoController.deleteParentesco
 );
 
 /**
@@ -379,8 +379,8 @@ router.delete('/:id',
  */
 // PATCH /api/parentescos/:id/restore - Restaurar parentesco eliminado
 router.patch('/:id/restore',
-  AuthMiddleware.authenticateToken,
-  ParentescoController.restoreParentesco
+  authMiddleware.authenticateToken,
+  parentescoController.deleteParentesco
 );
 
 export default router;

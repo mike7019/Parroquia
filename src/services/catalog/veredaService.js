@@ -1,6 +1,9 @@
-import { Veredas } from '../../models/index.js';
-import { Op } from 'sequelize';
+// import { Veredas } from '../../models/index.js'; // TEMPORALMENTE DESACTIVADO
 import sequelize from '../../../config/sequelize.js';
+import { Op } from 'sequelize';
+
+// Obtener el modelo Veredas desde Sequelize una vez que se cargue
+const getVeredasModel = () => sequelize.models.Veredas;
 
 class VeredaService {
   /**
@@ -18,7 +21,7 @@ class VeredaService {
         whereConditions.push({ codigo_vereda: veredaData.codigo_vereda });
       }
       
-      const [vereda, created] = await Veredas.findOrCreate({
+      const [vereda, created] = await getVeredasModel().findOrCreate({
         where: {
           [Op.or]: whereConditions
         },
@@ -43,7 +46,7 @@ class VeredaService {
    */
   async createVereda(veredaData) {
     try {
-      const vereda = await Veredas.create({
+      const vereda = await getVeredasModel().create({
         nombre: veredaData.nombre,
         codigo_vereda: veredaData.codigo_vereda || null,
         id_municipio_municipios: veredaData.id_municipio || null
@@ -80,21 +83,12 @@ class VeredaService {
         where.id_municipio_municipios = municipioId;
       }
 
-      const veredas = await Veredas.findAll({
+      const veredas = await getVeredasModel().findAll({
         where,
         order: [[sortBy, sortOrder]]
       });
 
-      return {
-        veredas,
-        total: veredas.length,
-        filters: {
-          search,
-          municipioId,
-          sortBy,
-          sortOrder
-        }
-      };
+      return veredas;
     } catch (error) {
       throw new Error(`Error fetching veredas: ${error.message}`);
     }
@@ -105,7 +99,7 @@ class VeredaService {
    */
   async getVeredaById(id) {
     try {
-      const vereda = await Veredas.findByPk(id);
+      const vereda = await getVeredasModel().findByPk(id);
 
       if (!vereda) {
         throw new Error('Vereda not found');
@@ -122,7 +116,7 @@ class VeredaService {
    */
   async updateVereda(id, updateData) {
     try {
-      const vereda = await Veredas.findByPk(id);
+      const vereda = await getVeredasModel().findByPk(id);
       
       if (!vereda) {
         throw new Error('Vereda not found');
@@ -149,13 +143,21 @@ class VeredaService {
    */
   async deleteVereda(id) {
     try {
-      const vereda = await Veredas.findByPk(id);
+      const vereda = await getVeredasModel().findByPk(id);
       
       if (!vereda) {
         throw new Error('Vereda not found');
       }
 
-      // For now, just delete without checking associations
+      // Check if vereda is being used in familias table
+      const familiaCount = await sequelize.models.Familia?.count({
+        where: { id_vereda: id }
+      }) || 0;
+
+      if (familiaCount > 0) {
+        throw new Error('Cannot delete vereda because it is associated with families');
+      }
+
       await vereda.destroy();
       return { message: 'Vereda deleted successfully' };
     } catch (error) {
@@ -168,7 +170,7 @@ class VeredaService {
    */
   async getVeredasByMunicipio(municipioId) {
     try {
-      const veredas = await Veredas.findAll({
+      const veredas = await getVeredasModel().findAll({
         where: { id_municipio_municipios: municipioId },
         order: [['nombre', 'ASC']]
       });
@@ -186,9 +188,9 @@ class VeredaService {
     try {
       const where = veredaId ? { id_vereda: veredaId } : {};
 
-      const totalVeredas = await Veredas.count({ where });
+      const totalVeredas = await getVeredasModel().count({ where });
       
-      const veredas = await Veredas.findAll({
+      const veredas = await getVeredasModel().findAll({
         where,
         attributes: ['id_vereda', 'nombre', 'codigo_vereda', 'id_municipio_municipios'],
         order: [['nombre', 'ASC']]
@@ -229,7 +231,7 @@ class VeredaService {
         where.id_municipio_municipios = municipioId;
       }
 
-      const veredas = await Veredas.findAll({
+      const veredas = await getVeredasModel().findAll({
         where,
         order: [['nombre', 'ASC']]
       });
@@ -245,7 +247,7 @@ class VeredaService {
    */
   async getVeredaDetails(id) {
     try {
-      const vereda = await Veredas.findByPk(id);
+      const vereda = await getVeredasModel().findByPk(id);
 
       if (!vereda) {
         throw new Error('Vereda not found');

@@ -23,7 +23,7 @@ class TallaService {
 
   async getAllTallas(filters = {}) {
     try {
-      const { search, tipo_prenda, genero, activo, page = 1, limit = 50 } = filters;
+      const { search, tipo_prenda, genero, activo } = filters;
       const Talla = this.getModel();
       
       const whereClause = {};
@@ -51,27 +51,17 @@ class TallaService {
         whereClause.activo = activo === 'true' || activo === true;
       }
 
-      const offset = (parseInt(page) - 1) * parseInt(limit);
-
-      const { count, rows } = await Talla.findAndCountAll({
+      const tallas = await Talla.findAll({
         where: whereClause,
         order: [
           ['tipo_prenda', 'ASC'],
           ['genero', 'ASC'],
           ['equivalencia_numerica', 'ASC'],
           ['talla', 'ASC']
-        ],
-        limit: parseInt(limit),
-        offset: offset
+        ]
       });
 
-      return {
-        tallas: rows,
-        total: count,
-        page: parseInt(page),
-        limit: parseInt(limit),
-        totalPages: Math.ceil(count / parseInt(limit))
-      };
+      return tallas;
     } catch (error) {
       console.error('Error en getAllTallas:', error);
       throw new Error(`Error al obtener las tallas: ${error.message}`);

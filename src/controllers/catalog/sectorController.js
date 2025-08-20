@@ -47,16 +47,12 @@ class SectorController {
   async getAllSectors(req, res) {
     try {
       const {
-        page = 1,
-        limit = 10,
         search,
-        sortBy = 'id_sector',
+        sortBy = 'nombre',
         sortOrder = 'ASC'
       } = req.query;
 
-      const result = await sectorService.getAllSectors({
-        page: parseInt(page),
-        limit: parseInt(limit),
+      const sectors = await sectorService.getAllSectors({
         search,
         sortBy,
         sortOrder
@@ -65,7 +61,7 @@ class SectorController {
       res.json(
         createSuccessResponse(
           'Sectors retrieved successfully',
-          result
+          sectors
         )
       );
     } catch (error) {
@@ -188,76 +184,6 @@ class SectorController {
           error.message.includes('not found') ? 'Sector not found' : 'Error deleting sector',
           error.message,
           error.message.includes('not found') ? 'NOT_FOUND' : 'DELETE_ERROR'
-        )
-      );
-    }
-  }
-
-  /**
-   * Bulk create sectors
-   */
-  async bulkCreateSectors(req, res) {
-    try {
-      const { sectors } = req.body;
-
-      if (!sectors || !Array.isArray(sectors) || sectors.length === 0) {
-        return res.status(400).json(
-          createErrorResponse('Array of sectors is required', null, 'VALIDATION_ERROR')
-        );
-      }
-
-      // Validate each sector has required fields
-      for (const sector of sectors) {
-        if (!sector.nombre) {
-          return res.status(400).json(
-            createErrorResponse('All sectors must have a nombre', null, 'VALIDATION_ERROR')
-          );
-        }
-      }
-
-      const createdSectors = await sectorService.bulkCreateSectors(sectors);
-
-      res.status(201).json(
-        createSuccessResponse(
-          `${createdSectors.length} sectores creados exitosamente`,
-          null
-        )
-      );
-    } catch (error) {
-      res.status(500).json(
-        createErrorResponse(
-          'Error bulk creating sectors',
-          error.message,
-          'BULK_CREATE_ERROR'
-        )
-      );
-    }
-  }
-
-  /**
-   * Get sectors statistics
-   */
-  async getSectorsStats(req, res) {
-    try {
-      const totalSectors = await sectorService.getSectorsCount();
-
-      const stats = {
-        total: totalSectors,
-        lastUpdated: new Date().toISOString()
-      };
-
-      res.json(
-        createSuccessResponse(
-          'Sectors statistics retrieved successfully',
-          stats
-        )
-      );
-    } catch (error) {
-      res.status(500).json(
-        createErrorResponse(
-          'Error retrieving sectors statistics',
-          error.message,
-          'STATS_ERROR'
         )
       );
     }

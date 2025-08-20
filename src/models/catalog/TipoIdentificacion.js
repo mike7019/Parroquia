@@ -9,12 +9,13 @@ const TipoIdentificacion = sequelize.define('TipoIdentificacion', {
     autoIncrement: true
   },
   nombre: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(255),
     allowNull: false
   },
   codigo: {
-    type: DataTypes.STRING,
-    allowNull: true
+    type: DataTypes.STRING(10),
+    allowNull: false,
+    unique: true
   },
   descripcion: {
     type: DataTypes.TEXT,

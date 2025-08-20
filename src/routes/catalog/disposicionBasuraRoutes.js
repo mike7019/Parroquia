@@ -140,25 +140,10 @@ const router = express.Router();
  *   get:
  *     tags: [Disposición de Basura]
  *     summary: Obtener todos los tipos de disposición de basura
- *     description: Lista paginada de todos los tipos de disposición de basura con filtros opcionales
+ *     description: Lista de todos los tipos de disposición de basura con filtros opcionales
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           minimum: 1
- *           default: 1
- *         description: Número de página
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           minimum: 1
- *           maximum: 100
- *           default: 10
- *         description: Elementos por página
  *       - in: query
  *         name: search
  *         schema:
@@ -194,16 +179,9 @@ const router = express.Router();
  *                   type: string
  *                   example: "Tipos de disposición de basura obtenidos exitosamente"
  *                 data:
- *                   type: object
- *                   properties:
- *                     tipos:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/TipoDisposicionBasura'
- *                     total:
- *                       type: integer
- *                       description: Total number of items
- *                       example: 15
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/TipoDisposicionBasura'
  *       400:
  *         $ref: '#/components/responses/ValidationError'
  *       401:

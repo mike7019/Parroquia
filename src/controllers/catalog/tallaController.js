@@ -34,16 +34,14 @@ class TallaController {
         search: req.query.search,
         tipo_prenda: req.query.tipo_prenda,
         genero: req.query.genero,
-        activo: req.query.activo,
-        page: req.query.page,
-        limit: req.query.limit
+        activo: req.query.activo
       };
 
-      const result = await tallaService.getAllTallas(filters);
+      const tallas = await tallaService.getAllTallas(filters);
       
       return res.status(200).json(createSuccessResponse(
         'Tallas obtenidas exitosamente',
-        result
+        tallas
       ));
     } catch (error) {
       console.error('Error en getAllTallas:', error);

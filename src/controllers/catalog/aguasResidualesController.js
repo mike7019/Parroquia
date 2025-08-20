@@ -48,23 +48,19 @@ class AguasResidualesController {
       const {
         search,
         sortBy = 'id_tipo_aguas_residuales',
-        sortOrder = 'ASC',
-        page = 1,
-        limit = 10
+        sortOrder = 'ASC'
       } = req.query;
 
-      const result = await aguasResidualesService.getAllTiposAguasResiduales({
+      const tiposAguasResiduales = await aguasResidualesService.getAllTiposAguasResiduales({
         search,
         sortBy,
-        sortOrder,
-        page: parseInt(page),
-        limit: parseInt(limit)
+        sortOrder
       });
 
       res.json(
         createSuccessResponse(
           'Tipos de aguas residuales retrieved successfully',
-          result
+          tiposAguasResiduales
         )
       );
     } catch (error) {

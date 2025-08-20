@@ -54,17 +54,13 @@ class MunicipioController {
   async getAllMunicipios(req, res) {
     try {
       const {
-        page = 1,
-        limit = 10,
         search,
         sortBy = 'nombre_municipio',
         sortOrder = 'ASC',
         id_departamento
       } = req.query;
 
-      const result = await municipioService.getAllMunicipios({
-        page: parseInt(page),
-        limit: parseInt(limit),
+      const municipios = await municipioService.getAllMunicipios({
         search,
         sortBy,
         sortOrder,
@@ -74,7 +70,7 @@ class MunicipioController {
       res.json(
         createSuccessResponse(
           'Municipios retrieved successfully',
-          result
+          municipios
         )
       );
     } catch (error) {

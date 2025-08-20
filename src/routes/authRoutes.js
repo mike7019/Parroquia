@@ -99,7 +99,7 @@ router.post('/register',
  *             $ref: '#/components/schemas/LoginInput'
  *           example:
  *             correo_electronico: "admin@parroquia.com"
- *             contrasena: "admin123"
+ *             contrasena: "Admin123!"
  *     responses:
  *       200:
  *         description: Login exitoso

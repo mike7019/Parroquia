@@ -50,22 +50,6 @@ router.use(authenticateToken);
  *           type: string
  *           description: Descripción del tipo de aguas residuales
  *           example: "Sistema de alcantarillado municipal"
- *     TipoAguasResidualesResponse:
- *       allOf:
- *         - $ref: '#/components/schemas/ApiResponse'
- *         - type: object
- *           properties:
- *             data:
- *               type: object
- *               properties:
- *                 tiposAguasResiduales:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/TipoAguasResiduales'
- *                 total:
- *                   type: integer
- *                   description: Total number of tipos de aguas residuales
- *                   example: 5
  */
 
 /**
@@ -236,7 +220,14 @@ router.get('/stats', aguasResidualesController.getStatistics);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/TipoAguasResidualesResponse'
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/TipoAguasResiduales'
  *       500:
  *         description: Server error
  *         content:

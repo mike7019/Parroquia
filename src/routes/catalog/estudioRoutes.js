@@ -4,8 +4,8 @@
  */
 
 import express from 'express';
-import EstudioController from '../../controllers/estudioController.js';
-import AuthMiddleware from '../../middlewares/auth.js';
+import estudioController from '../../controllers/catalog/estudioController.js';
+import authMiddleware from '../../middlewares/auth.js';
 
 const router = express.Router();
 
@@ -135,7 +135,7 @@ const router = express.Router();
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/stats', AuthMiddleware.authenticateToken, EstudioController.getStats);
+router.get('/stats', authMiddleware.authenticateToken, estudioController.getEstadisticas);
 
 /**
  * @swagger
@@ -207,7 +207,11 @@ router.get('/stats', AuthMiddleware.authenticateToken, EstudioController.getStat
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/', AuthMiddleware.authenticateToken, EstudioController.getAll);
+// GET /api/parentescos - Obtener todos los parentescos
+router.get('/',
+  authMiddleware.authenticateToken,
+  estudioController.getAllEstudios
+);
 
 /**
  * @swagger
@@ -264,7 +268,7 @@ router.get('/', AuthMiddleware.authenticateToken, EstudioController.getAll);
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.post('/', AuthMiddleware.authenticateToken, EstudioController.create);
+router.post('/', authMiddleware.authenticateToken, estudioController.createEstudio);
 
 /**
  * @swagger
@@ -324,7 +328,7 @@ router.post('/', AuthMiddleware.authenticateToken, EstudioController.create);
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/search', AuthMiddleware.authenticateToken, EstudioController.search);
+router.get('/search', authMiddleware.authenticateToken, estudioController.getAllEstudios);
 
 /**
  * @swagger
@@ -374,7 +378,7 @@ router.get('/search', AuthMiddleware.authenticateToken, EstudioController.search
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/:id', AuthMiddleware.authenticateToken, EstudioController.getById);
+router.get('/:id', authMiddleware.authenticateToken, estudioController.getEstudioById);
 
 /**
  * @swagger
@@ -431,7 +435,7 @@ router.get('/:id', AuthMiddleware.authenticateToken, EstudioController.getById);
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.put('/:id', AuthMiddleware.authenticateToken, EstudioController.update);
+router.put('/:id', authMiddleware.authenticateToken, estudioController.updateEstudio);
 
 /**
  * @swagger
@@ -475,7 +479,7 @@ router.put('/:id', AuthMiddleware.authenticateToken, EstudioController.update);
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.delete('/:id', AuthMiddleware.authenticateToken, EstudioController.delete);
+router.delete('/:id', authMiddleware.authenticateToken, estudioController.deleteEstudio);
 
 /**
  * @swagger
@@ -521,6 +525,6 @@ router.delete('/:id', AuthMiddleware.authenticateToken, EstudioController.delete
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.patch('/:id/restore', AuthMiddleware.authenticateToken, EstudioController.restore);
+router.patch('/:id/restore', authMiddleware.authenticateToken, estudioController.deleteEstudio);
 
 export default router;

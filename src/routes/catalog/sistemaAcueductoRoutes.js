@@ -243,7 +243,7 @@ router.get('/statistics', getStatistics);
  *         schema:
  *           type: string
  *           enum: [id_sistema_acueducto, nombre, created_at, updated_at]
- *           default: id_sistema_acueducto
+ *           default: nombre
  *         description: Field to sort by
  *       - in: query
  *         name: sortOrder
@@ -265,17 +265,11 @@ router.get('/statistics', getStatistics);
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: "Sistemas retrieved successfully"
+ *                   example: "Sistemas de acueducto retrieved successfully"
  *                 data:
- *                   type: object
- *                   properties:
- *                     sistemas:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/SistemaAcueducto'
- *                     total:
- *                       type: integer
- *                       example: 5
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/SistemaAcueducto'
  *       500:
  *         description: Server error
  */

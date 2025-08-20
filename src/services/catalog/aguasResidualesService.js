@@ -37,9 +37,7 @@ class AguasResidualesService {
       const {
         search,
         sortBy = 'id_tipo_aguas_residuales',
-        sortOrder = 'ASC',
-        page = 1,
-        limit = 10
+        sortOrder = 'ASC'
       } = options;
 
       const whereClause = {};
@@ -51,25 +49,12 @@ class AguasResidualesService {
         ];
       }
 
-      const offset = (page - 1) * limit;
-
-      const result = await TipoAguasResiduales.findAndCountAll({
+      const tiposAguasResiduales = await TipoAguasResiduales.findAll({
         where: whereClause,
-        order: [[sortBy, sortOrder.toUpperCase()]],
-        limit: parseInt(limit),
-        offset: parseInt(offset)
+        order: [[sortBy, sortOrder.toUpperCase()]]
       });
 
-      return {
-        tiposAguasResiduales: result.rows,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(result.count / limit),
-          totalCount: result.count,
-          hasNext: page * limit < result.count,
-          hasPrev: page > 1
-        }
-      };
+      return tiposAguasResiduales;
     } catch (error) {
       throw new Error(`Error fetching tipos de aguas residuales: ${error.message}`);
     }

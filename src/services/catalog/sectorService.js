@@ -37,19 +37,16 @@ class SectorService {
   }
 
   /**
-   * Get all sectors with pagination and filtering
+   * Get all sectors with filtering
    */
   async getAllSectors(options = {}) {
     try {
       const {
-        page = 1,
-        limit = 10,
         search,
-        sortBy = 'id_sector',
+        sortBy = 'nombre',
         sortOrder = 'ASC'
       } = options;
 
-      const offset = (page - 1) * limit;
       const whereClause = {};
 
       if (search) {
@@ -58,26 +55,12 @@ class SectorService {
         };
       }
 
-      const { count, rows } = await getSectorModel().findAndCountAll({
+      const sectors = await getSectorModel().findAll({
         where: whereClause,
-        order: [[sortBy, sortOrder]],
-        limit: parseInt(limit),
-        offset: parseInt(offset)
+        order: [[sortBy, sortOrder]]
       });
 
-      const totalPages = Math.ceil(count / limit);
-
-      return {
-        sectors: rows,
-        pagination: {
-          totalItems: count,
-          totalPages,
-          currentPage: parseInt(page),
-          itemsPerPage: parseInt(limit),
-          hasNextPage: page < totalPages,
-          hasPreviousPage: page > 1
-        }
-      };
+      return sectors;
     } catch (error) {
       throw new Error(`Error fetching sectors: ${error.message}`);
     }
@@ -129,33 +112,6 @@ class SectorService {
       return true;
     } catch (error) {
       throw new Error(`Error deleting sector: ${error.message}`);
-    }
-  }
-
-  /**
-   * Bulk create sectors
-   */
-  async bulkCreateSectors(sectorsData) {
-    try {
-      const sectors = await getSectorModel().bulkCreate(sectorsData, {
-        validate: true,
-        returning: true
-      });
-      return sectors;
-    } catch (error) {
-      throw new Error(`Error bulk creating sectors: ${error.message}`);
-    }
-  }
-
-  /**
-   * Get sectors count
-   */
-  async getSectorsCount() {
-    try {
-      const count = await getSectorModel().count();
-      return count;
-    } catch (error) {
-      throw new Error(`Error counting sectors: ${error.message}`);
     }
   }
 

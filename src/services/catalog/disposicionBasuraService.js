@@ -7,11 +7,10 @@ import logger from '../../utils/logger.js';
 class DisposicionBasuraService {
   
   /**
-   * Obtener todos los tipos de disposición de basura con paginación
+   * Obtener todos los tipos de disposición de basura
    */
-  async getAllTipos(page = 1, limit = 10, search = null, sortBy = 'nombre', sortOrder = 'ASC') {
+  async getAllTipos(search = null, sortBy = 'nombre', sortOrder = 'ASC') {
     try {
-      const offset = (page - 1) * limit;
       const whereClause = {};
 
       // Agregar filtro de búsqueda si se proporciona
@@ -22,24 +21,12 @@ class DisposicionBasuraService {
         ];
       }
 
-      const { count, rows } = await TipoDisposicionBasura.findAndCountAll({
+      const tipos = await TipoDisposicionBasura.findAll({
         where: whereClause,
-        order: [[sortBy, sortOrder.toUpperCase()]],
-        limit: parseInt(limit),
-        offset: parseInt(offset),
+        order: [[sortBy, sortOrder.toUpperCase()]]
       });
 
-      return {
-        tipos: rows,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(count / limit),
-          totalItems: count,
-          itemsPerPage: parseInt(limit),
-          hasNextPage: page < Math.ceil(count / limit),
-          hasPrevPage: page > 1
-        }
-      };
+      return tipos;
     } catch (error) {
       logger.error('Error getting tipos disposicion basura:', error);
       throw error;

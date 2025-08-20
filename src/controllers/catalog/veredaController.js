@@ -76,7 +76,7 @@ class VeredaController {
         sortOrder = 'ASC'
       } = req.query;
 
-      const result = await veredaService.getAllVeredas({
+      const veredas = await veredaService.getAllVeredas({
         search,
         municipioId,
         sortBy,
@@ -86,7 +86,7 @@ class VeredaController {
       res.json(
         createSuccessResponse(
           'Veredas retrieved successfully',
-          result
+          veredas
         )
       );
     } catch (error) {

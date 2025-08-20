@@ -1,5 +1,9 @@
-import { Departamentos } from '../../models/index.js';
+// import { Departamento } from '../../models/index.js'; // TEMPORALMENTE DESACTIVADO
+import sequelize from '../../../config/sequelize.js';
 import { Op } from 'sequelize';
+
+// Obtener el modelo Departamento desde Sequelize una vez que se cargue
+const getDepartamentoModel = () => sequelize.models.Departamento;
 
 class DepartamentoService {
   /**
@@ -7,7 +11,7 @@ class DepartamentoService {
    */
   async createDepartamento(departamentoData) {
     try {
-      const departamento = await Departamentos.create(departamentoData);
+      const departamento = await getDepartamentoModel().create(departamentoData);
       return departamento;
     } catch (error) {
       throw new Error(`Error creating departamento: ${error.message}`);
@@ -19,7 +23,7 @@ class DepartamentoService {
    */
   async findOrCreateDepartamento(departamentoData) {
     try {
-      const [departamento, created] = await Departamentos.findOrCreate({
+      const [departamento, created] = await getDepartamentoModel().findOrCreate({
         where: { 
           [Op.or]: [
             { nombre: departamentoData.nombre },
@@ -44,7 +48,7 @@ class DepartamentoService {
         page = 1,
         limit = 10,
         search = null,
-        sortBy = 'nombre_municipio',
+        sortBy = 'nombre',
         sortOrder = 'ASC'
       } = options;
 
@@ -53,24 +57,17 @@ class DepartamentoService {
       if (search) {
         where[Op.or] = [
           { nombre: { [Op.iLike]: `%${search}%` } },
-          { codigo_dane: { [Op.iLike]: `%${search}%` } },
-          { region: { [Op.iLike]: `%${search}%` } }
+          { codigo_dane: { [Op.iLike]: `%${search}%` } }
         ];
       }
 
       const offset = (page - 1) * limit;
 
-      const result = await Departamentos.findAndCountAll({
+      const result = await getDepartamentoModel().findAndCountAll({
         where,
         order: [[sortBy, sortOrder]],
         limit: parseInt(limit),
-        offset: parseInt(offset),
-        include: [
-          {
-            association: 'municipios',
-            attributes: ['id_municipio', 'nombre_municipio', 'codigo_dane']
-          }
-        ]
+        offset: parseInt(offset)
       });
 
       return {
@@ -93,14 +90,7 @@ class DepartamentoService {
    */
   async getDepartamentoById(id) {
     try {
-      const departamento = await Departamentos.findByPk(id, {
-        include: [
-          {
-            association: 'municipios',
-            attributes: ['id_municipio', 'nombre_municipio', 'codigo_dane']
-          }
-        ]
-      });
+      const departamento = await getDepartamentoModel().findByPk(id);
 
       if (!departamento) {
         throw new Error('Departamento not found');
@@ -117,14 +107,8 @@ class DepartamentoService {
    */
   async getDepartamentoByCodigoDane(codigo_dane) {
     try {
-      const departamento = await Departamentos.findOne({
-        where: { codigo_dane },
-        include: [
-          {
-            association: 'municipios',
-            attributes: ['id_municipio', 'nombre_municipio', 'codigo_dane']
-          }
-        ]
+      const departamento = await getDepartamentoModel().findOne({
+        where: { codigo_dane }
       });
 
       if (!departamento) {
@@ -142,7 +126,7 @@ class DepartamentoService {
    */
   async updateDepartamento(id, updateData) {
     try {
-      const departamento = await Departamentos.findByPk(id);
+      const departamento = await getDepartamentoModel().findByPk(id);
 
       if (!departamento) {
         throw new Error('Departamento not found');
@@ -161,16 +145,10 @@ class DepartamentoService {
    */
   async deleteDepartamento(id) {
     try {
-      const departamento = await Departamentos.findByPk(id);
+      const departamento = await getDepartamentoModel().findByPk(id);
 
       if (!departamento) {
         throw new Error('Departamento not found');
-      }
-
-      // Verificar si tiene municipios asociados
-      const municipiosCount = await departamento.countMunicipios();
-      if (municipiosCount > 0) {
-        throw new Error('Cannot delete departamento with associated municipios');
       }
 
       await departamento.destroy();
@@ -182,24 +160,43 @@ class DepartamentoService {
   }
 
   /**
-   * Get departamentos by region
+   * Search departamentos
    */
-  async getDepartamentosByRegion(region) {
+  async searchDepartamentos(query, limit = 20) {
     try {
-      const departamentos = await Departamentos.findAll({
-        where: { region },
-        order: [['nombre_municipio', 'ASC']],
-        include: [
-          {
-            association: 'municipios',
-            attributes: ['id_municipio', 'nombre_municipio', 'codigo_dane']
-          }
-        ]
+      if (!query || query.length < 2) {
+        throw new Error('Search query must be at least 2 characters long');
+      }
+
+      const departamentos = await getDepartamentoModel().findAll({
+        where: {
+          [Op.or]: [
+            { nombre: { [Op.iLike]: `%${query}%` } },
+            { codigo_dane: { [Op.iLike]: `%${query}%` } }
+          ]
+        },
+        order: [['nombre', 'ASC']],
+        limit: parseInt(limit)
       });
 
       return departamentos;
     } catch (error) {
-      throw new Error(`Error fetching departamentos by region: ${error.message}`);
+      throw new Error(`Error searching departamentos: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get statistics
+   */
+  async getStatistics() {
+    try {
+      const totalDepartamentos = await getDepartamentoModel().count();
+      
+      return {
+        totalDepartamentos
+      };
+    } catch (error) {
+      throw new Error(`Error getting statistics: ${error.message}`);
     }
   }
 }

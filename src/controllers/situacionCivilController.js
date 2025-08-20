@@ -32,14 +32,12 @@ class SituacionCivilController {
   }
 
   /**
-   * Lista todas las situaciones civiles con paginación y filtros
+   * Lista todas las situaciones civiles con filtros
    * GET /api/catalog/situaciones-civiles
    */
   static async getAll(req, res, next) {
     try {
       const {
-        page = 1,
-        limit = 10,
         search = '',
         includeInactive = 'false',
         orderBy = 'orden',
@@ -47,13 +45,9 @@ class SituacionCivilController {
       } = req.query;
 
       // Validaciones
-      const pageNum = Math.max(1, parseInt(page));
-      const limitNum = Math.min(Math.max(1, parseInt(limit)), 100);
       const includeInactiveBool = includeInactive === 'true';
 
-      const result = await SituacionCivilService.getAllSituacionesCiviles({
-        page: pageNum,
-        limit: limitNum,
+      const situacionesCiviles = await SituacionCivilService.getAllSituacionesCiviles({
         search: search.toString(),
         includeInactive: includeInactiveBool,
         orderBy: orderBy.toString(),
@@ -62,11 +56,8 @@ class SituacionCivilController {
 
       res.status(200).json({
         status: 'success',
-        data: result.situacionesCiviles,
-        pagination: result.pagination,
-        filters: result.filters,
-        total: result.pagination.totalItems,
-        message: `${result.pagination.totalItems} situaciones civiles encontradas`
+        data: situacionesCiviles,
+        message: `${situacionesCiviles.length} situaciones civiles encontradas`
       });
 
     } catch (error) {

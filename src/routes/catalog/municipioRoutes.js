@@ -142,27 +142,16 @@ router.post('/bulk', municipioController.bulkCreateMunicipios);
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Items per page
- *       - in: query
  *         name: search
  *         schema:
  *           type: string
- *         description: Search term for municipio name
+ *         description: Search term for municipio name or codigo DANE
  *       - in: query
  *         name: sortBy
  *         schema:
  *           type: string
- *           default: id_municipio
+ *           enum: [id_municipio, nombre_municipio, codigo_dane]
+ *           default: nombre_municipio
  *         description: Field to sort by
  *       - in: query
  *         name: sortOrder
@@ -171,6 +160,11 @@ router.post('/bulk', municipioController.bulkCreateMunicipios);
  *           enum: [ASC, DESC]
  *           default: ASC
  *         description: Sort order
+ *       - in: query
+ *         name: id_departamento
+ *         schema:
+ *           type: integer
+ *         description: Filter by departamento ID
  *     responses:
  *       200:
  *         description: Municipios retrieved successfully
@@ -182,18 +176,15 @@ router.post('/bulk', municipioController.bulkCreateMunicipios);
  *                 - type: object
  *                   properties:
  *                     data:
- *                       type: object
- *                       properties:
- *                         municipios:
- *                           type: array
- *                           items:
- *                             $ref: '#/components/schemas/Municipio'
- *                         total:
- *                           type: integer
- *                           description: Total number of municipios
- *                           example: 50
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Municipio'
  *       500:
  *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/', municipioController.getAllMunicipios);
 

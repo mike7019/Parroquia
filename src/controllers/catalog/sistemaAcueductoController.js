@@ -24,7 +24,7 @@ export const getAllSistemasAcueducto = async (req, res) => {
   try {
     const {
       search,
-      sortBy = 'id_sistema_acueducto',
+      sortBy = 'nombre',
       sortOrder = 'ASC'
     } = req.query;
 
@@ -34,12 +34,12 @@ export const getAllSistemasAcueducto = async (req, res) => {
       sortOrder: sortOrder.toUpperCase()
     };
 
-    const result = await getAllSistemasAcueductoService(options);
+    const sistemas = await getAllSistemasAcueductoService(options);
 
     res.json(
       createSuccessResponse(
         'Sistemas de acueducto retrieved successfully',
-        result
+        sistemas
       )
     );
   } catch (error) {

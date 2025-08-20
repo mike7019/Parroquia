@@ -76,18 +76,6 @@ router.post('/', parroquiaController.createParroquia);
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Items per page
- *       - in: query
  *         name: search
  *         schema:
  *           type: string
@@ -102,7 +90,7 @@ router.post('/', parroquiaController.createParroquia);
  *         schema:
  *           type: string
  *           default: id_parroquia
- *           enum: [id_parroquia, nombre, fecha_creacion, fecha_actualizacion]
+ *           enum: [id_parroquia, nombre]
  *         description: Field to sort by
  *       - in: query
  *         name: sortOrder
@@ -117,7 +105,14 @@ router.post('/', parroquiaController.createParroquia);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ParroquiasListResponse'
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Parroquia'
  *       500:
  *         description: Server error
  *         content:

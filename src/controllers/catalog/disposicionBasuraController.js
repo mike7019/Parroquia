@@ -19,35 +19,30 @@ class DisposicionBasuraController {
 
     try {
       const { 
-        page = 1, 
-        limit = 10, 
         search = null, 
         sortBy = 'nombre', 
         sortOrder = 'ASC' 
       } = req.query;
 
       controllerLogger.info('Getting tipos disposicion basura', {
-        page: parseInt(page),
-        limit: parseInt(limit),
         search,
         sortBy,
         sortOrder
       });
 
-      const result = await DatabaseErrorHandler.executeWithErrorHandling(
-        () => disposicionBasuraService.getAllTipos(page, limit, search, sortBy, sortOrder),
+      const tipos = await DatabaseErrorHandler.executeWithErrorHandling(
+        () => disposicionBasuraService.getAllTipos(search, sortBy, sortOrder),
         { operation: 'get_tipos_disposicion_basura' }
       );
 
       controllerLogger.info('Tipos disposicion basura retrieved successfully', {
-        totalItems: result.pagination.totalItems,
-        currentPage: result.pagination.currentPage
+        totalItems: tipos.length
       });
 
       res.status(200).json({
         status: 'success',
         message: 'Tipos de disposición de basura obtenidos exitosamente',
-        data: result
+        data: tipos
       });
     } catch (error) {
       controllerLogger.error('Error getting tipos disposicion basura', error);

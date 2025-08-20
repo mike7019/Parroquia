@@ -16,12 +16,10 @@ const { SituacionCivil } = sequelize.models;
 class SituacionCivilService {
   
   /**
-   * Obtiene todas las situaciones civiles con paginación y filtros
+   * Obtiene todas las situaciones civiles con filtros
    */
   static async getAllSituacionesCiviles(options = {}) {
     const {
-      page = 1,
-      limit = 10,
       search = '',
       includeInactive = false,
       orderBy = 'orden',
@@ -29,7 +27,6 @@ class SituacionCivilService {
     } = options;
 
     try {
-      const offset = (page - 1) * limit;
       const whereClause = {};
 
       // Filtro de búsqueda
@@ -51,34 +48,16 @@ class SituacionCivilService {
       const orderField = validOrderFields.includes(orderBy) ? orderBy : 'orden';
       const direction = orderDirection.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
 
-      const { count, rows } = await SituacionCivil.findAndCountAll({
+      const situacionesCiviles = await SituacionCivil.findAll({
         where: whereClause,
         order: [
           [orderField, direction],
           ['nombre', 'ASC'] // Orden secundario
         ],
-        limit: parseInt(limit),
-        offset: parseInt(offset),
         paranoid: !includeInactive // Si incluye inactivos, mostrar también eliminados
       });
 
-      return {
-        situacionesCiviles: rows,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(count / limit),
-          totalItems: count,
-          itemsPerPage: parseInt(limit),
-          hasNextPage: page < Math.ceil(count / limit),
-          hasPrevPage: page > 1
-        },
-        filters: {
-          search,
-          includeInactive,
-          orderBy: orderField,
-          orderDirection: direction
-        }
-      };
+      return situacionesCiviles;
 
     } catch (error) {
       console.error('Error en getAllSituacionesCiviles:', error);

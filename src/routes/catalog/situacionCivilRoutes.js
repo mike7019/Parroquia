@@ -151,26 +151,11 @@ router.get('/stats', AuthMiddleware.authenticateToken, SituacionCivilController.
  * /api/catalog/situaciones-civiles:
  *   get:
  *     summary: Listar situaciones civiles
- *     description: Obtiene una lista paginada de situaciones civiles con opciones de filtrado y búsqueda
+ *     description: Obtiene una lista de situaciones civiles con opciones de filtrado y búsqueda
  *     tags: [Situaciones Civiles]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           minimum: 1
- *           default: 1
- *         description: Número de página
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           minimum: 1
- *           maximum: 100
- *           default: 10
- *         description: Elementos por página
  *       - in: query
  *         name: search
  *         schema:
@@ -211,21 +196,6 @@ router.get('/stats', AuthMiddleware.authenticateToken, SituacionCivilController.
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/SituacionCivil'
- *                 pagination:
- *                   $ref: '#/components/schemas/Pagination'
- *                 filters:
- *                   type: object
- *                   properties:
- *                     search:
- *                       type: string
- *                     includeInactive:
- *                       type: boolean
- *                     orderBy:
- *                       type: string
- *                     orderDirection:
- *                       type: string
- *                 total:
- *                   type: integer
  *                 message:
  *                   type: string
  *       401:

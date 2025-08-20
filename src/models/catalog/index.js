@@ -45,12 +45,12 @@ Veredas.belongsTo(Municipios, {
 });
 
 Sector.hasMany(Veredas, {
-    foreignKey: 'id_sector_sector',
+    foreignKey: 'id_sector',
     as: 'veredasBySector'
 });
 
 Veredas.belongsTo(Sector, {
-    foreignKey: 'id_sector_sector',
+    foreignKey: 'id_sector',
     as: 'sector'
 });
 

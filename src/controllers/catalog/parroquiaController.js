@@ -55,17 +55,13 @@ class ParroquiaController {
   async getAllParroquias(req, res) {
     try {
       const {
-        page = 1,
-        limit = 10,
         search,
         sortBy = 'id_parroquia',
         sortOrder = 'ASC',
         id_municipio
       } = req.query;
 
-      const result = await parroquiaService.getAllParroquias({
-        page: parseInt(page),
-        limit: parseInt(limit),
+      const parroquias = await parroquiaService.getAllParroquias({
         search,
         sortBy,
         sortOrder,
@@ -75,7 +71,7 @@ class ParroquiaController {
       res.json(
         createSuccessResponse(
           'Parroquias retrieved successfully',
-          result
+          parroquias
         )
       );
     } catch (error) {

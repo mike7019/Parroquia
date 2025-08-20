@@ -58,13 +58,11 @@ class MunicipioService {
   }
 
   /**
-   * Get all municipios with pagination and search
+   * Get all municipios with search
    */
   async getAllMunicipios(options = {}) {
     try {
       const {
-        page = 1,
-        limit = 10,
         search = null,
         sortBy = 'nombre_municipio',
         sortOrder = 'ASC',
@@ -84,13 +82,9 @@ class MunicipioService {
         where.id_departamento = id_departamento;
       }
 
-      const offset = (page - 1) * limit;
-
-      const result = await Municipios.findAndCountAll({
+      const municipios = await Municipios.findAll({
         where,
         order: [[sortBy, sortOrder]],
-        limit: parseInt(limit),
-        offset: parseInt(offset),
         include: [
           {
             association: 'departamento',
@@ -99,16 +93,7 @@ class MunicipioService {
         ]
       });
 
-      return {
-        municipios: result.rows,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(result.count / limit),
-          totalCount: result.count,
-          hasNext: page * limit < result.count,
-          hasPrev: page > 1
-        }
-      };
+      return municipios;
     } catch (error) {
       throw new Error(`Error fetching municipios: ${error.message}`);
     }

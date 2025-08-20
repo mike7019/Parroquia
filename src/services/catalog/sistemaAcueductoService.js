@@ -37,7 +37,7 @@ class SistemaAcueductoService {
   }
 
   async getAllSistemasAcueducto(options = {}) {
-    const { search, page = 1, limit = 50 } = options;
+    const { search } = options;
     const SistemaAcueducto = this.getModel();
     
     const whereClause = {};
@@ -49,22 +49,12 @@ class SistemaAcueductoService {
       ];
     }
 
-    const offset = (parseInt(page) - 1) * parseInt(limit);
-
-    const { count, rows } = await SistemaAcueducto.findAndCountAll({
+    const sistemas = await SistemaAcueducto.findAll({
       where: whereClause,
-      order: [['nombre', 'ASC']],
-      limit: parseInt(limit),
-      offset: offset
+      order: [['nombre', 'ASC']]
     });
 
-    return {
-      sistemas: rows,
-      total: count,
-      page: parseInt(page),
-      limit: parseInt(limit),
-      totalPages: Math.ceil(count / parseInt(limit))
-    };
+    return sistemas;
   }
 
   async getSistemaAcueductoById(id) {

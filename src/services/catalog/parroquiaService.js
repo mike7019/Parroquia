@@ -77,13 +77,11 @@ class ParroquiaService {
   }
 
   /**
-   * Get all parroquias with pagination and search
+   * Get all parroquias with search
    */
   async getAllParroquias(options = {}) {
     try {
       const {
-        page = 1,
-        limit = 10,
         search = null,
         sortBy = 'id_parroquia',
         sortOrder = 'ASC',
@@ -111,8 +109,6 @@ class ParroquiaService {
         where.id_municipio = id_municipio;
       }
 
-      const offset = (page - 1) * limit;
-
       // Check if associations exist before including them
       const includeOptions = [];
       if (Parroquia.associations && Parroquia.associations.municipio) {
@@ -128,24 +124,13 @@ class ParroquiaService {
         });
       }
 
-      const result = await Parroquia.findAndCountAll({
+      const parroquias = await Parroquia.findAll({
         where,
         order: [[sortBy, sortOrder]],
-        limit: parseInt(limit),
-        offset: parseInt(offset),
         include: includeOptions
       });
 
-      return {
-        parroquias: result.rows,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(result.count / limit),
-          totalCount: result.count,
-          hasNext: page * limit < result.count,
-          hasPrev: page > 1
-        }
-      };
+      return parroquias;
     } catch (error) {
       throw new Error(`Error fetching parroquias: ${error.message}`);
     }
@@ -300,39 +285,10 @@ class ParroquiaService {
    */
   async getParroquiaStatistics() {
     try {
-      const [
-        totalParroquias,
-        parroquiasWithPersonas,
-        totalPersonas
-      ] = await Promise.all([
-        getParroquiaModel().count(),
-        getParroquiaModel().count({
-          include: [{
-            association: 'personas',
-            required: true
-          }]
-        }),
-        getParroquiaModel().findAll({
-          attributes: [
-            'id_parroquia',
-            'nombre',
-            [sequelize.fn('COUNT', sequelize.col('personas.id')), 'personasCount']
-          ],
-          include: [{
-            association: 'personas',
-            attributes: [],
-            required: false
-          }],
-          group: ['getParroquiaModel().id_parroquia', 'getParroquiaModel().nombre'],
-          raw: true
-        })
-      ]);
-
+      const totalParroquias = await getParroquiaModel().count();
+      
       return {
-        totalParroquias,
-        parroquiasWithPersonas,
-        parroquiasWithoutPersonas: totalParroquias - parroquiasWithPersonas,
-        detailedStats: totalPersonas
+        totalParroquias
       };
     } catch (error) {
       throw new Error(`Error calculating parroquia statistics: ${error.message}`);
