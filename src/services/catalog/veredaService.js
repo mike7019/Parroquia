@@ -64,6 +64,12 @@ class VeredaService {
   async getAllVeredas() {
     try {
       const veredas = await getVeredasModel().findAll({
+        include: [{
+          model: sequelize.models.Municipios,
+          as: 'municipio',
+          attributes: ['id_municipio', 'nombre_municipio', 'codigo_dane'],
+          required: false
+        }],
         order: [['id_vereda', 'ASC']]
       });
 
@@ -88,7 +94,14 @@ class VeredaService {
    */
   async getVeredaById(id) {
     try {
-      const vereda = await getVeredasModel().findByPk(id);
+      const vereda = await getVeredasModel().findByPk(id, {
+        include: [{
+          model: sequelize.models.Municipios,
+          as: 'municipio',
+          attributes: ['id_municipio', 'nombre_municipio', 'codigo_dane'],
+          required: false
+        }]
+      });
 
       if (!vereda) {
         throw new Error('Vereda not found');
@@ -161,6 +174,12 @@ class VeredaService {
     try {
       const veredas = await getVeredasModel().findAll({
         where: { id_municipio_municipios: municipioId },
+        include: [{
+          model: sequelize.models.Municipios,
+          as: 'municipio',
+          attributes: ['id_municipio', 'nombre_municipio', 'codigo_dane'],
+          required: false
+        }],
         order: [['nombre', 'ASC']]
       });
 
@@ -222,6 +241,12 @@ class VeredaService {
 
       const veredas = await getVeredasModel().findAll({
         where,
+        include: [{
+          model: sequelize.models.Municipios,
+          as: 'municipio',
+          attributes: ['id_municipio', 'nombre_municipio', 'codigo_dane'],
+          required: false
+        }],
         order: [['nombre', 'ASC']]
       });
 
