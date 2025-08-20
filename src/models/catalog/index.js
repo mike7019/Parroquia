@@ -44,6 +44,8 @@ Veredas.belongsTo(Municipios, {
     as: 'municipio'
 });
 
+// COMENTADO: Asociaciones con Sector que causan problemas porque id_sector no existe en BD
+/*
 Sector.hasMany(Veredas, {
     foreignKey: 'id_sector',
     as: 'veredasBySector'
@@ -53,6 +55,7 @@ Veredas.belongsTo(Sector, {
     foreignKey: 'id_sector',
     as: 'sector'
 });
+*/
 
 // Asociaciones para Disposición de Basura
 TipoDisposicionBasura.hasMany(FamiliaDisposicionBasura, {

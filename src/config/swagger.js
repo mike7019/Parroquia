@@ -1132,20 +1132,9 @@ const swaggerConfig = {
               type: 'integer',
               description: 'ID del municipio (foreign key)',
               example: 1
-            },
-            id_sector_sector: {
-              type: 'integer',
-              description: 'ID del sector (foreign key)',
-              example: 1
-            },
-            municipio: {
-              $ref: '#/components/schemas/Municipio'
-            },
-            sector: {
-              $ref: '#/components/schemas/Sector'
             }
           },
-          required: ['nombre', 'id_municipio_municipios', 'id_sector_sector']
+          required: ['nombre']
         },
         Municipio: {
           type: 'object',
