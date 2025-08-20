@@ -34,7 +34,7 @@ class MunicipioController {
       res.status(201).json(
         createSuccessResponse(
           'Municipio creado exitosamente',
-          null
+          result.municipio
         )
       );
     } catch (error) {
