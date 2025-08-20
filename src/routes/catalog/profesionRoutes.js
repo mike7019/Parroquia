@@ -23,19 +23,6 @@ const router = express.Router();
  *           type: string
  *           description: Descripción de la profesión
  *           example: "Profesional de la salud especializado en diagnóstico y tratamiento"
- *         categoria:
- *           type: string
- *           description: Categoría o área de la profesión
- *           example: "Salud"
- *         nivel_educativo_requerido:
- *           type: string
- *           enum: [Primaria, Secundaria, Técnico, Tecnológico, Universitario, Especialización, Maestría, Doctorado, No requerido]
- *           description: Nivel educativo requerido para ejercer la profesión
- *           example: "Universitario"
- *         activo:
- *           type: boolean
- *           description: Estado de la profesión
- *           example: true
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -58,19 +45,6 @@ const router = express.Router();
  *           type: string
  *           description: Descripción de la profesión
  *           example: "Profesional encargado del desarrollo y mantenimiento de software"
- *         categoria:
- *           type: string
- *           description: Categoría o área de la profesión
- *           example: "Tecnología"
- *         nivel_educativo_requerido:
- *           type: string
- *           enum: [Primaria, Secundaria, Técnico, Tecnológico, Universitario, Especialización, Maestría, Doctorado, No requerido]
- *           description: Nivel educativo requerido
- *           example: "Universitario"
- *         activo:
- *           type: boolean
- *           description: Estado de la profesión
- *           example: true
  *     
  *     ProfesionResponse:
  *       type: object
@@ -93,26 +67,21 @@ const router = express.Router();
  *     ProfesionesListResponse:
  *       type: object
  *       properties:
- *         success:
- *           type: boolean
- *           example: true
+ *         status:
+ *           type: string
+ *           enum: [success, error]
+ *           example: success
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Profesion'
+ *         total:
+ *           type: integer
+ *           description: Total de profesiones
+ *           example: 23
  *         message:
  *           type: string
- *           example: "Profesiones obtenidas exitosamente"
- *         data:
- *           type: object
- *           properties:
- *             profesiones:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Profesion'
- *             total:
- *               type: integer
- *               description: Total de profesiones
- *               example: 50
- *         timestamp:
- *           type: string
- *           format: date-time
+ *           example: "Se encontraron 23 profesiones"
  *     
  *     EstadisticasProfesiones:
  *       type: object
@@ -129,34 +98,6 @@ const router = express.Router();
  *             total:
  *               type: integer
  *               example: 150
- *             activas:
- *               type: integer
- *               example: 140
- *             inactivas:
- *               type: integer
- *               example: 10
- *             porCategoria:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   categoria:
- *                     type: string
- *                     example: "Salud"
- *                   cantidad:
- *                     type: integer
- *                     example: 25
- *             porNivelEducativo:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   nivel:
- *                     type: string
- *                     example: "Universitario"
- *                   cantidad:
- *                     type: integer
- *                     example: 80
  */
 
 /**
@@ -164,36 +105,10 @@ const router = express.Router();
  * /api/catalog/profesiones:
  *   get:
  *     summary: Obtener todas las profesiones
- *     description: Retorna una lista de todas las profesiones con opciones de filtrado y búsqueda
+ *     description: Retorna una lista de todas las profesiones
  *     tags: [Profesiones]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Búsqueda por nombre o descripción
- *         example: "médico"
- *       - in: query
- *         name: categoria
- *         schema:
- *           type: string
- *         description: Filtrar por categoría
- *         example: "Salud"
- *       - in: query
- *         name: nivelEducativo
- *         schema:
- *           type: string
- *           enum: [Primaria, Secundaria, Técnico, Tecnológico, Universitario, Especialización, Maestría, Doctorado, No requerido]
- *         description: Filtrar por nivel educativo requerido
- *         example: "Universitario"
- *       - in: query
- *         name: activo
- *         schema:
- *           type: boolean
- *         description: Filtrar por estado (true para activos, false para inactivos)
- *         example: true
  *     responses:
  *       200:
  *         description: Lista de profesiones obtenida exitosamente
@@ -213,7 +128,7 @@ router.get('/', authMiddleware.authenticateToken, profesionController.getAllProf
  * /api/catalog/profesiones/categorias:
  *   get:
  *     summary: Obtener categorías de profesiones
- *     description: Retorna una lista de todas las categorías de profesiones disponibles
+ *     description: Retorna una lista vacía ya que no se manejan categorías
  *     tags: [Profesiones]
  *     security:
  *       - bearerAuth: []
@@ -238,7 +153,7 @@ router.get('/', authMiddleware.authenticateToken, profesionController.getAllProf
  *                       type: array
  *                       items:
  *                         type: string
- *                       example: ["Salud", "Educación", "Tecnología", "Ingeniería"]
+ *                       example: []
  *       401:
  *         description: No autorizado
  *       500:
@@ -323,17 +238,11 @@ router.get('/:id', authMiddleware.authenticateToken, profesionController.getProf
  *               value:
  *                 nombre: "Médico General"
  *                 descripcion: "Profesional de la salud especializado en medicina general"
- *                 categoria: "Salud"
- *                 nivel_educativo_requerido: "Universitario"
- *                 activo: true
  *             ingeniero:
  *               summary: Ejemplo de Ingeniero
  *               value:
  *                 nombre: "Ingeniero Civil"
  *                 descripcion: "Profesional encargado del diseño y construcción de infraestructuras"
- *                 categoria: "Ingeniería"
- *                 nivel_educativo_requerido: "Universitario"
- *                 activo: true
  *     responses:
  *       201:
  *         description: Profesión creada exitosamente
@@ -382,30 +291,16 @@ router.post('/', authMiddleware.authenticateToken, profesionController.createPro
  *               descripcion:
  *                 type: string
  *                 example: "Médico con especialización en área específica"
- *               categoria:
- *                 type: string
- *                 example: "Salud"
- *               nivel_educativo_requerido:
- *                 type: string
- *                 enum: [Primaria, Secundaria, Técnico, Tecnológico, Universitario, Especialización, Maestría, Doctorado, No requerido]
- *                 example: "Especialización"
- *               activo:
- *                 type: boolean
- *                 example: true
  *           examples:
  *             actualizacion_completa:
  *               summary: Actualización completa
  *               value:
  *                 nombre: "Médico Especialista"
  *                 descripcion: "Médico con especialización en área específica"
- *                 categoria: "Salud"
- *                 nivel_educativo_requerido: "Especialización"
- *                 activo: true
  *             actualizacion_parcial:
  *               summary: Actualización parcial
  *               value:
  *                 descripcion: "Nueva descripción actualizada"
- *                 categoria: "Salud Especializada"
  *     responses:
  *       200:
  *         description: Profesión actualizada exitosamente

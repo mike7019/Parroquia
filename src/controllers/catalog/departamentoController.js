@@ -50,28 +50,8 @@ class DepartamentoController {
    */
   async getAllDepartamentos(req, res) {
     try {
-      const {
-        page = 1,
-        limit = 10,
-        search,
-        sortBy = 'nombre',
-        sortOrder = 'ASC'
-      } = req.query;
-
-      const result = await departamentoService.getAllDepartamentos({
-        page: parseInt(page),
-        limit: parseInt(limit),
-        search,
-        sortBy,
-        sortOrder
-      });
-
-      res.json(
-        createSuccessResponse(
-          'Departamentos retrieved successfully',
-          result
-        )
-      );
+      const result = await departamentoService.getAllDepartamentos();
+      res.json(result);
     } catch (error) {
       res.status(500).json(
         createErrorResponse(

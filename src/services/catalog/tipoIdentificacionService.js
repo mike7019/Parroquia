@@ -33,32 +33,25 @@ class TipoIdentificacionService {
     /**
      * Obtener todos los tipos de identificación
      */
-    async getAllTiposIdentificacion(options = {}) {
+    async getAllTiposIdentificacion() {
         try {
-            const {
-                search = null,
-                sortBy = 'nombre',
-                sortOrder = 'ASC'
-            } = options;
-
-            const where = {};
-            
-            if (search) {
-                where[Op.or] = [
-                    { nombre: { [Op.iLike]: `%${search}%` } },
-                    { descripcion: { [Op.iLike]: `%${search}%` } },
-                    { codigo: { [Op.iLike]: `%${search}%` } }
-                ];
-            }
-
             const tiposIdentificacion = await TipoIdentificacion.findAll({
-                where,
-                order: [[sortBy, sortOrder]]
+                order: [['nombre', 'ASC']]
             });
 
-            return tiposIdentificacion;
+            return {
+                status: 'success',
+                data: tiposIdentificacion,
+                total: tiposIdentificacion.length,
+                message: `Se encontraron ${tiposIdentificacion.length} tipos de identificación`
+            };
         } catch (error) {
-            throw new Error(`Error fetching tipos identificación: ${error.message}`);
+            return {
+                status: 'error',
+                data: [],
+                total: 0,
+                message: `Error al obtener tipos de identificación: ${error.message}`
+            };
         }
     }
 

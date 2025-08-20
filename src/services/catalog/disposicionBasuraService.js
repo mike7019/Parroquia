@@ -1,6 +1,5 @@
 import TipoDisposicionBasura from '../../models/catalog/TipoDisposicionBasura.js';
 import FamiliaDisposicionBasura from '../../models/catalog/FamiliaDisposicionBasura.js';
-import { Op } from 'sequelize';
 import sequelize from '../../../config/sequelize.js';
 import logger from '../../utils/logger.js';
 
@@ -9,27 +8,26 @@ class DisposicionBasuraService {
   /**
    * Obtener todos los tipos de disposición de basura
    */
-  async getAllTipos(search = null, sortBy = 'nombre', sortOrder = 'ASC') {
+  async getAllTipos() {
     try {
-      const whereClause = {};
-
-      // Agregar filtro de búsqueda si se proporciona
-      if (search) {
-        whereClause[Op.or] = [
-          { nombre: { [Op.iLike]: `%${search}%` } },
-          { descripcion: { [Op.iLike]: `%${search}%` } }
-        ];
-      }
-
       const tipos = await TipoDisposicionBasura.findAll({
-        where: whereClause,
-        order: [[sortBy, sortOrder.toUpperCase()]]
+        order: [['nombre', 'ASC']]
       });
 
-      return tipos;
+      return {
+        status: 'success',
+        data: tipos,
+        total: tipos.length,
+        message: `Se encontraron ${tipos.length} tipos de disposición de basura`
+      };
     } catch (error) {
       logger.error('Error getting tipos disposicion basura:', error);
-      throw error;
+      return {
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener tipos de disposición de basura: ${error.message}`
+      };
     }
   }
 
@@ -104,7 +102,7 @@ class DisposicionBasuraService {
         const existingTipo = await TipoDisposicionBasura.findOne({
           where: { 
             nombre: tipoData.nombre,
-            id_tipo_disposicion_basura: { [Op.ne]: id }
+            id_tipo_disposicion_basura: { '!=': id }
           }
         });
 

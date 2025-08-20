@@ -170,33 +170,27 @@ class SexoService {
   }
 
   /**
-   * Get all sexos with search
+   * Get all sexos
    */
-  async getAllSexos(options = {}) {
+  async getAllSexos() {
     try {
-      const {
-        search = null,
-        sortBy = 'id_sexo',
-        sortOrder = 'ASC'
-      } = options;
-
-      const where = {};
-      
-      if (search) {
-        where[Op.or] = [
-          { nombre: { [Op.iLike]: `%${search}%` } },
-          { codigo: { [Op.iLike]: `%${search}%` } }
-        ];
-      }
-
       const sexos = await getSexoModel().findAll({
-        where,
-        order: [[sortBy, sortOrder]]
+        order: [['id_sexo', 'ASC']]
       });
 
-      return sexos;
+      return {
+        status: 'success',
+        data: sexos,
+        total: sexos.length,
+        message: `Se encontraron ${sexos.length} sexos`
+      };
     } catch (error) {
-      throw new Error(`Error fetching sexos: ${error.message}`);
+      return {
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener sexos: ${error.message}`
+      };
     }
   }
 }

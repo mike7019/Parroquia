@@ -186,40 +186,27 @@ router.get('/stats', sexoController.getStatistics);
  *     tags: [Sexos]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Search term for name
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           enum: [id_sexo, nombre]
- *           default: id_sexo
- *         description: Field to sort by
- *       - in: query
- *         name: sortOrder
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *           default: ASC
- *         description: Sort order
  *     responses:
  *       200:
  *         description: Sexos retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               allOf:
- *                 - $ref: '#/components/schemas/ApiResponse'
- *                 - type: object
- *                   properties:
- *                     data:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/Sexo'
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Sexo'
+ *                 total:
+ *                   type: integer
+ *                   example: 3
+ *                 message:
+ *                   type: string
+ *                   example: Se encontraron 3 sexos
  *       500:
  *         description: Server error
  *         content:

@@ -1,6 +1,5 @@
 // import { Departamento } from '../../models/index.js'; // TEMPORALMENTE DESACTIVADO
 import sequelize from '../../../config/sequelize.js';
-import { Op } from 'sequelize';
 
 // Obtener el modelo Departamento desde Sequelize una vez que se cargue
 const getDepartamentoModel = () => sequelize.models.Departamento;
@@ -23,65 +22,50 @@ class DepartamentoService {
    */
   async findOrCreateDepartamento(departamentoData) {
     try {
-      const [departamento, created] = await getDepartamentoModel().findOrCreate({
-        where: { 
-          [Op.or]: [
-            { nombre: departamentoData.nombre },
-            { codigo_dane: departamentoData.codigo_dane }
-          ]
-        },
-        defaults: departamentoData
+      // Verificar si existe por nombre o código DANE
+      let existingDepartamento = await getDepartamentoModel().findOne({
+        where: { nombre: departamentoData.nombre }
       });
 
-      return { departamento, created };
+      if (!existingDepartamento && departamentoData.codigo_dane) {
+        existingDepartamento = await getDepartamentoModel().findOne({
+          where: { codigo_dane: departamentoData.codigo_dane }
+        });
+      }
+
+      if (existingDepartamento) {
+        return { departamento: existingDepartamento, created: false };
+      }
+
+      const departamento = await getDepartamentoModel().create(departamentoData);
+      return { departamento, created: true };
     } catch (error) {
       throw new Error(`Error finding or creating departamento: ${error.message}`);
     }
   }
 
   /**
-   * Get all departamentos with pagination and search
+   * Get all departamentos
    */
-  async getAllDepartamentos(options = {}) {
+  async getAllDepartamentos() {
     try {
-      const {
-        page = 1,
-        limit = 10,
-        search = null,
-        sortBy = 'nombre',
-        sortOrder = 'ASC'
-      } = options;
-
-      const where = {};
-      
-      if (search) {
-        where[Op.or] = [
-          { nombre: { [Op.iLike]: `%${search}%` } },
-          { codigo_dane: { [Op.iLike]: `%${search}%` } }
-        ];
-      }
-
-      const offset = (page - 1) * limit;
-
-      const result = await getDepartamentoModel().findAndCountAll({
-        where,
-        order: [[sortBy, sortOrder]],
-        limit: parseInt(limit),
-        offset: parseInt(offset)
+      const departamentos = await getDepartamentoModel().findAll({
+        order: [['nombre', 'ASC']]
       });
 
       return {
-        departamentos: result.rows,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(result.count / limit),
-          totalCount: result.count,
-          hasNext: page * limit < result.count,
-          hasPrev: page > 1
-        }
+        status: 'success',
+        data: departamentos,
+        total: departamentos.length,
+        message: `Se encontraron ${departamentos.length} departamentos`
       };
     } catch (error) {
-      throw new Error(`Error fetching departamentos: ${error.message}`);
+      return {
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener departamentos: ${error.message}`
+      };
     }
   }
 
@@ -156,32 +140,6 @@ class DepartamentoService {
       return { message: 'Departamento deleted successfully' };
     } catch (error) {
       throw new Error(`Error deleting departamento: ${error.message}`);
-    }
-  }
-
-  /**
-   * Search departamentos
-   */
-  async searchDepartamentos(query, limit = 20) {
-    try {
-      if (!query || query.length < 2) {
-        throw new Error('Search query must be at least 2 characters long');
-      }
-
-      const departamentos = await getDepartamentoModel().findAll({
-        where: {
-          [Op.or]: [
-            { nombre: { [Op.iLike]: `%${query}%` } },
-            { codigo_dane: { [Op.iLike]: `%${query}%` } }
-          ]
-        },
-        order: [['nombre', 'ASC']],
-        limit: parseInt(limit)
-      });
-
-      return departamentos;
-    } catch (error) {
-      throw new Error(`Error searching departamentos: ${error.message}`);
     }
   }
 

@@ -30,33 +30,32 @@ class AguasResidualesService {
   }
 
   /**
-   * Get all tipos de aguas residuales with search
+   * Get all tipos de aguas residuales
    */
   async getAllTiposAguasResiduales(options = {}) {
     try {
       const {
-        search,
         sortBy = 'id_tipo_aguas_residuales',
         sortOrder = 'ASC'
       } = options;
 
-      const whereClause = {};
-      
-      if (search) {
-        whereClause[Op.or] = [
-          { nombre: { [Op.iLike]: `%${search}%` } },
-          { descripcion: { [Op.iLike]: `%${search}%` } }
-        ];
-      }
-
       const tiposAguasResiduales = await TipoAguasResiduales.findAll({
-        where: whereClause,
         order: [[sortBy, sortOrder.toUpperCase()]]
       });
 
-      return tiposAguasResiduales;
+      return {
+        status: 'success',
+        data: tiposAguasResiduales,
+        total: tiposAguasResiduales.length,
+        message: `Se encontraron ${tiposAguasResiduales.length} tipos de aguas residuales`
+      };
     } catch (error) {
-      throw new Error(`Error fetching tipos de aguas residuales: ${error.message}`);
+      return {
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener tipos de aguas residuales: ${error.message}`
+      };
     }
   }
 
@@ -137,30 +136,6 @@ class AguasResidualesService {
       return { message: 'Tipo de aguas residuales deleted successfully' };
     } catch (error) {
       throw new Error(`Error deleting tipo de aguas residuales: ${error.message}`);
-    }
-  }
-
-  /**
-   * Search tipos de aguas residuales
-   */
-  async searchTiposAguasResiduales(searchTerm, options = {}) {
-    try {
-      const { limit = 20 } = options;
-
-      const tiposAguasResiduales = await TipoAguasResiduales.findAll({
-        where: {
-          [Op.or]: [
-            { nombre: { [Op.iLike]: `%${searchTerm}%` } },
-            { descripcion: { [Op.iLike]: `%${searchTerm}%` } }
-          ]
-        },
-        order: [['nombre', 'ASC']],
-        limit: parseInt(limit)
-      });
-
-      return tiposAguasResiduales;
-    } catch (error) {
-      throw new Error(`Error searching tipos de aguas residuales: ${error.message}`);
     }
   }
 

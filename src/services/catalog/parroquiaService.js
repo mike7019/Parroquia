@@ -77,37 +77,11 @@ class ParroquiaService {
   }
 
   /**
-   * Get all parroquias with search
+   * Get all parroquias
    */
-  async getAllParroquias(options = {}) {
+  async getAllParroquias() {
     try {
-      const {
-        search = null,
-        sortBy = 'id_parroquia',
-        sortOrder = 'ASC',
-        id_municipio = null
-      } = options;
-
-      const where = {};
       const Parroquia = getParroquiaModel();
-      const modelAttributes = Object.keys(Parroquia.rawAttributes);
-      
-      if (search) {
-        const searchConditions = [
-          { nombre: { [Op.iLike]: `%${search}%` } }
-        ];
-        
-        // Only add descripcion search if the field exists
-        if (modelAttributes.includes('descripcion')) {
-          searchConditions.push({ descripcion: { [Op.iLike]: `%${search}%` } });
-        }
-        
-        where[Op.or] = searchConditions;
-      }
-
-      if (id_municipio && modelAttributes.includes('id_municipio')) {
-        where.id_municipio = id_municipio;
-      }
 
       // Check if associations exist before including them
       const includeOptions = [];
@@ -125,14 +99,23 @@ class ParroquiaService {
       }
 
       const parroquias = await Parroquia.findAll({
-        where,
-        order: [[sortBy, sortOrder]],
+        order: [['id_parroquia', 'ASC']],
         include: includeOptions
       });
 
-      return parroquias;
+      return {
+        status: 'success',
+        data: parroquias,
+        total: parroquias.length,
+        message: `Se encontraron ${parroquias.length} parroquias`
+      };
     } catch (error) {
-      throw new Error(`Error fetching parroquias: ${error.message}`);
+      return {
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener parroquias: ${error.message}`
+      };
     }
   }
 

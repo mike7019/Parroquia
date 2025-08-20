@@ -10,27 +10,26 @@ class ParentescoService {
   /**
    * Obtener todos los parentescos
    */
-  async getAllParentescos(search = null, sortBy = 'nombre', sortOrder = 'ASC') {
+  async getAllParentescos() {
     try {
-      const whereClause = {};
-
-      // Agregar filtro de búsqueda si se proporciona
-      if (search) {
-        whereClause[Op.or] = [
-          { nombre: { [Op.iLike]: `%${search}%` } },
-          { descripcion: { [Op.iLike]: `%${search}%` } }
-        ];
-      }
-
       const parentescos = await getParentescoModel().findAll({
-        where: whereClause,
-        order: [[sortBy, sortOrder.toUpperCase()]]
+        order: [['nombre', 'ASC']]
       });
 
-      return parentescos;
+      return {
+        status: 'success',
+        data: parentescos,
+        total: parentescos.length,
+        message: `Se encontraron ${parentescos.length} parentescos`
+      };
     } catch (error) {
       logger.error('Error getting parentescos:', error);
-      throw error;
+      return {
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener parentescos: ${error.message}`
+      };
     }
   }
 

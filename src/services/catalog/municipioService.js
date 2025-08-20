@@ -1,5 +1,4 @@
 import { Municipios, Departamentos } from '../../models/catalog/index.js';
-import { Op } from 'sequelize';
 import sequelize from '../../../config/sequelize.js';
 
 class MunicipioService {
@@ -16,19 +15,28 @@ class MunicipioService {
         }
       }
 
-      const [municipio, created] = await Municipios.findOrCreate({
-        where: {
-          [Op.or]: [
-            { nombre_municipio: municipioData.nombre_municipio },
-            { codigo_dane: municipioData.codigo_dane }
-          ]
-        },
-        defaults: municipioData
+      // Verificar si existe por nombre o código DANE
+      let existingMunicipio = await Municipios.findOne({
+        where: { nombre_municipio: municipioData.nombre_municipio }
       });
 
+      if (!existingMunicipio && municipioData.codigo_dane) {
+        existingMunicipio = await Municipios.findOne({
+          where: { codigo_dane: municipioData.codigo_dane }
+        });
+      }
+
+      if (existingMunicipio) {
+        return {
+          municipio: await this.getMunicipioById(existingMunicipio.id_municipio),
+          created: false
+        };
+      }
+
+      const municipio = await Municipios.create(municipioData);
       return {
         municipio: await this.getMunicipioById(municipio.id_municipio),
-        created
+        created: true
       };
     } catch (error) {
       throw new Error(`Error finding or creating municipio: ${error.message}`);
@@ -58,33 +66,12 @@ class MunicipioService {
   }
 
   /**
-   * Get all municipios with search
+   * Get all municipios
    */
-  async getAllMunicipios(options = {}) {
+  async getAllMunicipios() {
     try {
-      const {
-        search = null,
-        sortBy = 'nombre_municipio',
-        sortOrder = 'ASC',
-        id_departamento = null
-      } = options;
-
-      const where = {};
-      
-      if (search) {
-        where[Op.or] = [
-          { nombre_municipio: { [Op.iLike]: `%${search}%` } },
-          { codigo_dane: { [Op.iLike]: `%${search}%` } }
-        ];
-      }
-
-      if (id_departamento) {
-        where.id_departamento = id_departamento;
-      }
-
       const municipios = await Municipios.findAll({
-        where,
-        order: [[sortBy, sortOrder]],
+        order: [['nombre_municipio', 'ASC']],
         include: [
           {
             association: 'departamento',
@@ -93,9 +80,19 @@ class MunicipioService {
         ]
       });
 
-      return municipios;
+      return {
+        status: 'success',
+        data: municipios,
+        total: municipios.length,
+        message: `Se encontraron ${municipios.length} municipios`
+      };
     } catch (error) {
-      throw new Error(`Error fetching municipios: ${error.message}`);
+      return {
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener municipios: ${error.message}`
+      };
     }
   }
 
@@ -234,30 +231,6 @@ class MunicipioService {
       return municipios;
     } catch (error) {
       throw new Error(`Error fetching municipios by departamento: ${error.message}`);
-    }
-  }
-
-  /**
-   * Search municipios by codigo DANE pattern
-   */
-  async searchMunicipiosByCodigoDane(pattern) {
-    try {
-      const municipios = await Municipios.findAll({
-        where: {
-          codigo_dane: { [Op.like]: `${pattern}%` }
-        },
-        order: [['codigo_dane', 'ASC']],
-        include: [
-          {
-            association: 'departamento',
-            attributes: ['id_departamento', 'nombre', 'codigo_dane']
-          }
-        ]
-      });
-
-      return municipios;
-    } catch (error) {
-      throw new Error(`Error searching municipios by codigo DANE: ${error.message}`);
     }
   }
 

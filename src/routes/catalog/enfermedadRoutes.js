@@ -59,55 +59,52 @@ router.post('/', enfermedadController.createEnfermedad);
  * @swagger
  * /api/catalog/enfermedades:
  *   get:
- *     summary: Get all enfermedades with search
+ *     summary: Get all enfermedades
  *     tags: [Enfermedades]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Search term for name or description
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           default: id_enfermedad
- *         description: Field to sort by
- *       - in: query
- *         name: sortOrder
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *           default: ASC
- *         description: Sort order
  *     responses:
  *       200:
  *         description: Enfermedades retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               allOf:
- *                 - $ref: '#/components/schemas/ApiResponse'
- *                 - type: object
- *                   properties:
- *                     data:
- *                       type: object
- *                       properties:
- *                         enfermedades:
- *                           type: array
- *                           items:
- *                             $ref: '#/components/schemas/Enfermedad'
- *                         totalCount:
- *                           type: integer
- *                           description: Total number of enfermedades
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   enum: [success, error]
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Enfermedad'
+ *                 total:
+ *                   type: integer
+ *                   description: Total number of enfermedades
+ *                   example: 30
+ *                 message:
+ *                   type: string
+ *                   example: "Se encontraron 30 enfermedades"
  *       500:
  *         description: Server error
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 data:
+ *                   type: array
+ *                   example: []
+ *                 total:
+ *                   type: integer
+ *                   example: 0
+ *                 message:
+ *                   type: string
+ *                   example: "Error al obtener enfermedades"
  */
 router.get('/', enfermedadController.getAllEnfermedades);
 

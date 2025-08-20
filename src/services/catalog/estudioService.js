@@ -1,4 +1,3 @@
-import { Op } from 'sequelize';
 import sequelize from '../../../config/sequelize.js';
 import logger from '../../utils/logger.js';
 
@@ -10,27 +9,26 @@ class EstudioService {
   /**
    * Obtener todos los estudios
    */
-  async getAllEstudios(search = null, sortBy = 'nombre', sortOrder = 'ASC') {
+  async getAllEstudios() {
     try {
-      const whereClause = {};
-
-      // Agregar filtro de búsqueda si se proporciona
-      if (search) {
-        whereClause[Op.or] = [
-          { nombre: { [Op.iLike]: `%${search}%` } },
-          { descripcion: { [Op.iLike]: `%${search}%` } }
-        ];
-      }
-
       const estudios = await getEstudioModel().findAll({
-        where: whereClause,
-        order: [[sortBy, sortOrder.toUpperCase()]]
+        order: [['nombre', 'ASC']]
       });
 
-      return estudios;
+      return {
+        status: 'success',
+        data: estudios,
+        total: estudios.length,
+        message: `Se encontraron ${estudios.length} estudios`
+      };
     } catch (error) {
       logger.error('Error getting estudios:', error);
-      throw error;
+      return {
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener estudios: ${error.message}`
+      };
     }
   }
 
@@ -105,7 +103,7 @@ class EstudioService {
         const existingEstudio = await getEstudioModel().findOne({
           where: { 
             nombre: estudioData.nombre,
-            id_estudio: { [Op.ne]: id }
+            id_estudio: { '!=': id }
           }
         });
 
@@ -206,22 +204,6 @@ class EstudioService {
       return estadisticas;
     } catch (error) {
       logger.error('Error getting estadisticas estudios:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Buscar estudios por nombre exacto
-   */
-  async findByNombre(nombre) {
-    try {
-      const estudio = await getEstudioModel().findOne({
-        where: { nombre: { [Op.iLike]: nombre } }
-      });
-
-      return estudio;
-    } catch (error) {
-      logger.error(`Error finding estudio by nombre ${nombre}:`, error);
       throw error;
     }
   }

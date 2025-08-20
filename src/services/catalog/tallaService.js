@@ -21,38 +21,11 @@ class TallaService {
     return this.model;
   }
 
-  async getAllTallas(filters = {}) {
+  async getAllTallas() {
     try {
-      const { search, tipo_prenda, genero, activo } = filters;
       const Talla = this.getModel();
-      
-      const whereClause = {};
-      
-      // Filtro por búsqueda en talla y descripción
-      if (search) {
-        whereClause[Op.or] = [
-          { talla: { [Op.iLike]: `%${search}%` } },
-          { descripcion: { [Op.iLike]: `%${search}%` } }
-        ];
-      }
-      
-      // Filtro por tipo de prenda
-      if (tipo_prenda) {
-        whereClause.tipo_prenda = tipo_prenda;
-      }
-      
-      // Filtro por género
-      if (genero) {
-        whereClause.genero = genero;
-      }
-      
-      // Filtro por estado activo
-      if (activo !== undefined) {
-        whereClause.activo = activo === 'true' || activo === true;
-      }
 
       const tallas = await Talla.findAll({
-        where: whereClause,
         order: [
           ['tipo_prenda', 'ASC'],
           ['genero', 'ASC'],
@@ -61,10 +34,20 @@ class TallaService {
         ]
       });
 
-      return tallas;
+      return {
+        status: 'success',
+        data: tallas,
+        total: tallas.length,
+        message: `Se encontraron ${tallas.length} tallas`
+      };
     } catch (error) {
       console.error('Error en getAllTallas:', error);
-      throw new Error(`Error al obtener las tallas: ${error.message}`);
+      return {
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener las tallas: ${error.message}`
+      };
     }
   }
 

@@ -108,52 +108,31 @@ router.get('/stats',
  * /api/catalog/parentescos:
  *   get:
  *     summary: Obtener todos los parentescos
- *     description: |
- *       Recupera una lista de todos los parentescos con opciones avanzadas de filtrado y paginación.
- *       
- *       **Funcionalidades:**
- *       - Filtrado por estado (activo/inactivo)
- *       - Búsqueda por nombre del parentesco
- *       - Paginación configurable
- *       - Ordenamiento alfabético por nombre
- *       
- *       **Datos incluidos por defecto:** 30 tipos de parentesco comunes
+ *     description: Recupera una lista de todos los parentescos
  *     tags: [Parentescos]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: includeInactive
- *         schema:
- *           type: boolean
- *           default: false
- *         description: Incluir parentescos inactivos
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           minimum: 1
- *         description: Número de página para paginación
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           minimum: 1
- *           maximum: 100
- *           default: 10
- *         description: Cantidad de elementos por página
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Buscar por nombre del parentesco
  *     responses:
  *       200:
  *         description: Lista de parentescos obtenida exitosamente
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ParentescosListResponse'
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Parentesco'
+ *                 total:
+ *                   type: integer
+ *                   example: 30
+ *                 message:
+ *                   type: string
+ *                   example: Se encontraron 30 parentescos
  *       401:
  *         description: No autorizado
  *       500:

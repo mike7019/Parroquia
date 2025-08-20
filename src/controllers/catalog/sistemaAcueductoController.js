@@ -4,7 +4,6 @@ import {
   getSistemaAcueductoById as getSistemaAcueductoByIdService,
   updateSistemaAcueducto as updateSistemaAcueductoService,
   deleteSistemaAcueducto as deleteSistemaAcueductoService,
-  searchSistemasAcueducto as searchSistemasAcueductoService,
   getSistemasByName as getSistemasByNameService,
   getUniqueNombres as getUniqueNombresService,
   getStatistics as getStatisticsService,
@@ -22,34 +21,16 @@ import { createSuccessResponse, createErrorResponse } from '../../utils/response
  */
 export const getAllSistemasAcueducto = async (req, res) => {
   try {
-    const {
-      search,
-      sortBy = 'nombre',
-      sortOrder = 'ASC'
-    } = req.query;
+    const result = await getAllSistemasAcueductoService();
 
-    const options = {
-      search,
-      sortBy,
-      sortOrder: sortOrder.toUpperCase()
-    };
-
-    const sistemas = await getAllSistemasAcueductoService(options);
-
-    res.json(
-      createSuccessResponse(
-        'Sistemas de acueducto retrieved successfully',
-        sistemas
-      )
-    );
+    res.json(result);
   } catch (error) {
-    res.status(500).json(
-      createErrorResponse(
-        'Error retrieving sistemas de acueducto',
-        error.message,
-        'FETCH_ERROR'
-      )
-    );
+    res.status(500).json({
+      status: 'error',
+      data: [],
+      total: 0,
+      message: `Error al obtener sistemas de acueducto: ${error.message}`
+    });
   }
 };
 
@@ -214,38 +195,6 @@ export const deleteSistemaAcueducto = async (req, res) => {
         'Error deleting sistema de acueducto',
         error.message,
         'DELETE_ERROR'
-      )
-    );
-  }
-};
-
-/**
- * Search sistemas de acueducto
- */
-export const searchSistemasAcueducto = async (req, res) => {
-  try {
-    const { query } = req.query;
-
-    if (!query) {
-      return res.status(400).json(
-        createErrorResponse('Search query is required', null, 'VALIDATION_ERROR')
-      );
-    }
-
-    const result = await searchSistemasAcueductoService(query);
-
-    res.json(
-      createSuccessResponse(
-        'Search completed successfully',
-        result
-      )
-    );
-  } catch (error) {
-    res.status(500).json(
-      createErrorResponse(
-        'Error performing search',
-        error.message,
-        'SEARCH_ERROR'
       )
     );
   }

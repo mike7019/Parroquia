@@ -140,30 +140,9 @@ const router = express.Router();
  *   get:
  *     tags: [Disposición de Basura]
  *     summary: Obtener todos los tipos de disposición de basura
- *     description: Lista de todos los tipos de disposición de basura con filtros opcionales
+ *     description: Lista de todos los tipos de disposición de basura
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *           maxLength: 255
- *         description: Término de búsqueda (nombre o descripción)
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           enum: [id_tipo_disposicion_basura, nombre, descripcion, created_at, updated_at]
- *           default: nombre
- *         description: Campo por el cual ordenar
- *       - in: query
- *         name: sortOrder
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *           default: ASC
- *         description: Orden de clasificación
  *     responses:
  *       200:
  *         description: Lista de tipos de disposición obtenida exitosamente
@@ -174,14 +153,17 @@ const router = express.Router();
  *               properties:
  *                 status:
  *                   type: string
- *                   example: "success"
- *                 message:
- *                   type: string
- *                   example: "Tipos de disposición de basura obtenidos exitosamente"
+ *                   example: success
  *                 data:
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/TipoDisposicionBasura'
+ *                 total:
+ *                   type: integer
+ *                   example: 12
+ *                 message:
+ *                   type: string
+ *                   example: Se encontraron 12 tipos de disposición de basura
  *       400:
  *         $ref: '#/components/responses/ValidationError'
  *       401:

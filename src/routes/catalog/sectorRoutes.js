@@ -53,33 +53,10 @@ router.post('/', sectorController.createSector);
  * /api/catalog/sectors:
  *   get:
  *     summary: Get all sectors
- *     description: Obtiene todos los sectores con filtros de búsqueda y ordenamiento.
+ *     description: Obtiene todos los sectores
  *     tags: [Sectors]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Término de búsqueda para filtrar por nombre
- *         example: "San José"
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           default: nombre
- *           enum: [nombre, created_at, updated_at]
- *         description: Campo por el cual ordenar los resultados
- *         example: "nombre"
- *       - in: query
- *         name: sortOrder
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *           default: ASC
- *         description: Orden de los resultados
- *         example: "ASC"
  *     responses:
  *       200:
  *         description: Sectores obtenidos exitosamente
@@ -88,13 +65,19 @@ router.post('/', sectorController.createSector);
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
+ *                 status:
+ *                   type: string
+ *                   example: success
  *                 data:
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Sector'
+ *                 total:
+ *                   type: integer
+ *                   example: 15
+ *                 message:
+ *                   type: string
+ *                   example: Se encontraron 15 sectores
  *       500:
  *         description: Error del servidor
  */

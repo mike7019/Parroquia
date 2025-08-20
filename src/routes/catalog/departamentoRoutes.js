@@ -44,44 +44,27 @@ router.post('/', departamentoController.createDepartamento);
  *     tags: [Departamentos]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Number of items per page
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Search term for name, codigo DANE, or region
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           default: nombre
- *         description: Field to sort by
- *       - in: query
- *         name: sortOrder
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *           default: ASC
- *         description: Sort order
  *     responses:
  *       200:
  *         description: Departamentos retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/DepartamentosListResponse'
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Departamento'
+ *                 total:
+ *                   type: integer
+ *                   example: 32
+ *                 message:
+ *                   type: string
+ *                   example: Se encontraron 32 departamentos
  *       500:
  *         description: Server error
  */

@@ -37,32 +37,27 @@ class SectorService {
   }
 
   /**
-   * Get all sectors with filtering
+   * Get all sectors
    */
-  async getAllSectors(options = {}) {
+  async getAllSectors() {
     try {
-      const {
-        search,
-        sortBy = 'nombre',
-        sortOrder = 'ASC'
-      } = options;
-
-      const whereClause = {};
-
-      if (search) {
-        whereClause.nombre = {
-          [Op.iLike]: `%${search}%`
-        };
-      }
-
       const sectors = await getSectorModel().findAll({
-        where: whereClause,
-        order: [[sortBy, sortOrder]]
+        order: [['nombre', 'ASC']]
       });
 
-      return sectors;
+      return {
+        status: 'success',
+        data: sectors,
+        total: sectors.length,
+        message: `Se encontraron ${sectors.length} sectores`
+      };
     } catch (error) {
-      throw new Error(`Error fetching sectors: ${error.message}`);
+      return {
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener sectores: ${error.message}`
+      };
     }
   }
 

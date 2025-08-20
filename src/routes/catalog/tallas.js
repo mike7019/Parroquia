@@ -210,29 +210,6 @@ const validateQueryParams = [
  *     tags: [Tallas]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Buscar por nombre de talla o descripción
- *       - in: query
- *         name: tipo_prenda
- *         schema:
- *           type: string
- *           enum: [zapato, camisa, pantalon]
- *         description: Filtrar por tipo de prenda
- *       - in: query
- *         name: genero
- *         schema:
- *           type: string
- *           enum: [masculino, femenino, unisex]
- *         description: Filtrar por género
- *       - in: query
- *         name: activo
- *         schema:
- *           type: boolean
- *         description: Filtrar por estado activo
  *     responses:
  *       200:
  *         description: Lista de tallas obtenida exitosamente
@@ -241,16 +218,19 @@ const validateQueryParams = [
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
+ *                 status:
  *                   type: string
- *                   example: "Tallas obtenidas exitosamente"
+ *                   example: success
  *                 data:
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Talla'
+ *                 total:
+ *                   type: integer
+ *                   example: 45
+ *                 message:
+ *                   type: string
+ *                   example: Se encontraron 45 tallas
  *       401:
  *         description: Token no proporcionado o inválido
  *       500:

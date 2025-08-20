@@ -142,36 +142,10 @@ router.get('/stats', authMiddleware.authenticateToken, estudioController.getEsta
  * /api/catalog/estudios:
  *   get:
  *     summary: Listar todos los estudios
- *     description: Obtiene una lista completa de estudios con opciones de filtrado y búsqueda
+ *     description: Obtiene una lista completa de estudios
  *     tags: [Estudios]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Término de búsqueda (nivel, descripción)
- *       - in: query
- *         name: includeInactive
- *         schema:
- *           type: boolean
- *           default: false
- *         description: Incluir estudios inactivos
- *       - in: query
- *         name: orderBy
- *         schema:
- *           type: string
- *           enum: [ordenNivel, nivel, descripcion, activo, createdAt, updatedAt]
- *           default: ordenNivel
- *         description: Campo de ordenamiento
- *       - in: query
- *         name: orderDirection
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *           default: ASC
- *         description: Dirección del ordenamiento
  *     responses:
  *       200:
  *         description: Lista de estudios obtenida exitosamente
@@ -182,26 +156,17 @@ router.get('/stats', authMiddleware.authenticateToken, estudioController.getEsta
  *               properties:
  *                 status:
  *                   type: string
- *                   example: "success"
+ *                   example: success
  *                 data:
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Estudio'
- *                 filters:
- *                   type: object
- *                   properties:
- *                     search:
- *                       type: string
- *                     includeInactive:
- *                       type: boolean
- *                     orderBy:
- *                       type: string
- *                     orderDirection:
- *                       type: string
  *                 total:
  *                   type: integer
+ *                   example: 15
  *                 message:
  *                   type: string
+ *                   example: Se encontraron 15 estudios
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  *       500:

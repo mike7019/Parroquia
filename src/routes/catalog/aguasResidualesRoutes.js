@@ -194,40 +194,27 @@ router.get('/stats', aguasResidualesController.getStatistics);
  *     tags: [Aguas Residuales]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Search term for name or description
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           enum: [id_tipo_aguas_residuales, nombre, created_at]
- *           default: id_tipo_aguas_residuales
- *         description: Field to sort by
- *       - in: query
- *         name: sortOrder
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *           default: ASC
- *         description: Sort order
  *     responses:
  *       200:
  *         description: Tipos de aguas residuales retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               allOf:
- *                 - $ref: '#/components/schemas/ApiResponse'
- *                 - type: object
- *                   properties:
- *                     data:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/TipoAguasResiduales'
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/TipoAguasResiduales'
+ *                 total:
+ *                   type: integer
+ *                   example: 8
+ *                 message:
+ *                   type: string
+ *                   example: Se encontraron 8 tipos de aguas residuales
  *       500:
  *         description: Server error
  *         content:

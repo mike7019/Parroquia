@@ -1,7 +1,6 @@
 /**
  * Sistema de Acueducto Service
  */
-import { Op } from 'sequelize';
 import sequelize from '../../../config/sequelize.js';
 
 class SistemaAcueductoService {
@@ -36,25 +35,28 @@ class SistemaAcueductoService {
     }
   }
 
-  async getAllSistemasAcueducto(options = {}) {
-    const { search } = options;
-    const SistemaAcueducto = this.getModel();
-    
-    const whereClause = {};
-    
-    if (search) {
-      whereClause[Op.or] = [
-        { nombre: { [Op.iLike]: `%${search}%` } },
-        { descripcion: { [Op.iLike]: `%${search}%` } }
-      ];
+  async getAllSistemasAcueducto() {
+    try {
+      const SistemaAcueducto = this.getModel();
+
+      const sistemas = await SistemaAcueducto.findAll({
+        order: [['nombre', 'ASC']]
+      });
+
+      return {
+        status: 'success',
+        data: sistemas,
+        total: sistemas.length,
+        message: `Se encontraron ${sistemas.length} sistemas de acueducto`
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener sistemas de acueducto: ${error.message}`
+      };
     }
-
-    const sistemas = await SistemaAcueducto.findAll({
-      where: whereClause,
-      order: [['nombre', 'ASC']]
-    });
-
-    return sistemas;
   }
 
   async getSistemaAcueductoById(id) {
@@ -99,9 +101,6 @@ class SistemaAcueductoService {
     return { message: 'Sistema de acueducto eliminado exitosamente' };
   }
 
-  async searchSistemasAcueducto(searchTerm) {
-    return await this.getAllSistemasAcueducto({ search: searchTerm });
-  }
 }
 
 // Crear instancia del servicio
@@ -109,11 +108,10 @@ const sistemaAcueductoService = new SistemaAcueductoService();
 
 // Exportar métodos como funciones
 export const createSistemaAcueducto = (data) => sistemaAcueductoService.createSistemaAcueducto(data);
-export const getAllSistemasAcueducto = (options) => sistemaAcueductoService.getAllSistemasAcueducto(options);
+export const getAllSistemasAcueducto = () => sistemaAcueductoService.getAllSistemasAcueducto();
 export const getSistemaAcueductoById = (id) => sistemaAcueductoService.getSistemaAcueductoById(id);
 export const updateSistemaAcueducto = (id, updateData) => sistemaAcueductoService.updateSistemaAcueducto(id, updateData);
 export const deleteSistemaAcueducto = (id) => sistemaAcueductoService.deleteSistemaAcueducto(id);
-export const searchSistemasAcueducto = (searchTerm) => sistemaAcueductoService.searchSistemasAcueducto(searchTerm);
 
 export const getSistemasByName = async (nombre) => {
   return [

@@ -42,41 +42,32 @@ class ComunidadCulturalService {
   }
 
   /**
-   * Get all comunidades culturales with search and filtering
+   * Get all comunidades culturales
    */
   async getAllComunidadesCulturales(options = {}) {
     try {
       const {
-        search = null,
         sortBy = 'id_comunidad_cultural',
-        sortOrder = 'ASC',
-        activo = null
+        sortOrder = 'ASC'
       } = options;
 
-      const where = {};
-      
-      if (search) {
-        where[Op.or] = [
-          { nombre: { [Op.iLike]: `%${search}%` } },
-          { descripcion: { [Op.iLike]: `%${search}%` } }
-        ];
-      }
-
-      if (activo !== null) {
-        where.activo = activo;
-      }
-
       const comunidadesCulturales = await getComunidadCulturalModel().findAll({
-        where,
         order: [[sortBy, sortOrder]]
       });
 
       return {
-        comunidadesCulturales,
-        total: comunidadesCulturales.length
+        status: 'success',
+        data: comunidadesCulturales,
+        total: comunidadesCulturales.length,
+        message: `Se encontraron ${comunidadesCulturales.length} comunidades culturales`
       };
     } catch (error) {
-      throw new Error(`Error fetching comunidades culturales: ${error.message}`);
+      return {
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener comunidades culturales: ${error.message}`
+      };
     }
   }
 

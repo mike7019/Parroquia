@@ -41,36 +41,20 @@ class EnfermedadController {
   }
 
   /**
-   * Get all enfermedades with search
+   * Get all enfermedades
    */
   async getAllEnfermedades(req, res) {
     try {
-      const {
-        search,
-        sortBy = 'id_enfermedad',
-        sortOrder = 'ASC'
-      } = req.query;
+      const result = await enfermedadService.getAllEnfermedades();
 
-      const result = await enfermedadService.getAllEnfermedades({
-        search,
-        sortBy,
-        sortOrder
-      });
-
-      res.json(
-        createSuccessResponse(
-          'Enfermedades retrieved successfully',
-          result
-        )
-      );
+      res.json(result);
     } catch (error) {
-      res.status(500).json(
-        createErrorResponse(
-          'Error retrieving enfermedades',
-          error.message,
-          'FETCH_ERROR'
-        )
-      );
+      res.status(500).json({
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener enfermedades: ${error.message}`
+      });
     }
   }
 

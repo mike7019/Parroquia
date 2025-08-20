@@ -74,45 +74,27 @@ router.post('/', parroquiaController.createParroquia);
  *     tags: [Parroquias]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Search term for name or description
- *       - in: query
- *         name: id_municipio
- *         schema:
- *           type: integer
- *         description: Filter by municipio ID
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           default: id_parroquia
- *           enum: [id_parroquia, nombre]
- *         description: Field to sort by
- *       - in: query
- *         name: sortOrder
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *           default: ASC
- *         description: Sort order
  *     responses:
  *       200:
  *         description: Parroquias retrieved successfully (includes municipio data)
  *         content:
  *           application/json:
  *             schema:
- *               allOf:
- *                 - $ref: '#/components/schemas/ApiResponse'
- *                 - type: object
- *                   properties:
- *                     data:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/Parroquia'
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Parroquia'
+ *                 total:
+ *                   type: integer
+ *                   example: 48
+ *                 message:
+ *                   type: string
+ *                   example: Se encontraron 48 parroquias
  *       500:
  *         description: Server error
  *         content:

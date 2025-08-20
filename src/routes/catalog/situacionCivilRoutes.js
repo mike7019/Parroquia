@@ -151,36 +151,10 @@ router.get('/stats', AuthMiddleware.authenticateToken, SituacionCivilController.
  * /api/catalog/situaciones-civiles:
  *   get:
  *     summary: Listar situaciones civiles
- *     description: Obtiene una lista de situaciones civiles con opciones de filtrado y búsqueda
+ *     description: Obtiene una lista de situaciones civiles
  *     tags: [Situaciones Civiles]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Término de búsqueda (nombre, descripción, código)
- *       - in: query
- *         name: includeInactive
- *         schema:
- *           type: boolean
- *           default: false
- *         description: Incluir situaciones civiles inactivas
- *       - in: query
- *         name: orderBy
- *         schema:
- *           type: string
- *           enum: [orden, nombre, codigo, createdAt, updatedAt]
- *           default: orden
- *         description: Campo de ordenamiento
- *       - in: query
- *         name: orderDirection
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *           default: ASC
- *         description: Dirección del ordenamiento
  *     responses:
  *       200:
  *         description: Lista de situaciones civiles obtenida exitosamente
@@ -191,13 +165,17 @@ router.get('/stats', AuthMiddleware.authenticateToken, SituacionCivilController.
  *               properties:
  *                 status:
  *                   type: string
- *                   example: "success"
+ *                   example: success
  *                 data:
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/SituacionCivil'
+ *                 total:
+ *                   type: integer
+ *                   example: 8
  *                 message:
  *                   type: string
+ *                   example: Se encontraron 8 situaciones civiles
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  *       500:

@@ -108,30 +108,9 @@ const router = express.Router();
  *   get:
  *     tags: [Tipos de Vivienda]
  *     summary: Obtener todos los tipos de vivienda
- *     description: Lista de todos los tipos de vivienda con filtros opcionales
+ *     description: Lista de todos los tipos de vivienda
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *           maxLength: 255
- *         description: Término de búsqueda (nombre o descripción)
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           enum: [id_tipo_vivienda, nombre, descripcion, activo, created_at, updated_at]
- *           default: nombre
- *         description: Campo por el cual ordenar
- *       - in: query
- *         name: sortOrder
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *           default: ASC
- *         description: Orden de clasificación
  *     responses:
  *       200:
  *         description: Lista de tipos de vivienda obtenida exitosamente
@@ -142,21 +121,17 @@ const router = express.Router();
  *               properties:
  *                 status:
  *                   type: string
- *                   example: "success"
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/TipoVivienda'
+ *                 total:
+ *                   type: integer
+ *                   example: 15
  *                 message:
  *                   type: string
- *                   example: "Tipos de vivienda obtenidos exitosamente"
- *                 data:
- *                   type: object
- *                   properties:
- *                     tipos:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/TipoVivienda'
- *                     total:
- *                       type: integer
- *                       description: Total de tipos de vivienda
- *                       example: 15
+ *                   example: Se encontraron 15 tipos de vivienda
  *       400:
  *         $ref: '#/components/responses/ValidationError'
  *       401:

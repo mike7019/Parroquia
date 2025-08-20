@@ -1,7 +1,6 @@
 import sequelize from '../../../config/sequelize.js';
 import '../../../config/sequelize.js';
 import '../../models/index.js'; // Asegurar que los modelos estén importados
-import { Op } from 'sequelize';
 
 // Obtener el modelo Enfermedad desde Sequelize una vez que se cargue
 const getEnfermedadModel = () => sequelize.models.Enfermedad;
@@ -27,36 +26,27 @@ class EnfermedadService {
   }
 
   /**
-   * Get all enfermedades with search
+   * Get all enfermedades
    */
-  async getAllEnfermedades(options = {}) {
+  async getAllEnfermedades() {
     try {
-      const {
-        search = null,
-        sortBy = 'id_enfermedad',
-        sortOrder = 'ASC'
-      } = options;
-
-      const where = {};
-      
-      if (search) {
-        where[Op.or] = [
-          { nombre: { [Op.iLike]: `%${search}%` } },
-          { descripcion: { [Op.iLike]: `%${search}%` } }
-        ];
-      }
-
       const enfermedades = await getEnfermedadModel().findAll({
-        where,
-        order: [[sortBy, sortOrder]]
+        order: [['id_enfermedad', 'ASC']]
       });
 
       return {
-        enfermedades,
-        totalCount: enfermedades.length
+        status: 'success',
+        data: enfermedades,
+        total: enfermedades.length,
+        message: `Se encontraron ${enfermedades.length} enfermedades`
       };
     } catch (error) {
-      throw new Error(`Error fetching enfermedades: ${error.message}`);
+      return {
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener enfermedades: ${error.message}`
+      };
     }
   }
 

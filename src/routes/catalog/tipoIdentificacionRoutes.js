@@ -11,39 +11,27 @@ const router = express.Router();
  *     summary: Obtener todos los tipos de identificación
  *     description: Obtiene una lista de todos los tipos de identificación disponibles
  *     tags: [Tipos de Identificación]
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Buscar por nombre, descripción o código
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           default: nombre
- *         description: Campo por el cual ordenar
- *       - in: query
- *         name: sortOrder
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *           default: ASC
- *         description: Orden de clasificación
  *     responses:
  *       200:
  *         description: Lista de tipos de identificación obtenida correctamente
  *         content:
  *           application/json:
  *             schema:
- *               allOf:
- *                 - $ref: '#/components/schemas/ApiResponse'
- *                 - type: object
- *                   properties:
- *                     data:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/TipoIdentificacion'
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/TipoIdentificacion'
+ *                 total:
+ *                   type: integer
+ *                   example: 8
+ *                 message:
+ *                   type: string
+ *                   example: Se encontraron 8 tipos de identificación
  *       500:
  *         description: Error interno del servidor
  */

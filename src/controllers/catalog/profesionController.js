@@ -21,27 +21,17 @@ class ProfesionController {
    */
   async getAllProfesiones(req, res) {
     try {
-      const { search, categoria, nivelEducativo, activo } = req.query;
+      const result = await profesionService.getAllProfesiones();
       
-      const filters = {
-        search,
-        categoria,
-        nivelEducativo,
-        activo: activo !== undefined ? activo === 'true' : undefined
-      };
-      
-      const result = await profesionService.getAllProfesiones(filters);
-      
-      const response = createSuccessResponse('Profesiones obtenidas exitosamente', {
-        profesiones: result.profesiones,
-        total: result.total
-      });
-      
-      return res.status(200).json(response);
+      return res.status(200).json(result);
     } catch (error) {
       console.error('Error en getAllProfesiones:', error);
-      const errorResponse = createErrorResponse(error.message, error.statusCode || 500);
-      return res.status(error.statusCode || 500).json(errorResponse);
+      return res.status(500).json({
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener profesiones: ${error.message}`
+      });
     }
   }
 

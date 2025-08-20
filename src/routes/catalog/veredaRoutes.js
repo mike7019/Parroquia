@@ -37,34 +37,10 @@ router.post('/', veredaController.createVereda);
  * /api/catalog/veredas:
  *   get:
  *     summary: Get all veredas
- *     description: Obtiene una lista completa de veredas con opciones de filtrado y búsqueda
+ *     description: Obtiene una lista completa de veredas
  *     tags: [Veredas]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Search term (nombre o código de vereda)
- *       - in: query
- *         name: municipioId
- *         schema:
- *           type: integer
- *         description: Filter by municipio
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           default: id_vereda
- *         description: Field to sort by
- *       - in: query
- *         name: sortOrder
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *           default: ASC
- *         description: Sort order
  *     responses:
  *       200:
  *         description: Veredas retrieved successfully
@@ -73,23 +49,19 @@ router.post('/', veredaController.createVereda);
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Vereda'
+ *                 total:
+ *                   type: integer
+ *                   example: 125
  *                 message:
  *                   type: string
- *                   example: "Veredas retrieved successfully"
- *                 data:
- *                   type: object
- *                   properties:
- *                     veredas:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/Vereda'
- *                     total:
- *                       type: integer
- *                     filters:
- *                       type: object
+ *                   example: Se encontraron 125 veredas
  *       500:
  *         description: Server error
  */

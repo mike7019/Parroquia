@@ -140,45 +140,27 @@ router.post('/bulk', municipioController.bulkCreateMunicipios);
  *     tags: [Municipios]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Search term for municipio name or codigo DANE
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           enum: [id_municipio, nombre_municipio, codigo_dane]
- *           default: nombre_municipio
- *         description: Field to sort by
- *       - in: query
- *         name: sortOrder
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *           default: ASC
- *         description: Sort order
- *       - in: query
- *         name: id_departamento
- *         schema:
- *           type: integer
- *         description: Filter by departamento ID
  *     responses:
  *       200:
  *         description: Municipios retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               allOf:
- *                 - $ref: '#/components/schemas/ApiResponse'
- *                 - type: object
- *                   properties:
- *                     data:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/Municipio'
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Municipio'
+ *                 total:
+ *                   type: integer
+ *                   example: 1102
+ *                 message:
+ *                   type: string
+ *                   example: Se encontraron 1102 municipios
  *       500:
  *         description: Server error
  *         content:

@@ -19,24 +19,10 @@ class ProfesionService {
 
   async getAllProfesiones(filters = {}) {
     try {
-      const { search, activo } = filters;
       const Profesion = this.getModel();
       
-      const whereClause = {};
-      
-      // Filtro por búsqueda en nombre y descripción
-      if (search) {
-        whereClause[Op.or] = [
-          { nombre: { [Op.iLike]: `%${search}%` } },
-          { descripcion: { [Op.iLike]: `%${search}%` } }
-        ];
-      }
-      
-      // Filtro por estado activo solo si existe la columna
-      // Para mantener compatibilidad, no filtramos por activo por ahora
-      
+      // Sin filtros - retorna todas las profesiones
       const profesiones = await Profesion.findAll({
-        where: whereClause,
         order: [['nombre', 'ASC']],
         attributes: [
           'id_profesion',
@@ -47,15 +33,22 @@ class ProfesionService {
         ]
       });
       
-      const total = await Profesion.count({ where: whereClause });
+      const total = profesiones.length;
       
       return {
-        profesiones,
-        total
+        status: 'success',
+        data: profesiones,
+        total: total,
+        message: `Se encontraron ${total} profesiones`
       };
     } catch (error) {
       console.error('Error en getAllProfesiones:', error);
-      throw error;
+      return {
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener profesiones: ${error.message}`
+      };
     }
   }
 

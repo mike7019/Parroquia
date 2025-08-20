@@ -10,30 +10,26 @@ class TipoViviendaService {
   /**
    * Obtener todos los tipos de vivienda
    */
-  async getAllTipos(search = null, sortBy = 'nombre', sortOrder = 'ASC') {
+  async getAllTipos() {
     try {
-      const whereClause = {};
-
-      // Agregar filtro de búsqueda si se proporciona
-      if (search) {
-        whereClause[Op.or] = [
-          { nombre: { [Op.iLike]: `%${search}%` } },
-          { descripcion: { [Op.iLike]: `%${search}%` } }
-        ];
-      }
-
       const tipos = await getTipoViviendaModel().findAll({
-        where: whereClause,
-        order: [[sortBy, sortOrder.toUpperCase()]]
+        order: [['nombre', 'ASC']]
       });
 
       return {
-        tipos,
-        total: tipos.length
+        status: 'success',
+        data: tipos,
+        total: tipos.length,
+        message: `Se encontraron ${tipos.length} tipos de vivienda`
       };
     } catch (error) {
       logger.error('Error getting tipos vivienda:', error);
-      throw error;
+      return {
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener tipos de vivienda: ${error.message}`
+      };
     }
   }
 

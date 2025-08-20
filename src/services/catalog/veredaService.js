@@ -59,38 +59,27 @@ class VeredaService {
   }
 
   /**
-   * Get all veredas with filters (sin paginación)
+   * Get all veredas
    */
-  async getAllVeredas(options = {}) {
+  async getAllVeredas() {
     try {
-      const {
-        search = null,
-        municipioId = null,
-        sortBy = 'id_vereda',
-        sortOrder = 'ASC'
-      } = options;
-
-      const where = {};
-      
-      if (search) {
-        where[Op.or] = [
-          { nombre: { [Op.iLike]: `%${search}%` } },
-          { codigo_vereda: { [Op.iLike]: `%${search}%` } }
-        ];
-      }
-
-      if (municipioId) {
-        where.id_municipio_municipios = municipioId;
-      }
-
       const veredas = await getVeredasModel().findAll({
-        where,
-        order: [[sortBy, sortOrder]]
+        order: [['id_vereda', 'ASC']]
       });
 
-      return veredas;
+      return {
+        status: 'success',
+        data: veredas,
+        total: veredas.length,
+        message: `Se encontraron ${veredas.length} veredas`
+      };
     } catch (error) {
-      throw new Error(`Error fetching veredas: ${error.message}`);
+      return {
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener veredas: ${error.message}`
+      };
     }
   }
 

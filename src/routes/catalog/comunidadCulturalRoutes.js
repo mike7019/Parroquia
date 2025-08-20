@@ -151,51 +151,27 @@ router.post('/', comunidadCulturalController.createComunidadCultural);
  *     tags: [Comunidades Culturales]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Término de búsqueda
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           default: id_comunidad_cultural
- *         description: Campo para ordenar
- *       - in: query
- *         name: sortOrder
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *           default: ASC
- *         description: Orden de clasificación
- *       - in: query
- *         name: activo
- *         schema:
- *           type: boolean
- *         description: Filtrar por estado activo
  *     responses:
  *       200:
  *         description: Comunidades culturales obtenidas exitosamente
  *         content:
  *           application/json:
  *             schema:
- *               allOf:
- *                 - $ref: '#/components/schemas/ApiResponse'
- *                 - type: object
- *                   properties:
- *                     data:
- *                       type: object
- *                       properties:
- *                         comunidadesCulturales:
- *                           type: array
- *                           items:
- *                             $ref: '#/components/schemas/ComunidadCultural'
- *                         total:
- *                           type: integer
- *                           description: Total de comunidades culturales
- *                           example: 25
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/ComunidadCultural'
+ *                 total:
+ *                   type: integer
+ *                   example: 25
+ *                 message:
+ *                   type: string
+ *                   example: Se encontraron 25 comunidades culturales
  *       500:
  *         description: Error del servidor
  */

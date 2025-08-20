@@ -5,7 +5,6 @@ import {
   createSistemaAcueducto,
   updateSistemaAcueducto,
   deleteSistemaAcueducto,
-  searchSistemasAcueducto,
   getSistemasByName,
   getUniqueNombres,
   getStatistics,
@@ -120,55 +119,6 @@ router.post('/bulk', bulkCreateSistemasAcueducto);
 
 /**
  * @swagger
- * /api/catalog/sistemas-acueducto/search:
- *   get:
- *     summary: Search sistemas de acueducto
- *     tags: [Sistemas de Acueducto]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: query
- *         required: true
- *         schema:
- *           type: string
- *         description: Search term
- *     responses:
- *       200:
- *         description: Search results
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: "Search completed successfully"
- *                 data:
- *                   type: object
- *                   properties:
- *                     sistemas:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/SistemaAcueducto'
- *                     total:
- *                       type: integer
- *                       example: 3
- *                     searchTerm:
- *                       type: string
- *                       example: "agua"
- *       400:
- *         description: Missing query parameter
- *       500:
- *         description: Server error
- */
-router.get('/search', searchSistemasAcueducto);
-
-/**
- * @swagger
  * /api/catalog/sistemas-acueducto/nombres:
  *   get:
  *     summary: Get unique nombres
@@ -232,26 +182,6 @@ router.get('/statistics', getStatistics);
  *     tags: [Sistemas de Acueducto]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Search term for filtering
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           enum: [id_sistema_acueducto, nombre, created_at, updated_at]
- *           default: nombre
- *         description: Field to sort by
- *       - in: query
- *         name: sortOrder
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *           default: ASC
- *         description: Sort order
  *     responses:
  *       200:
  *         description: List of sistemas retrieved successfully
@@ -260,18 +190,40 @@ router.get('/statistics', getStatistics);
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
+ *                 status:
  *                   type: string
- *                   example: "Sistemas de acueducto retrieved successfully"
+ *                   enum: [success, error]
+ *                   example: success
  *                 data:
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/SistemaAcueducto'
+ *                 total:
+ *                   type: integer
+ *                   description: Total number of sistemas
+ *                   example: 11
+ *                 message:
+ *                   type: string
+ *                   example: "Se encontraron 11 sistemas de acueducto"
  *       500:
  *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 data:
+ *                   type: array
+ *                   example: []
+ *                 total:
+ *                   type: integer
+ *                   example: 0
+ *                 message:
+ *                   type: string
+ *                   example: "Error al obtener sistemas de acueducto"
  */
 router.get('/', getAllSistemasAcueducto);
 
