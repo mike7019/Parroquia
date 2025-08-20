@@ -24,14 +24,6 @@ const Veredas = sequelize.define('Veredas', {
       model: 'municipios',
       key: 'id_municipio'
     }
-  },
-  id_sector: {
-    type: DataTypes.BIGINT,
-    allowNull: true,
-    references: {
-      model: 'sectores',
-      key: 'id_sector'
-    }
   }
 }, {
   sequelize,
