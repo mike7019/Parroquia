@@ -62,9 +62,9 @@ class EstudioController {
       const estudioData = req.body;
       
       // Validación básica
-      if (!estudioData.nombre) {
+      if (!estudioData.nivel) {
         return res.status(400).json(createErrorResponse(
-          'El nombre del estudio es obligatorio',
+          'El nivel del estudio es obligatorio',
           'MISSING_REQUIRED_FIELD'
         ));
       }

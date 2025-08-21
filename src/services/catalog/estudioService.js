@@ -12,7 +12,7 @@ class EstudioService {
   async getAllEstudios() {
     try {
       const estudios = await getEstudioModel().findAll({
-        order: [['nombre', 'ASC']]
+        order: [['nivel', 'ASC']]
       });
 
       return {
@@ -58,13 +58,13 @@ class EstudioService {
    */
   async createEstudio(estudioData) {
     try {
-      // Verificar si ya existe un estudio con el mismo nombre
+      // Verificar si ya existe un estudio con el mismo nivel
       const existingEstudio = await getEstudioModel().findOne({
-        where: { nombre: estudioData.nombre }
+        where: { nivel: estudioData.nivel }
       });
 
       if (existingEstudio) {
-        const error = new Error('Ya existe un estudio con ese nombre');
+        const error = new Error('Ya existe un estudio con ese nivel');
         error.statusCode = 409;
         error.code = 'DUPLICATE_NAME';
         throw error;
@@ -73,8 +73,8 @@ class EstudioService {
       const nuevoEstudio = await getEstudioModel().create(estudioData);
       
       logger.info('Estudio creado exitosamente', {
-        id: nuevoEstudio.id_estudio,
-        nombre: nuevoEstudio.nombre
+        id: nuevoEstudio.id,
+        nivel: nuevoEstudio.nivel
       });
 
       return nuevoEstudio;
@@ -98,17 +98,17 @@ class EstudioService {
         throw error;
       }
 
-      // Verificar si hay otro estudio con el mismo nombre (excluyendo el actual)
-      if (estudioData.nombre && estudioData.nombre !== estudio.nombre) {
+      // Verificar si hay otro estudio con el mismo nivel (excluyendo el actual)
+      if (estudioData.nivel && estudioData.nivel !== estudio.nivel) {
         const existingEstudio = await getEstudioModel().findOne({
           where: { 
-            nombre: estudioData.nombre,
-            id_estudio: { '!=': id }
+            nivel: estudioData.nivel,
+            id: { '!=': id }
           }
         });
 
         if (existingEstudio) {
-          const error = new Error('Ya existe un estudio con ese nombre');
+          const error = new Error('Ya existe un estudio con ese nivel');
           error.statusCode = 409;
           error.code = 'DUPLICATE_NAME';
           throw error;
@@ -118,8 +118,8 @@ class EstudioService {
       await estudio.update(estudioData);
       
       logger.info('Estudio actualizado exitosamente', {
-        id: estudio.id_estudio,
-        nombre: estudio.nombre
+        id: estudio.id,
+        nivel: estudio.nivel
       });
 
       return estudio;
@@ -162,7 +162,7 @@ class EstudioService {
       
       logger.info('Estudio eliminado exitosamente', {
         id: id,
-        nombre: estudio.nombre
+        nivel: estudio.nivel
       });
 
       return { message: 'Estudio eliminado exitosamente' };
@@ -179,7 +179,7 @@ class EstudioService {
     try {
       const estudios = await getEstudioModel().findAll({
         where: { nivel: nivel },
-        order: [['nombre', 'ASC']]
+        order: [['nivel', 'ASC']]
       });
 
       return estudios;
