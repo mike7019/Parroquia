@@ -25,6 +25,10 @@ router.use(authenticateToken);
  *             $ref: '#/components/schemas/CreateSectorRequest'
  *           example:
  *             nombre: "Sector San José"
+ *             id_municipio: 1
+ *             descripcion: "Sector ubicado en la zona central de la parroquia"
+ *             codigo: "SEC001"
+ *             estado: "activo"
  *     responses:
  *       201:
  *         description: Sector created successfully
@@ -40,9 +44,58 @@ router.use(authenticateToken);
  *                   type: string
  *                   example: "Sector creado exitosamente"
  *       400:
- *         description: Validation error
+ *         description: Error de validación - campos obligatorios faltantes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "El municipio es obligatorio"
+ *                 code:
+ *                   type: string
+ *                   example: "VALIDATION_ERROR"
+ *             examples:
+ *               missing_name:
+ *                 summary: "Nombre faltante"
+ *                 value:
+ *                   success: false
+ *                   message: "El nombre del sector es obligatorio"
+ *                   code: "VALIDATION_ERROR"
+ *               missing_municipio:
+ *                 summary: "Municipio faltante"
+ *                 value:
+ *                   success: false
+ *                   message: "El municipio es obligatorio"
+ *                   code: "VALIDATION_ERROR"
+ *               invalid_municipio:
+ *                 summary: "ID municipio inválido"
+ *                 value:
+ *                   success: false
+ *                   message: "El ID del municipio debe ser un número válido"
+ *                   code: "VALIDATION_ERROR"
+ *       404:
+ *         description: Municipio no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Municipio no encontrado"
+ *                 code:
+ *                   type: string
+ *                   example: "NOT_FOUND"
  *       409:
- *         description: Sector with this name already exists
+ *         description: Sector con ese nombre ya existe
  *       500:
  *         description: Server error
  */
@@ -185,5 +238,26 @@ router.put('/:id', sectorController.updateSector);
  *         description: Error del servidor
  */
 router.delete('/:id', sectorController.deleteSector);
+
+/**
+ * @swagger
+ * /api/catalog/sectors/municipios:
+ *   get:
+ *     summary: Get available municipios for sector creation
+ *     description: Obtiene la lista de municipios disponibles para asignar a un sector.
+ *     tags: [Sectors]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Municipios obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/MunicipiosDisponiblesResponse'
+ *       500:
+ *         description: Error del servidor
+ */
+router.get('/municipios', sectorController.getAvailableMunicipios);
 
 export default router;

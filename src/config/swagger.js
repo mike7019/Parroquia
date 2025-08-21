@@ -9,8 +9,8 @@ const swaggerConfig = {
     openapi: '3.0.0',
     info: {
       title: 'Parroquia API',
-      version: '1.0.0',
-      description: 'Sistema de gestión parroquial - API REST completa con autenticación y gestión de usuarios',
+      version: '1.0.1',
+      description: 'Sistema de gestión parroquial - API REST completa con autenticación y gestión de usuarios - Actualizado: Sectores con municipio obligatorio',
       contact: {
         name: 'API Support',
         email: 'support@parroquia.com'
@@ -1301,6 +1301,27 @@ const swaggerConfig = {
               description: 'Nombre del sector',
               example: 'Sector San José'
             },
+            id_municipio: {
+              type: 'integer',
+              description: 'ID del municipio al que pertenece el sector',
+              example: 1
+            },
+            municipio: {
+              type: 'object',
+              description: 'Información del municipio al que pertenece el sector',
+              properties: {
+                id_municipio: {
+                  type: 'integer',
+                  description: 'ID del municipio',
+                  example: 1
+                },
+                nombre_municipio: {
+                  type: 'string',
+                  description: 'Nombre del municipio',
+                  example: 'Medellín'
+                }
+              }
+            },
             descripcion: {
               type: 'string',
               maxLength: 500,
@@ -1339,7 +1360,7 @@ const swaggerConfig = {
               example: '2025-01-15T10:30:00Z'
             }
           },
-          required: ['nombre']
+          required: ['nombre', 'id_municipio']
         },
         VeredaSimple: {
           type: 'object',
@@ -1383,6 +1404,12 @@ const swaggerConfig = {
               description: 'Nombre del sector (obligatorio)',
               example: 'Sector San José'
             },
+            id_municipio: {
+              type: 'integer',
+              minimum: 1,
+              description: 'ID del municipio al que pertenece el sector (obligatorio). Use GET /api/catalog/sectors/municipios para obtener IDs válidos.',
+              example: 1
+            },
             descripcion: {
               type: 'string',
               maxLength: 500,
@@ -1411,9 +1438,10 @@ const swaggerConfig = {
               example: [1, 2, 3]
             }
           },
-          required: ['nombre'],
+          required: ['nombre', 'id_municipio'],
           example: {
             nombre: 'Sector San José',
+            id_municipio: 1,
             descripcion: 'Sector ubicado en la zona central',
             codigo: 'SEC001',
             estado: 'activo',
@@ -1428,6 +1456,12 @@ const swaggerConfig = {
               maxLength: 255,
               description: 'Nombre del sector',
               example: 'Sector San José Actualizado'
+            },
+            id_municipio: {
+              type: 'integer',
+              minimum: 1,
+              description: 'ID del municipio al que pertenece el sector (opcional para actualización). Use GET /api/catalog/sectors/municipios para obtener IDs válidos.',
+              example: 2
             },
             descripcion: {
               type: 'string',
@@ -1458,6 +1492,7 @@ const swaggerConfig = {
           },
           example: {
             nombre: 'Sector San José Actualizado',
+            id_municipio: 2,
             descripcion: 'Descripción actualizada del sector',
             codigo: 'SEC001-UPD',
             estado: 'activo',
@@ -1475,6 +1510,67 @@ const swaggerConfig = {
             },
             pagination: {
               $ref: '#/components/schemas/Pagination'
+            }
+          }
+        },
+        MunicipiosDisponiblesResponse: {
+          type: 'object',
+          properties: {
+            success: {
+              type: 'boolean',
+              description: 'Indica si la operación fue exitosa',
+              example: true
+            },
+            message: {
+              type: 'string',
+              description: 'Mensaje descriptivo de la operación',
+              example: 'Municipios disponibles obtenidos exitosamente'
+            },
+            data: {
+              type: 'object',
+              properties: {
+                status: {
+                  type: 'string',
+                  description: 'Estado de la consulta',
+                  example: 'success'
+                },
+                data: {
+                  type: 'array',
+                  description: 'Lista de municipios disponibles',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      id_municipio: {
+                        type: 'integer',
+                        description: 'ID único del municipio',
+                        example: 1
+                      },
+                      nombre_municipio: {
+                        type: 'string',
+                        description: 'Nombre del municipio',
+                        example: 'Medellín'
+                      }
+                    },
+                    required: ['id_municipio', 'nombre_municipio']
+                  }
+                },
+                total: {
+                  type: 'integer',
+                  description: 'Total de municipios disponibles',
+                  example: 10
+                },
+                message: {
+                  type: 'string',
+                  description: 'Mensaje descriptivo del resultado',
+                  example: 'Se encontraron 10 municipios disponibles'
+                }
+              }
+            },
+            timestamp: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Timestamp de la respuesta',
+              example: '2025-08-21T04:00:00.000Z'
             }
           }
         },
