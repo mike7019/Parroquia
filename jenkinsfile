@@ -12,6 +12,8 @@ pipeline {
         SSH_CREDENTIAL_ID = 'servidor-produccion-ssh'
         // Puerto de la aplicación
         APP_PORT = '3000'
+        // Rama a desplegar
+        DEPLOY_BRANCH = 'feature'
     }
 
     stages {
@@ -37,17 +39,21 @@ pipeline {
                             cd ${PROJECT_PATH}
                             
                             # Asegura que estemos en la rama correcta
-                            git checkout develop
+                            git checkout ${DEPLOY_BRANCH}
                             
                             # Baja los últimos cambios
-                            git pull origin develop
+                            git pull origin ${DEPLOY_BRANCH}
                             
-                            # Copia el archivo de configuración de producción
-                            echo 'Configurando variables de entorno...'
-                            cp .env.production .env
+                            # Copia el archivo de configuración de producción si existe
+                            if [ -f .env.production ]; then
+                                echo 'Configurando variables de entorno...'
+                                cp .env.production .env
+                            else
+                                echo 'Advertencia: No se encontró .env.production'
+                            fi
                             
                             echo 'Deteniendo servicios actuales (si existen)...'
-                            docker-compose down
+                            docker-compose down || true
                             
                             echo 'Limpiando contenedores e imágenes antiguas...'
                             docker system prune -f
