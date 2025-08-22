@@ -244,6 +244,36 @@ module.exports = (sequelize, DataTypes) => {
     id_sexo: {
       type: DataTypes.BIGINT,
       allowNull: true
+    },
+    talla_camisa: {
+      type: DataTypes.STRING(10),
+      allowNull: true,
+      validate: {
+        len: {
+          args: [0, 10],
+          msg: 'La talla de camisa no puede exceder 10 caracteres'
+        }
+      }
+    },
+    talla_pantalon: {
+      type: DataTypes.STRING(10),
+      allowNull: true,
+      validate: {
+        len: {
+          args: [0, 10],
+          msg: 'La talla de pantalón no puede exceder 10 caracteres'
+        }
+      }
+    },
+    talla_zapato: {
+      type: DataTypes.STRING(10),
+      allowNull: true,
+      validate: {
+        len: {
+          args: [0, 10],
+          msg: 'La talla de zapato no puede exceder 10 caracteres'
+        }
+      }
     }
   }, {
     sequelize,
