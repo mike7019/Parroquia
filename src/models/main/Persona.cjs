@@ -279,7 +279,7 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'Persona',
     tableName: 'personas',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         unique: true,

@@ -1,0 +1,73 @@
+{
+  "informacionGeneral": {
+    "sector": "La Loma",
+    "apellido_familiar": "Pérez García",
+    "direccion": "Calle 123 #45-67, Vereda La Esperanza",
+    "telefono": "3001234567",
+    "numero_contrato_epm": "123456789",
+    "fecha": "2025-08-22T00:00:00.000Z"
+  },
+  "vivienda": {
+    "tipo_vivienda": {
+      "id": 1,
+      "nombre": "Casa"
+    },
+    "numero_habitaciones": 3,
+    "numero_banos": 2,
+    "disposicion_basuras": {
+      "id": 1,
+      "nombre": "Recolección municipal"
+    }
+  },
+  "servicios_agua": {
+    "tiene_acueducto": true,
+    "tiene_pozo": false,
+    "pozo_septico": true,
+    "letrina": false,
+    "campo_abierto": false
+  },
+  "observaciones": {
+    "observaciones_generales": "Familia colaborativa con la comunidad",
+    "autorizacion_datos": true
+  },
+  "familyMembers": [
+    {
+      "nombres": "Juan Carlos Pérez García",
+      "fecha_nacimiento": "1980-05-15",
+      "tipo_identificacion": "CC",
+      "numero_identificacion": "12345678",
+      "sexo": "M",
+      "parentesco": "Jefe de Hogar",
+      "telefono": "3001234567",
+      "correo_electronico": "juan@example.com",
+      "ocupacion": "Agricultor",
+      "nivel_educativo": "Bachillerato",
+      "situacion_civil": "Casado",
+      "enfermedades": [],
+      "necesidades_especiales": "",
+      "liderazgo": "Presidente JAC",
+      "habilidades": "Cultivo de café",
+      "talla_ropa": "L",
+      "vivo": true
+    },
+    {
+      "nombres": "María Elena García López",
+      "fecha_nacimiento": "1985-08-20",
+      "tipo_identificacion": "CC",
+      "numero_identificacion": "87654321",
+      "sexo": "F",
+      "parentesco": "Esposa",
+      "telefono": "3002345678",
+      "correo_electronico": "maria@example.com",
+      "ocupacion": "Ama de casa",
+      "nivel_educativo": "Primaria",
+      "situacion_civil": "Casada",
+      "enfermedades": [],
+      "necesidades_especiales": "",
+      "liderazgo": "",
+      "habilidades": "Costura",
+      "talla_ropa": "M",
+      "vivo": true
+    }
+  ]
+}

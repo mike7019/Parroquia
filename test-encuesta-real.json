@@ -1,0 +1,89 @@
+{
+  "informacionGeneral": {
+    "municipio": {
+      "id": "1",
+      "nombre": "Bogotá D.C."
+    },
+    "parroquia": {
+      "id": "3",
+      "nombre": "Parroquia San José"
+    },
+    "sector": {
+      "id": "1",
+      "nombre": "Sector San José"
+    },
+    "vereda": {
+      "id": "1",
+      "nombre": "Vereda de Prueba"
+    },
+    "fecha": "2025-08-22T18:04:44.397Z",
+    "apellido_familiar": "demooo",
+    "direccion": "cra 44 66 175",
+    "telefono": "3206668151",
+    "numero_contrato_epm": "mmm5444"
+  },
+  "vivienda": {
+    "tipo_vivienda": {
+      "id": "1",
+      "nombre": "Casa"
+    },
+    "disposicion_basuras": {
+      "recolector": true,
+      "quemada": false,
+      "enterrada": false,
+      "recicla": true,
+      "aire_libre": true,
+      "no_aplica": true
+    }
+  },
+  "servicios_agua": {
+    "sistema_acueducto": {
+      "id": "4",
+      "nombre": "Fuente Natural"
+    },
+    "aguas_residuales": null,
+    "pozo_septico": false,
+    "letrina": false,
+    "campo_abierto": false
+  },
+  "observaciones": {
+    "sustento_familia": "mmmmmmmmmmmmmmm",
+    "observaciones_encuestador": "dddddddddddddddddddddddd",
+    "autorizacion_datos": true
+  },
+  "familyMembers": [
+    {
+      "nombres": "manuel Alejando",
+      "fechaNacimiento": "2025-04-16T05:00:00.000Z",
+      "tipoIdentificacion": "RC",
+      "sexo": "Hombre",
+      "situacionCivil": "",
+      "talla": {
+        "camisa": "",
+        "pantalon": "",
+        "calzado": ""
+      },
+      "estudio": "",
+      "telefono": "",
+      "parentesco": "Primo/Prima",
+      "comunidadCultural": "",
+      "id": "1752592686071"
+    }
+  ],
+  "deceasedMembers": [
+    {
+      "nombres": "manuel Alejando",
+      "fechaAniversario": "2025-08-19T05:00:00.000Z",
+      "eraPadre": true,
+      "eraMadre": false,
+      "id": "1755885913244"
+    }
+  ],
+  "metadata": {
+    "timestamp": "2025-08-22T18:05:23.572Z",
+    "completed": false,
+    "currentStage": 6
+  },
+  "version": "2.0",
+  "savedAt": "2025-08-22T18:05:23.572Z"
+}

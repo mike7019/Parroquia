@@ -11,6 +11,7 @@ import Sector from './catalog/Sector.js';
 import TipoIdentificacion from './catalog/TipoIdentificacion.js';
 import Enfermedad from './catalog/Enfermedad.js';
 import Familias from './catalog/Familias.js';
+import Persona from './catalog/Persona.js';
 import TipoVivienda from './catalog/TipoVivienda.js';
 import Parentesco from './catalog/Parentesco.js';
 import SituacionCivil from './catalog/SituacionCivil.js';
@@ -134,6 +135,7 @@ export default {
   Municipios,
   Departamentos,
   Familias,
+  Persona,
   Parentesco,
   Talla
 };
@@ -168,6 +170,7 @@ export {
   TipoIdentificacion,
   Enfermedad,
   Familias,
+  Persona,
   TipoVivienda,
   Parentesco,
   SituacionCivil,

@@ -92,9 +92,7 @@ const Familias = sequelize.define('Familias', {
   }
 }, {
   tableName: 'familias',
-  timestamps: true,
-  createdAt: 'created_at',
-  updatedAt: 'updated_at',
+  timestamps: false,
   indexes: [
     {
       fields: ['id_municipio']
@@ -130,7 +128,7 @@ Familias.associate = function(models) {
   if (models.Sector) {
     Familias.belongsTo(models.Sector, {
       foreignKey: 'id_sector',
-      as: 'sector'
+      as: 'sector_info'
     });
   }
   

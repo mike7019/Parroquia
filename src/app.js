@@ -18,6 +18,7 @@ import systemRoutes from './routes/systemRoutes.js';
 import catalogRoutes from './routes/catalog/index.js';
 import parentescoRoutes from './routes/catalog/parentescoRoutes.js';
 import situacionCivilRoutes from './routes/catalog/situacionCivilRoutes.js';
+import encuestaRoutes from './routes/encuestaRoutes.js';
 
 // Import middlewares
 import errorHandler from './middlewares/errorHandler.js';
@@ -196,6 +197,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/catalog', catalogRoutes);
 app.use('/api/parentescos', parentescoRoutes); // Direct access for compatibility
 app.use('/api/situaciones-civiles', situacionCivilRoutes); // Direct access for compatibility
+app.use('/api', encuestaRoutes); // Rutas de encuestas
 app.use('/api', systemRoutes);
 
 // Root route
