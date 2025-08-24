@@ -13,7 +13,7 @@ try {
         contrasena = "Admin123!"
     } | ConvertTo-Json
 
-    $loginResponse = Invoke-RestMethod -Uri "http://localhost:3000/api/auth/login" -Method POST -Body $loginBody -ContentType "application/json"
+    $loginResponse = Invoke-RestMethod -Uri "http://localhost:5000/api/auth/login" -Method POST -Body $loginBody -ContentType "application/json"
     $token = $loginResponse.data.accessToken
     $headers = @{
         "Authorization" = "Bearer $token"
@@ -85,7 +85,7 @@ try {
         }
     } | ConvertTo-Json -Depth 5
 
-    $createResponse = Invoke-RestMethod -Uri "http://localhost:3000/api/encuesta" -Method POST -Body $encuestaBody -Headers $headers
+    $createResponse = Invoke-RestMethod -Uri "http://localhost:5000/api/encuesta" -Method POST -Body $encuestaBody -Headers $headers
     $familiaId = $createResponse.data.familia_id
     
     Write-Host "   ✅ Encuesta creada exitosamente - ID: $familiaId" -ForegroundColor Green
@@ -93,13 +93,13 @@ try {
 
     # OBTENER ENCUESTA
     Write-Host "🔍 PASO 3: Obteniendo encuesta..." -ForegroundColor Cyan
-    $getResponse = Invoke-RestMethod -Uri "http://localhost:3000/api/encuesta/$familiaId" -Method GET -Headers $headers
+    $getResponse = Invoke-RestMethod -Uri "http://localhost:5000/api/encuesta/$familiaId" -Method GET -Headers $headers
     Write-Host "   ✅ Encuesta obtenida: $($getResponse.data.informacion_general.apellido_familiar)" -ForegroundColor Green
     Write-Host ""
 
     # ELIMINAR ENCUESTA
     Write-Host "🗑️ PASO 4: Eliminando encuesta..." -ForegroundColor Cyan
-    $deleteResponse = Invoke-RestMethod -Uri "http://localhost:3000/api/encuesta/$familiaId" -Method DELETE -Headers $headers
+    $deleteResponse = Invoke-RestMethod -Uri "http://localhost:5000/api/encuesta/$familiaId" -Method DELETE -Headers $headers
     Write-Host "   ✅ Encuesta eliminada: $($deleteResponse.data.estadisticas.apellido_familiar)" -ForegroundColor Green
     Write-Host "   👥 Personas eliminadas: $($deleteResponse.data.estadisticas.personas_eliminadas)" -ForegroundColor Yellow
     Write-Host ""
@@ -107,7 +107,7 @@ try {
     # VERIFICAR ELIMINACIÓN
     Write-Host "✅ PASO 5: Verificando eliminación..." -ForegroundColor Cyan
     try {
-        $verifyResponse = Invoke-RestMethod -Uri "http://localhost:3000/api/encuesta/$familiaId" -Method GET -Headers $headers
+        $verifyResponse = Invoke-RestMethod -Uri "http://localhost:5000/api/encuesta/$familiaId" -Method GET -Headers $headers
         Write-Host "   ❌ ERROR: La encuesta aún existe!" -ForegroundColor Red
     } catch {
         Write-Host "   ✅ Correcto: Encuesta no encontrada (404)" -ForegroundColor Green

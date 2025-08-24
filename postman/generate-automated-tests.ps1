@@ -168,7 +168,7 @@ newman run Parroquia-Complete-Automated-Tests.postman_collection.json \
 - 100% de servicios con formato estandarizado
 
 ### **🔧 Variables de Entorno Necesarias:**
-- `baseUrl`: http://localhost:3000
+- `baseUrl`: http://localhost:5000
 - `adminEmail`: admin@test.com
 - `adminPassword`: Admin123!
 - `authToken`: (se llena automáticamente)

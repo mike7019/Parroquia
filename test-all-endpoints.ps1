@@ -12,7 +12,7 @@ $loginBody = @{
 } | ConvertTo-Json
 
 try {
-    $loginResponse = Invoke-RestMethod -Uri "http://localhost:3000/api/auth/login" -Method POST -ContentType "application/json" -Body $loginBody
+    $loginResponse = Invoke-RestMethod -Uri "http://localhost:5000/api/auth/login" -Method POST -ContentType "application/json" -Body $loginBody
     $accessToken = $loginResponse.data.accessToken
     $headers = @{
         "Authorization" = "Bearer $accessToken"
@@ -52,7 +52,7 @@ function Test-CRUDEndpoints {
         # CREATE (POST)
         Write-Host "`n1️⃣ CREATE - POST $EndpointBase" -ForegroundColor Green
         $createBody = $CreateData | ConvertTo-Json
-        $createResponse = Invoke-RestMethod -Uri "http://localhost:3000$EndpointBase" -Method POST -Headers $Headers -Body $createBody
+        $createResponse = Invoke-RestMethod -Uri "http://localhost:5000$EndpointBase" -Method POST -Headers $Headers -Body $createBody
         $createdId = $createResponse.data.id
         $results.CreatedId = $createdId
         $results.Create = $true
@@ -62,7 +62,7 @@ function Test-CRUDEndpoints {
         
         # READ ALL (GET)
         Write-Host "`n2️⃣ READ ALL - GET $EndpointBase" -ForegroundColor Blue
-        $readAllResponse = Invoke-RestMethod -Uri "http://localhost:3000$EndpointBase" -Method GET -Headers $Headers
+        $readAllResponse = Invoke-RestMethod -Uri "http://localhost:5000$EndpointBase" -Method GET -Headers $Headers
         $totalRecords = $readAllResponse.data.Count
         $results.ReadAll = $true
         Write-Host "   ✅ READ ALL exitoso - Total registros: $totalRecords" -ForegroundColor Green
@@ -71,7 +71,7 @@ function Test-CRUDEndpoints {
         
         # READ BY ID (GET)
         Write-Host "`n3️⃣ READ BY ID - GET $EndpointBase/$createdId" -ForegroundColor Blue
-        $readByIdResponse = Invoke-RestMethod -Uri "http://localhost:3000$EndpointBase/$createdId" -Method GET -Headers $Headers
+        $readByIdResponse = Invoke-RestMethod -Uri "http://localhost:5000$EndpointBase/$createdId" -Method GET -Headers $Headers
         $retrievedName = $readByIdResponse.data.nombre
         $results.ReadById = $true
         Write-Host "   ✅ READ BY ID exitoso - Nombre: $retrievedName" -ForegroundColor Green
@@ -81,7 +81,7 @@ function Test-CRUDEndpoints {
         # UPDATE (PUT)
         Write-Host "`n4️⃣ UPDATE - PUT $EndpointBase/$createdId" -ForegroundColor Orange
         $updateBody = $UpdateData | ConvertTo-Json
-        $updateResponse = Invoke-RestMethod -Uri "http://localhost:3000$EndpointBase/$createdId" -Method PUT -Headers $Headers -Body $updateBody
+        $updateResponse = Invoke-RestMethod -Uri "http://localhost:5000$EndpointBase/$createdId" -Method PUT -Headers $Headers -Body $updateBody
         $updatedName = $updateResponse.data.nombre
         $results.Update = $true
         Write-Host "   ✅ UPDATE exitoso - Nuevo nombre: $updatedName" -ForegroundColor Green
@@ -90,7 +90,7 @@ function Test-CRUDEndpoints {
         
         # DELETE (DELETE)
         Write-Host "`n5️⃣ DELETE - DELETE $EndpointBase/$createdId" -ForegroundColor Red
-        $deleteResponse = Invoke-RestMethod -Uri "http://localhost:3000$EndpointBase/$createdId" -Method DELETE -Headers $Headers
+        $deleteResponse = Invoke-RestMethod -Uri "http://localhost:5000$EndpointBase/$createdId" -Method DELETE -Headers $Headers
         $results.Delete = $true
         Write-Host "   ✅ DELETE exitoso" -ForegroundColor Green
         

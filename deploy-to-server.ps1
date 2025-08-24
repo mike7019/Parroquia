@@ -163,9 +163,9 @@ sequelize.authenticate()
     
     $serverResponding = $false
     try {
-        $response = Invoke-WebRequest -Uri "http://localhost:3000/health" -TimeoutSec 10 -ErrorAction SilentlyContinue
+        $response = Invoke-WebRequest -Uri "http://localhost:5000/health" -TimeoutSec 10 -ErrorAction SilentlyContinue
         if ($response.StatusCode -eq 200) {
-            Log-Success "Servidor respondiendo en puerto 3000"
+            Log-Success "Servidor respondiendo en puerto 5000"
             $serverResponding = $true
         }
     } catch {
@@ -197,8 +197,8 @@ sequelize.authenticate()
     Write-Host "3. Monitorear logs por posibles errores"
     Write-Host ""
     Write-Host "🔗 URLs para probar:" -ForegroundColor Blue
-    Write-Host "- Health check: http://tu-servidor:3000/health"
-    Write-Host "- API Veredas: http://tu-servidor:3000/api/catalog/veredas"
+    Write-Host "- Health check: http://tu-servidor:5000/health"
+    Write-Host "- API Veredas: http://tu-servidor:5000/api/catalog/veredas"
     Write-Host ""
     Log-Success "Deployment finalizado: $(Get-Date)"
     

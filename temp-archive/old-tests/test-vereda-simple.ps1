@@ -2,7 +2,7 @@
 # Script to test all vereda endpoints
 
 param(
-    [string]$BaseUrl = "http://localhost:3000"
+    [string]$BaseUrl = "http://localhost:5000"
 )
 
 $apiUrl = "$BaseUrl/api"

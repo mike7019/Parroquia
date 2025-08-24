@@ -5,7 +5,7 @@ Write-Host "📅 $(Get-Date)" -ForegroundColor Blue
 Write-Host ""
 
 # Configuración del servidor (ajustar según corresponda)
-$SERVER_URL = "http://localhost:3000"  # Cambiar por la URL del servidor
+$SERVER_URL = "http://localhost:5000"  # Cambiar por la URL del servidor
 $ADMIN_EMAIL = "admin@test.com"
 $ADMIN_PASSWORD = "Admin123!"
 

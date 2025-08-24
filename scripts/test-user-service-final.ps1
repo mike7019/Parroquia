@@ -31,7 +31,7 @@ try {
         Write-Host "✅ ¡Todas las pruebas pasaron exitosamente!" -ForegroundColor Green
         Write-Host ""
         Write-Host "🚀 Ahora puedes probar la API:" -ForegroundColor Cyan
-        Write-Host "   GET http://localhost:3000/api/users" -ForegroundColor White
+        Write-Host "   GET http://localhost:5000/api/users" -ForegroundColor White
         Write-Host ""
         Write-Host "📋 Los endpoints disponibles son:" -ForegroundColor Cyan
         Write-Host "   GET /api/users           - Obtener usuarios activos" -ForegroundColor White

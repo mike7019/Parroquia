@@ -2,7 +2,7 @@
 # PowerShell script to test all vereda endpoints
 
 # Base URL
-$baseUrl = "http://localhost:3000"
+$baseUrl = "http://localhost:5000"
 $apiUrl = "$baseUrl/api"
 
 # Colors for output

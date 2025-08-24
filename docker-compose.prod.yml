@@ -35,7 +35,7 @@ services:
         condition: service_healthy
     environment:
       - NODE_ENV=production
-      - PORT=3000
+      - PORT=5000
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_NAME=parroquia_db
@@ -64,7 +64,7 @@ services:
       - app_temp:/app/temp
       - app_uploads:/app/uploads
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
       interval: 30s
       timeout: 15s
       retries: 3

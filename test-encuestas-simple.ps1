@@ -1,7 +1,7 @@
 # Script para probar los endpoints de encuestas
 Write-Host "🧪 INICIANDO PRUEBAS DE ENDPOINTS DE ENCUESTAS" -ForegroundColor Green
 
-$baseUrl = "http://localhost:3000/api"
+$baseUrl = "http://localhost:5000/api"
 $headers = @{
     "Content-Type" = "application/json"
 }
