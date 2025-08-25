@@ -825,14 +825,17 @@ export const crearEncuesta = async (req, res) => {
     // 1. CREAR FAMILIA
     console.log('💾 Creando registro de familia...');
     
+    // Calcular tamaño de familia (mínimo 1)
+    const tamanioFamiliaCalculado = Math.max(1, (familyMembers.length || 0) + (deceasedMembers.length || 0));
+    
     const familiaData = {
       apellido_familiar: informacionGeneral.apellido_familiar,
-      sector: informacionGeneral.sector?.nombre || 'TEMP_SECTOR',
+      sector: informacionGeneral.sector?.nombre || informacionGeneral.sector || 'General',
       direccion_familia: informacionGeneral.direccion,
       telefono: informacionGeneral.telefono,
       email: informacionGeneral.email || null,
-      tamaño_familia: (familyMembers.length || 0) + (deceasedMembers.length || 0),
-      tipo_vivienda: vivienda.tipo_vivienda?.nombre || 'Casa',
+      tamaño_familia: tamanioFamiliaCalculado,
+      tipo_vivienda: vivienda.tipo_vivienda?.nombre || vivienda.tipo_vivienda || 'Casa',
       estado_encuesta: 'completed',
       numero_encuestas: 1,
       fecha_ultima_encuesta: new Date().toISOString().split('T')[0],
@@ -842,6 +845,15 @@ export const crearEncuesta = async (req, res) => {
       id_vereda: informacionGeneral.vereda?.id ? parseInt(informacionGeneral.vereda.id) : null,
       id_sector: informacionGeneral.sector?.id ? parseInt(informacionGeneral.sector.id) : null
     };
+
+    // Debug: mostrar datos que se van a insertar
+    console.log('📋 Datos de familia a insertar:', {
+      apellido_familiar: familiaData.apellido_familiar,
+      sector: familiaData.sector,
+      tamaño_familia: familiaData.tamaño_familia,
+      tipo_vivienda: familiaData.tipo_vivienda,
+      id_municipio: familiaData.id_municipio
+    });
 
     const familia = await Familias.create(familiaData, { transaction });
     console.log(`✅ Familia creada con ID: ${familia.id_familia}`);
