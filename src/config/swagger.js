@@ -2316,336 +2316,6 @@ const swaggerConfig = {
               }
             }
           ]
-        }
-      },
-      responses: {
-        UnauthorizedError: {
-          description: 'Token de acceso requerido o inválido',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/ErrorResponse'
-              },
-              example: {
-                status: 'error',
-                message: 'Token de acceso requerido',
-                code: 'UNAUTHORIZED'
-              }
-            }
-          }
-        },
-        ForbiddenError: {
-          description: 'Acceso denegado - permisos insuficientes',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/ErrorResponse'
-              },
-              example: {
-                status: 'error',
-                message: 'Acceso denegado',
-                code: 'FORBIDDEN'
-              }
-            }
-          }
-        },
-        NotFoundError: {
-          description: 'Recurso no encontrado',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/ErrorResponse'
-              },
-              example: {
-                status: 'error',
-                message: 'Usuario no encontrado',
-                code: 'NOT_FOUND'
-              }
-            }
-          }
-        },
-        ValidationError: {
-          description: 'Error de validación en los datos enviados',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/ErrorResponse'
-              },
-              example: {
-                status: 'error',
-                message: 'Errores de validación',
-                code: 'VALIDATION_ERROR',
-                errors: [
-                  {
-                    field: 'email',
-                    message: 'El formato del email no es válido'
-                  },
-                  {
-                    field: 'password',
-                    message: 'La contraseña debe tener al menos 8 caracteres'
-                  }
-                ]
-              }
-            }
-          }
-        },
-        ConflictError: {
-          description: 'Conflicto - el recurso ya existe o hay un conflicto con el estado actual',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/ErrorResponse'
-              },
-              example: {
-                status: 'error',
-                message: 'El email ya está registrado',
-                code: 'CONFLICT'
-              }
-            }
-          }
-        },
-        InternalServerError: {
-          description: 'Error interno del servidor',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/ErrorResponse'
-              },
-              example: {
-                status: 'error',
-                message: 'Error interno del servidor',
-                code: 'INTERNAL_SERVER_ERROR'
-              }
-            }
-          }
-        },
-        // Esquemas para API de Difuntos
-        DifuntosFamilia: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'integer',
-              description: 'ID único del registro',
-              example: 1
-            },
-            id_encuesta: {
-              type: 'integer',
-              description: 'ID de la encuesta asociada',
-              example: 123
-            },
-            nombre_completo: {
-              type: 'string',
-              description: 'Nombre completo del difunto',
-              example: 'José María García López'
-            },
-            fecha_fallecimiento: {
-              type: 'string',
-              format: 'date',
-              description: 'Fecha de fallecimiento (YYYY-MM-DD)',
-              example: '2023-01-15'
-            },
-            lugar_fallecimiento: {
-              type: 'string',
-              description: 'Lugar donde ocurrió el fallecimiento',
-              example: 'Hospital San Juan'
-            },
-            causa_fallecimiento: {
-              type: 'string',
-              description: 'Causa del fallecimiento',
-              example: 'Enfermedad cardiovascular'
-            },
-            documentos: {
-              type: 'string',
-              description: 'Documentos relacionados con el fallecimiento',
-              example: 'Certificado de defunción, Acta de inhumación'
-            },
-            parentesco: {
-              type: 'string',
-              description: 'Parentesco con la familia encuestada',
-              example: 'Padre'
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de creación del registro',
-              example: '2023-01-15T10:30:00Z'
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de última actualización',
-              example: '2023-01-15T10:30:00Z'
-            }
-          }
-        },
-        DifuntosListResponse: {
-          type: 'object',
-          properties: {
-            status: {
-              type: 'string',
-              description: 'Estado de la respuesta',
-              example: 'success'
-            },
-            data: {
-              type: 'array',
-              items: {
-                $ref: '#/components/schemas/DifuntosFamilia'
-              }
-            },
-            total: {
-              type: 'integer',
-              description: 'Número total de registros',
-              example: 25
-            },
-            pagination: {
-              type: 'object',
-              properties: {
-                page: {
-                  type: 'integer',
-                  description: 'Página actual',
-                  example: 1
-                },
-                limit: {
-                  type: 'integer',
-                  description: 'Límite de registros por página',
-                  example: 10
-                },
-                totalPages: {
-                  type: 'integer',
-                  description: 'Total de páginas',
-                  example: 3
-                }
-              }
-            }
-          }
-        },
-        DifuntosDetailResponse: {
-          type: 'object',
-          properties: {
-            status: {
-              type: 'string',
-              description: 'Estado de la respuesta',
-              example: 'success'
-            },
-            data: {
-              $ref: '#/components/schemas/DifuntosFamilia'
-            }
-          }
-        },
-        DifuntosStatsResponse: {
-          type: 'object',
-          properties: {
-            status: {
-              type: 'string',
-              description: 'Estado de la respuesta',
-              example: 'success'
-            },
-            data: {
-              type: 'object',
-              properties: {
-                totalDifuntos: {
-                  type: 'integer',
-                  description: 'Total de difuntos registrados',
-                  example: 156
-                },
-                porMes: {
-                  type: 'array',
-                  description: 'Estadísticas por mes',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      mes: {
-                        type: 'string',
-                        description: 'Nombre del mes',
-                        example: 'Enero'
-                      },
-                      cantidad: {
-                        type: 'integer',
-                        description: 'Cantidad de fallecimientos en el mes',
-                        example: 8
-                      }
-                    }
-                  }
-                },
-                porCausa: {
-                  type: 'array',
-                  description: 'Estadísticas por causa de fallecimiento',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      causa: {
-                        type: 'string',
-                        description: 'Causa de fallecimiento',
-                        example: 'Enfermedad cardiovascular'
-                      },
-                      cantidad: {
-                        type: 'integer',
-                        description: 'Cantidad de casos',
-                        example: 15
-                      }
-                    }
-                  }
-                },
-                porParentesco: {
-                  type: 'array',
-                  description: 'Estadísticas por parentesco',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      parentesco: {
-                        type: 'string',
-                        description: 'Tipo de parentesco',
-                        example: 'Padre'
-                      },
-                      cantidad: {
-                        type: 'integer',
-                        description: 'Cantidad de casos',
-                        example: 12
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        DifuntosByDateResponse: {
-          type: 'object',
-          properties: {
-            status: {
-              type: 'string',
-              description: 'Estado de la respuesta',
-              example: 'success'
-            },
-            data: {
-              type: 'array',
-              items: {
-                $ref: '#/components/schemas/DifuntosFamilia'
-              }
-            },
-            filtros: {
-              type: 'object',
-              properties: {
-                fechaInicio: {
-                  type: 'string',
-                  format: 'date',
-                  description: 'Fecha de inicio del filtro',
-                  example: '2023-01-01'
-                },
-                fechaFin: {
-                  type: 'string',
-                  format: 'date',
-                  description: 'Fecha de fin del filtro',
-                  example: '2023-12-31'
-                }
-              }
-            },
-            total: {
-              type: 'integer',
-              description: 'Total de registros encontrados',
-              example: 42
-            }
-          }
         },
         // ========================
         // SCHEMAS DE ENCUESTAS
@@ -3057,6 +2727,336 @@ const swaggerConfig = {
               type: 'boolean',
               description: 'Si hay página anterior',
               example: false
+            }
+          }
+        }
+      },
+      responses: {
+        UnauthorizedError: {
+          description: 'Token de acceso requerido o inválido',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/ErrorResponse'
+              },
+              example: {
+                status: 'error',
+                message: 'Token de acceso requerido',
+                code: 'UNAUTHORIZED'
+              }
+            }
+          }
+        },
+        ForbiddenError: {
+          description: 'Acceso denegado - permisos insuficientes',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/ErrorResponse'
+              },
+              example: {
+                status: 'error',
+                message: 'Acceso denegado',
+                code: 'FORBIDDEN'
+              }
+            }
+          }
+        },
+        NotFoundError: {
+          description: 'Recurso no encontrado',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/ErrorResponse'
+              },
+              example: {
+                status: 'error',
+                message: 'Usuario no encontrado',
+                code: 'NOT_FOUND'
+              }
+            }
+          }
+        },
+        ValidationError: {
+          description: 'Error de validación en los datos enviados',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/ErrorResponse'
+              },
+              example: {
+                status: 'error',
+                message: 'Errores de validación',
+                code: 'VALIDATION_ERROR',
+                errors: [
+                  {
+                    field: 'email',
+                    message: 'El formato del email no es válido'
+                  },
+                  {
+                    field: 'password',
+                    message: 'La contraseña debe tener al menos 8 caracteres'
+                  }
+                ]
+              }
+            }
+          }
+        },
+        ConflictError: {
+          description: 'Conflicto - el recurso ya existe o hay un conflicto con el estado actual',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/ErrorResponse'
+              },
+              example: {
+                status: 'error',
+                message: 'El email ya está registrado',
+                code: 'CONFLICT'
+              }
+            }
+          }
+        },
+        InternalServerError: {
+          description: 'Error interno del servidor',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/ErrorResponse'
+              },
+              example: {
+                status: 'error',
+                message: 'Error interno del servidor',
+                code: 'INTERNAL_SERVER_ERROR'
+              }
+            }
+          }
+        },
+        // Esquemas para API de Difuntos
+        DifuntosFamilia: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              description: 'ID único del registro',
+              example: 1
+            },
+            id_encuesta: {
+              type: 'integer',
+              description: 'ID de la encuesta asociada',
+              example: 123
+            },
+            nombre_completo: {
+              type: 'string',
+              description: 'Nombre completo del difunto',
+              example: 'José María García López'
+            },
+            fecha_fallecimiento: {
+              type: 'string',
+              format: 'date',
+              description: 'Fecha de fallecimiento (YYYY-MM-DD)',
+              example: '2023-01-15'
+            },
+            lugar_fallecimiento: {
+              type: 'string',
+              description: 'Lugar donde ocurrió el fallecimiento',
+              example: 'Hospital San Juan'
+            },
+            causa_fallecimiento: {
+              type: 'string',
+              description: 'Causa del fallecimiento',
+              example: 'Enfermedad cardiovascular'
+            },
+            documentos: {
+              type: 'string',
+              description: 'Documentos relacionados con el fallecimiento',
+              example: 'Certificado de defunción, Acta de inhumación'
+            },
+            parentesco: {
+              type: 'string',
+              description: 'Parentesco con la familia encuestada',
+              example: 'Padre'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación del registro',
+              example: '2023-01-15T10:30:00Z'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización',
+              example: '2023-01-15T10:30:00Z'
+            }
+          }
+        },
+        DifuntosListResponse: {
+          type: 'object',
+          properties: {
+            status: {
+              type: 'string',
+              description: 'Estado de la respuesta',
+              example: 'success'
+            },
+            data: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/DifuntosFamilia'
+              }
+            },
+            total: {
+              type: 'integer',
+              description: 'Número total de registros',
+              example: 25
+            },
+            pagination: {
+              type: 'object',
+              properties: {
+                page: {
+                  type: 'integer',
+                  description: 'Página actual',
+                  example: 1
+                },
+                limit: {
+                  type: 'integer',
+                  description: 'Límite de registros por página',
+                  example: 10
+                },
+                totalPages: {
+                  type: 'integer',
+                  description: 'Total de páginas',
+                  example: 3
+                }
+              }
+            }
+          }
+        },
+        DifuntosDetailResponse: {
+          type: 'object',
+          properties: {
+            status: {
+              type: 'string',
+              description: 'Estado de la respuesta',
+              example: 'success'
+            },
+            data: {
+              $ref: '#/components/schemas/DifuntosFamilia'
+            }
+          }
+        },
+        DifuntosStatsResponse: {
+          type: 'object',
+          properties: {
+            status: {
+              type: 'string',
+              description: 'Estado de la respuesta',
+              example: 'success'
+            },
+            data: {
+              type: 'object',
+              properties: {
+                totalDifuntos: {
+                  type: 'integer',
+                  description: 'Total de difuntos registrados',
+                  example: 156
+                },
+                porMes: {
+                  type: 'array',
+                  description: 'Estadísticas por mes',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      mes: {
+                        type: 'string',
+                        description: 'Nombre del mes',
+                        example: 'Enero'
+                      },
+                      cantidad: {
+                        type: 'integer',
+                        description: 'Cantidad de fallecimientos en el mes',
+                        example: 8
+                      }
+                    }
+                  }
+                },
+                porCausa: {
+                  type: 'array',
+                  description: 'Estadísticas por causa de fallecimiento',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      causa: {
+                        type: 'string',
+                        description: 'Causa de fallecimiento',
+                        example: 'Enfermedad cardiovascular'
+                      },
+                      cantidad: {
+                        type: 'integer',
+                        description: 'Cantidad de casos',
+                        example: 15
+                      }
+                    }
+                  }
+                },
+                porParentesco: {
+                  type: 'array',
+                  description: 'Estadísticas por parentesco',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      parentesco: {
+                        type: 'string',
+                        description: 'Tipo de parentesco',
+                        example: 'Padre'
+                      },
+                      cantidad: {
+                        type: 'integer',
+                        description: 'Cantidad de casos',
+                        example: 12
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        DifuntosByDateResponse: {
+          type: 'object',
+          properties: {
+            status: {
+              type: 'string',
+              description: 'Estado de la respuesta',
+              example: 'success'
+            },
+            data: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/DifuntosFamilia'
+              }
+            },
+            filtros: {
+              type: 'object',
+              properties: {
+                fechaInicio: {
+                  type: 'string',
+                  format: 'date',
+                  description: 'Fecha de inicio del filtro',
+                  example: '2023-01-01'
+                },
+                fechaFin: {
+                  type: 'string',
+                  format: 'date',
+                  description: 'Fecha de fin del filtro',
+                  example: '2023-12-31'
+                }
+              }
+            },
+            total: {
+              type: 'integer',
+              description: 'Total de registros encontrados',
+              example: 42
             }
           }
         }
