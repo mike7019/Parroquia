@@ -2,147 +2,37 @@ import sequelize from '../../config/sequelize.js';
 import Usuario from './Usuario.js';
 import Role from './Role.js';
 import UsuarioRole from './UsuarioRole.js';
-import Parroquia from './catalog/Parroquia.js';
-import Veredas from './catalog/Veredas.js';
-import Sexo from './catalog/Sexo.js';
-import Municipios from './catalog/Municipios.js';
-import Departamentos from './catalog/Departamentos.js';
-import Sector from './catalog/Sector.js';
-import TipoIdentificacion from './catalog/TipoIdentificacion.js';
-import Enfermedad from './catalog/Enfermedad.js';
-import Familias from './catalog/Familias.js';
-import Persona from './catalog/Persona.js';
-import TipoVivienda from './catalog/TipoVivienda.js';
-import Parentesco from './catalog/Parentesco.js';
-import SituacionCivil from './catalog/SituacionCivil.js';
-import Estudio from './catalog/Estudio.js';
-import Talla from './catalog/Talla.js';
-import DifuntosFamilia from './catalog/DifuntosFamilia.js';
 
-// Create User alias for compatibility
-const User = Usuario;
-
-// Catalog model associations
-// COMENTADO: Asociaciones movidas a src/models/catalog/index.js para evitar duplicados
-/*
-// Asociaciones de Departamentos y Municipios
-Departamentos.hasMany(Municipios, {
-  foreignKey: 'id_departamento',
-  as: 'municipios'
-});
-
-Municipios.belongsTo(Departamentos, {
-  foreignKey: 'id_departamento',
-  as: 'departamentoData'
-});
-*/
-
-// Asociaciones comentadas - los modelos están duplicados en main/
-/*
-Parroquia.hasMany(Persona, {
-  foreignKey: 'id_parroquia',
-  as: 'personas'
-});
-
-Persona.belongsTo(Parroquia, {
-  foreignKey: 'id_parroquia',
-  as: 'parroquia'
-});
-
-Sexo.hasMany(Persona, {
-  foreignKey: 'id_sexo',
-  as: 'personas'
-});
-
-Persona.belongsTo(Sexo, {
-  foreignKey: 'id_sexo',
-  as: 'sexo'
-});
-*/
-
-// COMENTADO: Todas las asociaciones movidas a archivos específicos para evitar duplicados
-/*
-// Usar el modelo Municipios (más completo) en lugar de Municipio
-Municipios.hasMany(Veredas, {
-  foreignKey: 'id_municipio_municipios',
-  targetKey: 'id_municipio',
-  as: 'veredas'
-});
-
-Veredas.belongsTo(Municipios, {
-  foreignKey: 'id_municipio_municipios',
-  targetKey: 'id_municipio',
-  as: 'municipio'
-});
-*/
-
-// Asociaciones comentadas - modelos duplicados en main/
-/*
-Veredas.hasMany(Persona, {
-  foreignKey: 'id_vereda',
-  as: 'personas'
-});
-
-Persona.belongsTo(Veredas, {
-  foreignKey: 'id_vereda',
-  as: 'vereda'
-});
-
-// Sector associations
-Sector.hasMany(Veredas, {
-  foreignKey: 'id_sector',
-  targetKey: 'id_sector',
-  as: 'veredas'
-});
-
-Veredas.belongsTo(Sector, {
-  foreignKey: 'id_sector',
-  targetKey: 'id_sector',
-  as: 'sector'
-});
-*/
-
-// COMENTADO: Asociaciones many-to-many movidas para evitar duplicados
-/*
-// Asociaciones many-to-many entre Veredas y Familias
-Veredas.belongsToMany(Familias, {
-  through: {
-    model: 'veredas_has_many_familias',
-    unique: false
-  },
-  foreignKey: 'id_vereda',
-  otherKey: 'id_familia',
-  as: 'familias',
-  timestamps: false
-});
-
-Familias.belongsToMany(Veredas, {
-  through: {
-    model: 'veredas_has_many_familias',
-    unique: false
-  },
-  foreignKey: 'id_familia',
-  otherKey: 'id_vereda',
-  as: 'veredas',
-  timestamps: false
-});
-*/
-
-// Re-export everything
-export default {
-  sequelize,
-  Usuario,
+// Import all catalog models and their associations
+import {
+  TipoIdentificacion,
+  Parroquia,
+  Sexo,
+  Sector,
   Veredas,
   Municipios,
   Departamentos,
   Familias,
-  Persona,
-  Parentesco,
-  Talla,
+  TipoDisposicionBasura,
+  FamiliaDisposicionBasura,
+  TipoAguasResiduales,
+  TipoVivienda,
+  ComunidadCultural,
   DifuntosFamilia
-};
+} from './catalog/index.js';
 
-// Define associations between Usuario and Role
+// Import other models individually
+import Enfermedad from './catalog/Enfermedad.js';
+import Persona from './catalog/Persona.js';
+import Parentesco from './catalog/Parentesco.js';
+import SituacionCivil from './catalog/SituacionCivil.js';
+import Estudio from './catalog/Estudio.js';
+import Talla from './catalog/Talla.js';
+
+// Create User alias for compatibility
+const User = Usuario;
+
+// Define associations for Usuario and Role models
 Usuario.belongsToMany(Role, {
   through: UsuarioRole,
   foreignKey: 'id_usuarios',
@@ -156,6 +46,35 @@ Role.belongsToMany(Usuario, {
   otherKey: 'id_usuarios',
   as: 'usuarios'
 });
+
+// Re-export everything
+export default {
+  sequelize,
+  Usuario,
+  User,
+  Role,
+  UsuarioRole,
+  Parroquia,
+  Veredas,
+  Sexo,
+  Municipios,
+  Departamentos,
+  Sector,
+  TipoIdentificacion,
+  Enfermedad,
+  Familias,
+  Persona,
+  TipoVivienda,
+  Parentesco,
+  SituacionCivil,
+  Estudio,
+  Talla,
+  DifuntosFamilia,
+  TipoDisposicionBasura,
+  FamiliaDisposicionBasura,
+  TipoAguasResiduales,
+  ComunidadCultural
+};
 
 export {
   sequelize,
@@ -178,5 +97,9 @@ export {
   SituacionCivil,
   Estudio,
   Talla,
-  DifuntosFamilia
+  DifuntosFamilia,
+  TipoDisposicionBasura,
+  FamiliaDisposicionBasura,
+  TipoAguasResiduales,
+  ComunidadCultural
 };
