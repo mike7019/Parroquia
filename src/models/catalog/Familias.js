@@ -6,8 +6,7 @@ const Familias = sequelize.define('Familias', {
     type: DataTypes.BIGINT,
     primaryKey: true,
     autoIncrement: true,
-    allowNull: false,
-    field: 'id_familia'
+    allowNull: false
   },
   apellido_familiar: {
     type: DataTypes.STRING(200),
@@ -36,7 +35,10 @@ const Familias = sequelize.define('Familias', {
   tamaño_familia: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    defaultValue: 1
+    defaultValue: 1,
+    validate: {
+      min: 1
+    }
   },
   tipo_vivienda: {
     type: DataTypes.STRING(100),

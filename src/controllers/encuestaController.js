@@ -845,6 +845,13 @@ export const crearEncuesta = async (req, res) => {
 
     const familia = await Familias.create(familiaData, { transaction });
     console.log(`✅ Familia creada con ID: ${familia.id_familia}`);
+    
+    // Verificar que se haya creado correctamente el ID
+    if (!familia.id_familia) {
+      throw new Error('Error al crear la familia: ID no generado correctamente');
+    }
+    
+    const familiaId = familia.id_familia;
 
     // 2. REGISTRAR DISPOSICIÓN DE BASURAS (simplificado)
     console.log('🗑️ Registrando disposición de basuras...');
@@ -868,7 +875,7 @@ export const crearEncuesta = async (req, res) => {
             await sequelize.query(
               'INSERT INTO familia_disposicion_basura (id_familia, id_tipo_disposicion_basura, "createdAt", "updatedAt") VALUES ($1, $2, NOW(), NOW())',
               {
-                bind: [familia.id_familia, disposicionMapping[tipo]],
+                bind: [familiaId, disposicionMapping[tipo]],
                 transaction
               }
             );
@@ -890,7 +897,7 @@ export const crearEncuesta = async (req, res) => {
         await sequelize.query(
           'INSERT INTO familia_sistema_acueducto (id_familia, id_sistema_acueducto, "createdAt", "updatedAt") VALUES ($1, $2, NOW(), NOW())',
           {
-            bind: [familia.id_familia, sistemaId],
+            bind: [familiaId, sistemaId],
             transaction
           }
         );
@@ -919,7 +926,7 @@ export const crearEncuesta = async (req, res) => {
       await sequelize.query(
         'INSERT INTO familia_tipo_vivienda (id_familia, id_tipo_vivienda, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
         {
-          bind: [familia.id_familia, tipoViviendaId],
+          bind: [familiaId, tipoViviendaId],
           transaction
         }
       );
@@ -1008,8 +1015,8 @@ export const crearEncuesta = async (req, res) => {
             correo_electronico: `${primerNombre.toLowerCase()}.${Date.now()}.${personasCreadas}@temp.com`,
             identificacion: identificacionUnica,
             direccion: informacionGeneral.direccion,
-            id_familia_familias: familia.id_familia,
-            id_familia: familia.id_familia, // Columna duplicada en la tabla
+            id_familia_familias: familiaId,
+            id_familia: familiaId, // Columna duplicada en la tabla
             id_sexo: sexoId,
             id_tipo_identificacion_tipo_identificacion: tipoIdentificacionId,
             id_estado_civil_estado_civil: estadoCivilId,
@@ -1062,8 +1069,8 @@ export const crearEncuesta = async (req, res) => {
             correo_electronico: `fallecido.${Date.now()}.${personasFallecidas}@temp.com`,
             identificacion: identificacionUnica,
             direccion: informacionGeneral.direccion,
-            id_familia_familias: familia.id_familia,
-            id_familia: familia.id_familia,
+            id_familia_familias: familiaId,
+            id_familia: familiaId,
             id_parroquia: null, // Evitar error de clave foránea, usar null por defecto
             // Campos adicionales para fallecidos en el campo 'estudios' como JSON temporal
             estudios: JSON.stringify({
@@ -1094,7 +1101,7 @@ export const crearEncuesta = async (req, res) => {
       status: 'success',
       message: 'Encuesta guardada exitosamente',
       data: {
-        familia_id: familia.id_familia,
+        familia_id: familiaId,
         personas_creadas: personasCreadas,
         personas_fallecidas: personasFallecidas,
         transaccion_id: `txn_${Date.now()}`,
