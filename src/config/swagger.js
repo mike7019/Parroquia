@@ -2646,6 +2646,419 @@ const swaggerConfig = {
               example: 42
             }
           }
+        },
+        // ========================
+        // SCHEMAS DE ENCUESTAS
+        // ========================
+        EncuestaCompleta: {
+          type: 'object',
+          required: ['informacionGeneral', 'vivienda', 'servicios_agua', 'observaciones', 'familyMembers'],
+          properties: {
+            informacionGeneral: {
+              type: 'object',
+              required: ['municipio', 'apellido_familiar', 'direccion'],
+              properties: {
+                municipio: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string', description: 'ID del municipio', example: '001' },
+                    nombre: { type: 'string', description: 'Nombre del municipio', example: 'Medellín' }
+                  }
+                },
+                parroquia: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string', description: 'ID de la parroquia', example: '002' },
+                    nombre: { type: 'string', description: 'Nombre de la parroquia', example: 'San José' }
+                  }
+                },
+                sector: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string', description: 'ID del sector', example: '003' },
+                    nombre: { type: 'string', description: 'Nombre del sector', example: 'Centro' }
+                  }
+                },
+                vereda: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string', description: 'ID de la vereda', example: '004' },
+                    nombre: { type: 'string', description: 'Nombre de la vereda', example: 'El Carmen' }
+                  }
+                },
+                fecha: { 
+                  type: 'string', 
+                  format: 'date-time',
+                  description: 'Fecha de la encuesta',
+                  example: '2025-08-23T03:13:14.017Z'
+                },
+                apellido_familiar: { 
+                  type: 'string',
+                  description: 'Apellido de la familia',
+                  example: 'García'
+                },
+                direccion: { 
+                  type: 'string',
+                  description: 'Dirección de la familia',
+                  example: 'Calle 10 # 20-30'
+                },
+                telefono: { 
+                  type: 'string',
+                  description: 'Teléfono de contacto',
+                  example: '6041234567'
+                },
+                numero_contrato_epm: { 
+                  type: 'string',
+                  description: 'Número de contrato EPM',
+                  example: '987654321'
+                }
+              }
+            },
+            vivienda: {
+              type: 'object',
+              properties: {
+                tipo_vivienda: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string', description: 'ID del tipo de vivienda', example: '01' },
+                    nombre: { type: 'string', description: 'Nombre del tipo de vivienda', example: 'Casa' }
+                  }
+                },
+                disposicion_basuras: {
+                  type: 'object',
+                  properties: {
+                    recolector: { type: 'boolean', description: 'Recolector público', example: true },
+                    quemada: { type: 'boolean', description: 'Basura quemada', example: false },
+                    enterrada: { type: 'boolean', description: 'Basura enterrada', example: false },
+                    recicla: { type: 'boolean', description: 'Recicla basura', example: true },
+                    aire_libre: { type: 'boolean', description: 'Basura al aire libre', example: false },
+                    no_aplica: { type: 'boolean', description: 'No aplica', example: false }
+                  }
+                }
+              }
+            },
+            servicios_agua: {
+              type: 'object',
+              properties: {
+                sistema_acueducto: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string', description: 'ID del sistema de acueducto', example: '10' },
+                    nombre: { type: 'string', description: 'Nombre del sistema', example: 'Aguas de Medellín' }
+                  }
+                },
+                aguas_residuales: { 
+                  type: 'string', 
+                  nullable: true,
+                  description: 'Tipo de tratamiento de aguas residuales',
+                  example: 'Alcantarillado público'
+                },
+                pozo_septico: { type: 'boolean', description: 'Tiene pozo séptico', example: false },
+                letrina: { type: 'boolean', description: 'Tiene letrina', example: false },
+                campo_abierto: { type: 'boolean', description: 'Campo abierto', example: false }
+              }
+            },
+            observaciones: {
+              type: 'object',
+              properties: {
+                sustento_familia: { 
+                  type: 'string',
+                  description: 'Principal sustento de la familia',
+                  example: 'Agricultura'
+                },
+                observaciones_encuestador: { 
+                  type: 'string',
+                  description: 'Observaciones del encuestador',
+                  example: 'Familia con acceso a servicios básicos'
+                },
+                autorizacion_datos: { 
+                  type: 'boolean',
+                  description: 'Autorización para tratamiento de datos',
+                  example: true
+                }
+              }
+            },
+            familyMembers: {
+              type: 'array',
+              description: 'Lista de miembros vivos de la familia',
+              items: {
+                $ref: '#/components/schemas/FamilyMemberInput'
+              }
+            },
+            deceasedMembers: {
+              type: 'array',
+              description: 'Lista de miembros fallecidos de la familia',
+              items: {
+                type: 'object',
+                properties: {
+                  nombres: { 
+                    type: 'string',
+                    description: 'Nombres del difunto',
+                    example: 'María López'
+                  },
+                  fechaAniversario: { 
+                    type: 'string', 
+                    format: 'date-time',
+                    description: 'Fecha de fallecimiento',
+                    example: '2020-05-20T00:00:00.000Z'
+                  },
+                  eraPadre: { 
+                    type: 'boolean',
+                    description: 'Era padre de familia',
+                    example: false
+                  },
+                  eraMadre: { 
+                    type: 'boolean',
+                    description: 'Era madre de familia',
+                    example: true
+                  }
+                }
+              }
+            },
+            metadata: {
+              type: 'object',
+              properties: {
+                timestamp: { 
+                  type: 'string', 
+                  format: 'date-time',
+                  description: 'Marca de tiempo de la encuesta',
+                  example: '2025-08-23T03:13:14.017Z'
+                },
+                completed: { 
+                  type: 'boolean',
+                  description: 'Encuesta completada',
+                  example: true
+                },
+                currentStage: { 
+                  type: 'integer',
+                  description: 'Etapa actual de la encuesta',
+                  example: 1
+                }
+              }
+            }
+          }
+        },
+        EncuestaResponse: {
+          type: 'object',
+          properties: {
+            status: {
+              type: 'string',
+              description: 'Estado de la operación',
+              example: 'success'
+            },
+            message: {
+              type: 'string',
+              description: 'Mensaje descriptivo',
+              example: 'Encuesta guardada exitosamente'
+            },
+            data: {
+              type: 'object',
+              properties: {
+                familia_id: {
+                  type: 'integer',
+                  description: 'ID de la familia creada',
+                  example: 3
+                },
+                personas_creadas: {
+                  type: 'integer',
+                  description: 'Número de personas creadas',
+                  example: 1
+                },
+                personas_fallecidas: {
+                  type: 'integer',
+                  description: 'Número de personas fallecidas registradas',
+                  example: 1
+                },
+                transaccion_id: {
+                  type: 'string',
+                  description: 'ID de la transacción',
+                  example: 'tx_12345'
+                }
+              }
+            }
+          }
+        },
+        EncuestaResumen: {
+          type: 'object',
+          properties: {
+            id_familia: {
+              type: 'integer',
+              description: 'ID único de la familia',
+              example: 1
+            },
+            apellido_familiar: {
+              type: 'string',
+              description: 'Apellido de la familia',
+              example: 'García'
+            },
+            direccion_familia: {
+              type: 'string',
+              description: 'Dirección de la familia',
+              example: 'Calle 10 # 20-30'
+            },
+            telefono_familiar: {
+              type: 'string',
+              description: 'Teléfono de contacto',
+              example: '6041234567'
+            },
+            sector: {
+              type: 'string',
+              description: 'Sector de la familia',
+              example: 'Centro'
+            },
+            municipio: {
+              type: 'string',
+              description: 'Municipio de la familia',
+              example: 'Medellín'
+            },
+            fecha_ultima_encuesta: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de la última encuesta',
+              example: '2025-08-23T03:13:14.017Z'
+            },
+            total_personas: {
+              type: 'integer',
+              description: 'Total de personas en la familia',
+              example: 4
+            }
+          }
+        },
+        EncuestaDetallada: {
+          type: 'object',
+          properties: {
+            id_familia: {
+              type: 'integer',
+              description: 'ID único de la familia',
+              example: 1
+            },
+            apellido_familiar: {
+              type: 'string',
+              description: 'Apellido de la familia',
+              example: 'García'
+            },
+            direccion_familia: {
+              type: 'string',
+              description: 'Dirección de la familia',
+              example: 'Calle 10 # 20-30'
+            },
+            telefono_familiar: {
+              type: 'string',
+              description: 'Teléfono de contacto',
+              example: '6041234567'
+            },
+            numero_contrato_epm: {
+              type: 'string',
+              description: 'Número de contrato EPM',
+              example: '987654321'
+            },
+            tratamiento_datos: {
+              type: 'boolean',
+              description: 'Autorización de tratamiento de datos',
+              example: true
+            },
+            informacion_vivienda: {
+              type: 'object',
+              properties: {
+                tipo_vivienda: {
+                  type: 'object',
+                  properties: {
+                    nombre: { type: 'string', example: 'Casa' }
+                  }
+                }
+              }
+            },
+            servicios_agua: {
+              type: 'object',
+              properties: {
+                sistema_acueducto: { type: 'string', example: 'Aguas de Medellín' },
+                aguas_residuales: { type: 'string', example: 'Alcantarillado público' },
+                pozo_septico: { type: 'boolean', example: false },
+                letrina: { type: 'boolean', example: false },
+                campo_abierto: { type: 'boolean', example: false }
+              }
+            },
+            disposicion_basuras: {
+              type: 'object',
+              properties: {
+                recolector: { type: 'boolean', example: true },
+                quemada: { type: 'boolean', example: false },
+                enterrada: { type: 'boolean', example: false },
+                recicla: { type: 'boolean', example: true },
+                aire_libre: { type: 'boolean', example: false },
+                no_aplica: { type: 'boolean', example: false }
+              }
+            },
+            personas: {
+              type: 'array',
+              description: 'Miembros vivos de la familia',
+              items: {
+                $ref: '#/components/schemas/FamilyMember'
+              }
+            },
+            difuntos: {
+              type: 'array',
+              description: 'Miembros fallecidos de la familia',
+              items: {
+                $ref: '#/components/schemas/DifuntosFamilia'
+              }
+            },
+            estadisticas: {
+              type: 'object',
+              properties: {
+                total_personas: {
+                  type: 'integer',
+                  description: 'Total de personas en la familia',
+                  example: 4
+                },
+                personas_vivas: {
+                  type: 'integer',
+                  description: 'Número de personas vivas',
+                  example: 3
+                },
+                personas_fallecidas: {
+                  type: 'integer',
+                  description: 'Número de personas fallecidas',
+                  example: 1
+                }
+              }
+            }
+          }
+        },
+        PaginationInfo: {
+          type: 'object',
+          properties: {
+            currentPage: {
+              type: 'integer',
+              description: 'Página actual',
+              example: 1
+            },
+            totalPages: {
+              type: 'integer',
+              description: 'Total de páginas',
+              example: 10
+            },
+            totalItems: {
+              type: 'integer',
+              description: 'Total de elementos',
+              example: 100
+            },
+            itemsPerPage: {
+              type: 'integer',
+              description: 'Elementos por página',
+              example: 10
+            },
+            hasNext: {
+              type: 'boolean',
+              description: 'Si hay página siguiente',
+              example: true
+            },
+            hasPrev: {
+              type: 'boolean',
+              description: 'Si hay página anterior',
+              example: false
+            }
+          }
         }
       }
     },
