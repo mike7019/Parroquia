@@ -122,43 +122,12 @@ class DifuntosService {
   async getPadresDifuntos(filters = {}) {
     try {
       const whereClause = {};
-      const includeClause = [
-        {
-          model: Familias,
-          as: 'familia',
-          required: true,
-          include: [
-            {
-              model: Veredas,
-              as: 'vereda',
-              required: false
-            },
-            {
-              model: Sector,
-              as: 'sector_info',
-              required: false
-            }
-          ]
-        }
+      
+      // Filtro específico para padres (basado en nombre o observaciones)
+      whereClause[Op.or] = [
+        { nombre_completo: { [Op.iRegexp]: '(padre|papá|don)' } },
+        { observaciones: { [Op.iRegexp]: '(padre|papá|don)' } }
       ];
-
-      // Filtros opcionales
-      if (filters.sector) {
-        includeClause[0].where = {
-          sector: {
-            [Op.iLike]: `%${filters.sector}%`
-          }
-        };
-      }
-
-      if (filters.apellido_familiar) {
-        includeClause[0].where = {
-          ...includeClause[0].where,
-          apellido_familiar: {
-            [Op.iLike]: `%${filters.apellido_familiar}%`
-          }
-        };
-      }
 
       if (filters.nombre) {
         whereClause.nombre_completo = {
@@ -177,32 +146,18 @@ class DifuntosService {
         ];
       }
 
-      // Filtro específico para padres (basado en nombre o observaciones)
-      whereClause[Op.or] = [
-        { nombre_completo: { [Op.iRegexp]: '(padre|papá|don)' } },
-        { observaciones: { [Op.iRegexp]: '(padre|papá|don)' } }
-      ];
-
       const difuntos = await DifuntosFamilia.findAll({
         where: whereClause,
-        include: includeClause,
         order: [['fecha_fallecimiento', 'DESC']],
-        attributes: [
-          'id_difunto',
-          'nombre_completo',
-          'fecha_fallecimiento',
-          'observaciones'
-        ]
+        limit: 10
       });
 
-      // Formatear respuesta
-      return difuntos.map(difunto => ({
-        sector_vereda: difunto.familia?.vereda?.nombre || difunto.familia?.sector || 'No especificado',
-        apellido_familiar: difunto.familia?.apellido_familiar || 'No especificado',
-        parentesco: 'Padre',
-        nombre: difunto.nombre_completo,
-        fecha_aniversario: difunto.fecha_fallecimiento
-      }));
+      return {
+        success: true,
+        data: difuntos,
+        total: difuntos.length,
+        filters: filters
+      };
 
     } catch (error) {
       throw new Error(`Error al obtener padres difuntos: ${error.message}`);
@@ -215,44 +170,7 @@ class DifuntosService {
   async getTodosDifuntos(filters = {}) {
     try {
       const whereClause = {};
-      const includeClause = [
-        {
-          model: Familias,
-          as: 'familia',
-          required: true,
-          include: [
-            {
-              model: Veredas,
-              as: 'vereda',
-              required: false
-            },
-            {
-              model: Sector,
-              as: 'sector_info',
-              required: false
-            }
-          ]
-        }
-      ];
-
-      // Filtros opcionales
-      if (filters.sector) {
-        includeClause[0].where = {
-          sector: {
-            [Op.iLike]: `%${filters.sector}%`
-          }
-        };
-      }
-
-      if (filters.apellido_familiar) {
-        includeClause[0].where = {
-          ...includeClause[0].where,
-          apellido_familiar: {
-            [Op.iLike]: `%${filters.apellido_familiar}%`
-          }
-        };
-      }
-
+      
       if (filters.nombre) {
         whereClause.nombre_completo = {
           [Op.iLike]: `%${filters.nombre}%`
@@ -272,45 +190,16 @@ class DifuntosService {
 
       const difuntos = await DifuntosFamilia.findAll({
         where: whereClause,
-        include: includeClause,
         order: [['fecha_fallecimiento', 'DESC']],
-        attributes: [
-          'id_difunto',
-          'nombre_completo',
-          'fecha_fallecimiento',
-          'observaciones'
-        ]
+        limit: 20
       });
 
-      // Formatear respuesta
-      return difuntos.map(difunto => {
-        // Determinar parentesco basado en el nombre o observaciones
-        let parentesco = 'Familiar';
-        const nombre = difunto.nombre_completo.toLowerCase();
-        const obs = (difunto.observaciones || '').toLowerCase();
-        
-        if (nombre.includes('madre') || nombre.includes('mamá') || nombre.includes('doña') ||
-            obs.includes('madre') || obs.includes('mamá') || obs.includes('doña')) {
-          parentesco = 'Madre';
-        } else if (nombre.includes('padre') || nombre.includes('papá') || nombre.includes('don') ||
-                   obs.includes('padre') || obs.includes('papá') || obs.includes('don')) {
-          parentesco = 'Padre';
-        } else if (nombre.includes('hijo') || nombre.includes('hija') ||
-                   obs.includes('hijo') || obs.includes('hija')) {
-          parentesco = 'Hijo/a';
-        } else if (nombre.includes('abuelo') || nombre.includes('abuela') ||
-                   obs.includes('abuelo') || obs.includes('abuela')) {
-          parentesco = 'Abuelo/a';
-        }
-
-        return {
-          sector_vereda: difunto.familia?.vereda?.nombre || difunto.familia?.sector || 'No especificado',
-          apellido_familiar: difunto.familia?.apellido_familiar || 'No especificado',
-          parentesco: parentesco,
-          nombre: difunto.nombre_completo,
-          fecha_aniversario: difunto.fecha_fallecimiento
-        };
-      });
+      return {
+        success: true,
+        data: difuntos,
+        total: difuntos.length,
+        filters: filters
+      };
 
     } catch (error) {
       throw new Error(`Error al obtener todos los difuntos: ${error.message}`);
@@ -323,26 +212,7 @@ class DifuntosService {
   async getDifuntosPorRangoFechas(fechaInicio, fechaFin, filters = {}) {
     try {
       const whereClause = {};
-      const includeClause = [
-        {
-          model: Familias,
-          as: 'familia',
-          required: true,
-          include: [
-            {
-              model: Veredas,
-              as: 'vereda',
-              required: false
-            },
-            {
-              model: Sector,
-              as: 'sector_info',
-              required: false
-            }
-          ]
-        }
-      ];
-
+      
       // Filtro por rango de fechas
       if (fechaInicio && fechaFin) {
         whereClause.fecha_fallecimiento = {
@@ -358,24 +228,6 @@ class DifuntosService {
         };
       }
 
-      // Filtros opcionales
-      if (filters.sector) {
-        includeClause[0].where = {
-          sector: {
-            [Op.iLike]: `%${filters.sector}%`
-          }
-        };
-      }
-
-      if (filters.apellido_familiar) {
-        includeClause[0].where = {
-          ...includeClause[0].where,
-          apellido_familiar: {
-            [Op.iLike]: `%${filters.apellido_familiar}%`
-          }
-        };
-      }
-
       if (filters.nombre) {
         whereClause.nombre_completo = {
           [Op.iLike]: `%${filters.nombre}%`
@@ -384,45 +236,17 @@ class DifuntosService {
 
       const difuntos = await DifuntosFamilia.findAll({
         where: whereClause,
-        include: includeClause,
         order: [['fecha_fallecimiento', 'DESC']],
-        attributes: [
-          'id_difunto',
-          'nombre_completo',
-          'fecha_fallecimiento',
-          'observaciones'
-        ]
+        limit: 50
       });
 
-      // Formatear respuesta
-      return difuntos.map(difunto => {
-        // Determinar parentesco basado en el nombre o observaciones
-        let parentesco = 'Familiar';
-        const nombre = difunto.nombre_completo.toLowerCase();
-        const obs = (difunto.observaciones || '').toLowerCase();
-        
-        if (nombre.includes('madre') || nombre.includes('mamá') || nombre.includes('doña') ||
-            obs.includes('madre') || obs.includes('mamá') || obs.includes('doña')) {
-          parentesco = 'Madre';
-        } else if (nombre.includes('padre') || nombre.includes('papá') || nombre.includes('don') ||
-                   obs.includes('padre') || obs.includes('papá') || obs.includes('don')) {
-          parentesco = 'Padre';
-        } else if (nombre.includes('hijo') || nombre.includes('hija') ||
-                   obs.includes('hijo') || obs.includes('hija')) {
-          parentesco = 'Hijo/a';
-        } else if (nombre.includes('abuelo') || nombre.includes('abuela') ||
-                   obs.includes('abuelo') || obs.includes('abuela')) {
-          parentesco = 'Abuelo/a';
-        }
-
-        return {
-          sector_vereda: difunto.familia?.vereda?.nombre || difunto.familia?.sector || 'No especificado',
-          apellido_familiar: difunto.familia?.apellido_familiar || 'No especificado',
-          parentesco: parentesco,
-          nombre: difunto.nombre_completo,
-          fecha_aniversario: difunto.fecha_fallecimiento
-        };
-      });
+      return {
+        success: true,
+        data: difuntos,
+        total: difuntos.length,
+        rangoFechas: { fechaInicio, fechaFin },
+        filters: filters
+      };
 
     } catch (error) {
       throw new Error(`Error al obtener difuntos por rango de fechas: ${error.message}`);
