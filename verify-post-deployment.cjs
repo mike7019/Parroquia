@@ -27,11 +27,11 @@ async function verifyPostDeployment() {
         
         const [familiaColumns] = await sequelize.query(`
             SELECT 
-                column_name, 
-                data_type, 
-                is_nullable, 
-                column_default,
-                constraint_type
+                c.column_name, 
+                c.data_type, 
+                c.is_nullable, 
+                c.column_default,
+                pk.constraint_type
             FROM information_schema.columns c
             LEFT JOIN (
                 SELECT tc.table_name, kcu.column_name, tc.constraint_type
@@ -71,27 +71,23 @@ async function verifyPostDeployment() {
         try {
             const [result] = await sequelize.query(`
                 INSERT INTO familias (
-                    numero_casa, 
+                    apellido_familiar, 
+                    sector, 
+                    direccion_familia, 
                     tamaño_familia, 
+                    tipo_vivienda, 
                     id_municipio, 
                     id_vereda, 
-                    id_sector, 
-                    ubicacion_geografica, 
-                    observaciones, 
-                    activo, 
-                    "createdAt", 
-                    "updatedAt"
+                    id_sector
                 ) VALUES (
-                    'DEPLOY-TEST-' || extract(epoch from now()), 
+                    'TEST-DEPLOY-' || extract(epoch from now()), 
+                    'Test Sector', 
+                    'Dirección de prueba',
+                    1, 
+                    'Casa',
                     1, 
                     1, 
-                    1, 
-                    1, 
-                    '0,0', 
-                    'Test post-deployment', 
-                    true, 
-                    NOW(), 
-                    NOW()
+                    1
                 ) RETURNING id_familia;
             `);
 
