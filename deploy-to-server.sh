@@ -117,24 +117,60 @@ echo "⚠️  IMPORTANTE: Esto va a sincronizar la BD con los modelos actualizad
 echo "Presiona ENTER para continuar o Ctrl+C para cancelar..."
 read
 
-node syncDatabaseComplete.js
+# Usar el comando correcto de npm para sincronización completa
+log_info "Ejecutando npm run db:sync:complete:alter..."
+npm run db:sync:complete:alter
 
 if [ $? -eq 0 ]; then
-    log_success "Sincronización de BD completada"
+    log_success "Sincronización de BD completada exitosamente"
+    log_info "Todos los modelos han sido sincronizados con ALTER"
 else
     log_error "Error en sincronización de BD"
-    log_info "Restaurando backup si es necesario..."
-    exit 1
+    log_info "Intentando sincronización alternativa..."
+    
+    # Fallback a script directo si npm script falla
+    if [ -f "syncDatabaseComplete.js" ]; then
+        node syncDatabaseComplete.js
+        if [ $? -eq 0 ]; then
+            log_success "Sincronización alternativa completada"
+        else
+            log_error "Error en ambos métodos de sincronización de BD"
+            exit 1
+        fi
+    else
+        log_error "Error en sincronización de BD y script de fallback no encontrado"
+        exit 1
+    fi
 fi
 
 # 7. VERIFICAR ESTADO FINAL
-log_info "Verificando estado final..."
-node verificar-simple.js
+log_info "Verificando estado final de la base de datos..."
 
-if [ $? -eq 0 ]; then
-    log_success "Verificación exitosa"
+# Usar script específico de verificación post-deployment
+if [ -f "verify-post-deployment.cjs" ]; then
+    node verify-post-deployment.cjs
+    
+    if [ $? -eq 0 ]; then
+        log_success "Verificación post-deployment exitosa"
+        log_success "Todos los cambios de BD se aplicaron correctamente"
+    else
+        log_error "Verificación post-deployment falló"
+        log_warning "Los cambios de BD podrían no haberse aplicado correctamente"
+        log_info "Revisar logs arriba para más detalles"
+    fi
 else
-    log_warning "Verificación con problemas, revisar logs"
+    # Fallback al script original
+    if [ -f "verificar-simple.js" ]; then
+        node verificar-simple.js
+        
+        if [ $? -eq 0 ]; then
+            log_success "Verificación básica exitosa"
+        else
+            log_warning "Verificación básica con problemas, revisar logs"
+        fi
+    else
+        log_warning "Script de verificación no encontrado"
+    fi
 fi
 
 # 8. REINICIAR SERVICIOS (si usa PM2)

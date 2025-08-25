@@ -127,22 +127,58 @@ sequelize.authenticate()
         }
     }
     
-    node syncDatabaseComplete.js
+    # Usar el comando correcto de npm para sincronización completa
+    Log-Info "Ejecutando npm run db:sync:complete:alter..."
+    npm run db:sync:complete:alter
     
     if ($LASTEXITCODE -eq 0) {
-        Log-Success "Sincronización de BD completada"
+        Log-Success "Sincronización de BD completada exitosamente"
+        Log-Info "Todos los modelos han sido sincronizados con ALTER"
     } else {
-        throw "Error en sincronización de BD"
+        Log-Error "Error en sincronización de BD"
+        Log-Info "Intentando sincronización alternativa..."
+        
+        # Fallback a script directo si npm script falla
+        if (Test-Path "syncDatabaseComplete.js") {
+            node syncDatabaseComplete.js
+            if ($LASTEXITCODE -eq 0) {
+                Log-Success "Sincronización alternativa completada"
+            } else {
+                throw "Error en ambos métodos de sincronización de BD"
+            }
+        } else {
+            throw "Error en sincronización de BD y script de fallback no encontrado"
+        }
     }
     
     # 7. VERIFICAR ESTADO FINAL
-    Log-Info "Verificando estado final..."
-    node verificar-simple.js
+    Log-Info "Verificando estado final de la base de datos..."
     
-    if ($LASTEXITCODE -eq 0) {
-        Log-Success "Verificación exitosa"
+    # Usar script específico de verificación post-deployment
+    if (Test-Path "verify-post-deployment.cjs") {
+        node verify-post-deployment.cjs
+        
+        if ($LASTEXITCODE -eq 0) {
+            Log-Success "Verificación post-deployment exitosa"
+            Log-Success "Todos los cambios de BD se aplicaron correctamente"
+        } else {
+            Log-Error "Verificación post-deployment falló"
+            Log-Warning "Los cambios de BD podrían no haberse aplicado correctamente"
+            Log-Info "Revisar logs arriba para más detalles"
+        }
     } else {
-        Log-Warning "Verificación con problemas, revisar logs"
+        # Fallback al script original
+        if (Test-Path "verificar-simple.js") {
+            node verificar-simple.js
+            
+            if ($LASTEXITCODE -eq 0) {
+                Log-Success "Verificación básica exitosa"
+            } else {
+                Log-Warning "Verificación básica con problemas, revisar logs"
+            }
+        } else {
+            Log-Warning "Script de verificación no encontrado"
+        }
     }
     
     # 8. REINICIAR SERVICIOS (si usa PM2)
