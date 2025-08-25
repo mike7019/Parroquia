@@ -6,7 +6,8 @@ const Familias = sequelize.define('Familias', {
     type: DataTypes.BIGINT,
     primaryKey: true,
     autoIncrement: true,
-    allowNull: false
+    allowNull: false,
+    field: 'id_familia'
   },
   apellido_familiar: {
     type: DataTypes.STRING(200),

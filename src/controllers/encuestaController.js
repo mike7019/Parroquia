@@ -838,9 +838,9 @@ export const crearEncuesta = async (req, res) => {
       fecha_ultima_encuesta: new Date().toISOString().split('T')[0],
       codigo_familia: `FAM_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
       tutor_responsable: null, // Se puede definir luego
-      id_municipio: informacionGeneral.municipio?.id || null,
-      id_vereda: informacionGeneral.vereda?.id || null,
-      id_sector: informacionGeneral.sector?.id || null
+      id_municipio: informacionGeneral.municipio?.id ? parseInt(informacionGeneral.municipio.id) : null,
+      id_vereda: informacionGeneral.vereda?.id ? parseInt(informacionGeneral.vereda.id) : null,
+      id_sector: informacionGeneral.sector?.id ? parseInt(informacionGeneral.sector.id) : null
     };
 
     const familia = await Familias.create(familiaData, { transaction });

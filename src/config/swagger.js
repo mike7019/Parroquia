@@ -2418,6 +2418,234 @@ const swaggerConfig = {
               }
             }
           }
+        },
+        // Esquemas para API de Difuntos
+        DifuntosFamilia: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              description: 'ID único del registro',
+              example: 1
+            },
+            id_encuesta: {
+              type: 'integer',
+              description: 'ID de la encuesta asociada',
+              example: 123
+            },
+            nombre_completo: {
+              type: 'string',
+              description: 'Nombre completo del difunto',
+              example: 'José María García López'
+            },
+            fecha_fallecimiento: {
+              type: 'string',
+              format: 'date',
+              description: 'Fecha de fallecimiento (YYYY-MM-DD)',
+              example: '2023-01-15'
+            },
+            lugar_fallecimiento: {
+              type: 'string',
+              description: 'Lugar donde ocurrió el fallecimiento',
+              example: 'Hospital San Juan'
+            },
+            causa_fallecimiento: {
+              type: 'string',
+              description: 'Causa del fallecimiento',
+              example: 'Enfermedad cardiovascular'
+            },
+            documentos: {
+              type: 'string',
+              description: 'Documentos relacionados con el fallecimiento',
+              example: 'Certificado de defunción, Acta de inhumación'
+            },
+            parentesco: {
+              type: 'string',
+              description: 'Parentesco con la familia encuestada',
+              example: 'Padre'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación del registro',
+              example: '2023-01-15T10:30:00Z'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización',
+              example: '2023-01-15T10:30:00Z'
+            }
+          }
+        },
+        DifuntosListResponse: {
+          type: 'object',
+          properties: {
+            status: {
+              type: 'string',
+              description: 'Estado de la respuesta',
+              example: 'success'
+            },
+            data: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/DifuntosFamilia'
+              }
+            },
+            total: {
+              type: 'integer',
+              description: 'Número total de registros',
+              example: 25
+            },
+            pagination: {
+              type: 'object',
+              properties: {
+                page: {
+                  type: 'integer',
+                  description: 'Página actual',
+                  example: 1
+                },
+                limit: {
+                  type: 'integer',
+                  description: 'Límite de registros por página',
+                  example: 10
+                },
+                totalPages: {
+                  type: 'integer',
+                  description: 'Total de páginas',
+                  example: 3
+                }
+              }
+            }
+          }
+        },
+        DifuntosDetailResponse: {
+          type: 'object',
+          properties: {
+            status: {
+              type: 'string',
+              description: 'Estado de la respuesta',
+              example: 'success'
+            },
+            data: {
+              $ref: '#/components/schemas/DifuntosFamilia'
+            }
+          }
+        },
+        DifuntosStatsResponse: {
+          type: 'object',
+          properties: {
+            status: {
+              type: 'string',
+              description: 'Estado de la respuesta',
+              example: 'success'
+            },
+            data: {
+              type: 'object',
+              properties: {
+                totalDifuntos: {
+                  type: 'integer',
+                  description: 'Total de difuntos registrados',
+                  example: 156
+                },
+                porMes: {
+                  type: 'array',
+                  description: 'Estadísticas por mes',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      mes: {
+                        type: 'string',
+                        description: 'Nombre del mes',
+                        example: 'Enero'
+                      },
+                      cantidad: {
+                        type: 'integer',
+                        description: 'Cantidad de fallecimientos en el mes',
+                        example: 8
+                      }
+                    }
+                  }
+                },
+                porCausa: {
+                  type: 'array',
+                  description: 'Estadísticas por causa de fallecimiento',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      causa: {
+                        type: 'string',
+                        description: 'Causa de fallecimiento',
+                        example: 'Enfermedad cardiovascular'
+                      },
+                      cantidad: {
+                        type: 'integer',
+                        description: 'Cantidad de casos',
+                        example: 15
+                      }
+                    }
+                  }
+                },
+                porParentesco: {
+                  type: 'array',
+                  description: 'Estadísticas por parentesco',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      parentesco: {
+                        type: 'string',
+                        description: 'Tipo de parentesco',
+                        example: 'Padre'
+                      },
+                      cantidad: {
+                        type: 'integer',
+                        description: 'Cantidad de casos',
+                        example: 12
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        DifuntosByDateResponse: {
+          type: 'object',
+          properties: {
+            status: {
+              type: 'string',
+              description: 'Estado de la respuesta',
+              example: 'success'
+            },
+            data: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/DifuntosFamilia'
+              }
+            },
+            filtros: {
+              type: 'object',
+              properties: {
+                fechaInicio: {
+                  type: 'string',
+                  format: 'date',
+                  description: 'Fecha de inicio del filtro',
+                  example: '2023-01-01'
+                },
+                fechaFin: {
+                  type: 'string',
+                  format: 'date',
+                  description: 'Fecha de fin del filtro',
+                  example: '2023-12-31'
+                }
+              }
+            },
+            total: {
+              type: 'integer',
+              description: 'Total de registros encontrados',
+              example: 42
+            }
+          }
         }
       }
     },
@@ -2429,55 +2657,59 @@ const swaggerConfig = {
     tags: [
       {
         name: 'Authentication',
-        description: 'Endpoints de autenticación y gestión de cuentas'
+        description: '🔐 **Autenticación y Gestión de Cuentas** - Endpoints para login, registro, verificación de email, reset de contraseñas y gestión de tokens JWT.'
       },
       {
         name: 'Users',
-        description: 'Operaciones de gestión de usuarios'
+        description: '👥 **Gestión de Usuarios** - Operaciones CRUD para administradores: listar, crear, editar y eliminar usuarios del sistema.'
+      },
+      {
+        name: 'Difuntos',
+        description: '🕊️ **Consultas de Difuntos** - Sistema de consultas especializadas para registros de personas fallecidas. **Funcionalidades:** Consultas de madres y padres difuntos, búsquedas por rangos de fechas, estadísticas por mes y año, filtros por nombre y fecha de aniversario.'
       },
       {
         name: 'Surveys',
-        description: 'Gestión de encuestas y familias'
+        description: '📊 **Encuestas y Familias** - Gestión del sistema de encuestas familiares y registro de datos socioeconómicos.'
       },
       {
         name: 'Parroquias',
-        description: 'Gestión de catálogo de parroquias'
+        description: '⛪ **Catálogo de Parroquias** - Gestión de parroquias del sistema eclesiástico.'
       },
       {
         name: 'Municipios',
-        description: 'Gestión de catálogo de municipios. **Flujo recomendado:** 1) Use GET /municipios/departamentos para obtener IDs válidos de departamentos, 2) Use el id_departamento en las operaciones de creación de municipios.'
+        description: '🏛️ **Catálogo de Municipios** - Gestión geográfica de municipios. **Flujo recomendado:** 1) Use GET /municipios/departamentos para obtener IDs válidos de departamentos, 2) Use el id_departamento en las operaciones de creación de municipios.'
       },
       {
         name: 'Veredas',
-        description: 'Gestión de catálogo de veredas'
+        description: '🌄 **Catálogo de Veredas** - Gestión de veredas y divisiones territoriales menores.'
       },
       {
         name: 'Sexos',
-        description: 'Gestión de catálogo de sexos'
+        description: '⚧ **Catálogo de Sexos** - Gestión de tipos de género para clasificación demográfica.'
       },
       {
         name: 'Enfermedades',
-        description: 'Gestión de catálogo de enfermedades. **Funcionalidades:** CRUD completo, búsqueda por nombre/descripción, asociación con personas, gestión de relaciones muchos a muchos.'
+        description: '🏥 **Catálogo de Enfermedades** - Gestión médica de enfermedades. **Funcionalidades:** CRUD completo, búsqueda por nombre/descripción, asociación con personas, gestión de relaciones muchos a muchos.'
       },
       {
         name: 'Aguas Residuales',
-        description: 'Gestión de catálogo de tipos de aguas residuales. **Funcionalidades:** CRUD completo, búsqueda por nombre/descripción, gestión de métodos de tratamiento de aguas residuales.'
+        description: '💧 **Catálogo de Aguas Residuales** - Gestión de tipos de tratamiento de aguas residuales. **Funcionalidades:** CRUD completo, búsqueda por nombre/descripción, gestión de métodos de tratamiento.'
       },
       {
         name: 'Tipos de Vivienda',
-        description: 'Gestión de catálogo de tipos de vivienda. **Funcionalidades:** CRUD completo, búsqueda por nombre/descripción, activación/desactivación, estadísticas de uso.'
+        description: '🏠 **Catálogo de Viviendas** - Gestión de tipos de vivienda. **Funcionalidades:** CRUD completo, búsqueda por nombre/descripción, activación/desactivación, estadísticas de uso.'
       },
       {
         name: 'Parentescos',
-        description: 'Gestión de catálogo de tipos de parentesco. **Funcionalidades:** CRUD completo, búsqueda por nombre, paginación, soft delete, restauración, estadísticas. Incluye 30 tipos de parentesco precargados (padre, madre, hijo, hermano, etc.).'
+        description: '👨‍👩‍👧‍👦 **Catálogo de Parentescos** - Gestión de tipos de parentesco familiar. **Funcionalidades:** CRUD completo, búsqueda por nombre, paginación, soft delete, restauración, estadísticas. Incluye 30 tipos de parentesco precargados (padre, madre, hijo, hermano, etc.).'
       },
       {
         name: 'Catalog',
-        description: 'Operaciones generales de catálogos'
+        description: '📚 **Catálogos Generales** - Operaciones generales de catálogos y configuraciones del sistema.'
       },
       {
         name: 'System',
-        description: 'Endpoints del sistema y verificación de salud'
+        description: '⚙️ **Sistema** - Endpoints del sistema, verificación de salud y status del servidor.'
       }
     ]
   },
