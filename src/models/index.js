@@ -17,6 +17,7 @@ import Parentesco from './catalog/Parentesco.js';
 import SituacionCivil from './catalog/SituacionCivil.js';
 import Estudio from './catalog/Estudio.js';
 import Talla from './catalog/Talla.js';
+import DifuntosFamilia from './catalog/DifuntosFamilia.js';
 
 // Create User alias for compatibility
 const User = Usuario;
@@ -137,7 +138,8 @@ export default {
   Familias,
   Persona,
   Parentesco,
-  Talla
+  Talla,
+  DifuntosFamilia
 };
 
 // Define associations between Usuario and Role
@@ -175,5 +177,6 @@ export {
   Parentesco,
   SituacionCivil,
   Estudio,
-  Talla
+  Talla,
+  DifuntosFamilia
 };

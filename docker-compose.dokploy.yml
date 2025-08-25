@@ -1,0 +1,128 @@
+version: '3.8'
+
+services:
+  # Parroquia API Application - Optimized for Dokploy
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      # Core Node.js Configuration
+      - NODE_ENV=production
+      - PORT=5000
+      
+      # Database Configuration
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-parroquia_db}
+      - DB_USER=${DB_USER:-parroquia_user}
+      - DB_PASSWORD=${DB_PASSWORD:-ParroquiaSecure2025}
+      
+      # JWT Configuration - Use environment variables for security
+      - JWT_SECRET=${JWT_SECRET:-CHANGE_THIS_IN_PRODUCTION}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-CHANGE_THIS_REFRESH_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-15m}
+      - JWT_REFRESH_EXPIRES_IN=${JWT_REFRESH_EXPIRES_IN:-7d}
+      - BCRYPT_ROUNDS=${BCRYPT_ROUNDS:-12}
+      
+      # Application Configuration
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5000}
+      - VERBOSE_LOGGING=${VERBOSE_LOGGING:-true}
+      
+      # Email Configuration (Optional)
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - EMAIL_FROM=${EMAIL_FROM:-noreply@parroquia.com}
+      - SEND_REAL_EMAILS=${SEND_REAL_EMAILS:-false}
+      
+      # Security Configuration
+      - ENABLE_HSTS=${ENABLE_HSTS:-true}
+      - RATE_LIMIT_WINDOW_MS=${RATE_LIMIT_WINDOW_MS:-900000}
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-100}
+      
+    volumes:
+      - app_logs:/app/logs
+      - app_uploads:/app/uploads
+      - app_temp:/app/temp
+    networks:
+      - parroquia-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    labels:
+      # Dokploy-specific labels for monitoring and management
+      - "dokploy.enable=true"
+      - "dokploy.service=parroquia-api"
+      - "dokploy.port=5000"
+      - "dokploy.health_check=/api/health"
+
+  # PostgreSQL Database - Production Ready
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-parroquia_db}
+      POSTGRES_USER: ${DB_USER:-parroquia_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-ParroquiaSecure2025}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+      # Performance tuning for production
+      POSTGRES_SHARED_BUFFERS: ${POSTGRES_SHARED_BUFFERS:-256MB}
+      POSTGRES_MAX_CONNECTIONS: ${POSTGRES_MAX_CONNECTIONS:-100}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - postgres_backups:/backups
+    ports:
+      - "5432:5432"
+    networks:
+      - parroquia-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-parroquia_user} -d ${DB_NAME:-parroquia_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    labels:
+      - "dokploy.enable=true"
+      - "dokploy.service=parroquia-postgres"
+      - "dokploy.backup=true"
+
+networks:
+  parroquia-network:
+    driver: bridge
+    labels:
+      - "dokploy.network=true"
+
+volumes:
+  postgres_data:
+    driver: local
+    labels:
+      - "dokploy.volume=database"
+  postgres_backups:
+    driver: local
+    labels:
+      - "dokploy.volume=backups"
+  app_logs:
+    driver: local
+    labels:
+      - "dokploy.volume=logs"
+  app_uploads:
+    driver: local
+    labels:
+      - "dokploy.volume=uploads"
+  app_temp:
+    driver: local
+    labels:
+      - "dokploy.volume=temp"

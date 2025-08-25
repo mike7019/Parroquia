@@ -19,6 +19,7 @@ import catalogRoutes from './routes/catalog/index.js';
 import parentescoRoutes from './routes/catalog/parentescoRoutes.js';
 import situacionCivilRoutes from './routes/catalog/situacionCivilRoutes.js';
 import encuestaRoutes from './routes/encuestaRoutes.js';
+import difuntosRoutes from './routes/difuntosRoutes.js';
 
 // Import middlewares
 import errorHandler from './middlewares/errorHandler.js';
@@ -198,6 +199,7 @@ app.use('/api/catalog', catalogRoutes);
 app.use('/api/parentescos', parentescoRoutes); // Direct access for compatibility
 app.use('/api/situaciones-civiles', situacionCivilRoutes); // Direct access for compatibility
 app.use('/api', encuestaRoutes); // Rutas de encuestas
+app.use('/api/difuntos', difuntosRoutes); // Rutas de difuntos
 app.use('/api', systemRoutes);
 
 // Root route
@@ -496,6 +498,13 @@ const displayRoutes = () => {
       { method: 'PUT', path: '/api/catalog/comunidades-culturales/:id', group: 'Catalog', protected: true, description: 'Update comunidad cultural' },
       { method: 'DELETE', path: '/api/catalog/comunidades-culturales/:id', group: 'Catalog', protected: true, description: 'Delete comunidad cultural' },
       
+      // Difuntos routes
+      { method: 'GET', path: '/api/difuntos/consultas/madres', group: 'Difuntos', protected: true, description: 'Consultar madres fallecidas' },
+      { method: 'GET', path: '/api/difuntos/consultas/padres', group: 'Difuntos', protected: true, description: 'Consultar padres fallecidos' },
+      { method: 'GET', path: '/api/difuntos/consultas/todos', group: 'Difuntos', protected: true, description: 'Consultar todos los difuntos' },
+      { method: 'GET', path: '/api/difuntos/consultas/rango-fechas', group: 'Difuntos', protected: true, description: 'Consultar difuntos por rango de fechas' },
+      { method: 'GET', path: '/api/difuntos/estadisticas', group: 'Difuntos', protected: true, description: 'Estadísticas de difuntos' },
+      
       // System & Infrastructure routes
       { method: 'GET', path: '/api/health', group: 'System', protected: false, description: 'API health check' },
       { method: 'GET', path: '/api/status', group: 'System', protected: false, description: 'System status' },
@@ -524,6 +533,7 @@ const displayRoutes = () => {
         'Authentication': '🔐',
         'User Management': '👥',
         'Catalog': '📚',
+        'Difuntos': '🕊️',
         'System': '⚙️',
         'Documentation': '📖',
         'Compatibility': '🔄'
