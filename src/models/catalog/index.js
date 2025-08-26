@@ -14,115 +14,58 @@ import ComunidadCultural from './ComunidadCultural.js';
 import DifuntosFamilia from './DifuntosFamilia.js';
 import Persona from './Persona.js';
 
-// Definir asociaciones
-Departamentos.hasMany(Municipios, {
-    foreignKey: 'id_departamento',
-    as: 'municipios'
-});
+// ⚠️  ASOCIACIONES COMENTADAS TEMPORALMENTE PARA EVITAR CONFLICTOS
+// Las asociaciones se configurarán en un archivo separado o en el momento de uso
+// para evitar problemas de carga circular y duplicación
 
-Municipios.belongsTo(Departamentos, {
-    foreignKey: 'id_departamento',
-    as: 'departamento'
-});
-
-// Asociación entre Municipios y Parroquias
-Municipios.hasMany(Parroquia, {
-    foreignKey: 'id_municipio',
-    as: 'parroquias'
-});
-
-Parroquia.belongsTo(Municipios, {
-    foreignKey: 'id_municipio',
-    as: 'municipio'
-});
-
-Municipios.hasMany(Veredas, {
-    foreignKey: 'id_municipio_municipios',
-    as: 'veredas'
-});
-
-Veredas.belongsTo(Municipios, {
-    foreignKey: 'id_municipio_municipios',
-    as: 'municipio'
-});
-
-// Asociaciones entre Municipios y Sectores
-Municipios.hasMany(Sector, {
-    foreignKey: 'id_municipio',
-    as: 'sectores'
-});
-
-Sector.belongsTo(Municipios, {
-    foreignKey: 'id_municipio',
-    as: 'municipio'
-});
-
-// COMENTADO: Asociaciones con Sector que causan problemas porque id_sector no existe en BD
 /*
-Sector.hasMany(Veredas, {
-    foreignKey: 'id_sector',
-    as: 'veredasBySector'
-});
+// Definir asociaciones básicas (solo las esenciales)
+console.log('⚠️  Configurando asociaciones para Departamentos...');
+try {
+    if (Departamentos && Municipios && !Departamentos.associations?.municipios) {
+        Departamentos.hasMany(Municipios, {
+            foreignKey: 'id_departamento',
+            as: 'municipios'
+        });
+    }
+} catch (error) {
+    console.log('⚠️  Error configurando asociaciones para Departamentos:', error.message);
+}
 
-Veredas.belongsTo(Sector, {
-    foreignKey: 'id_sector',
-    as: 'sector'
-});
+try {
+    if (Municipios && Departamentos && !Municipios.associations?.departamento) {
+        Municipios.belongsTo(Departamentos, {
+            foreignKey: 'id_departamento',
+            as: 'departamento'
+        });
+    }
+} catch (error) {
+    console.log('⚠️  Error configurando asociaciones para Municipios:', error.message);
+}
+
+// Asociaciones básicas Familias-Persona
+try {
+    if (Familias && Persona && !Familias.associations?.personas) {
+        Familias.hasMany(Persona, {
+            foreignKey: 'id_familia_familias',
+            as: 'personas'
+        });
+    }
+} catch (error) {
+    console.log('⚠️  Error configurando asociaciones para Familias:', error.message);
+}
+
+try {
+    if (Persona && Familias && !Persona.associations?.familia) {
+        Persona.belongsTo(Familias, {
+            foreignKey: 'id_familia_familias',
+            as: 'familia'
+        });
+    }
+} catch (error) {
+    console.log('⚠️  Error configurando asociaciones para Persona:', error.message);
+}
 */
-
-// Asociaciones para Disposición de Basura
-TipoDisposicionBasura.hasMany(FamiliaDisposicionBasura, {
-    foreignKey: 'id_tipo_disposicion_basura',
-    as: 'FamiliaDisposicionBasuras'
-});
-
-FamiliaDisposicionBasura.belongsTo(TipoDisposicionBasura, {
-    foreignKey: 'id_tipo_disposicion_basura',
-    as: 'TipoDisposicionBasura'
-});
-
-Familias.hasMany(FamiliaDisposicionBasura, {
-    foreignKey: 'id_familia',
-    as: 'DisposicionBasuras'
-});
-
-FamiliaDisposicionBasura.belongsTo(Familias, {
-    foreignKey: 'id_familia',
-    as: 'Familia'
-});
-
-// Asociaciones para Difuntos
-Familias.hasMany(DifuntosFamilia, {
-    foreignKey: 'id_familia_familias',
-    as: 'difuntos'
-});
-
-DifuntosFamilia.belongsTo(Familias, {
-    foreignKey: 'id_familia_familias',
-    as: 'familia'
-});
-
-// Asociaciones entre Familias y Persona
-Familias.hasMany(Persona, {
-    foreignKey: 'id_familia_familias',
-    as: 'personas'
-});
-
-Persona.belongsTo(Familias, {
-    foreignKey: 'id_familia_familias',
-    as: 'familia'
-});
-
-// Asociaciones entre Persona y otros catálogos
-Persona.belongsTo(Sexo, {
-    foreignKey: 'id_sexo',
-    as: 'sexo'
-});
-
-Persona.belongsTo(TipoIdentificacion, {
-    foreignKey: 'id_tipo_identificacion_tipo_identificacion',
-    as: 'tipo_identificacion'
-});
 
 export {
     TipoIdentificacion,

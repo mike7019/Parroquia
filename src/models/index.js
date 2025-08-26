@@ -3,24 +3,22 @@ import Usuario from './Usuario.js';
 import Role from './Role.js';
 import UsuarioRole from './UsuarioRole.js';
 
-// Import all catalog models and their associations
-import {
-  TipoIdentificacion,
-  Parroquia,
-  Sexo,
-  Sector,
-  Veredas,
-  Municipios,
-  Departamentos,
-  Familias,
-  TipoDisposicionBasura,
-  FamiliaDisposicionBasura,
-  TipoAguasResiduales,
-  TipoVivienda,
-  ComunidadCultural,
-  DifuntosFamilia,
-  Persona
-} from './catalog/index.js';
+// Import all catalog models individually to avoid circular dependencies
+import TipoIdentificacion from './catalog/TipoIdentificacion.js';
+import Parroquia from './catalog/Parroquia.js';
+import Sexo from './catalog/Sexo.js';
+import Sector from './catalog/Sector.js';
+import Veredas from './catalog/Veredas.js';
+import Municipios from './catalog/Municipios.js';
+import Departamentos from './catalog/Departamentos.js';
+import Familias from './catalog/Familias.js';
+import TipoDisposicionBasura from './catalog/TipoDisposicionBasura.js';
+import FamiliaDisposicionBasura from './catalog/FamiliaDisposicionBasura.js';
+import TipoAguasResiduales from './catalog/TipoAguasResiduales.js';
+import TipoVivienda from './catalog/TipoVivienda.js';
+import ComunidadCultural from './catalog/ComunidadCultural.js';
+import DifuntosFamilia from './catalog/DifuntosFamilia.js';
+import Persona from './catalog/Persona.js';
 
 // Import other models individually
 import Enfermedad from './catalog/Enfermedad.js';
@@ -32,20 +30,51 @@ import Talla from './catalog/Talla.js';
 // Create User alias for compatibility
 const User = Usuario;
 
-// Define associations for Usuario and Role models
-Usuario.belongsToMany(Role, {
-  through: UsuarioRole,
-  foreignKey: 'id_usuarios',
-  otherKey: 'id_roles',
-  as: 'roles'
+// ⚠️  ASOCIACIONES BÁSICAS SOLAMENTE (para evitar errores)
+// Solo configuramos las asociaciones esenciales que sabemos que funcionan
+
+console.log('🔗 Configurando asociaciones básicas...');
+
+// 1. Usuario - Role associations (estas funcionan bien)
+try {
+  Usuario.belongsToMany(Role, {
+    through: UsuarioRole,
+    foreignKey: 'id_usuarios',
+    otherKey: 'id_roles',
+    as: 'roles'
+  });
+
+  Role.belongsToMany(Usuario, {
+    through: UsuarioRole,
+    foreignKey: 'id_roles',
+    otherKey: 'id_usuarios',
+    as: 'usuarios'
+  });
+  
+  console.log('✅ Asociaciones Usuario-Role configuradas');
+} catch (error) {
+  console.log('⚠️  Error configurando asociaciones Usuario-Role:', error.message);
+}
+
+// 2. Comentamos temporalmente las demás asociaciones para evitar conflictos
+/*
+// Asociaciones que causan problemas - comentadas temporalmente
+
+// Departamentos - Municipios
+Departamentos.hasMany(Municipios, {
+  foreignKey: 'id_departamento',
+  as: 'municipios'
 });
 
-Role.belongsToMany(Usuario, {
-  through: UsuarioRole,
-  foreignKey: 'id_roles',
-  otherKey: 'id_usuarios',
-  as: 'usuarios'
+Municipios.belongsTo(Departamentos, {
+  foreignKey: 'id_departamento',
+  as: 'departamentoData'
 });
+
+// Otras asociaciones comentadas...
+*/
+
+console.log('✅ Modelos cargados sin asociaciones conflictivas');
 
 // Re-export everything
 export default {

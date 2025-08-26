@@ -1848,7 +1848,7 @@ verify_server_health() {
     # Esperar a que el servidor inicie
     sleep 10
     
-    local ports=("3000" "5000" "8080")
+    local ports=("3000" "8080")
     local server_responding=false
     
     for port in "${ports[@]}"; do

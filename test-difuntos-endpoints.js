@@ -6,7 +6,7 @@
 
 import 'dotenv/config';
 
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000/api';
 
 // Función para hacer peticiones HTTP
 async function makeRequest(endpoint, token = null) {
@@ -184,7 +184,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   console.log('   Para ejecutar las pruebas, configure las variables de entorno:');
   console.log('   - TEST_USER_EMAIL: email del usuario de prueba');
   console.log('   - TEST_USER_PASSWORD: contraseña del usuario de prueba');
-  console.log('   - API_BASE_URL: URL base de la API (opcional, default: http://localhost:5000/api)');
+  console.log('   - API_BASE_URL: URL base de la API (opcional, default: http://localhost:3000/api)');
   
   if (process.env.RUN_TESTS === 'true') {
     testDifuntosEndpoints().catch(console.error);

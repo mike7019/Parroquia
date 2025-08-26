@@ -21,7 +21,7 @@ import errorHandler from './middlewares/errorHandler.js';
 import { setupSwagger } from './config/swagger.js';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 // Trust proxy for rate limiting and security
 app.set('trust proxy', true);

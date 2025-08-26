@@ -10,11 +10,11 @@ services:
         - NODE_ENV=production
     restart: unless-stopped
     ports:
-      - "5000:5000"
+      - "3000:3000"
     environment:
       # Core Node.js Configuration
       - NODE_ENV=production
-      - PORT=5000
+      - PORT=3000
       
       # Database Configuration
       - DB_HOST=postgres
@@ -31,7 +31,7 @@ services:
       - BCRYPT_ROUNDS=${BCRYPT_ROUNDS:-12}
       
       # Application Configuration
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5000}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
       - VERBOSE_LOGGING=${VERBOSE_LOGGING:-true}
       
       # Email Configuration (Optional)
@@ -57,7 +57,7 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -66,7 +66,7 @@ services:
       # Dokploy-specific labels for monitoring and management
       - "dokploy.enable=true"
       - "dokploy.service=parroquia-api"
-      - "dokploy.port=5000"
+      - "dokploy.port=3000"
       - "dokploy.health_check=/api/health"
 
   # PostgreSQL Database - Production Ready
