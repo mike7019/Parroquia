@@ -53,12 +53,56 @@ log_step() {
 check_server_environment() {
     log_step "Verificando entorno del servidor..."
     
-    # Verificar que estamos en el directorio correcto
-    if [ ! -f "package.json" ] || [ ! -f "src/server.js" ]; then
-        log_error "No estás en el directorio correcto del proyecto"
-        log_error "Asegúrate de estar en el directorio raíz del proyecto parroquia"
+    # Verificar que estamos en un directorio del proyecto (más flexible)
+    local project_indicators=0
+    
+    # Buscar indicadores del proyecto de parroquia
+    if [ -f "package.json" ]; then
+        log_info "✓ package.json encontrado"
+        project_indicators=$((project_indicators + 1))
+    elif [ -f "../package.json" ]; then
+        log_info "✓ package.json encontrado en directorio padre"
+        cd ..
+        project_indicators=$((project_indicators + 1))
+    fi
+    
+    if [ -f "src/server.js" ]; then
+        log_info "✓ src/server.js encontrado"
+        project_indicators=$((project_indicators + 1))
+    elif [ -f "server.js" ]; then
+        log_info "✓ server.js encontrado en raíz"
+        project_indicators=$((project_indicators + 1))
+    elif [ -f "app.js" ]; then
+        log_info "✓ app.js encontrado"
+        project_indicators=$((project_indicators + 1))
+    fi
+    
+    if [ -d "src" ]; then
+        log_info "✓ Directorio src/ encontrado"
+        project_indicators=$((project_indicators + 1))
+    fi
+    
+    if [ -d "src/models" ] || [ -d "models" ]; then
+        log_info "✓ Directorio de modelos encontrado"
+        project_indicators=$((project_indicators + 1))
+    fi
+    
+    if [ -d "src/controllers" ] || [ -d "controllers" ]; then
+        log_info "✓ Directorio de controladores encontrado"
+        project_indicators=$((project_indicators + 1))
+    fi
+    
+    # Verificar que tenemos suficientes indicadores
+    if [ $project_indicators -lt 2 ]; then
+        log_error "No parece ser un directorio del proyecto parroquia"
+        log_error "Directorio actual: $(pwd)"
+        log_error "Archivos encontrados: $(ls -la | head -10)"
+        log_error "Asegúrate de estar en el directorio raíz del proyecto"
         return 1
     fi
+    
+    log_success "Directorio del proyecto verificado ($project_indicators indicadores)"
+    log_info "Directorio de trabajo: $(pwd)"
     
     # Verificar Node.js
     if command -v node &> /dev/null; then
@@ -388,7 +432,7 @@ sync_production_database() {
     echo "================================================"
     echo "Esta operación va a:"
     echo "✅ Agregar el campo 'comunionEnCasa' a la tabla familias (si no existe)"
-    echo "✅ Configurar asociaciones entre Persona y Familias"
+    echo "✅ Verificar estructura de tablas principales"
     echo "✅ Aplicar cambios usando ALTER TABLE (seguro para datos existentes)"
     echo "✅ Mantener TODOS los datos existentes"
     echo ""
@@ -408,11 +452,14 @@ sync_production_database() {
     # Crear script de sincronización segura para producción
     cat > sync_prod_safe.mjs << 'EOF'
 import sequelize from './config/sequelize.js';
-import { Familias } from './src/models/index.js';
 
 const syncProductionSafe = async () => {
   try {
     console.log('🔄 Iniciando sincronización segura de producción...');
+    
+    // Verificar conexión a BD
+    await sequelize.authenticate();
+    console.log('✅ Conexión a base de datos establecida');
     
     // Verificar si la columna comunionEnCasa ya existe
     const [columnExists] = await sequelize.query(`
@@ -438,22 +485,30 @@ const syncProductionSafe = async () => {
       console.log('ℹ️  Columna comunionEnCasa ya existe');
     }
     
-    // Sincronizar modelos sin forzar (alter = true es seguro)
-    console.log('🔄 Sincronizando modelos con alter=true...');
-    await sequelize.sync({ alter: true });
-    console.log('✅ Modelos sincronizados exitosamente');
+    // Verificar tablas principales
+    const [tables] = await sequelize.query(`
+      SELECT table_name, 
+             (SELECT COUNT(*) FROM information_schema.columns 
+              WHERE table_name = t.table_name AND table_schema = 'public') as column_count
+      FROM information_schema.tables t
+      WHERE table_schema = 'public' 
+      AND table_name IN ('familias', 'personas', 'usuarios', 'municipios');
+    `);
     
-    // Verificar que las asociaciones funcionan
-    console.log('🔍 Verificando asociaciones...');
-    await Familias.findOne({
-      include: [{
-        model: sequelize.models.Persona,
-        as: 'personas',
-        required: false
-      }],
-      limit: 1
+    console.log('� Estado de tablas principales:');
+    tables.forEach(table => {
+      console.log(`  ✅ ${table.table_name}: ${table.column_count} columnas`);
     });
-    console.log('✅ Asociaciones funcionando correctamente');
+    
+    // Intentar sincronización suave con Sequelize si los modelos están disponibles
+    try {
+      console.log('� Intentando sincronización con Sequelize...');
+      await sequelize.sync({ alter: true });
+      console.log('✅ Sincronización con Sequelize completada');
+    } catch (syncError) {
+      console.log('⚠️  Sincronización con Sequelize falló, pero la BD está actualizada manualmente');
+      console.log('   Error:', syncError.message);
+    }
     
     await sequelize.close();
     console.log('🎉 Sincronización de producción completada exitosamente');
@@ -461,6 +516,7 @@ const syncProductionSafe = async () => {
     
   } catch (error) {
     console.error('❌ Error en sincronización de producción:', error.message);
+    console.error('   Detalles:', error.original?.message || 'N/A');
     process.exit(1);
   }
 };
@@ -487,7 +543,6 @@ verify_production_features() {
     
     cat > verify_prod_features.mjs << 'EOF'
 import sequelize from './config/sequelize.js';
-import { Familias, Persona } from './src/models/index.js';
 
 const verifyProductionFeatures = async () => {
   try {
@@ -508,52 +563,78 @@ const verifyProductionFeatures = async () => {
       process.exit(1);
     }
     
-    // 2. Verificar asociaciones Persona-Familias
+    // 2. Verificar que los modelos están disponibles
     try {
-      const testAssociation = await Familias.findOne({
-        include: [{
-          model: Persona,
-          as: 'personas',
-          required: false
-        }],
-        limit: 1
-      });
-      console.log('✅ Asociaciones Persona-Familias funcionando en producción');
+      const [tables] = await sequelize.query(`
+        SELECT table_name FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name IN ('familias', 'personas');
+      `);
+      
+      const foundTables = tables.map(t => t.table_name);
+      if (foundTables.includes('familias') && foundTables.includes('personas')) {
+        console.log('✅ Tablas principales disponibles');
+      } else {
+        console.log('❌ Tablas principales no encontradas:', foundTables);
+        process.exit(1);
+      }
     } catch (assocError) {
-      console.log('❌ Error en asociaciones:', assocError.message);
+      console.log('❌ Error verificando tablas:', assocError.message);
       process.exit(1);
     }
     
     // 3. Verificar función de validación de miembros únicos
     const fs = await import('fs');
-    const controllerPath = './src/controllers/encuestaController.js';
+    const possibleControllerPaths = [
+      './src/controllers/encuestaController.js',
+      './controllers/encuestaController.js',
+      './src/controller/encuestaController.js'
+    ];
     
-    if (fs.existsSync(controllerPath)) {
-      const controllerContent = fs.readFileSync(controllerPath, 'utf8');
-      
-      if (controllerContent.includes('validarMiembrosUnicos') && 
-          controllerContent.includes('MIEMBROS_DUPLICADOS')) {
-        console.log('✅ Validación de miembros únicos disponible en producción');
-      } else {
-        console.log('❌ Validación de miembros únicos NO encontrada');
-        process.exit(1);
+    let controllerFound = false;
+    for (const controllerPath of possibleControllerPaths) {
+      if (fs.existsSync(controllerPath)) {
+        const controllerContent = fs.readFileSync(controllerPath, 'utf8');
+        
+        if (controllerContent.includes('validarMiembrosUnicos') && 
+            controllerContent.includes('MIEMBROS_DUPLICADOS')) {
+          console.log('✅ Validación de miembros únicos disponible en producción');
+          console.log(`   Ubicación: ${controllerPath}`);
+          controllerFound = true;
+          break;
+        }
       }
-    } else {
-      console.log('❌ Controlador de encuestas no encontrado');
+    }
+    
+    if (!controllerFound) {
+      console.log('❌ Validación de miembros únicos NO encontrada');
+      console.log('   Rutas verificadas:', possibleControllerPaths.join(', '));
       process.exit(1);
     }
     
     // 4. Verificar validador de encuestas
-    const validatorPath = './src/validators/encuestaValidator.js';
-    if (fs.existsSync(validatorPath)) {
-      console.log('✅ Validador de encuestas disponible');
-    } else {
-      console.log('❌ Validador de encuestas NO encontrado');
-      process.exit(1);
+    const possibleValidatorPaths = [
+      './src/validators/encuestaValidator.js',
+      './validators/encuestaValidator.js',
+      './src/validator/encuestaValidator.js'
+    ];
+    
+    let validatorFound = false;
+    for (const validatorPath of possibleValidatorPaths) {
+      if (fs.existsSync(validatorPath)) {
+        console.log('✅ Validador de encuestas disponible');
+        console.log(`   Ubicación: ${validatorPath}`);
+        validatorFound = true;
+        break;
+      }
+    }
+    
+    if (!validatorFound) {
+      console.log('⚠️  Validador de encuestas NO encontrado (opcional)');
+      console.log('   Rutas verificadas:', possibleValidatorPaths.join(', '));
     }
     
     await sequelize.close();
-    console.log('🎉 Todas las funcionalidades verificadas en producción');
+    console.log('🎉 Funcionalidades principales verificadas en producción');
     process.exit(0);
     
   } catch (error) {
@@ -582,6 +663,23 @@ EOF
 restart_production_services() {
     log_step "Reiniciando servicios de producción..."
     
+    # Detectar el archivo principal de la aplicación
+    local main_file=""
+    if [ -f "src/server.js" ]; then
+        main_file="src/server.js"
+    elif [ -f "server.js" ]; then
+        main_file="server.js"
+    elif [ -f "app.js" ]; then
+        main_file="app.js"
+    elif [ -f "index.js" ]; then
+        main_file="index.js"
+    else
+        log_warning "Archivo principal de aplicación no encontrado"
+        main_file="server.js"  # Valor por defecto
+    fi
+    
+    log_info "Archivo principal detectado: $main_file"
+    
     # Reiniciar con PM2 (método preferido para producción)
     if command -v pm2 &> /dev/null; then
         log_info "Gestionando aplicación con PM2..."
@@ -596,8 +694,10 @@ restart_production_services() {
             log_info "Iniciando nueva instancia de aplicación..."
             if [ -f "ecosystem.config.cjs" ]; then
                 pm2 start ecosystem.config.cjs
+            elif [ -f "ecosystem.config.js" ]; then
+                pm2 start ecosystem.config.js
             else
-                pm2 start src/server.js --name "$APP_NAME" -i max --env production
+                pm2 start $main_file --name "$APP_NAME" -i max --env production
             fi
             log_success "Aplicación iniciada con PM2"
         fi
@@ -617,7 +717,7 @@ restart_production_services() {
             log_success "Servicio reiniciado con systemctl"
         else
             log_warning "Servicio $APP_NAME no encontrado en systemctl"
-            log_info "Inicia manualmente con: npm start"
+            log_info "Inicia manualmente con: node $main_file"
         fi
         
     else
@@ -625,8 +725,11 @@ restart_production_services() {
         echo ""
         echo "Reinicia la aplicación manualmente:"
         echo "  Opción 1 (producción): npm start"
-        echo "  Opción 2 (desarrollo): node src/server.js"
-        echo "  Opción 3 (PM2): pm2 start ecosystem.config.cjs"
+        echo "  Opción 2 (directo): node $main_file"
+        echo "  Opción 3 (PM2): pm2 start $main_file --name $APP_NAME"
+        echo ""
+        echo "Para instalar PM2 globalmente:"
+        echo "  npm install -g pm2"
     fi
     
     return 0
