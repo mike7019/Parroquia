@@ -92,6 +92,12 @@ const Familias = sequelize.define('Familias', {
       model: 'sectores',
       key: 'id_sector'
     }
+  },
+  comunionEnCasa: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+    comment: 'Indica si la familia realiza comunión en casa'
   }
 }, {
   tableName: 'familias',

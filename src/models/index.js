@@ -18,12 +18,12 @@ import {
   TipoAguasResiduales,
   TipoVivienda,
   ComunidadCultural,
-  DifuntosFamilia
+  DifuntosFamilia,
+  Persona
 } from './catalog/index.js';
 
 // Import other models individually
 import Enfermedad from './catalog/Enfermedad.js';
-import Persona from './catalog/Persona.js';
 import Parentesco from './catalog/Parentesco.js';
 import SituacionCivil from './catalog/SituacionCivil.js';
 import Estudio from './catalog/Estudio.js';

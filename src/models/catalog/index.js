@@ -12,6 +12,7 @@ import TipoAguasResiduales from './TipoAguasResiduales.js';
 import TipoVivienda from './TipoVivienda.js';
 import ComunidadCultural from './ComunidadCultural.js';
 import DifuntosFamilia from './DifuntosFamilia.js';
+import Persona from './Persona.js';
 
 // Definir asociaciones
 Departamentos.hasMany(Municipios, {
@@ -101,6 +102,28 @@ DifuntosFamilia.belongsTo(Familias, {
     as: 'familia'
 });
 
+// Asociaciones entre Familias y Persona
+Familias.hasMany(Persona, {
+    foreignKey: 'id_familia_familias',
+    as: 'personas'
+});
+
+Persona.belongsTo(Familias, {
+    foreignKey: 'id_familia_familias',
+    as: 'familia'
+});
+
+// Asociaciones entre Persona y otros catálogos
+Persona.belongsTo(Sexo, {
+    foreignKey: 'id_sexo',
+    as: 'sexo'
+});
+
+Persona.belongsTo(TipoIdentificacion, {
+    foreignKey: 'id_tipo_identificacion_tipo_identificacion',
+    as: 'tipo_identificacion'
+});
+
 export {
     TipoIdentificacion,
     Parroquia,
@@ -115,5 +138,6 @@ export {
     TipoAguasResiduales,
     TipoVivienda,
     ComunidadCultural,
-    DifuntosFamilia
+    DifuntosFamilia,
+    Persona
 };

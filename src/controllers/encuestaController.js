@@ -1,4 +1,5 @@
 import sequelize from '../../config/sequelize.js';
+import { QueryTypes } from 'sequelize';
 import { Familias, Municipios, Parroquia, Sector, Veredas, Sexo, TipoIdentificacion, Persona } from '../models/index.js';
 import crypto from 'crypto';
 
@@ -51,6 +52,92 @@ const verificarFamiliaExistente = async (apellidoFamiliar, telefono, direccion) 
   } catch (error) {
     console.error('Error verificando familia existente:', error);
     return null;
+  }
+};
+
+/**
+ * Validar que los miembros de la familia no pertenezcan a otra familia
+ * Verifica números de identificación únicos en la base de datos
+ */
+const validarMiembrosUnicos = async (familyMembers = [], deceasedMembers = []) => {
+  try {
+    console.log('🔍 Validando que los miembros no pertenezcan a otra familia...');
+    
+    // Recopilar todas las identificaciones a validar
+    const identificacionesAValidar = [];
+    
+    // Agregar identificaciones de miembros vivos
+    if (familyMembers && familyMembers.length > 0) {
+      familyMembers.forEach(member => {
+        if (member.numeroIdentificacion) {
+          identificacionesAValidar.push(member.numeroIdentificacion);
+        }
+      });
+    }
+    
+    // Agregar identificaciones de miembros fallecidos
+    if (deceasedMembers && deceasedMembers.length > 0) {
+      deceasedMembers.forEach(member => {
+        if (member.numeroIdentificacion) {
+          identificacionesAValidar.push(member.numeroIdentificacion);
+        }
+      });
+    }
+    
+    if (identificacionesAValidar.length === 0) {
+      console.log('  ✅ No hay identificaciones para validar');
+      return;
+    }
+    
+    console.log(`  🔍 Validando ${identificacionesAValidar.length} identificaciones...`);
+    
+    // Buscar personas existentes con estas identificaciones usando consulta SQL directa
+    const personasExistentes = await sequelize.query(`
+      SELECT 
+        p.identificacion,
+        p.primer_nombre,
+        p.primer_apellido,
+        p.id_familia_familias,
+        f.apellido_familiar,
+        f.id_familia
+      FROM personas p
+      LEFT JOIN familias f ON p.id_familia_familias = f.id_familia
+      WHERE p.identificacion IN (:identificaciones)
+    `, {
+      replacements: { identificaciones: identificacionesAValidar },
+      type: QueryTypes.SELECT
+    });
+    
+    if (personasExistentes.length > 0) {
+      console.log(`  ❌ Se encontraron ${personasExistentes.length} personas que ya pertenecen a otras familias`);
+      
+      // Formatear conflictos para la respuesta
+      const conflictos = personasExistentes.map(persona => ({
+        identificacion: persona.identificacion,
+        nombre_completo: `${persona.primer_nombre} ${persona.primer_apellido || ''}`.trim(),
+        familia_actual: {
+          id: persona.id_familia,
+          apellido: persona.apellido_familiar || 'Sin apellido familiar'
+        }
+      }));
+      
+      // Lanzar error con detalles de los conflictos
+      const error = new Error(`Las siguientes personas ya pertenecen a otra familia: ${conflictos.map(c => `${c.nombre_completo} (${c.identificacion})`).join(', ')}`);
+      error.codigo = 'MIEMBROS_DUPLICADOS';
+      error.conflictos = conflictos;
+      throw error;
+    }
+    
+    console.log('  ✅ Todos los miembros son únicos');
+    
+  } catch (error) {
+    if (error.codigo === 'MIEMBROS_DUPLICADOS') {
+      throw error; // Re-lanzar errores de validación
+    }
+    
+    console.log(`  ❌ Error validando miembros únicos: ${error.name} [${error.constructor.name}]: ${error.message}`);
+    console.log(error.stack);
+    throw new Error(`Error al validar miembros únicos: ${error.message}`);
   }
 };
 
@@ -634,6 +721,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
  *                   direccion: { type: string }
  *                   telefono: { type: string }
  *                   numero_contrato_epm: { type: string }
+ *                   comunionEnCasa: { type: boolean }
  *               vivienda:
  *                 type: object
  *                 properties:
@@ -795,6 +883,11 @@ export const crearEncuesta = async (req, res) => {
 
     console.log('✅ Validaciones básicas completadas');
 
+    // VALIDAR MIEMBROS ÚNICOS - No pueden pertenecer a otra familia
+    console.log('🔍 Validando que los miembros no pertenezcan a otra familia...');
+    await validarMiembrosUnicos(familyMembers, deceasedMembers || []);
+    console.log('✅ Validación de miembros únicos completada');
+
     // VERIFICAR SI LA FAMILIA YA EXISTE
     console.log('🔍 Verificando familia existente...');
     const familiaExistente = await verificarFamiliaExistente(
@@ -843,7 +936,8 @@ export const crearEncuesta = async (req, res) => {
       tutor_responsable: null, // Se puede definir luego
       id_municipio: informacionGeneral.municipio?.id ? parseInt(informacionGeneral.municipio.id) : null,
       id_vereda: informacionGeneral.vereda?.id ? parseInt(informacionGeneral.vereda.id) : null,
-      id_sector: informacionGeneral.sector?.id ? parseInt(informacionGeneral.sector.id) : null
+      id_sector: informacionGeneral.sector?.id ? parseInt(informacionGeneral.sector.id) : null,
+      comunionEnCasa: informacionGeneral.comunionEnCasa || false
     };
 
     // Debug: mostrar datos que se van a insertar
@@ -957,55 +1051,68 @@ export const crearEncuesta = async (req, res) => {
           const primerNombre = nombres[0] || '';
           const segundoNombre = nombres.slice(1).join(' ') || null;
 
-          // Mapear sexo
+          // Mapear sexo - el JSON tiene objeto con id y nombre
           let sexoId = null;
           if (miembro.sexo) {
-            const sexoMapping = {
-              'Hombre': 1,        // Masculino
-              'Mujer': 2,         // Femenino  
-              'Masculino': 1,
-              'Femenino': 2,
-              'M': 1,
-              'F': 2,
-              'O': 3,
-              'Otro': 3
-            };
-            sexoId = sexoMapping[miembro.sexo] || null;
+            if (typeof miembro.sexo === 'object' && miembro.sexo.id) {
+              sexoId = parseInt(miembro.sexo.id);
+            } else if (typeof miembro.sexo === 'string') {
+              const sexoMapping = {
+                'Hombre': 1,        // Masculino
+                'Mujer': 2,         // Femenino  
+                'Masculino': 1,
+                'Femenino': 2,
+                'M': 1,
+                'F': 2,
+                'O': 3,
+                'Otro': 3
+              };
+              sexoId = sexoMapping[miembro.sexo] || null;
+            }
           }
 
-          // Mapear tipo de identificación
+          // Mapear tipo de identificación - el JSON tiene objeto con id y nombre
           let tipoIdentificacionId = null;
           if (miembro.tipoIdentificacion) {
-            const tipoIdMapping = {
-              'CC': 1,
-              'TI': 2,
-              'RC': 3,
-              'CE': 4,
-              'PP': 5
-            };
-            tipoIdentificacionId = tipoIdMapping[miembro.tipoIdentificacion] || null;
+            if (typeof miembro.tipoIdentificacion === 'object' && miembro.tipoIdentificacion.id) {
+              tipoIdentificacionId = parseInt(miembro.tipoIdentificacion.id);
+            } else if (typeof miembro.tipoIdentificacion === 'string') {
+              const tipoIdMapping = {
+                'CC': 1,
+                'TI': 2,
+                'RC': 3,
+                'CE': 4,
+                'PP': 5
+              };
+              tipoIdentificacionId = tipoIdMapping[miembro.tipoIdentificacion] || null;
+            }
           }
 
-          // Mapear estado civil
+          // Mapear estado civil - el JSON tiene objeto con id y nombre
           let estadoCivilId = null;
           if (miembro.situacionCivil) {
-            const estadoCivilMapping = {
-              'Soltero': 1,
-              'Soltera': 1,
-              'Soltero(a)': 1,
-              'Casado': 2,
-              'Casada': 2,
-              'Casado(a)': 2,
-              'Viudo': 4,
-              'Viuda': 4,
-              'Viudo(a)': 4,
-              'Divorciado': 3,
-              'Divorciada': 3,
-              'Divorciado(a)': 3,
-              'Unión Libre': 5,
-              'Union Libre': 5
-            };
-            estadoCivilId = estadoCivilMapping[miembro.situacionCivil] || null;
+            if (typeof miembro.situacionCivil === 'object' && miembro.situacionCivil.id) {
+              estadoCivilId = parseInt(miembro.situacionCivil.id);
+            } else if (typeof miembro.situacionCivil === 'string') {
+              const estadoCivilMapping = {
+                'Soltero': 1,
+                'Soltera': 1,
+                'Soltero(a)': 1,
+                'Casado Civil': 2,
+                'Casado': 2,
+                'Casada': 2,
+                'Casado(a)': 2,
+                'Viudo': 4,
+                'Viuda': 4,
+                'Viudo(a)': 4,
+                'Divorciado': 3,
+                'Divorciada': 3,
+                'Divorciado(a)': 3,
+                'Unión Libre': 5,
+                'Union Libre': 5
+              };
+              estadoCivilId = estadoCivilMapping[miembro.situacionCivil] || null;
+            }
           }
 
           // Extraer fecha de nacimiento
@@ -1025,19 +1132,19 @@ export const crearEncuesta = async (req, res) => {
             fecha_nacimiento: fechaNacimiento ? new Date(fechaNacimiento) : new Date('1900-01-01'),
             telefono: miembro.telefono || informacionGeneral.telefono,
             correo_electronico: `${primerNombre.toLowerCase()}.${Date.now()}.${personasCreadas}@temp.com`,
-            identificacion: identificacionUnica,
+            identificacion: miembro.numeroIdentificacion || identificacionUnica,
             direccion: informacionGeneral.direccion,
             id_familia_familias: familiaId,
             id_familia: familiaId, // Columna duplicada en la tabla
             id_sexo: sexoId,
             id_tipo_identificacion_tipo_identificacion: tipoIdentificacionId,
             id_estado_civil_estado_civil: estadoCivilId,
-            estudios: miembro.estudio || null,
+            estudios: (miembro.estudio && typeof miembro.estudio === 'object') ? miembro.estudio.nombre : (miembro.estudio || null),
             en_que_eres_lider: null, // Se puede expandir luego
             necesidad_enfermo: null, // Se puede expandir luego
-            talla_camisa: miembro.talla?.camisa || null,
-            talla_pantalon: miembro.talla?.pantalon || null,
-            talla_zapato: miembro.talla?.calzado || null,
+            talla_camisa: miembro['talla_camisa/blusa'] || (miembro.talla ? miembro.talla.camisa : null),
+            talla_pantalon: miembro.talla_pantalon || (miembro.talla ? miembro.talla.pantalon : null),
+            talla_zapato: miembro.talla_zapato || (miembro.talla ? miembro.talla.calzado : null),
             id_parroquia: null // Evitar error de clave foránea, usar null por defecto
           };
 
@@ -1087,9 +1194,10 @@ export const crearEncuesta = async (req, res) => {
             // Campos adicionales para fallecidos en el campo 'estudios' como JSON temporal
             estudios: JSON.stringify({
               es_fallecido: true,
-              fecha_aniversario: fallecido.fechaAniversario || null,
+              fecha_aniversario: fallecido.fechaFallecimiento || fallecido.fechaAniversario || null,
               era_padre: fallecido.eraPadre || false,
-              era_madre: fallecido.eraMadre || false
+              era_madre: fallecido.eraMadre || false,
+              causa_fallecimiento: fallecido.causaFallecimiento || null
             })
           };
 
@@ -1143,6 +1251,19 @@ export const crearEncuesta = async (req, res) => {
     await transaction.rollback();
     console.error('❌ Error procesando encuesta:', error);
 
+    // Manejar error específico de miembros duplicados
+    if (error.codigo === 'MIEMBROS_DUPLICADOS') {
+      return res.status(409).json({
+        status: 'error',
+        message: 'Algunos miembros ya pertenecen a otra familia',
+        details: error.message,
+        error_code: 'MIEMBROS_DUPLICADOS',
+        conflictos: error.conflictos || [],
+        sugerencia: 'Verifique los números de identificación de los miembros de la familia'
+      });
+    }
+
+    // Error genérico
     res.status(500).json({
       status: 'error',
       message: 'Error interno del servidor al procesar la encuesta',

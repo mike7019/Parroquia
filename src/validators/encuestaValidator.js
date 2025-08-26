@@ -27,6 +27,10 @@ export const validarEncuesta = [
   body('informacionGeneral.fecha')
     .isISO8601()
     .withMessage('La fecha debe estar en formato ISO válido'),
+  body('informacionGeneral.comunionEnCasa')
+    .optional()
+    .isBoolean()
+    .withMessage('comunionEnCasa debe ser un valor booleano (true/false)'),
 
   // Validaciones para vivienda
   body('vivienda').isObject().withMessage('vivienda debe ser un objeto'),
@@ -62,38 +66,210 @@ export const validarEncuesta = [
     }
     return true;
   }),
+  
+  // Validar identificaciones únicas dentro del mismo array
+  body('familyMembers').custom((members) => {
+    const identificaciones = members
+      .map(m => m.numeroIdentificacion)
+      .filter(id => id && id.trim() && id.trim() !== '');
+    
+    const identificacionesUnicas = new Set(identificaciones);
+    
+    if (identificaciones.length !== identificacionesUnicas.size) {
+      throw new Error('No puede haber números de identificación duplicados en la misma familia');
+    }
+    
+    return true;
+  }),
   body('familyMembers.*.nombres')
     .notEmpty()
     .withMessage('El nombre del miembro es requerido')
     .isLength({ min: 2, max: 255 })
     .withMessage('El nombre debe tener entre 2 y 255 caracteres'),
+  body('familyMembers.*.numeroIdentificacion')
+    .optional()
+    .isString()
+    .withMessage('El número de identificación debe ser una cadena'),
+  body('familyMembers.*.tipoIdentificacion')
+    .optional()
+    .custom((value) => {
+      // Permitir tanto string como objeto {id, nombre}
+      if (typeof value === 'string') {
+        const validTypes = ['CC', 'TI', 'RC', 'CE', 'PP', 'PEP', 'DIE', 'CCD'];
+        if (!validTypes.includes(value)) {
+          throw new Error('Tipo de identificación no válido');
+        }
+      } else if (typeof value === 'object' && value !== null) {
+        if (!value.id || !value.nombre) {
+          throw new Error('Objeto tipoIdentificacion debe tener id y nombre');
+        }
+      }
+      return true;
+    }),
   body('familyMembers.*.fechaNacimiento')
     .optional()
     .isISO8601()
     .withMessage('La fecha de nacimiento debe estar en formato ISO válido'),
-  body('familyMembers.*.tipoIdentificacion')
-    .optional()
-    .isIn(['CC', 'TI', 'RC', 'CE', 'PP', 'PEP', 'DIE', 'CCD'])
-    .withMessage('Tipo de identificación no válido'),
   body('familyMembers.*.sexo')
     .optional()
-    .isIn(['Hombre', 'Mujer', 'Masculino', 'Femenino', 'M', 'F'])
-    .withMessage('Sexo no válido'),
+    .custom((value) => {
+      // Permitir tanto string como objeto {id, nombre}
+      if (typeof value === 'string') {
+        const validSex = ['Hombre', 'Mujer', 'Masculino', 'Femenino', 'M', 'F'];
+        if (!validSex.includes(value)) {
+          throw new Error('Sexo no válido');
+        }
+      } else if (typeof value === 'object' && value !== null) {
+        if (!value.id || !value.nombre) {
+          throw new Error('Objeto sexo debe tener id y nombre');
+        }
+      }
+      return true;
+    }),
+  body('familyMembers.*.situacionCivil')
+    .optional()
+    .custom((value) => {
+      // Permitir tanto string como objeto {id, nombre}
+      if (typeof value === 'string') {
+        const validStates = ['Soltero', 'Soltera', 'Casado', 'Casada', 'Casado Civil', 'Divorciado', 'Divorciada', 'Viudo', 'Viuda', 'Unión Libre'];
+        if (!validStates.includes(value)) {
+          throw new Error('Situación civil no válida');
+        }
+      } else if (typeof value === 'object' && value !== null) {
+        if (!value.id || !value.nombre) {
+          throw new Error('Objeto situacionCivil debe tener id y nombre');
+        }
+      }
+      return true;
+    }),
   body('familyMembers.*.parentesco')
     .optional()
-    .isLength({ max: 100 })
-    .withMessage('Parentesco no puede exceder 100 caracteres'),
+    .custom((value) => {
+      // Permitir tanto string como objeto {id, nombre}
+      if (typeof value === 'string') {
+        return value.length <= 100;
+      } else if (typeof value === 'object' && value !== null) {
+        if (!value.id || !value.nombre) {
+          throw new Error('Objeto parentesco debe tener id y nombre');
+        }
+      }
+      return true;
+    }),
   body('familyMembers.*.telefono')
     .optional()
     .matches(/^[0-9+\-\s()]*$/)
     .withMessage('El teléfono debe contener solo números y caracteres válidos'),
+  body('familyMembers.*.estudio')
+    .optional()
+    .custom((value) => {
+      // Permitir tanto string como objeto {id, nombre}
+      if (typeof value === 'string') {
+        return value.length <= 200;
+      } else if (typeof value === 'object' && value !== null) {
+        if (!value.id || !value.nombre) {
+          throw new Error('Objeto estudio debe tener id y nombre');
+        }
+      }
+      return true;
+    }),
+  body('familyMembers.*.comunidadCultural')
+    .optional()
+    .custom((value) => {
+      // Permitir tanto string como objeto {id, nombre}
+      if (typeof value === 'string') {
+        return value.length <= 100;
+      } else if (typeof value === 'object' && value !== null) {
+        if (!value.id || !value.nombre) {
+          throw new Error('Objeto comunidadCultural debe tener id y nombre');
+        }
+      }
+      return true;
+    }),
+  body('familyMembers.*.enfermedad')
+    .optional()
+    .custom((value) => {
+      // Permitir tanto string como objeto {id, nombre}
+      if (typeof value === 'string') {
+        return value.length <= 100;
+      } else if (typeof value === 'object' && value !== null) {
+        if (!value.id || !value.nombre) {
+          throw new Error('Objeto enfermedad debe tener id y nombre');
+        }
+      }
+      return true;
+    }),
+  body('familyMembers.*.profesion')
+    .optional()
+    .custom((value) => {
+      // Permitir tanto string como objeto {id, nombre}
+      if (typeof value === 'string') {
+        return value.length <= 100;
+      } else if (typeof value === 'object' && value !== null) {
+        if (!value.id || !value.nombre) {
+          throw new Error('Objeto profesion debe tener id y nombre');
+        }
+      }
+      return true;
+    }),
+  body('familyMembers.*[\'talla_camisa/blusa\']')
+    .optional()
+    .isString()
+    .withMessage('Talla de camisa/blusa debe ser una cadena'),
+  body('familyMembers.*.talla_pantalon')
+    .optional()
+    .isString()
+    .withMessage('Talla de pantalón debe ser una cadena'),
+  body('familyMembers.*.talla_zapato')
+    .optional()
+    .isString()
+    .withMessage('Talla de zapato debe ser una cadena'),
+  body('familyMembers.*.motivoFechaCelebrar')
+    .optional()
+    .isObject()
+    .withMessage('motivoFechaCelebrar debe ser un objeto'),
+  body('familyMembers.*.motivoFechaCelebrar.motivo')
+    .optional()
+    .isString()
+    .withMessage('Motivo debe ser una cadena'),
+  body('familyMembers.*.motivoFechaCelebrar.dia')
+    .optional()
+    .isString()
+    .withMessage('Día debe ser una cadena'),
+  body('familyMembers.*.motivoFechaCelebrar.mes')
+    .optional()
+    .isString()
+    .withMessage('Mes debe ser una cadena'),
 
   // Validaciones para deceasedMembers (opcional)
   body('deceasedMembers').optional().isArray().withMessage('deceasedMembers debe ser un array'),
+  
+  // Validar identificaciones únicas entre miembros vivos y fallecidos
+  body().custom((value) => {
+    const familyMembers = value.familyMembers || [];
+    const deceasedMembers = value.deceasedMembers || [];
+    
+    // Obtener todas las identificaciones
+    const todasLasIdentificaciones = [
+      ...familyMembers.map(m => m.numeroIdentificacion),
+      ...deceasedMembers.map(m => m.numeroIdentificacion)
+    ].filter(id => id && id.trim() && id.trim() !== '');
+    
+    const identificacionesUnicas = new Set(todasLasIdentificaciones);
+    
+    if (todasLasIdentificaciones.length !== identificacionesUnicas.size) {
+      throw new Error('No puede haber números de identificación duplicados entre miembros vivos y fallecidos');
+    }
+    
+    return true;
+  }),
   body('deceasedMembers.*.nombres')
     .optional()
     .isLength({ min: 2, max: 255 })
     .withMessage('El nombre del miembro fallecido debe tener entre 2 y 255 caracteres'),
+  body('deceasedMembers.*.fechaFallecimiento')
+    .optional()
+    .isISO8601()
+    .withMessage('La fecha de fallecimiento debe estar en formato ISO válido'),
   body('deceasedMembers.*.fechaAniversario')
     .optional()
     .isISO8601()
@@ -106,6 +282,39 @@ export const validarEncuesta = [
     .optional()
     .isBoolean()
     .withMessage('eraMadre debe ser booleano'),
+  body('deceasedMembers.*.sexo')
+    .optional()
+    .custom((value) => {
+      // Permitir tanto string como objeto {id, nombre}
+      if (typeof value === 'string') {
+        const validSex = ['Hombre', 'Mujer', 'Masculino', 'Femenino', 'M', 'F'];
+        if (!validSex.includes(value)) {
+          throw new Error('Sexo no válido');
+        }
+      } else if (typeof value === 'object' && value !== null) {
+        if (!value.id || !value.nombre) {
+          throw new Error('Objeto sexo debe tener id y nombre');
+        }
+      }
+      return true;
+    }),
+  body('deceasedMembers.*.parentesco')
+    .optional()
+    .custom((value) => {
+      // Permitir tanto string como objeto {id, nombre}
+      if (typeof value === 'string') {
+        return value.length <= 100;
+      } else if (typeof value === 'object' && value !== null) {
+        if (!value.id || !value.nombre) {
+          throw new Error('Objeto parentesco debe tener id y nombre');
+        }
+      }
+      return true;
+    }),
+  body('deceasedMembers.*.causaFallecimiento')
+    .optional()
+    .isString()
+    .withMessage('Causa de fallecimiento debe ser una cadena'),
 
   // Validaciones para metadata (opcional)
   body('metadata').optional().isObject().withMessage('metadata debe ser un objeto'),

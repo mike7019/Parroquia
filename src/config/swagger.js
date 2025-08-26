@@ -862,19 +862,7 @@ const swaggerConfig = {
               type: 'string',
               maxLength: 500,
               description: 'Nombres completos del miembro de la familia',
-              example: 'Carlos'
-            },
-            apellidos: {
-              type: 'string',
-              maxLength: 500,
-              description: 'Apellidos del miembro de la familia',
-              example: 'González'
-            },
-            tipoIdentificacion: {
-              type: 'string',
-              enum: ['CC', 'TI', 'RC', 'CE', 'PP', 'PEP', 'DIE', 'CCD'],
-              description: 'Tipo de documento de identidad',
-              example: 'CC'
+              example: 'Carlos Andrés Rodríguez García'
             },
             numeroIdentificacion: {
               type: 'string',
@@ -882,88 +870,200 @@ const swaggerConfig = {
               description: 'Número de documento de identidad',
               example: '12345678'
             },
+            tipoIdentificacion: {
+              oneOf: [
+                {
+                  type: 'string',
+                  enum: ['CC', 'TI', 'RC', 'CE', 'PP', 'PEP', 'DIE', 'CCD'],
+                  description: 'Código del tipo de documento'
+                },
+                {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer', description: 'ID del tipo de identificación', example: 1 },
+                    nombre: { type: 'string', description: 'Nombre del tipo de identificación', example: 'Cédula de Ciudadanía' }
+                  }
+                }
+              ],
+              description: 'Tipo de documento de identidad (string o objeto)',
+              example: { id: 1, nombre: 'Cédula de Ciudadanía' }
+            },
             fechaNacimiento: {
               type: 'string',
-              format: 'date',
+              format: 'date-time',
               description: 'Fecha de nacimiento',
-              example: '1990-05-15'
+              example: '1985-03-15T00:00:00.000Z'
             },
             sexo: {
-              type: 'string',
-              enum: ['M', 'F', 'Otro'],
-              description: 'Sexo del miembro',
-              example: 'M'
-            },
-            situacionCivil: {
-              type: 'string',
-              enum: ['Soltero', 'Soltera', 'Casado', 'Casada', 'Divorciado', 'Divorciada', 'Viudo', 'Viuda', 'Unión Libre'],
-              description: 'Estado civil',
-              example: 'Soltero'
-            },
-            parentesco: {
-              type: 'string',
-              maxLength: 100,
-              description: 'Relación con el jefe de familia',
-              example: 'Hijo'
-            },
-            estudio: {
-              type: 'string',
-              maxLength: 200,
-              description: 'Nivel educativo',
-              example: 'Secundaria completa'
-            },
-            comunidadCultural: {
-              type: 'string',
-              maxLength: 100,
-              description: 'Comunidad cultural',
-              example: 'Ninguna'
-            },
-            ocupacion: {
-              type: 'string',
-              maxLength: 100,
-              description: 'Ocupación laboral',
-              example: 'Estudiante'
+              oneOf: [
+                {
+                  type: 'string',
+                  enum: ['M', 'F', 'Hombre', 'Mujer', 'Masculino', 'Femenino', 'Otro'],
+                  description: 'Código o nombre del sexo'
+                },
+                {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer', description: 'ID del sexo', example: 1 },
+                    nombre: { type: 'string', description: 'Nombre del sexo', example: 'Masculino' }
+                  }
+                }
+              ],
+              description: 'Sexo del miembro (string o objeto)',
+              example: { id: 1, nombre: 'Masculino' }
             },
             telefono: {
               type: 'string',
               maxLength: 20,
               description: 'Teléfono de contacto',
-              example: '3001234567'
+              example: '32066666666'
             },
-            email: {
+            situacionCivil: {
+              oneOf: [
+                {
+                  type: 'string',
+                  enum: ['Soltero', 'Soltera', 'Casado', 'Casada', 'Casado Civil', 'Divorciado', 'Divorciada', 'Viudo', 'Viuda', 'Unión Libre'],
+                  description: 'Estado civil'
+                },
+                {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer', description: 'ID del estado civil', example: 1 },
+                    nombre: { type: 'string', description: 'Nombre del estado civil', example: 'Casado Civil' }
+                  }
+                }
+              ],
+              description: 'Estado civil (string o objeto)',
+              example: { id: 1, nombre: 'Casado Civil' }
+            },
+            estudio: {
+              oneOf: [
+                {
+                  type: 'string',
+                  maxLength: 200,
+                  description: 'Nivel educativo'
+                },
+                {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer', description: 'ID del nivel educativo', example: 1 },
+                    nombre: { type: 'string', description: 'Nombre del nivel educativo', example: 'Universitario' }
+                  }
+                }
+              ],
+              description: 'Nivel educativo (string o objeto)',
+              example: { id: 1, nombre: 'Universitario' }
+            },
+            parentesco: {
+              oneOf: [
+                {
+                  type: 'string',
+                  maxLength: 100,
+                  description: 'Relación con el jefe de familia'
+                },
+                {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer', description: 'ID del parentesco', example: 1 },
+                    nombre: { type: 'string', description: 'Nombre del parentesco', example: 'Jefe de Hogar' }
+                  }
+                }
+              ],
+              description: 'Relación con el jefe de familia (string o objeto)',
+              example: { id: 1, nombre: 'Jefe de Hogar' }
+            },
+            comunidadCultural: {
+              oneOf: [
+                {
+                  type: 'string',
+                  maxLength: 100,
+                  description: 'Comunidad cultural'
+                },
+                {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer', description: 'ID de la comunidad cultural', example: 1 },
+                    nombre: { type: 'string', description: 'Nombre de la comunidad cultural', example: 'Ninguna' }
+                  }
+                }
+              ],
+              description: 'Comunidad cultural (string o objeto)',
+              example: { id: 1, nombre: 'Ninguna' }
+            },
+            enfermedad: {
+              oneOf: [
+                {
+                  type: 'string',
+                  maxLength: 100,
+                  description: 'Enfermedad'
+                },
+                {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer', description: 'ID de la enfermedad', example: 2 },
+                    nombre: { type: 'string', description: 'Nombre de la enfermedad', example: 'Diabetes' }
+                  }
+                }
+              ],
+              description: 'Enfermedad (string o objeto)',
+              example: { id: 2, nombre: 'Diabetes' }
+            },
+            'talla_camisa/blusa': {
               type: 'string',
-              format: 'email',
-              description: 'Correo electrónico',
-              example: 'carlos.gonzalez@email.com'
+              description: 'Talla de camisa o blusa',
+              example: 'L'
             },
-            talla: {
+            talla_pantalon: {
+              type: 'string',
+              description: 'Talla de pantalón',
+              example: '32'
+            },
+            talla_zapato: {
+              type: 'string',
+              description: 'Talla de zapato',
+              example: '42'
+            },
+            profesion: {
+              oneOf: [
+                {
+                  type: 'string',
+                  maxLength: 100,
+                  description: 'Profesión'
+                },
+                {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer', description: 'ID de la profesión', example: 1 },
+                    nombre: { type: 'string', description: 'Nombre de la profesión', example: 'Estudiante' }
+                  }
+                }
+              ],
+              description: 'Profesión (string o objeto)',
+              example: { id: 1, nombre: 'Estudiante' }
+            },
+            motivoFechaCelebrar: {
               type: 'object',
-              description: 'Tallas del miembro (al menos una requerida)',
+              description: 'Información de fechas especiales para celebrar',
               properties: {
-                camisa: {
+                motivo: {
                   type: 'string',
-                  description: 'Talla de camisa',
-                  example: 'M'
+                  description: 'Motivo de la celebración',
+                  example: 'Cumpleaños'
                 },
-                pantalon: {
+                dia: {
                   type: 'string',
-                  description: 'Talla de pantalón',
-                  example: '32'
+                  description: 'Día de la celebración',
+                  example: '15'
                 },
-                calzado: {
+                mes: {
                   type: 'string',
-                  description: 'Talla de calzado',
-                  example: '42'
+                  description: 'Mes de la celebración',
+                  example: '03'
                 }
               }
-            },
-            isActive: {
-              type: 'boolean',
-              description: 'Indica si el miembro está activo',
-              example: true
             }
           },
-          required: ['nombres', 'apellidos', 'tipoIdentificacion', 'numeroIdentificacion', 'fechaNacimiento', 'sexo', 'situacionCivil', 'parentesco', 'estudio', 'comunidadCultural', 'talla']
+          required: ['nombres']
         },
         VeredaInput: {
           type: 'object',
@@ -2381,6 +2481,11 @@ const swaggerConfig = {
                   type: 'string',
                   description: 'Número de contrato EPM',
                   example: '987654321'
+                },
+                comunionEnCasa: {
+                  type: 'boolean',
+                  description: 'Indica si la familia realiza comunión en casa',
+                  example: false
                 }
               }
             },
@@ -2464,13 +2569,54 @@ const swaggerConfig = {
                   nombres: { 
                     type: 'string',
                     description: 'Nombres del difunto',
-                    example: 'María López'
+                    example: 'Pedro Antonio Rodríguez'
+                  },
+                  fechaFallecimiento: { 
+                    type: 'string', 
+                    format: 'date-time',
+                    description: 'Fecha de fallecimiento',
+                    example: '2020-05-15T00:00:00.000Z'
                   },
                   fechaAniversario: { 
                     type: 'string', 
                     format: 'date-time',
-                    description: 'Fecha de fallecimiento',
-                    example: '2020-05-20T00:00:00.000Z'
+                    description: 'Fecha de aniversario (alias para fechaFallecimiento)',
+                    example: '2020-05-15T00:00:00.000Z'
+                  },
+                  sexo: {
+                    oneOf: [
+                      {
+                        type: 'string',
+                        enum: ['M', 'F', 'Hombre', 'Mujer', 'Masculino', 'Femenino', 'Otro'],
+                        description: 'Código o nombre del sexo'
+                      },
+                      {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'integer', description: 'ID del sexo', example: 1 },
+                          nombre: { type: 'string', description: 'Nombre del sexo', example: 'Masculino' }
+                        }
+                      }
+                    ],
+                    description: 'Sexo del difunto (string o objeto)',
+                    example: { id: 1, nombre: 'Masculino' }
+                  },
+                  parentesco: {
+                    oneOf: [
+                      {
+                        type: 'string',
+                        description: 'Relación de parentesco'
+                      },
+                      {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string', description: 'ID del parentesco', example: 'PADRE' },
+                          nombre: { type: 'string', description: 'Nombre del parentesco', example: 'Padre' }
+                        }
+                      }
+                    ],
+                    description: 'Parentesco con la familia (string o objeto)',
+                    example: { id: 'PADRE', nombre: 'Padre' }
                   },
                   eraPadre: { 
                     type: 'boolean',
@@ -2481,6 +2627,11 @@ const swaggerConfig = {
                     type: 'boolean',
                     description: 'Era madre de familia',
                     example: true
+                  },
+                  causaFallecimiento: {
+                    type: 'string',
+                    description: 'Causa del fallecimiento',
+                    example: 'Enfermedad cardiovascular'
                   }
                 }
               }

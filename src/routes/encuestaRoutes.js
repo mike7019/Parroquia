@@ -113,17 +113,18 @@ const router = express.Router();
  *             $ref: '#/components/schemas/EncuestaCompleta'
  *           example:
  *             informacionGeneral:
- *               municipio: { id: "001", nombre: "Medellín" }
- *               parroquia: { id: "002", nombre: "San José" }
- *               sector: { id: "003", nombre: "Centro" }
- *               vereda: { id: "004", nombre: "El Carmen" }
- *               fecha: "2025-08-23T03:13:14.017Z"
- *               apellido_familiar: "García"
- *               direccion: "Calle 10 # 20-30"
- *               telefono: "6041234567"
- *               numero_contrato_epm: "987654321"
+ *               municipio: { id: 1, nombre: "Medellín" }
+ *               parroquia: { id: 1, nombre: "San José" }
+ *               sector: { id: 1, nombre: "Centro" }
+ *               vereda: { id: 1, nombre: "La Macarena" }
+ *               fecha: "2025-08-25"
+ *               apellido_familiar: "Rodríguez García"
+ *               direccion: "Carrera 45 # 23-67"
+ *               telefono: "3001234567"
+ *               numero_contrato_epm: "12345678"
+ *               comunionEnCasa: false
  *             vivienda:
- *               tipo_vivienda: { id: "01", nombre: "Casa" }
+ *               tipo_vivienda: { id: 1, nombre: "Casa" }
  *               disposicion_basuras:
  *                 recolector: true
  *                 quemada: false
@@ -132,38 +133,45 @@ const router = express.Router();
  *                 aire_libre: false
  *                 no_aplica: false
  *             servicios_agua:
- *               sistema_acueducto: { id: "10", nombre: "Aguas de Medellín" }
- *               aguas_residuales: "Alcantarillado público"
+ *               sistema_acueducto: { id: 1, nombre: "Acueducto Público" }
+ *               aguas_residuales: { id: 1, nombre: "Alcantarillado" }
  *               pozo_septico: false
  *               letrina: false
  *               campo_abierto: false
  *             observaciones:
- *               sustento_familia: "Agricultura"
- *               observaciones_encuestador: "Familia con acceso a servicios básicos"
+ *               sustento_familia: "Trabajo independiente en ventas"
+ *               observaciones_encuestador: "Familia colaborativa, información completa"
  *               autorizacion_datos: true
  *             familyMembers:
- *               - nombres: "Juan Pérez"
- *                 fechaNacimiento: "1990-05-12T00:00:00.000Z"
- *                 tipoIdentificacion: "CC"
- *                 sexo: "M"
- *                 situacionCivil: "Soltero"
- *                 parentesco: "Hijo"
- *                 telefono: "3001234567"
- *                 estudio: "Universitario"
- *                 comunidadCultural: "Ninguna"
- *                 talla:
- *                   camisa: "M"
- *                   pantalon: "32"
- *                   calzado: "42"
+ *               - nombres: "Carlos Andrés Rodríguez García"
+ *                 numeroIdentificacion: "12345678"
+ *                 tipoIdentificacion: { id: 1, nombre: "Cédula de Ciudadanía" }
+ *                 fechaNacimiento: "1985-03-15"
+ *                 sexo: { id: 1, nombre: "Masculino" }
+ *                 telefono: "32066666666"
+ *                 situacionCivil: { id: 1, nombre: "Casado Civil" }
+ *                 estudio: { id: 1, nombre: "Universitario" }
+ *                 parentesco: { id: 1, nombre: "Jefe de Hogar" }
+ *                 comunidadCultural: { id: 1, nombre: "Ninguna" }
+ *                 enfermedad: { id: 2, nombre: "Diabetes" }
+ *                 "talla_camisa/blusa": "L"
+ *                 talla_pantalon: "32"
+ *                 talla_zapato: "42"
+ *                 profesion: { id: 1, nombre: "Estudiante" }
+ *                 motivoFechaCelebrar:
+ *                   motivo: "Cumpleaños"
+ *                   dia: "15"
+ *                   mes: "03"
  *             deceasedMembers:
- *               - nombres: "María López"
- *                 fechaAniversario: "2020-05-20T00:00:00.000Z"
- *                 eraPadre: false
- *                 eraMadre: true
+ *               - nombres: "Pedro Antonio Rodríguez"
+ *                 fechaFallecimiento: "2020-05-15"
+ *                 sexo: { id: 1, nombre: "Masculino" }
+ *                 parentesco: { id: "PADRE", nombre: "Padre" }
+ *                 causaFallecimiento: "Enfermedad cardiovascular"
  *             metadata:
- *               timestamp: "2025-08-23T03:13:14.017Z"
+ *               timestamp: "2025-08-25T10:30:00.000Z"
  *               completed: true
- *               currentStage: 1
+ *               currentStage: 6
  *     responses:
  *       200:
  *         description: Encuesta creada exitosamente

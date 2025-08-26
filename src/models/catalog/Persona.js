@@ -121,7 +121,7 @@ const Persona = sequelize.define('Persona', {
   sequelize,
   modelName: 'Persona',
   tableName: 'personas',
-  timestamps: true, // La tabla SÍ tiene createdAt y updatedAt (confirmado por MCP)
+  timestamps: false, // La tabla NO tiene createdAt y updatedAt
   indexes: [
     {
       fields: ['id_familia_familias']
