@@ -121,7 +121,32 @@ router.post('/', municipioController.createMunicipio);
  *                 items:
  *                   oneOf:
  *                     - type: string
+ *                       description: Simple municipality name (requires defaultDepartamentoId)
  *                     - $ref: '#/components/schemas/MunicipioInput'
+ *               defaultDepartamentoId:
+ *                 type: integer
+ *                 description: Default department ID for string entries (required when array contains strings)
+ *                 example: 1
+ *           examples:
+ *             mixed_data:
+ *               summary: Mixed strings and objects
+ *               value:
+ *                 municipios:
+ *                   - "Municipio Simple"
+ *                   - nombre_municipio: "Bogotá D.C."
+ *                     codigo_dane: "11001"
+ *                     id_departamento: 1
+ *                 defaultDepartamentoId: 1
+ *             objects_only:
+ *               summary: Objects only (no defaultDepartamentoId needed)
+ *               value:
+ *                 municipios:
+ *                   - nombre_municipio: "Medellín"
+ *                     codigo_dane: "05001"
+ *                     id_departamento: 2
+ *                   - nombre_municipio: "Cali"
+ *                     codigo_dane: "76001"
+ *                     id_departamento: 3
  *     responses:
  *       201:
  *         description: Municipios created successfully

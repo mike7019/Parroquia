@@ -34,4 +34,12 @@ const Veredas = sequelize.define('Veredas', {
   updatedAt: 'updated_at'
 });
 
+// Definir asociaciones
+Veredas.associate = function(models) {
+  Veredas.belongsTo(models.Municipios, {
+    foreignKey: 'id_municipio_municipios',
+    as: 'municipio'
+  });
+};
+
 export default Veredas;

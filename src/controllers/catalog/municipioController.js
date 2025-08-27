@@ -250,7 +250,7 @@ class MunicipioController {
    */
   async bulkCreateMunicipios(req, res) {
     try {
-      const { municipios } = req.body;
+      const { municipios, defaultDepartamentoId } = req.body;
 
       if (!municipios || !Array.isArray(municipios)) {
         return res.status(400).json(
@@ -258,7 +258,12 @@ class MunicipioController {
         );
       }
 
-      const result = await municipioService.bulkCreateMunicipios(municipios);
+      const options = {};
+      if (defaultDepartamentoId) {
+        options.defaultDepartamentoId = defaultDepartamentoId;
+      }
+
+      const result = await municipioService.bulkCreateMunicipios(municipios, options);
 
       res.status(201).json(
         createSuccessResponse(

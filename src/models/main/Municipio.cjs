@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       // Relación con Vereda - un municipio puede tener muchas veredas
-      Municipio.hasMany(models.Vereda, {
+      Municipio.hasMany(models.Veredas, {
         foreignKey: 'id_municipio_municipios',
         as: 'veredas'
       });

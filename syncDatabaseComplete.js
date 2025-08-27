@@ -322,7 +322,7 @@ export async function loadAllModels() {
                              'FamiliaSistemaAcueducto', 'FamiliaTipoAguasResiduales', 'FamiliaTipoVivienda',
                              'PersonaEnfermedad', 'Profesion', 'Sexo', 'SistemaAcueducto', 
                              'TipoAguasResiduales', 'TipoDisposicionBasura', 'TipoVivienda',
-                             'Municipio', 'Departamento']; // ✅ Agregados modelos críticos
+                             'Municipio', 'Departamento', 'Veredas', 'Municipios', 'Departamentos']; // ✅ Agregados modelos críticos
           
           if (safeModels.includes(modelName) || modelName === 'Persona') {
             sequelize.models[modelName].associate(sequelize.models);

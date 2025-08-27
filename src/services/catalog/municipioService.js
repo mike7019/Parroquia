@@ -1,4 +1,5 @@
 import sequelize from '../../../config/sequelize.js';
+import { Op } from 'sequelize';
 
 // Función para obtener modelos de forma segura
 const getMunicipioModel = () => {
@@ -88,14 +89,27 @@ class MunicipioService {
   }
 
   /**
-   * Get all municipios
+   * Get all municipios with optional filters
    */
-  async getAllMunicipios() {
+  async getAllMunicipios(options = {}) {
     try {
       const MunicipioModel = getMunicipioModel();
+      const { search, sortBy = 'nombre_municipio', sortOrder = 'ASC', id_departamento } = options;
+
+      // Construir condiciones de búsqueda
+      const whereClause = {};
+      if (search) {
+        whereClause.nombre_municipio = {
+          [Op.iLike]: `%${search}%`
+        };
+      }
+      if (id_departamento) {
+        whereClause.id_departamento = id_departamento;
+      }
 
       const municipios = await MunicipioModel.findAll({
-        order: [['nombre_municipio', 'ASC']],
+        where: whereClause,
+        order: [[sortBy, sortOrder]],
         include: [
           {
             association: 'departamento',
@@ -218,22 +232,45 @@ class MunicipioService {
 
   /**
    * Bulk create municipios
+   * @param {Array} municipiosData - Array of municipio objects or strings
+   * @param {Object} options - Optional parameters
+   * @param {number} options.defaultDepartamentoId - Default departamento ID for string entries
    */
-  async bulkCreateMunicipios(municipiosData) {
+  async bulkCreateMunicipios(municipiosData, options = {}) {
     try {
       const MunicipioModel = getMunicipioModel();
+      
+      if (!Array.isArray(municipiosData) || municipiosData.length === 0) {
+        throw new Error('municipiosData debe ser un array no vacío');
+      }
 
       const municipios = municipiosData.map(item => {
         if (typeof item === 'string') {
-          return { nombre_municipio: item };
+          return { 
+            nombre_municipio: item,
+            id_departamento: options.defaultDepartamentoId || null
+          };
         }
+        
+        // Asegurar que hay un nombre válido
+        const nombre = item.nombre_municipio || item.nombre;
+        if (!nombre) {
+          throw new Error('Cada municipio debe tener un nombre válido');
+        }
+        
         return {
-          nombre_municipio: item.nombre,
-          codigo_dane: item.codigo_dane,
-          id_departamento: item.id_departamento,
-          departamento: item.departamento // Campo legacy
+          nombre_municipio: nombre,
+          codigo_dane: item.codigo_dane || null,
+          id_departamento: item.id_departamento || options.defaultDepartamentoId || null,
+          departamento: item.departamento || null // Campo legacy
         };
       });
+
+      // Validar que todos tengan id_departamento si es requerido
+      const sinDepartamento = municipios.filter(m => !m.id_departamento);
+      if (sinDepartamento.length > 0) {
+        throw new Error(`${sinDepartamento.length} municipios no tienen id_departamento asignado. Use options.defaultDepartamentoId para strings simples.`);
+      }
 
       const result = await MunicipioModel.bulkCreate(municipios, {
         ignoreDuplicates: true,
@@ -284,6 +321,34 @@ class MunicipioService {
       return departamentos;
     } catch (error) {
       throw new Error(`Error fetching departamentos: ${error.message}`);
+    }
+  }
+
+  /**
+   * Search municipios by codigo DANE pattern
+   */
+  async searchMunicipiosByCodigoDane(pattern) {
+    try {
+      const MunicipioModel = getMunicipioModel();
+
+      const municipios = await MunicipioModel.findAll({
+        where: {
+          codigo_dane: {
+            [Op.iLike]: `%${pattern}%`
+          }
+        },
+        include: [
+          {
+            association: 'departamento',
+            attributes: ['id_departamento', 'nombre', 'codigo_dane']
+          }
+        ],
+        order: [['nombre_municipio', 'ASC']]
+      });
+
+      return municipios;
+    } catch (error) {
+      throw new Error(`Error searching municipios by codigo DANE: ${error.message}`);
     }
   }
 }

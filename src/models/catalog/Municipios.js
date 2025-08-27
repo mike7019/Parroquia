@@ -73,4 +73,43 @@ const Municipios = sequelize.define('Municipios', {
   }
 });
 
+// Definir asociaciones completas
+Municipios.associate = function(models) {
+  // Relación con Departamento - un municipio pertenece a un departamento
+  Municipios.belongsTo(models.Departamentos, {
+    foreignKey: 'id_departamento',
+    as: 'departamento'
+  });
+
+  // Relación con Veredas - un municipio puede tener muchas veredas
+  Municipios.hasMany(models.Veredas, {
+    foreignKey: 'id_municipio_municipios',
+    as: 'veredas'
+  });
+
+  // Relación con Parroquia - un municipio puede tener muchas parroquias
+  if (models.Parroquia) {
+    Municipios.hasMany(models.Parroquia, {
+      foreignKey: 'id_municipio',
+      as: 'parroquias'
+    });
+  }
+
+  // Relación con Sector - un municipio puede tener muchos sectores
+  if (models.Sector) {
+    Municipios.hasMany(models.Sector, {
+      foreignKey: 'id_municipio',
+      as: 'sectores'
+    });
+  }
+
+  // Relación con Familia - un municipio puede tener muchas familias
+  if (models.Familia) {
+    Municipios.hasMany(models.Familia, {
+      foreignKey: 'id_municipio',
+      as: 'familias'
+    });
+  }
+};
+
 export default Municipios;
