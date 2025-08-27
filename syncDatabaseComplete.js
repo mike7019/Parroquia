@@ -321,7 +321,8 @@ export async function loadAllModels() {
           const safeModels = ['Encuesta', 'Enfermedad', 'Familia', 'FamiliaDisposicionBasura', 
                              'FamiliaSistemaAcueducto', 'FamiliaTipoAguasResiduales', 'FamiliaTipoVivienda',
                              'PersonaEnfermedad', 'Profesion', 'Sexo', 'SistemaAcueducto', 
-                             'TipoAguasResiduales', 'TipoDisposicionBasura', 'TipoVivienda'];
+                             'TipoAguasResiduales', 'TipoDisposicionBasura', 'TipoVivienda',
+                             'Municipio', 'Departamento']; // ✅ Agregados modelos críticos
           
           if (safeModels.includes(modelName) || modelName === 'Persona') {
             sequelize.models[modelName].associate(sequelize.models);

@@ -23,24 +23,21 @@ class MunicipioService {
    */
   async findOrCreateMunicipio(municipioData) {
     try {
-      const MunicipioModel = getMunicipioModel();
-      const DepartamentoModel = getDepartamentoModel();
-
       // Validate that the departamento exists
       if (municipioData.id_departamento) {
-        const departamento = await DepartamentoModel.findByPk(municipioData.id_departamento);
+        const departamento = await getDepartamentoModel().findByPk(municipioData.id_departamento);
         if (!departamento) {
           throw new Error(`Departamento with ID ${municipioData.id_departamento} does not exist`);
         }
       }
 
       // Verificar si existe por nombre o código DANE
-      let existingMunicipio = await MunicipioModel.findOne({
+      let existingMunicipio = await getMunicipioModel().findOne({
         where: { nombre_municipio: municipioData.nombre_municipio }
       });
 
       if (!existingMunicipio && municipioData.codigo_dane) {
-        existingMunicipio = await MunicipioModel.findOne({
+        existingMunicipio = await getMunicipioModel().findOne({
           where: { codigo_dane: municipioData.codigo_dane }
         });
       }
@@ -52,7 +49,7 @@ class MunicipioService {
         };
       }
 
-      const municipio = await MunicipioModel.create(municipioData);
+      const municipio = await Municipios().create(municipioData);
       return {
         municipio: await this.getMunicipioById(municipio.id_municipio),
         created: true
@@ -67,18 +64,15 @@ class MunicipioService {
    */
   async createMunicipio(municipioData) {
     try {
-      const MunicipioModel = getMunicipioModel();
-      const DepartamentoModel = getDepartamentoModel();
-
       // Validate that the departamento exists
       if (municipioData.id_departamento) {
-        const departamento = await DepartamentoModel.findByPk(municipioData.id_departamento);
+        const departamento = await Departamentos().findByPk(municipioData.id_departamento);
         if (!departamento) {
           throw new Error(`Departamento with ID ${municipioData.id_departamento} does not exist`);
         }
       }
 
-      const municipio = await MunicipioModel.create(municipioData);
+      const municipio = await Municipios().create(municipioData);
 
       // Devolver el municipio con su departamento
       return await this.getMunicipioById(municipio.id_municipio);
@@ -92,9 +86,7 @@ class MunicipioService {
    */
   async getAllMunicipios() {
     try {
-      const MunicipioModel = getMunicipioModel();
-
-      const municipios = await MunicipioModel.findAll({
+      const municipios = await Municipios().findAll({
         order: [['nombre_municipio', 'ASC']],
         include: [
           {
@@ -125,9 +117,7 @@ class MunicipioService {
    */
   async getMunicipioById(id) {
     try {
-      const MunicipioModel = getMunicipioModel();
-
-      const municipio = await MunicipioModel.findByPk(id, {
+      const municipio = await Municipios().findByPk(id, {
         include: [
           {
             association: 'departamento',
@@ -151,9 +141,7 @@ class MunicipioService {
    */
   async getMunicipioByCodigoDane(codigo_dane) {
     try {
-      const MunicipioModel = getMunicipioModel();
-
-      const municipio = await MunicipioModel.findOne({
+      const municipio = await Municipios().findOne({
         where: { codigo_dane },
         include: [
           {
@@ -178,9 +166,7 @@ class MunicipioService {
    */
   async updateMunicipio(id, updateData) {
     try {
-      const MunicipioModel = getMunicipioModel();
-
-      const municipio = await MunicipioModel.findByPk(id);
+      const municipio = await Municipios().findByPk(id);
 
       if (!municipio) {
         throw new Error('Municipio not found');
@@ -200,9 +186,7 @@ class MunicipioService {
    */
   async deleteMunicipio(id) {
     try {
-      const MunicipioModel = getMunicipioModel();
-
-      const municipio = await MunicipioModel.findByPk(id);
+      const municipio = await Municipios().findByPk(id);
 
       if (!municipio) {
         throw new Error('Municipio not found');
@@ -221,8 +205,6 @@ class MunicipioService {
    */
   async bulkCreateMunicipios(municipiosData) {
     try {
-      const MunicipioModel = getMunicipioModel();
-
       const municipios = municipiosData.map(item => {
         if (typeof item === 'string') {
           return { nombre_municipio: item };
@@ -235,7 +217,7 @@ class MunicipioService {
         };
       });
 
-      const result = await MunicipioModel.bulkCreate(municipios, {
+      const result = await Municipios().bulkCreate(municipios, {
         ignoreDuplicates: true,
         returning: true
       });
@@ -251,9 +233,7 @@ class MunicipioService {
    */
   async getMunicipiosByDepartamento(id_departamento) {
     try {
-      const MunicipioModel = getMunicipioModel();
-
-      const municipios = await MunicipioModel.findAll({
+      const municipios = await Municipios().findAll({
         where: { id_departamento },
         order: [['nombre_municipio', 'ASC']],
         include: [
@@ -275,9 +255,7 @@ class MunicipioService {
    */
   async getAllDepartamentos() {
     try {
-      const DepartamentoModel = getDepartamentoModel();
-
-      const departamentos = await DepartamentoModel.findAll({
+      const departamentos = await Departamentos().findAll({
         order: [['nombre', 'ASC']]
       });
 

@@ -21,6 +21,7 @@ import situacionCivilRoutes from './routes/catalog/situacionCivilRoutes.js';
 import encuestaRoutes from './routes/encuestaRoutes.js';
 import difuntosRoutes from './routes/difuntosRoutes.js';
 import familiasConsultasRoutes from './routes/familiasConsultasRoutes.js';
+import debugRoutes from './routes/debugRoutes.js';
 
 // Import middlewares
 import errorHandler from './middlewares/errorHandler.js';
@@ -202,6 +203,7 @@ app.use('/api/situaciones-civiles', situacionCivilRoutes); // Direct access for 
 app.use('/api', encuestaRoutes); // Rutas de encuestas
 app.use('/api/difuntos', difuntosRoutes); // Rutas de difuntos
 app.use('/api/consultas', familiasConsultasRoutes); // Rutas de consultas de familias
+app.use('/api/debug', debugRoutes); // Rutas de debug (solo desarrollo)
 app.use('/api', systemRoutes);
 
 // Root route
@@ -237,7 +239,33 @@ const startServer = async () => {
 
     // Load all models from subcarpetas
     console.log('📦 Loading all models...');
-    await loadAllModels();
+    try {
+      await loadAllModels();
+      console.log('✅ All models loaded successfully');
+      
+      // Verificar modelos críticos
+      const criticalModels = ['Municipio', 'Departamento', 'Usuario'];
+      const missingModels = criticalModels.filter(modelName => 
+        !sequelize.models[modelName] && !sequelize.models[modelName + 's']
+      );
+      
+      if (missingModels.length > 0) {
+        console.warn('⚠️  Missing critical models:', missingModels);
+      } else {
+        console.log('✅ All critical models found');
+      }
+      
+      // Verificar asociaciones del modelo Municipio
+      const MunicipioModel = sequelize.models.Municipio || sequelize.models.Municipios;
+      if (MunicipioModel) {
+        const associations = Object.keys(MunicipioModel.associations || {});
+        console.log(`✅ Municipio model associations: ${associations.join(', ') || 'None'}`);
+      }
+      
+    } catch (error) {
+      console.error('❌ Error loading models:', error.message);
+      throw error;
+    }
 
     // Sync database (be careful in production)
     if (process.env.NODE_ENV !== 'production') {
