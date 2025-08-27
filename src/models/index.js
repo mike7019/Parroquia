@@ -30,12 +30,6 @@ import Talla from './catalog/Talla.js';
 // Create User alias for compatibility
 const User = Usuario;
 
-// ⚠️  ASOCIACIONES BÁSICAS SOLAMENTE (para evitar errores)
-// Solo configuramos las asociaciones esenciales que sabemos que funcionan
-
-console.log('🔗 Configurando asociaciones básicas...');
-
-// 1. Usuario - Role associations (estas funcionan bien)
 try {
   Usuario.belongsToMany(Role, {
     through: UsuarioRole,
@@ -55,24 +49,6 @@ try {
 } catch (error) {
   console.log('⚠️  Error configurando asociaciones Usuario-Role:', error.message);
 }
-
-// 2. Comentamos temporalmente las demás asociaciones para evitar conflictos
-/*
-// Asociaciones que causan problemas - comentadas temporalmente
-
-// Departamentos - Municipios
-Departamentos.hasMany(Municipios, {
-  foreignKey: 'id_departamento',
-  as: 'municipios'
-});
-
-Municipios.belongsTo(Departamentos, {
-  foreignKey: 'id_departamento',
-  as: 'departamentoData'
-});
-
-// Otras asociaciones comentadas...
-*/
 
 console.log('✅ Modelos cargados sin asociaciones conflictivas');
 

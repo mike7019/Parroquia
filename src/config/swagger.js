@@ -3228,6 +3228,10 @@ const swaggerConfig = {
         description: '👥 **Gestión de Usuarios** - Operaciones CRUD para administradores: listar, crear, editar y eliminar usuarios del sistema.'
       },
       {
+        name: 'Consultas Familias',
+        description: '👨‍👩‍👧‍👦 **Consultas de Familias** - Sistema especializado de consultas familiares. **Funcionalidades:** Consultar madres y padres (vivos y fallecidos), búsquedas con filtros avanzados, estadísticas detalladas, información completa de parentesco y datos demográficos.'
+      },
+      {
         name: 'Difuntos',
         description: '🕊️ **Consultas de Difuntos** - Sistema de consultas especializadas para registros de personas fallecidas. **Funcionalidades:** Consultas de madres y padres difuntos, búsquedas por rangos de fechas, estadísticas por mes y año, filtros por nombre y fecha de aniversario.'
       },

@@ -20,6 +20,7 @@ import parentescoRoutes from './routes/catalog/parentescoRoutes.js';
 import situacionCivilRoutes from './routes/catalog/situacionCivilRoutes.js';
 import encuestaRoutes from './routes/encuestaRoutes.js';
 import difuntosRoutes from './routes/difuntosRoutes.js';
+import familiasConsultasRoutes from './routes/familiasConsultasRoutes.js';
 
 // Import middlewares
 import errorHandler from './middlewares/errorHandler.js';
@@ -200,6 +201,7 @@ app.use('/api/parentescos', parentescoRoutes); // Direct access for compatibilit
 app.use('/api/situaciones-civiles', situacionCivilRoutes); // Direct access for compatibility
 app.use('/api', encuestaRoutes); // Rutas de encuestas
 app.use('/api/difuntos', difuntosRoutes); // Rutas de difuntos
+app.use('/api/consultas', familiasConsultasRoutes); // Rutas de consultas de familias
 app.use('/api', systemRoutes);
 
 // Root route
@@ -505,6 +507,15 @@ const displayRoutes = () => {
       { method: 'GET', path: '/api/difuntos/consultas/rango-fechas', group: 'Difuntos', protected: true, description: 'Consultar difuntos por rango de fechas' },
       { method: 'GET', path: '/api/difuntos/estadisticas', group: 'Difuntos', protected: true, description: 'Estadísticas de difuntos' },
       
+      // Consultas Familias routes
+      { method: 'GET', path: '/api/consultas/madres', group: 'Consultas Familias', protected: true, description: 'Consultar madres vivas' },
+      { method: 'GET', path: '/api/consultas/padres', group: 'Consultas Familias', protected: true, description: 'Consultar padres vivos' },
+      { method: 'GET', path: '/api/consultas/madres-fallecidas', group: 'Consultas Familias', protected: true, description: 'Consultar madres fallecidas' },
+      { method: 'GET', path: '/api/consultas/padres-fallecidos', group: 'Consultas Familias', protected: true, description: 'Consultar padres fallecidos' },
+      { method: 'GET', path: '/api/consultas/familias-padres-madres', group: 'Consultas Familias', protected: true, description: 'Consultar familias con padres y madres' },
+      { method: 'GET', path: '/api/consultas/estadisticas', group: 'Consultas Familias', protected: true, description: 'Estadísticas de familias' },
+      { method: 'GET', path: '/api/consultas/persona/:documento', group: 'Consultas Familias', protected: true, description: 'Buscar persona por documento' },
+      
       // System & Infrastructure routes
       { method: 'GET', path: '/api/health', group: 'System', protected: false, description: 'API health check' },
       { method: 'GET', path: '/api/status', group: 'System', protected: false, description: 'System status' },
@@ -534,6 +545,7 @@ const displayRoutes = () => {
         'User Management': '👥',
         'Catalog': '📚',
         'Difuntos': '🕊️',
+        'Consultas Familias': '👨‍👩‍👧‍👦',
         'System': '⚙️',
         'Documentation': '📖',
         'Compatibility': '🔄'
@@ -555,6 +567,8 @@ const displayRoutes = () => {
     const authRoutes = routes.filter(r => r.group === 'Authentication').length;
     const userRoutes = routes.filter(r => r.group === 'User Management').length;
     const catalogRoutes = routes.filter(r => r.group === 'Catalog').length;
+    const difuntosRoutes = routes.filter(r => r.group === 'Difuntos').length;
+    const familiasRoutes = routes.filter(r => r.group === 'Consultas Familias').length;
     const systemRoutes = routes.filter(r => r.group === 'System').length;
     const docRoutes = routes.filter(r => r.group === 'Documentation').length;
     const compatRoutes = routes.filter(r => r.group === 'Compatibility').length;
@@ -567,6 +581,8 @@ const displayRoutes = () => {
     console.log(`   • Authentication: ${authRoutes} routes`);
     console.log(`   • User Management: ${userRoutes} routes`);
     console.log(`   • Catalog: ${catalogRoutes} routes`);
+    console.log(`   • Difuntos: ${difuntosRoutes} routes`);
+    console.log(`   • Consultas Familias: ${familiasRoutes} routes`);
     console.log(`   • System: ${systemRoutes} routes`);
     console.log(`   • Documentation: ${docRoutes} routes`);
     console.log(`   • Compatibility: ${compatRoutes} routes`);
@@ -577,8 +593,8 @@ const displayRoutes = () => {
   } else {
     // Simplified route summary with enhanced info
     console.log('📋 API Routes Summary:');
-    console.log('   🔐 Authentication (13), 👥 Users (5), 📚 Catalog (29), ⚙️  System (2), 📖 Docs (1), 🔄 Compatibility (2)');
-    console.log('   💡 Total: 52 endpoints | Use VERBOSE_LOGGING=true for detailed route listing');
+    console.log('   🔐 Authentication (13), 👥 Users (5), 📚 Catalog (29), 🕊️ Difuntos (5), 👨‍👩‍👧‍👦 Consultas Familias (7), ⚙️ System (2), 📖 Docs (1), 🔄 Compatibility (2)');
+    console.log('   💡 Total: 64 endpoints | Use VERBOSE_LOGGING=true for detailed route listing');
   }
 };
 

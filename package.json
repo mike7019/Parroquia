@@ -17,6 +17,7 @@
     "docker:secure": "docker-compose -f docker-compose.secure.yml up -d",
     "docker:secure:down": "docker-compose -f docker-compose.secure.yml down",
     "ssl:create": "node scripts/create-ssl-cert.js",
+    "docs:generate": "node generate-copilot-instructions.js",
     "admin:create": "node createAdminUser.js",
     "admin:update-email": "node updateAdminEmail.js",
     "db:sync": "node syncDatabase.js",
