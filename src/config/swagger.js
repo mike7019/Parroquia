@@ -3236,6 +3236,18 @@ const swaggerConfig = {
         description: '🕊️ **Consultas de Difuntos** - Sistema de consultas especializadas para registros de personas fallecidas. **Funcionalidades:** Consultas de madres y padres difuntos, búsquedas por rangos de fechas, estadísticas por mes y año, filtros por nombre y fecha de aniversario.'
       },
       {
+        name: 'Difuntos Consolidado',
+        description: '⚰️ **[NUEVO] Difuntos Consolidado** - Endpoint unificado que reemplaza múltiples consultas de difuntos. **Filtros:** parentesco, fechas, municipio, sector. **Incluye:** estadísticas automáticas, aniversarios próximos, inferencia de parentesco.'
+      },
+      {
+        name: 'Salud Consolidado', 
+        description: '🩺 **[NUEVO] Salud Consolidado** - Consultas de salud de personas con filtros avanzados. **Filtros:** enfermedades, edades, sexo, ubicación. **Incluye:** estadísticas de salud, distribución por edades, análisis de enfermedades comunes.'
+      },
+      {
+        name: 'Familias Consolidado',
+        description: '👨‍👩‍👧‍👦 **[NUEVO] Familias Consolidado** - Sistema unificado de consultas familiares que consolida 10+ endpoints. **Filtros:** parentesco, ubicación, sexo, edad. **Incluye:** familias sin padre/madre, estadísticas completas, inferencia de parentesco.'
+      },
+      {
         name: 'Surveys',
         description: '📊 **Encuestas y Familias** - Gestión del sistema de encuestas familiares y registro de datos socioeconómicos.'
       },
@@ -3284,8 +3296,10 @@ const swaggerConfig = {
   apis: [
     './src/routes/*.js',
     './src/routes/catalog/*.js',
+    './src/routes/consolidados/*.js',
     './src/controllers/*.js',
-    './src/controllers/catalog/*.js'
+    './src/controllers/catalog/*.js',
+    './src/controllers/consolidados/*.js'
   ]
 };
 

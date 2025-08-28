@@ -23,6 +23,11 @@ import difuntosRoutes from './routes/difuntosRoutes.js';
 import familiasConsultasRoutes from './routes/familiasConsultasRoutes.js';
 import debugRoutes from './routes/debugRoutes.js';
 
+// Import consolidated routes
+import difuntosConsolidadoRoutes from './routes/consolidados/difuntosRoutes.js';
+import saludConsolidadoRoutes from './routes/consolidados/saludRoutes.js';
+import familiasConsolidadoRoutes from './routes/consolidados/familiasRoutes.js';
+
 // Import middlewares
 import errorHandler from './middlewares/errorHandler.js';
 
@@ -204,6 +209,12 @@ app.use('/api', encuestaRoutes); // Rutas de encuestas
 app.use('/api/difuntos', difuntosRoutes); // Rutas de difuntos
 app.use('/api/consultas', familiasConsultasRoutes); // Rutas de consultas de familias
 app.use('/api/debug', debugRoutes); // Rutas de debug (solo desarrollo)
+
+// Consolidated API Routes - High Priority Phase 1
+app.use('/api/difuntos', difuntosConsolidadoRoutes); // Consolidated difuntos routes
+app.use('/api/personas/salud', saludConsolidadoRoutes); // Consolidated health routes  
+app.use('/api/familias', familiasConsolidadoRoutes); // Consolidated families routes
+
 app.use('/api', systemRoutes);
 
 // Root route
