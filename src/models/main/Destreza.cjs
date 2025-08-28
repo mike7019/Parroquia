@@ -4,11 +4,11 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Destreza extends Model {
     static associate(models) {
-      // Relación muchos a muchos con Persona (nomenclatura optimizada)
+      // Relación muchos a muchos con Persona (nomenclatura corregida para coincidir con la tabla real)
       Destreza.belongsToMany(models.Persona, {
         through: 'persona_destreza',
-        foreignKey: 'id_destreza',
-        otherKey: 'id_persona',
+        foreignKey: 'id_destrezas_destrezas',
+        otherKey: 'id_personas_personas',
         as: 'personas'
       });
     }

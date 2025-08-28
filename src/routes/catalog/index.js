@@ -17,6 +17,7 @@ import estudioRoutes from './estudioRoutes.js';
 import comunidadCulturalRoutes from './comunidadCulturalRoutes.js';
 import profesionRoutes from './profesionRoutes.js';
 import tallaRoutes from './tallas.js';
+import destrezaRoutes from './destrezaRoutes.js';
 
 const router = express.Router();
 
@@ -91,6 +92,9 @@ const router = express.Router();
  *                     tallas:
  *                       type: string
  *                       example: 'active'
+ *                     destrezas:
+ *                       type: string
+ *                       example: 'active'
  */
 
 // Mount catalog routes
@@ -112,6 +116,7 @@ router.use('/estudios', estudioRoutes);
 router.use('/comunidades-culturales', comunidadCulturalRoutes);
 router.use('/profesiones', profesionRoutes);
 router.use('/tallas', tallaRoutes);
+router.use('/destrezas', destrezaRoutes);
 
 // Health check for catalog module
 router.get('/health', (req, res) => {
@@ -137,7 +142,8 @@ router.get('/health', (req, res) => {
       estudios: 'active',
       comunidadesCulturales: 'active',
       profesiones: 'active',
-      tallas: 'active'
+      tallas: 'active',
+      destrezas: 'active'
     }
   });
 });
