@@ -897,11 +897,28 @@ export const crearEncuesta = async (req, res) => {
     );
 
     if (familiaExistente) {
+      // MEJORA: Detectar posibles errores de formulación comparando miembros
+      const miembrosExistentes = await Persona.findAll({
+        where: { id_familia_familias: familiaExistente.id_familia },
+        attributes: ['numero_identificacion', 'nombres', 'apellidos']
+      });
+
+      const identificacionesNuevas = familyMembers?.map(m => m.numeroIdentificacion).filter(Boolean) || [];
+      const identificacionesExistentes = miembrosExistentes.map(m => m.numero_identificacion).filter(Boolean);
+      
+      const hayMiembrosNuevos = identificacionesNuevas.some(id => !identificacionesExistentes.includes(id));
+      
+      let mensajeDetallado = 'Esta familia ya está registrada en el sistema.';
+      if (hayMiembrosNuevos) {
+        mensajeDetallado = 'Esta familia ya existe pero detectamos miembros con identificaciones diferentes. Esto podría indicar un error en la formulación de la encuesta.';
+        console.log('🚨 Detectado posible error de formulación: misma familia con miembros diferentes');
+      }
+
       await transaction.rollback();
       console.log(`⚠️ Familia duplicada detectada: ${familiaExistente.apellido_familiar}`);
       return res.status(409).json({
         status: 'error',
-        message: 'Esta familia ya está registrada en el sistema',
+        message: mensajeDetallado,
         code: 'DUPLICATE_FAMILY',
         data: {
           familia_existente: {
@@ -909,8 +926,24 @@ export const crearEncuesta = async (req, res) => {
             apellido: familiaExistente.apellido_familiar,
             telefono: familiaExistente.telefono,
             direccion: familiaExistente.direccion_familia,
-            fecha_registro: familiaExistente.fecha_ultima_encuesta
-          }
+            fecha_registro: familiaExistente.fecha_ultima_encuesta,
+            miembros_existentes: miembrosExistentes.map(m => ({
+              identificacion: m.numero_identificacion,
+              nombre: `${m.nombres} ${m.apellidos}`
+            }))
+          },
+          miembros_en_nueva_encuesta: familyMembers?.map(m => ({
+            identificacion: m.numeroIdentificacion,
+            nombre: `${m.nombres} ${m.apellidos}`
+          })) || [],
+          posible_error_formulacion: hayMiembrosNuevos,
+          instrucciones: hayMiembrosNuevos ? [
+            "⚠️ POSIBLE ERROR: Verificar si cambiaste incorrectamente las cédulas de miembros existentes",
+            "Si es la misma familia, usa el endpoint de actualización en lugar de crear una nueva"
+          ] : [
+            "Familia ya registrada anteriormente",
+            "Si deseas actualizar la información, usa el endpoint de actualización correspondiente"
+          ]
         }
       });
     }
