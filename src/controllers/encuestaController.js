@@ -175,9 +175,28 @@ export const obtenerEncuestas = async (req, res) => {
       encuestas.map(async (familia) => {
         const familiaData = familia.toJSON();
         
-        // Obtener personas de la familia usando el modelo importado
-        const personas = await Persona.findAll({
-          where: { id_familia_familias: familiaData.id_familia }
+        // Obtener personas de la familia usando SQL directo para evitar errores de modelo
+        const personas = await sequelize.query(`
+          SELECT 
+            id_personas,
+            primer_nombre,
+            segundo_nombre,
+            primer_apellido,
+            segundo_apellido,
+            identificacion,
+            telefono,
+            correo_electronico,
+            fecha_nacimiento,
+            direccion,
+            estudios,
+            talla_camisa,
+            talla_pantalon,
+            talla_zapato
+          FROM personas 
+          WHERE id_familia_familias = :familiaId
+        `, {
+          replacements: { familiaId: familiaData.id_familia },
+          type: QueryTypes.SELECT
         });
 
         // Obtener información de ubicación (municipio, vereda, sector)
@@ -327,9 +346,31 @@ export const obtenerEncuestaPorId = async (req, res) => {
 
     const familiaData = encuesta.toJSON();
 
-    // Obtener personas de la familia usando el modelo importado
-    const personas = await Persona.findAll({
-      where: { id_familia_familias: familiaData.id_familia }
+    // Obtener personas de la familia usando SQL directo para evitar errores de modelo
+    const personas = await sequelize.query(`
+      SELECT 
+        id_personas,
+        primer_nombre,
+        segundo_nombre,
+        primer_apellido,
+        segundo_apellido,
+        identificacion,
+        telefono,
+        correo_electronico,
+        fecha_nacimiento,
+        direccion,
+        estudios,
+        talla_camisa,
+        talla_pantalon,
+        talla_zapato,
+        id_sexo,
+        id_tipo_identificacion_tipo_identificacion,
+        id_estado_civil_estado_civil
+      FROM personas 
+      WHERE id_familia_familias = :familiaId
+    `, {
+      replacements: { familiaId: familiaData.id_familia },
+      type: QueryTypes.SELECT
     });
 
     // Obtener información adicional de vivienda y servicios
@@ -898,13 +939,17 @@ export const crearEncuesta = async (req, res) => {
 
     if (familiaExistente) {
       // MEJORA: Detectar posibles errores de formulación comparando miembros
-      const miembrosExistentes = await Persona.findAll({
-        where: { id_familia_familias: familiaExistente.id_familia },
-        attributes: ['numero_identificacion', 'nombres', 'apellidos']
+      const miembrosExistentes = await sequelize.query(`
+        SELECT identificacion, primer_nombre, primer_apellido 
+        FROM personas 
+        WHERE id_familia_familias = :familiaId
+      `, {
+        replacements: { familiaId: familiaExistente.id_familia },
+        type: QueryTypes.SELECT
       });
 
       const identificacionesNuevas = familyMembers?.map(m => m.numeroIdentificacion).filter(Boolean) || [];
-      const identificacionesExistentes = miembrosExistentes.map(m => m.numero_identificacion).filter(Boolean);
+      const identificacionesExistentes = miembrosExistentes.map(m => m.identificacion).filter(Boolean);
       
       const hayMiembrosNuevos = identificacionesNuevas.some(id => !identificacionesExistentes.includes(id));
       
@@ -928,8 +973,8 @@ export const crearEncuesta = async (req, res) => {
             direccion: familiaExistente.direccion_familia,
             fecha_registro: familiaExistente.fecha_ultima_encuesta,
             miembros_existentes: miembrosExistentes.map(m => ({
-              identificacion: m.numero_identificacion,
-              nombre: `${m.nombres} ${m.apellidos}`
+              identificacion: m.identificacion,
+              nombre: `${m.primer_nombre} ${m.primer_apellido}`
             }))
           },
           miembros_en_nueva_encuesta: familyMembers?.map(m => ({
@@ -1332,14 +1377,19 @@ export const eliminarEncuesta = async (req, res) => {
     console.log(`✅ Encuesta encontrada: ${encuesta.apellido_familiar}`);
 
     // 2. OBTENER ESTADÍSTICAS ANTES DE ELIMINAR
-    const personas = await Persona.findAll({
-      where: { id_familia_familias: id }
+    const personas = await sequelize.query(`
+      SELECT COUNT(*) as total FROM personas WHERE id_familia_familias = :familiaId
+    `, {
+      replacements: { familiaId: id },
+      type: QueryTypes.SELECT
     });
+
+    const totalPersonas = parseInt(personas[0].total) || 0;
 
     const estadisticasEliminacion = {
       familia_id: id,
       apellido_familiar: encuesta.apellido_familiar,
-      personas_eliminadas: personas.length,
+      personas_eliminadas: totalPersonas,
       fecha_eliminacion: new Date().toISOString()
     };
 

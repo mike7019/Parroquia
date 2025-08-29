@@ -1,5 +1,5 @@
 import { DifuntosFamilia, Familias, Municipios, Veredas, Sector } from '../../models/index.js';
-import { Op } from 'sequelize';
+import { Op, QueryTypes } from 'sequelize';
 import sequelize from '../../../config/sequelize.js';
 
 class DifuntosConsolidadoService {
@@ -10,276 +10,264 @@ class DifuntosConsolidadoService {
     try {
       console.log('🔍 Iniciando consulta consolidada de difuntos...', filtros);
       
-      const whereClause = {};
-      const includeClause = [
-        {
-          model: Familias,
-          as: 'familia',
-          required: false,
-          attributes: ['apellido_familiar', 'sector', 'telefono', 'direccion_familia', 'id_municipio', 'id_vereda', 'id_sector'],
-          include: [
-            {
-              model: Municipios,
-              as: 'municipio',
-              required: false,
-              attributes: ['nombre']
-            },
-            {
-              model: Veredas,
-              as: 'vereda',
-              required: false,
-              attributes: ['nombre']
-            },
-            {
-              model: Sector,
-              as: 'sector_info',
-              required: false,
-              attributes: ['nombre']
-            }
-          ]
-        }
-      ];
-
-      // Filtrar por parentesco
+      // Usar consulta SQL directa para evitar problemas de asociaciones
+      let whereConditions = [];
+      let params = {};
+      
+      // Construir condiciones WHERE
       if (filtros.parentesco) {
         const parentescoLower = filtros.parentesco.toLowerCase();
         if (parentescoLower === 'madre') {
-          whereClause[Op.or] = [
-            { nombre_completo: { [Op.iRegexp]: '(madre|mamá|doña)' } },
-            { observaciones: { [Op.iRegexp]: '(madre|mamá|doña)' } }
-          ];
+          whereConditions.push(`(df.nombre_completo ILIKE '%madre%' OR df.nombre_completo ILIKE '%mamá%' OR df.observaciones ILIKE '%madre%')`);
         } else if (parentescoLower === 'padre') {
-          whereClause[Op.or] = [
-            { nombre_completo: { [Op.iRegexp]: '(padre|papá|don)' } },
-            { observaciones: { [Op.iRegexp]: '(padre|papá|don)' } }
-          ];
+          whereConditions.push(`(df.nombre_completo ILIKE '%padre%' OR df.nombre_completo ILIKE '%papá%' OR df.observaciones ILIKE '%padre%')`);
         }
       }
-
-      // Filtrar por fecha específica de aniversario
+      
       if (filtros.fecha_aniversario) {
-        whereClause.fecha_fallecimiento = filtros.fecha_aniversario;
+        whereConditions.push(`df.fecha_fallecimiento = :fecha_aniversario`);
+        params.fecha_aniversario = filtros.fecha_aniversario;
       }
-
-      // Filtrar por rango de fechas
-      if (filtros.fecha_inicio && filtros.fecha_fin) {
-        whereClause.fecha_fallecimiento = {
-          [Op.between]: [filtros.fecha_inicio, filtros.fecha_fin]
-        };
-      } else if (filtros.fecha_inicio) {
-        whereClause.fecha_fallecimiento = {
-          [Op.gte]: filtros.fecha_inicio
-        };
-      } else if (filtros.fecha_fin) {
-        whereClause.fecha_fallecimiento = {
-          [Op.lte]: filtros.fecha_fin
-        };
-      }
-
-      // Filtrar por mes de aniversario
+      
       if (filtros.mes_aniversario) {
-        const mes = parseInt(filtros.mes_aniversario);
-        if (mes >= 1 && mes <= 12) {
-          whereClause[Op.and] = [
-            sequelize.where(
-              sequelize.fn('EXTRACT', sequelize.literal('month FROM fecha_fallecimiento')), 
-              mes
-            )
-          ];
-        }
+        whereConditions.push(`EXTRACT(MONTH FROM df.fecha_fallecimiento) = :mes_aniversario`);
+        params.mes_aniversario = filtros.mes_aniversario;
       }
-
-      // Filtrar por sector (en la familia)
+      
+      if (filtros.fecha_inicio && filtros.fecha_fin) {
+        whereConditions.push(`df.fecha_fallecimiento BETWEEN :fecha_inicio AND :fecha_fin`);
+        params.fecha_inicio = filtros.fecha_inicio;
+        params.fecha_fin = filtros.fecha_fin;
+      }
+      
       if (filtros.sector) {
-        includeClause[0].where = {
-          ...includeClause[0].where,
-          [Op.or]: [
-            { sector: { [Op.iLike]: `%${filtros.sector}%` } },
-            { '$familia.sector_info.nombre$': { [Op.iLike]: `%${filtros.sector}%` } }
-          ]
-        };
-        includeClause[0].required = true;
+        whereConditions.push(`s.nombre ILIKE :sector`);
+        params.sector = `%${filtros.sector}%`;
       }
-
-      // Filtrar por municipio
+      
       if (filtros.municipio) {
-        includeClause[0].include[0].where = {
-          nombre_municipio: { [Op.iLike]: `%${filtros.municipio}%` }
-        };
-        includeClause[0].include[0].required = true;
-        includeClause[0].required = true;
+        whereConditions.push(`m.nombre_municipio ILIKE :municipio`);
+        params.municipio = `%${filtros.municipio}%`;
       }
-
-      // Ejecutar consulta
-      const difuntos = await DifuntosFamilia.findAll({
-        where: whereClause,
-        include: includeClause,
-        order: [['fecha_fallecimiento', 'DESC']],
-        limit: filtros.limite || 100
-      });
-
-      // Formatear resultados
-      const resultado = difuntos.map(difunto => {
-        const añosFallecido = this.calcularAñosDesde(difunto.fecha_fallecimiento);
-        const parentesco = this.inferirParentesco(difunto.nombre_completo, difunto.observaciones);
-        
-        return {
-          id_difunto: difunto.id_difunto,
-          nombre: difunto.nombre_completo,
-          apellido_familiar: difunto.familia?.apellido_familiar || 'No especificado',
-          parentesco: parentesco,
-          fecha_aniversario: difunto.fecha_fallecimiento,
-          fecha_fallecimiento: difunto.fecha_fallecimiento,
-          sector: difunto.familia?.sector || difunto.familia?.sector_info?.nombre || 'No especificado',
-          municipio: difunto.familia?.municipio?.nombre || 'No especificado',
-          vereda: difunto.familia?.vereda?.nombre || 'No especificado',
-          direccion: difunto.familia?.direccion_familia || 'No especificado',
-          telefono: difunto.familia?.telefono || 'No especificado',
-          años_fallecido: añosFallecido,
-          observaciones: difunto.observaciones || '',
-          familia: {
-            apellido_familiar: difunto.familia?.apellido_familiar || 'No especificado',
-            direccion: difunto.familia?.direccion_familia || 'No especificado',
-            telefono: difunto.familia?.telefono || 'No especificado'
-          }
-        };
-      });
-
-      // Generar estadísticas
-      const estadisticas = this.generarEstadisticasDifuntos(resultado);
-
-      return {
-        exito: true,
-        mensaje: "Consulta de difuntos exitosa",
-        datos: resultado,
-        total: resultado.length,
-        estadisticas: estadisticas,
-        filtros_aplicados: filtros
-      };
-
-    } catch (error) {
-      console.error('❌ Error en consulta de difuntos:', error);
-      throw new Error(`Error al consultar difuntos: ${error.message}`);
-    }
-  }
-
-  /**
-   * Inferir parentesco a partir del nombre y observaciones
-   */
-  inferirParentesco(nombreCompleto, observaciones) {
-    const texto = `${nombreCompleto || ''} ${observaciones || ''}`.toLowerCase();
-    
-    if (texto.includes('madre') || texto.includes('mamá') || texto.includes('doña')) {
-      return 'Madre';
-    } else if (texto.includes('padre') || texto.includes('papá') || texto.includes('don')) {
-      return 'Padre';
-    } else if (texto.includes('hijo') || texto.includes('hija')) {
-      return 'Hijo/a';
-    } else if (texto.includes('abuelo') || texto.includes('abuela')) {
-      return 'Abuelo/a';
-    } else if (texto.includes('hermano') || texto.includes('hermana')) {
-      return 'Hermano/a';
-    } else {
-      return 'Familiar';
-    }
-  }
-
-  /**
-   * Calcular años transcurridos desde una fecha
-   */
-  calcularAñosDesde(fecha) {
-    if (!fecha) return 'No especificada';
-    
-    const hoy = new Date();
-    const fechaReferencia = new Date(fecha);
-    let años = hoy.getFullYear() - fechaReferencia.getFullYear();
-    const mesActual = hoy.getMonth();
-    const mesReferencia = fechaReferencia.getMonth();
-    
-    if (mesActual < mesReferencia || (mesActual === mesReferencia && hoy.getDate() < fechaReferencia.getDate())) {
-      años--;
-    }
-    
-    return años;
-  }
-
-  /**
-   * Generar estadísticas de los difuntos
-   */
-  generarEstadisticasDifuntos(difuntos) {
-    const estadisticas = {
-      por_parentesco: {},
-      por_mes: {},
-      por_año: {},
-      por_municipio: {},
-      por_sector: {}
-    };
-
-    difuntos.forEach(difunto => {
-      // Por parentesco
-      const parentesco = difunto.parentesco;
-      estadisticas.por_parentesco[parentesco] = (estadisticas.por_parentesco[parentesco] || 0) + 1;
-
-      // Por mes
-      if (difunto.fecha_fallecimiento) {
-        const fecha = new Date(difunto.fecha_fallecimiento);
-        const mes = fecha.toLocaleString('es-ES', { month: 'long' });
-        estadisticas.por_mes[mes] = (estadisticas.por_mes[mes] || 0) + 1;
-
-        // Por año
-        const año = fecha.getFullYear();
-        estadisticas.por_año[año] = (estadisticas.por_año[año] || 0) + 1;
-      }
-
-      // Por municipio
-      const municipio = difunto.municipio;
-      if (municipio !== 'No especificado') {
-        estadisticas.por_municipio[municipio] = (estadisticas.por_municipio[municipio] || 0) + 1;
-      }
-
-      // Por sector
-      const sector = difunto.sector;
-      if (sector !== 'No especificado') {
-        estadisticas.por_sector[sector] = (estadisticas.por_sector[sector] || 0) + 1;
-      }
-    });
-
-    return estadisticas;
-  }
-
-  /**
-   * Obtener difuntos por aniversario próximo (útil para notificaciones)
-   */
-  async obtenerAniversariosProximos(dias = 30) {
-    try {
-      const hoy = new Date();
-      const fechaLimite = new Date();
-      fechaLimite.setDate(hoy.getDate() + dias);
-
-      // Crear consulta para encontrar aniversarios en el rango de fechas
+      
+      const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+      
+      const limite = filtros.limite || 100;
+      params.limite = limite;
+      
       const query = `
-        SELECT df.*, f.apellido_familiar, f.telefono
+        SELECT 
+          df.id_difunto,
+          df.nombre_completo,
+          df.fecha_fallecimiento as fecha_aniversario,
+          df.observaciones,
+          f.apellido_familiar,
+          f.sector,
+          f.telefono,
+          f.direccion_familia,
+          m.nombre_municipio,
+          s.nombre as nombre_sector,
+          v.nombre as nombre_vereda,
+          CASE 
+            WHEN df.nombre_completo ILIKE '%madre%' OR df.nombre_completo ILIKE '%mamá%' OR df.observaciones ILIKE '%madre%' THEN 'Madre'
+            WHEN df.nombre_completo ILIKE '%padre%' OR df.nombre_completo ILIKE '%papá%' OR df.observaciones ILIKE '%padre%' THEN 'Padre'
+            ELSE 'Familiar'
+          END as parentesco_inferido
         FROM difuntos_familia df
         LEFT JOIN familias f ON df.id_familia_familias = f.id_familia
-        WHERE 
-          EXTRACT(month FROM df.fecha_fallecimiento) = EXTRACT(month FROM CURRENT_DATE)
-          AND EXTRACT(day FROM df.fecha_fallecimiento) >= EXTRACT(day FROM CURRENT_DATE)
-          AND EXTRACT(day FROM df.fecha_fallecimiento) <= EXTRACT(day FROM DATE_ADD(CURRENT_DATE, INTERVAL ${dias} DAY))
-        ORDER BY EXTRACT(day FROM df.fecha_fallecimiento) ASC
+        LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
+        LEFT JOIN sectores s ON f.id_sector = s.id_sector
+        LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
+        ${whereClause}
+        ORDER BY df.fecha_fallecimiento DESC
+        LIMIT :limite
       `;
-
-      const [resultados] = await sequelize.query(query);
       
-      return resultados.map(difunto => ({
-        nombre: difunto.nombre_completo,
-        apellido_familiar: difunto.apellido_familiar,
-        fecha_aniversario: difunto.fecha_fallecimiento,
-        días_hasta_aniversario: Math.ceil((new Date(difunto.fecha_fallecimiento).getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24)),
-        telefono_familia: difunto.telefono
-      }));
-
+      console.log('📋 Ejecutando consulta SQL:', query);
+      console.log('📊 Parámetros:', params);
+      
+      const difuntos = await sequelize.query(query, {
+        replacements: params,
+        type: QueryTypes.SELECT
+      });
+      
+      // Consulta para obtener el total
+      const countQuery = `
+        SELECT COUNT(*) as total
+        FROM difuntos_familia df
+        LEFT JOIN familias f ON df.id_familia_familias = f.id_familia
+        LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
+        LEFT JOIN sectores s ON f.id_sector = s.id_sector
+        LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
+        ${whereClause}
+      `;
+      
+      const [countResult] = await sequelize.query(countQuery, {
+        replacements: params,
+        type: QueryTypes.SELECT
+      });
+      
+      console.log('✅ Consulta exitosa:', {
+        difuntos_encontrados: difuntos.length,
+        total_en_db: countResult.total
+      });
+      
+      return {
+        difuntos,
+        total: parseInt(countResult.total),
+        filtros_aplicados: filtros
+      };
+      
     } catch (error) {
-      throw new Error(`Error al obtener aniversarios próximos: ${error.message}`);
+      console.error('❌ Error en consulta consolidada de difuntos:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener estadísticas de difuntos por mes
+   */
+  async obtenerEstadisticasPorMes() {
+    try {
+      const query = `
+        SELECT 
+          EXTRACT(MONTH FROM fecha_fallecimiento) as mes,
+          TO_CHAR(fecha_fallecimiento, 'Month') as nombre_mes,
+          COUNT(*) as total_difuntos
+        FROM difuntos_familia 
+        WHERE fecha_fallecimiento IS NOT NULL
+        GROUP BY EXTRACT(MONTH FROM fecha_fallecimiento), TO_CHAR(fecha_fallecimiento, 'Month')
+        ORDER BY mes
+      `;
+      
+      const resultado = await sequelize.query(query, {
+        type: QueryTypes.SELECT
+      });
+      
+      return resultado;
+    } catch (error) {
+      console.error('❌ Error obteniendo estadísticas por mes:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener difuntos próximos a cumplir aniversario
+   */
+  async obtenerProximosAniversarios(diasAdelante = 30) {
+    try {
+      const query = `
+        SELECT 
+          df.id_difunto,
+          df.nombre_completo,
+          df.fecha_fallecimiento as fecha_aniversario,
+          df.observaciones,
+          f.apellido_familiar,
+          f.telefono,
+          f.direccion_familia,
+          m.nombre_municipio,
+          s.nombre as nombre_sector,
+          DATE_PART('day', 
+            (DATE_TRUNC('year', CURRENT_DATE) + 
+             INTERVAL '1 year' * 
+             CASE WHEN EXTRACT(DOY FROM fecha_fallecimiento) < EXTRACT(DOY FROM CURRENT_DATE) 
+                  THEN 1 ELSE 0 END +
+             INTERVAL '1 day' * (EXTRACT(DOY FROM fecha_fallecimiento) - 1)) - CURRENT_DATE
+          ) as dias_hasta_aniversario
+        FROM difuntos_familia df
+        LEFT JOIN familias f ON df.id_familia_familias = f.id_familia
+        LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
+        LEFT JOIN sectores s ON f.id_sector = s.id_sector
+        WHERE df.fecha_fallecimiento IS NOT NULL
+          AND DATE_PART('day', 
+            (DATE_TRUNC('year', CURRENT_DATE) + 
+             INTERVAL '1 year' * 
+             CASE WHEN EXTRACT(DOY FROM fecha_fallecimiento) < EXTRACT(DOY FROM CURRENT_DATE) 
+                  THEN 1 ELSE 0 END +
+             INTERVAL '1 day' * (EXTRACT(DOY FROM fecha_fallecimiento) - 1)) - CURRENT_DATE
+          ) BETWEEN 0 AND :diasAdelante
+        ORDER BY dias_hasta_aniversario ASC
+      `;
+      
+      const resultado = await sequelize.query(query, {
+        replacements: { diasAdelante },
+        type: QueryTypes.SELECT
+      });
+      
+      return resultado;
+    } catch (error) {
+      console.error('❌ Error obteniendo próximos aniversarios:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Buscar difuntos por nombre
+   */
+  async buscarPorNombre(nombreBusqueda, limite = 50) {
+    try {
+      const query = `
+        SELECT 
+          df.id_difunto,
+          df.nombre_completo,
+          df.fecha_fallecimiento as fecha_aniversario,
+          df.observaciones,
+          f.apellido_familiar,
+          f.telefono,
+          f.direccion_familia,
+          m.nombre_municipio,
+          s.nombre as nombre_sector,
+          v.nombre as nombre_vereda
+        FROM difuntos_familia df
+        LEFT JOIN familias f ON df.id_familia_familias = f.id_familia
+        LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
+        LEFT JOIN sectores s ON f.id_sector = s.id_sector
+        LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
+        WHERE df.nombre_completo ILIKE :nombreBusqueda
+        ORDER BY df.nombre_completo
+        LIMIT :limite
+      `;
+      
+      const resultado = await sequelize.query(query, {
+        replacements: { 
+          nombreBusqueda: `%${nombreBusqueda}%`,
+          limite 
+        },
+        type: QueryTypes.SELECT
+      });
+      
+      return resultado;
+    } catch (error) {
+      console.error('❌ Error buscando por nombre:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener resumen de difuntos por sector
+   */
+  async obtenerResumenPorSector() {
+    try {
+      const query = `
+        SELECT 
+          COALESCE(s.nombre, 'Sin sector') as sector,
+          COUNT(df.id_difunto) as total_difuntos,
+          COUNT(DISTINCT f.id_familia) as familias_con_difuntos
+        FROM difuntos_familia df
+        LEFT JOIN familias f ON df.id_familia_familias = f.id_familia
+        LEFT JOIN sectores s ON f.id_sector = s.id_sector
+        GROUP BY s.nombre
+        ORDER BY total_difuntos DESC
+      `;
+      
+      const resultado = await sequelize.query(query, {
+        type: QueryTypes.SELECT
+      });
+      
+      return resultado;
+    } catch (error) {
+      console.error('❌ Error obteniendo resumen por sector:', error);
+      throw error;
     }
   }
 }

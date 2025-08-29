@@ -3253,6 +3253,10 @@ const swaggerConfig = {
         description: '🏡 **[NUEVO] Parroquias Consolidado** - Endpoint unificado para consultas de infraestructura parroquial. **Filtros:** municipio, tipos de vivienda, acueducto, aguas residuales, disposición basura. **Incluye:** estadísticas de infraestructura, análisis demográfico, distribución de servicios.'
       },
       {
+        name: 'Personas y Capacidades',
+        description: '🎯 **[NUEVO] Personas y Capacidades** - Sistema completo para análisis de capacidades, destrezas y análisis geográfico. **Funcionalidades:** Consultas por destrezas/habilidades, análisis geográfico por sectores/veredas, consultas por profesiones, comunidades culturales. **100% coverage final endpoint.**'
+      },
+      {
         name: 'Surveys',
         description: '📊 **Encuestas y Familias** - Gestión del sistema de encuestas familiares y registro de datos socioeconómicos.'
       },

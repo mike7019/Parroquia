@@ -48,14 +48,12 @@ class SaludConsolidadoController {
    */
   async obtenerEstadisticas(req, res) {
     try {
-      // Obtener todas las personas para generar estadísticas generales
-      const resultado = await saludConsolidadoService.consultarSalud({});
+      const estadisticas = await saludConsolidadoService.obtenerEstadisticas();
       
       res.json({
         exito: true,
         mensaje: "Estadísticas de salud obtenidas",
-        datos: resultado.estadisticas,
-        total_personas: resultado.total
+        datos: estadisticas
       });
 
     } catch (error) {

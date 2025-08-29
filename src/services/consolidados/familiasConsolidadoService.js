@@ -1,5 +1,5 @@
 import { Persona, Familias, Sexo, Municipios, Veredas, Sector, Parroquia, DifuntosFamilia } from '../../models/index.js';
-import { Op } from 'sequelize';
+import { Op, QueryTypes } from 'sequelize';
 import sequelize from '../../../config/sequelize.js';
 
 class FamiliasConsolidadoService {
@@ -255,81 +255,91 @@ class FamiliasConsolidadoService {
   }
 
   /**
-   * Consultar familias sin padre o madre
+   * Consultar familias sin padre o madre usando SQL directo simplificado
    */
   async consultarFamiliasSinPadreMadre(tipo, filtrosFamilia = {}) {
     try {
+      console.log(`🔍 Consultando familias sin ${tipo} usando SQL directo...`);
+      
       const sexoBuscado = tipo === 'sinPadre' ? 'masculino' : 'femenino';
       
-      // Obtener todas las familias
-      const todasLasFamilias = await Familias.findAll({
-        include: [
-          {
-            model: Persona,
-            as: 'personas',
-            required: false,
-            include: [
-              {
-                model: Sexo,
-                as: 'sexo',
-                required: false
-              }
-            ]
-          },
-          {
-            model: Municipios,
-            as: 'municipio',
-            required: false
-          },
-          {
-            model: Veredas,
-            as: 'vereda',
-            required: false
-          },
-          {
-            model: Sector,
-            as: 'sector_info',
-            required: false
-          }
-        ]
+      // Consulta SQL directa simplificada
+      const query = `
+        SELECT 
+          f.id_familia,
+          f.apellido_familiar,
+          f.direccion_familia,
+          f.telefono,
+          f.sector,
+          f.tamaño_familia,
+          m.nombre_municipio as municipio,
+          v.nombre as vereda,
+          s.nombre as sector_nombre,
+          '${tipo === 'sinPadre' ? 'Padre' : 'Madre'}' as falta
+        FROM familias f
+        LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
+        LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
+        LEFT JOIN sectores s ON f.id_sector = s.id_sector
+        GROUP BY f.id_familia, f.apellido_familiar, f.direccion_familia, f.telefono, f.sector, 
+                 f.tamaño_familia, m.nombre_municipio, v.nombre, s.nombre
+        HAVING COUNT(
+          CASE WHEN EXISTS (
+            SELECT 1 FROM personas p 
+            LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
+            WHERE p.id_familia_familias = f.id_familia 
+              AND sx.descripcion ILIKE '%${sexoBuscado}%'
+              AND EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) >= 18
+          ) THEN 1 END
+        ) = 0
+        ORDER BY f.apellido_familiar
+        LIMIT 20
+      `;
+
+      const familiasSinPadreMadre = await sequelize.query(query, {
+        type: QueryTypes.SELECT
       });
 
-      // Filtrar familias que no tienen padre o madre
-      const familiasSinPadreMadre = todasLasFamilias.filter(familia => {
-        if (!familia.personas || familia.personas.length === 0) return false;
-        
-        // Verificar si tiene personas del sexo buscado mayores de 18 años
-        const tienePersonaDelSexo = familia.personas.some(persona => {
-          const edad = this.calcularEdad(persona.fecha_nacimiento);
-          const sexo = persona.sexo?.nombre?.toLowerCase() || '';
-          
-          return sexo.includes(sexoBuscado) && edad >= 18;
-        });
-        
-        return !tienePersonaDelSexo; // Retornar familias SIN padre/madre
-      });
+      // Obtener integrantes para cada familia
+      const familiasConIntegrantes = await Promise.all(
+        familiasSinPadreMadre.map(async (familia) => {
+          const integrantesQuery = `
+            SELECT 
+              p.id_personas,
+              p.primer_nombre,
+              p.primer_apellido,
+              p.identificacion,
+              p.fecha_nacimiento,
+              sx.descripcion as sexo,
+              EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad
+            FROM personas p
+            LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
+            WHERE p.id_familia_familias = $1
+            ORDER BY p.fecha_nacimiento
+          `;
 
-      // Formatear resultado
-      return familiasSinPadreMadre.map(familia => ({
-        id_familia: familia.id_familia,
-        apellido_familiar: familia.apellido_familiar,
-        direccion: familia.direccion_familia,
-        telefono: familia.telefono,
-        sector: familia.sector || familia.sector_info?.nombre || 'No especificado',
-        municipio: familia.municipio?.nombre || 'No especificado',
-        vereda: familia.vereda?.nombre || 'No especificado',
-        tipo_vivienda: familia.tipo_vivienda,
-        tamaño_familia: familia.tamaño_familia,
-        falta: tipo === 'sinPadre' ? 'Padre' : 'Madre',
-        integrantes: familia.personas?.map(persona => ({
-          nombre: `${persona.primer_nombre} ${persona.primer_apellido}`,
-          sexo: persona.sexo?.nombre || 'No especificado',
-          edad: this.calcularEdad(persona.fecha_nacimiento),
-          documento: persona.identificacion
-        })) || []
-      }));
+          const integrantes = await sequelize.query(integrantesQuery, {
+            type: QueryTypes.SELECT,
+            bind: [familia.id_familia]
+          });
+
+          return {
+            ...familia,
+            integrantes: integrantes.map(persona => ({
+              nombre: `${persona.primer_nombre} ${persona.primer_apellido}`,
+              sexo: persona.sexo || 'No especificado',
+              edad: parseInt(persona.edad),
+              documento: persona.identificacion
+            }))
+          };
+        })
+      );
+
+      console.log(`✅ Encontradas ${familiasConIntegrantes.length} familias sin ${tipo === 'sinPadre' ? 'padre' : 'madre'}`);
+
+      return familiasConIntegrantes;
 
     } catch (error) {
+      console.error(`❌ Error consultando familias sin ${tipo}:`, error);
       throw new Error(`Error al consultar familias sin ${tipo}: ${error.message}`);
     }
   }

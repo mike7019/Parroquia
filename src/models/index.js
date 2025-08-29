@@ -46,11 +46,55 @@ try {
   });
   
   console.log('✅ Asociaciones Usuario-Role configuradas');
+
+  // Configuramos las asociaciones críticas para el sistema
+  const models = {
+    Usuario, User, Role, UsuarioRole, Parroquia, Veredas, Sexo, Municipios, 
+    Departamentos, Sector, TipoIdentificacion, Enfermedad, Familias, Persona, 
+    TipoVivienda, Parentesco, SituacionCivil, Estudio, Talla, DifuntosFamilia,
+    TipoDisposicionBasura, FamiliaDisposicionBasura, TipoAguasResiduales, ComunidadCultural
+  };
+
+  // Ejecutar asociaciones de Familias
+  if (Familias && typeof Familias.associate === 'function') {
+    Familias.associate(models);
+    console.log('✅ Asociaciones de Familias configuradas');
+  }
+
+  // Ejecutar asociaciones de DifuntosFamilia
+  if (DifuntosFamilia && typeof DifuntosFamilia.associate === 'function') {
+    DifuntosFamilia.associate(models);
+    console.log('✅ Asociaciones de DifuntosFamilia configuradas');
+  }
+
+  // Configurar la asociación inversa crítica para las consultas
+  if (Familias && DifuntosFamilia) {
+    Familias.hasMany(DifuntosFamilia, {
+      foreignKey: 'id_familia_familias',
+      as: 'difuntos'
+    });
+    console.log('✅ Asociación Familias -> DifuntosFamilia configurada');
+  }
+
+  // Ejecutar asociaciones de otros modelos críticos si existen
+  const modelsWithAssociations = [Persona, Municipios, Departamentos, Sector, Veredas];
+  
+  modelsWithAssociations.forEach(model => {
+    if (model && typeof model.associate === 'function') {
+      try {
+        model.associate(models);
+        console.log(`✅ Asociaciones de ${model.name} configuradas`);
+      } catch (error) {
+        console.log(`⚠️  Error en asociaciones de ${model.name}:`, error.message);
+      }
+    }
+  });
+
 } catch (error) {
-  console.log('⚠️  Error configurando asociaciones Usuario-Role:', error.message);
+  console.log('⚠️  Error configurando asociaciones:', error.message);
 }
 
-console.log('✅ Modelos cargados sin asociaciones conflictivas');
+console.log('✅ Modelos cargados con asociaciones configuradas');
 
 // Re-export everything
 export default {
