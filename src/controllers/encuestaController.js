@@ -180,7 +180,7 @@ export const obtenerEncuestas = async (req, res) => {
       type: QueryTypes.SELECT
     });
 
-    // Obtener encuestas con información básica usando SQL directo (TODAS las columnas)
+    // Obtener encuestas con información básica usando SQL directo (COLUMNAS EXISTENTES SOLAMENTE)
     const familiasQuery = `
       SELECT 
         id_familia,
@@ -197,9 +197,6 @@ export const obtenerEncuestas = async (req, res) => {
         fecha_ultima_encuesta,
         codigo_familia,
         tutor_responsable,
-        id_municipio,
-        id_vereda,
-        id_sector,
         "comunionEnCasa"
       FROM familias 
       WHERE ${whereClause}
@@ -244,74 +241,76 @@ export const obtenerEncuestas = async (req, res) => {
         let veredaInfo = null;
         let sectorInfo = null;
 
+        // COMENTADO: Las columnas id_municipio, id_vereda, id_sector no existen en la tabla familias
         // Obtener información del municipio
-        if (familiaData.id_municipio) {
-          try {
-            const [municipio] = await sequelize.query(`
-              SELECT id_municipio, nombre_municipio 
-              FROM municipios 
-              WHERE id_municipio = :municipioId
-            `, {
-              replacements: { municipioId: familiaData.id_municipio },
-              type: QueryTypes.SELECT
-            });
-            
-            if (municipio) {
-              municipioInfo = {
-                id: municipio.id_municipio,
-                nombre: municipio.nombre_municipio
-              };
-            }
-          } catch (error) {
-            console.log(`⚠️ Error obteniendo municipio ${familiaData.id_municipio}:`, error.message);
-          }
-        }
+        // if (familiaData.id_municipio) {
+        //   try {
+        //     const [municipio] = await sequelize.query(`
+        //       SELECT id_municipio, nombre_municipio 
+        //       FROM municipios 
+        //       WHERE id_municipio = :municipioId
+        //     `, {
+        //       replacements: { municipioId: familiaData.id_municipio },
+        //       type: QueryTypes.SELECT
+        //     });
+        //     
+        //     if (municipio) {
+        //       municipioInfo = {
+        //         id: municipio.id_municipio,
+        //         nombre: municipio.nombre_municipio
+        //       };
+        //     }
+        //   } catch (error) {
+        //     console.log(`⚠️ Error obteniendo municipio ${familiaData.id_municipio}:`, error.message);
+        //   }
+        // }
 
+        // COMENTADO: Las columnas id_vereda e id_sector no existen en la tabla familias
         // Obtener información de la vereda
-        if (familiaData.id_vereda) {
-          try {
-            const [vereda] = await sequelize.query(`
-              SELECT id_vereda, nombre 
-              FROM veredas 
-              WHERE id_vereda = :veredaId
-            `, {
-              replacements: { veredaId: familiaData.id_vereda },
-              type: QueryTypes.SELECT
-            });
-            
-            if (vereda) {
-              veredaInfo = {
-                id: vereda.id_vereda,
-                nombre: vereda.nombre
-              };
-            }
-          } catch (error) {
-            console.log(`⚠️ Error obteniendo vereda ${familiaData.id_vereda}:`, error.message);
-          }
-        }
+        // if (familiaData.id_vereda) {
+        //   try {
+        //     const [vereda] = await sequelize.query(`
+        //       SELECT id_vereda, nombre 
+        //       FROM veredas 
+        //       WHERE id_vereda = :veredaId
+        //     `, {
+        //       replacements: { veredaId: familiaData.id_vereda },
+        //       type: QueryTypes.SELECT
+        //     });
+        //     
+        //     if (vereda) {
+        //       veredaInfo = {
+        //         id: vereda.id_vereda,
+        //         nombre: vereda.nombre
+        //       };
+        //     }
+        //   } catch (error) {
+        //     console.log(`⚠️ Error obteniendo vereda ${familiaData.id_vereda}:`, error.message);
+        //   }
+        // }
 
         // Obtener información del sector específico
-        if (familiaData.id_sector) {
-          try {
-            const [sector] = await sequelize.query(`
-              SELECT id_sector, nombre 
-              FROM sectores 
-              WHERE id_sector = :sectorId
-            `, {
-              replacements: { sectorId: familiaData.id_sector },
-              type: QueryTypes.SELECT
-            });
-            
-            if (sector) {
-              sectorInfo = {
-                id: sector.id_sector,
-                nombre: sector.nombre
-              };
-            }
-          } catch (error) {
-            console.log(`⚠️ Error obteniendo sector ${familiaData.id_sector}:`, error.message);
-          }
-        }
+        // if (familiaData.id_sector) {
+        //   try {
+        //     const [sector] = await sequelize.query(`
+        //       SELECT id_sector, nombre 
+        //       FROM sectores 
+        //       WHERE id_sector = :sectorId
+        //     `, {
+        //       replacements: { sectorId: familiaData.id_sector },
+        //       type: QueryTypes.SELECT
+        //     });
+        //     
+        //     if (sector) {
+        //       sectorInfo = {
+        //         id: sector.id_sector,
+        //         nombre: sector.nombre
+        //       };
+        //     }
+        //   } catch (error) {
+        //     console.log(`⚠️ Error obteniendo sector ${familiaData.id_sector}:`, error.message);
+        //   }
+        // }
 
         // Formatear información de personas
         const personasFormateadas = personas.map(persona => ({
@@ -370,10 +369,10 @@ export const obtenerEncuestas = async (req, res) => {
             sector_texto: familiaData.sector
           },
           
-          // *** UBICACIÓN (IDS DIRECTOS) ***
-          id_municipio: familiaData.id_municipio,
-          id_vereda: familiaData.id_vereda,
-          id_sector: familiaData.id_sector,
+          // *** UBICACIÓN (IDS DIRECTOS) *** - COMENTADO: Campos no existen en tabla familias
+          // id_municipio: familiaData.id_municipio,
+          // id_vereda: familiaData.id_vereda,
+          // id_sector: familiaData.id_sector,
           
           
           // Información de personas/miembros de familia
@@ -440,7 +439,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
     );
     console.log(`🔍 Familia existe (verificación directa): ${verificacionDirecta[0].existe}`);
 
-    // Buscar la familia usando SQL directo (TODAS las columnas)
+    // Buscar la familia usando SQL directo (COLUMNAS EXISTENTES SOLAMENTE)
     const familiasQuery = `
       SELECT 
         id_familia,
@@ -457,9 +456,6 @@ export const obtenerEncuestaPorId = async (req, res) => {
         fecha_ultima_encuesta,
         codigo_familia,
         tutor_responsable,
-        id_municipio,
-        id_vereda,
-        id_sector,
         "comunionEnCasa"
       FROM familias 
       WHERE id_familia = :familiaId
@@ -583,27 +579,28 @@ export const obtenerEncuestaPorId = async (req, res) => {
       }
     }
 
-    if (familiaData.id_vereda) {
-      const Veredas = sequelize.models.Veredas;
-      const vereda = await Veredas.findByPk(familiaData.id_vereda);
-      if (vereda) {
-        veredaInfo = {
-          id: vereda.id_vereda,
-          nombre: vereda.nombre_vereda
-        };
-      }
-    }
+    // COMENTADO: Las columnas id_vereda e id_sector no existen en la tabla familias
+    // if (familiaData.id_vereda) {
+    //   const Veredas = sequelize.models.Veredas;
+    //   const vereda = await Veredas.findByPk(familiaData.id_vereda);
+    //   if (vereda) {
+    //     veredaInfo = {
+    //       id: vereda.id_vereda,
+    //       nombre: vereda.nombre_vereda
+    //     };
+    //   }
+    // }
 
-    if (familiaData.id_sector) {
-      const Sectores = sequelize.models.Sector;
-      const sector = await Sectores.findByPk(familiaData.id_sector);
-      if (sector) {
-        sectorInfo = {
-          id: sector.id_sector,
-          nombre: sector.nombre_sector
-        };
-      }
-    }
+    // if (familiaData.id_sector) {
+    //   const Sectores = sequelize.models.Sector;
+    //   const sector = await Sectores.findByPk(familiaData.id_sector);
+    //   if (sector) {
+    //     sectorInfo = {
+    //       id: sector.id_sector,
+    //       nombre: sector.nombre_sector
+    //     };
+    //   }
+    // }
 
     // Para cada persona, obtener información adicional y detallada
     const personasDetalladas = await Promise.all(
@@ -1160,8 +1157,9 @@ export const crearEncuesta = async (req, res) => {
       apellido_familiar: familiaData.apellido_familiar,
       sector: familiaData.sector,
       tamaño_familia: familiaData.tamaño_familia,
-      tipo_vivienda: familiaData.tipo_vivienda,
-      id_municipio: familiaData.id_municipio
+      tipo_vivienda: familiaData.tipo_vivienda
+      // COMENTADO: id_municipio no existe en la tabla familias
+      // id_municipio: familiaData.id_municipio
     });
 
     const familia = await Familias.create(familiaData, { transaction });
