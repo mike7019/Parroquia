@@ -1,5 +1,5 @@
 import express from 'express';
-import { crearEncuesta, obtenerEncuestas, obtenerEncuestaPorId, eliminarEncuesta } from '../controllers/encuestaController.js';
+import { crearEncuesta, obtenerEncuestas, obtenerEncuestaPorId, eliminarEncuesta, actualizarCamposEncuesta, actualizarEncuestaCompleta } from '../controllers/encuestaController.js';
 import authMiddleware from '../middlewares/auth.js';
 import { validarEncuesta } from '../validators/encuestaValidator.js';
 
@@ -415,6 +415,326 @@ router.post('/encuesta',
 router.delete('/encuesta/:id', 
   authMiddleware.authenticateToken,  // Middleware de autenticación
   eliminarEncuesta                   // Controlador
+);
+
+/**
+ * @swagger
+ * /api/encuesta/{id}:
+ *   patch:
+ *     summary: Actualizar campos específicos de una encuesta
+ *     description: |
+ *       Permite actualizar uno o varios campos específicos de una encuesta familiar
+ *       sin afectar el resto de la información. Ideal para actualizaciones parciales.
+ *       
+ *       **Campos permitidos para actualizar:**
+ *       - apellido_familiar
+ *       - sector
+ *       - direccion_familia
+ *       - numero_contacto
+ *       - telefono
+ *       - email
+ *       - tamaño_familia
+ *       - tipo_vivienda
+ *       - estado_encuesta
+ *       - tutor_responsable
+ *       - comunionEnCasa
+ *       
+ *       **Características:**
+ *       - Solo se actualizarán los campos enviados en el body
+ *       - Actualización automática de fecha_ultima_encuesta
+ *       - Validación de campos permitidos
+ *       - Operación transaccional con rollback automático
+ *     tags: [Encuestas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID único de la encuesta a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               apellido_familiar:
+ *                 type: string
+ *                 description: Apellido de la familia
+ *                 example: "Rodríguez García"
+ *               sector:
+ *                 type: string
+ *                 description: Sector donde vive la familia
+ *                 example: "Centro"
+ *               direccion_familia:
+ *                 type: string
+ *                 description: Dirección de residencia
+ *                 example: "Carrera 45 # 23-67"
+ *               numero_contacto:
+ *                 type: string
+ *                 description: Número de contacto principal
+ *                 example: "3001234567"
+ *               telefono:
+ *                 type: string
+ *                 description: Teléfono de la familia
+ *                 example: "3001234567"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Correo electrónico de la familia
+ *                 example: "familia@email.com"
+ *               tamaño_familia:
+ *                 type: integer
+ *                 description: Número de miembros en la familia
+ *                 example: 4
+ *               tipo_vivienda:
+ *                 type: string
+ *                 description: Tipo de vivienda
+ *                 example: "Casa"
+ *               estado_encuesta:
+ *                 type: string
+ *                 enum: [pendiente, completada, verificada]
+ *                 description: Estado actual de la encuesta
+ *                 example: "completada"
+ *               tutor_responsable:
+ *                 type: string
+ *                 description: Nombre del tutor o responsable
+ *                 example: "Carlos Rodríguez"
+ *               comunionEnCasa:
+ *                 type: boolean
+ *                 description: Si la familia realiza comunión en casa
+ *                 example: true
+ *           example:
+ *             telefono: "3009876543"
+ *             email: "nuevoemail@familia.com"
+ *             estado_encuesta: "completada"
+ *             comunionEnCasa: true
+ *     responses:
+ *       200:
+ *         description: Campos actualizados exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 exito:
+ *                   type: boolean
+ *                   example: true
+ *                 mensaje:
+ *                   type: string
+ *                   example: "Campos de encuesta actualizados exitosamente"
+ *                 datos:
+ *                   type: object
+ *                   description: Datos actualizados de la familia
+ *                 campos_actualizados:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["telefono", "email", "estado_encuesta", "comunionEnCasa"]
+ *                 metadata:
+ *                   type: object
+ *                   properties:
+ *                     timestamp:
+ *                       type: string
+ *                       format: date-time
+ *                     operacion:
+ *                       type: string
+ *                       example: "PATCH"
+ *                     registros_afectados:
+ *                       type: integer
+ *                       example: 1
+ *       400:
+ *         description: Campos inválidos o ID inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "error"
+ *                 message:
+ *                   type: string
+ *                   example: "No se proporcionaron campos válidos para actualizar"
+ *                 code:
+ *                   type: string
+ *                   example: "NO_VALID_FIELDS"
+ *                 campos_permitidos:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *       404:
+ *         description: Encuesta no encontrada
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ *   put:
+ *     summary: Actualizar encuesta completa
+ *     description: |
+ *       Reemplaza completamente todos los datos de una encuesta familiar.
+ *       Requiere proporcionar todos los campos obligatorios.
+ *       
+ *       **Campos requeridos:**
+ *       - apellido_familiar (obligatorio)
+ *       - sector (obligatorio)
+ *       - direccion_familia (obligatorio)
+ *       
+ *       **Características:**
+ *       - Actualización completa de todos los campos
+ *       - Validación de campos requeridos
+ *       - Actualización automática de fecha_ultima_encuesta
+ *       - Operación transaccional con rollback automático
+ *     tags: [Encuestas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID único de la encuesta a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - apellido_familiar
+ *               - sector
+ *               - direccion_familia
+ *             properties:
+ *               apellido_familiar:
+ *                 type: string
+ *                 description: Apellido de la familia (requerido)
+ *                 example: "Rodríguez García"
+ *               sector:
+ *                 type: string
+ *                 description: Sector donde vive la familia (requerido)
+ *                 example: "Centro"
+ *               direccion_familia:
+ *                 type: string
+ *                 description: Dirección de residencia (requerido)
+ *                 example: "Carrera 45 # 23-67"
+ *               numero_contacto:
+ *                 type: string
+ *                 description: Número de contacto principal
+ *                 example: "3001234567"
+ *               telefono:
+ *                 type: string
+ *                 description: Teléfono de la familia
+ *                 example: "3001234567"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Correo electrónico de la familia
+ *                 example: "familia@email.com"
+ *               tamaño_familia:
+ *                 type: integer
+ *                 description: Número de miembros en la familia
+ *                 example: 4
+ *               tipo_vivienda:
+ *                 type: string
+ *                 description: Tipo de vivienda
+ *                 example: "Casa"
+ *               estado_encuesta:
+ *                 type: string
+ *                 enum: [pendiente, completada, verificada]
+ *                 description: Estado actual de la encuesta
+ *                 example: "completada"
+ *               tutor_responsable:
+ *                 type: string
+ *                 description: Nombre del tutor o responsable
+ *                 example: "Carlos Rodríguez"
+ *               comunionEnCasa:
+ *                 type: boolean
+ *                 description: Si la familia realiza comunión en casa
+ *                 example: false
+ *           example:
+ *             apellido_familiar: "Rodríguez García"
+ *             sector: "Centro"
+ *             direccion_familia: "Carrera 45 # 23-67"
+ *             numero_contacto: "3001234567"
+ *             telefono: "3001234567"
+ *             email: "familia@email.com"
+ *             tamaño_familia: 4
+ *             tipo_vivienda: "Casa"
+ *             estado_encuesta: "completada"
+ *             tutor_responsable: "Carlos Rodríguez"
+ *             comunionEnCasa: false
+ *     responses:
+ *       200:
+ *         description: Encuesta actualizada completamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 exito:
+ *                   type: boolean
+ *                   example: true
+ *                 mensaje:
+ *                   type: string
+ *                   example: "Encuesta actualizada completamente"
+ *                 datos:
+ *                   type: object
+ *                   description: Datos actualizados de la familia
+ *                 metadata:
+ *                   type: object
+ *                   properties:
+ *                     timestamp:
+ *                       type: string
+ *                       format: date-time
+ *                     operacion:
+ *                       type: string
+ *                       example: "PUT"
+ *                     registros_afectados:
+ *                       type: integer
+ *                       example: 1
+ *       400:
+ *         description: Faltan campos requeridos o ID inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "error"
+ *                 message:
+ *                   type: string
+ *                   example: "Faltan campos requeridos para actualización completa"
+ *                 code:
+ *                   type: string
+ *                   example: "MISSING_REQUIRED_FIELDS"
+ *                 campos_faltantes:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["apellido_familiar", "sector"]
+ *       404:
+ *         description: Encuesta no encontrada
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+
+// Ruta PATCH para actualizar campos específicos de encuesta
+router.patch('/encuesta/:id', 
+  authMiddleware.authenticateToken,  // Middleware de autenticación
+  actualizarCamposEncuesta          // Controlador
+);
+
+// Ruta PUT para actualizar encuesta completa
+router.put('/encuesta/:id', 
+  authMiddleware.authenticateToken,  // Middleware de autenticación
+  actualizarEncuestaCompleta        // Controlador
 );
 
 export default router;

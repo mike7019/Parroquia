@@ -196,8 +196,7 @@ export const obtenerEncuestas = async (req, res) => {
         numero_encuestas,
         fecha_ultima_encuesta,
         codigo_familia,
-        tutor_responsable,
-        "comunionEnCasa"
+        tutor_responsable
       FROM familias 
       WHERE ${whereClause}
       ORDER BY fecha_ultima_encuesta DESC 
@@ -455,8 +454,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
         numero_encuestas,
         fecha_ultima_encuesta,
         codigo_familia,
-        tutor_responsable,
-        "comunionEnCasa"
+        tutor_responsable
       FROM familias 
       WHERE id_familia = :familiaId
     `;
@@ -1687,7 +1685,303 @@ export const eliminarEncuesta = async (req, res) => {
   }
 };
 
+/**
+ * PATCH - Actualizar campos específicos de una encuesta
+ * Permite actualizar uno o varios campos de la familia sin afectar el resto
+ */
+export const actualizarCamposEncuesta = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  
+  try {
+    const { id } = req.params;
+    const camposActualizar = req.body;
+
+    console.log(`🔄 Actualizando campos específicos de encuesta ID: ${id}`);
+    console.log('📝 Campos a actualizar:', Object.keys(camposActualizar));
+
+    // Validar que el ID sea válido
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'ID de encuesta inválido',
+        code: 'INVALID_ID'
+      });
+    }
+
+    // Verificar que la familia existe
+    const familiaExistente = await sequelize.query(
+      'SELECT id_familia, apellido_familiar FROM familias WHERE id_familia = :id',
+      {
+        replacements: { id },
+        type: QueryTypes.SELECT,
+        transaction
+      }
+    );
+
+    if (!familiaExistente || familiaExistente.length === 0) {
+      await transaction.rollback();
+      return res.status(404).json({
+        status: 'error',
+        message: 'Encuesta no encontrada',
+        code: 'ENCUESTA_NOT_FOUND'
+      });
+    }
+
+    // Campos permitidos para actualizar en la tabla familias
+    const camposPermitidos = [
+      'apellido_familiar',
+      'sector', 
+      'direccion_familia',
+      'numero_contacto',
+      'telefono',
+      'email',
+      'tamaño_familia',
+      'tipo_vivienda',
+      'estado_encuesta',
+      'tutor_responsable', // Este es boolean
+      'comunionEnCasa'
+    ];
+
+    // Filtrar solo campos permitidos
+    const camposValidos = {};
+    Object.keys(camposActualizar).forEach(campo => {
+      if (camposPermitidos.includes(campo)) {
+        camposValidos[campo] = camposActualizar[campo];
+      }
+    });
+
+    if (Object.keys(camposValidos).length === 0) {
+      await transaction.rollback();
+      return res.status(400).json({
+        status: 'error',
+        message: 'No se proporcionaron campos válidos para actualizar',
+        code: 'NO_VALID_FIELDS',
+        campos_permitidos: camposPermitidos
+      });
+    }
+
+    // Construir query dinámico de actualización
+    const setClauses = Object.keys(camposValidos).map(campo => `"${campo}" = :${campo}`);
+    const updateQuery = `
+      UPDATE familias 
+      SET ${setClauses.join(', ')}, fecha_ultima_encuesta = NOW()
+      WHERE id_familia = :id
+    `;
+
+    // Ejecutar actualización
+    await sequelize.query(updateQuery, {
+      replacements: { ...camposValidos, id },
+      type: QueryTypes.UPDATE,
+      transaction
+    });
+
+    // Obtener los datos actualizados
+    const familiaActualizada = await sequelize.query(
+      `SELECT 
+        id_familia,
+        apellido_familiar,
+        sector,
+        direccion_familia,
+        numero_contacto,
+        telefono,
+        email,
+        "tamaño_familia",
+        tipo_vivienda,
+        estado_encuesta,
+        tutor_responsable,
+        "comunionEnCasa",
+        fecha_ultima_encuesta
+      FROM familias 
+      WHERE id_familia = :id`,
+      {
+        replacements: { id },
+        type: QueryTypes.SELECT,
+        transaction
+      }
+    );
+
+    await transaction.commit();
+
+    console.log('✅ Campos actualizados exitosamente');
+
+    res.status(200).json({
+      exito: true,
+      mensaje: 'Campos de encuesta actualizados exitosamente',
+      datos: familiaActualizada[0],
+      campos_actualizados: Object.keys(camposValidos),
+      metadata: {
+        timestamp: new Date().toISOString(),
+        operacion: 'PATCH',
+        registros_afectados: 1
+      }
+    });
+
+  } catch (error) {
+    await transaction.rollback();
+    console.error('❌ Error actualizando campos de encuesta:', error);
+
+    res.status(500).json({
+      status: 'error',
+      message: 'Error interno del servidor al actualizar la encuesta',
+      details: process.env.NODE_ENV === 'development' ? error.message : 'Error interno',
+      error_code: 'UPDATE_FIELDS_ERROR'
+    });
+  }
+};
+
+/**
+ * PUT - Actualizar encuesta completa
+ * Reemplaza todos los datos de la familia con los nuevos datos proporcionados
+ */
+export const actualizarEncuestaCompleta = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  
+  try {
+    const { id } = req.params;
+    const datosCompletos = req.body;
+
+    console.log(`🔄 Actualizando encuesta completa ID: ${id}`);
+    console.log('📝 Datos recibidos:', JSON.stringify(datosCompletos, null, 2));
+
+    // Validar que el ID sea válido
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'ID de encuesta inválido',
+        code: 'INVALID_ID'
+      });
+    }
+
+    // Verificar que la familia existe
+    const familiaExistente = await sequelize.query(
+      'SELECT id_familia, apellido_familiar FROM familias WHERE id_familia = :id',
+      {
+        replacements: { id },
+        type: QueryTypes.SELECT,
+        transaction
+      }
+    );
+
+    if (!familiaExistente || familiaExistente.length === 0) {
+      await transaction.rollback();
+      return res.status(404).json({
+        status: 'error',
+        message: 'Encuesta no encontrada',
+        code: 'ENCUESTA_NOT_FOUND'
+      });
+    }
+
+    // Validaciones requeridas para actualización completa
+    const camposRequeridos = ['apellido_familiar', 'sector', 'direccion_familia'];
+    const camposFaltantes = camposRequeridos.filter(campo => !datosCompletos[campo]);
+
+    if (camposFaltantes.length > 0) {
+      await transaction.rollback();
+      return res.status(400).json({
+        status: 'error',
+        message: 'Faltan campos requeridos para actualización completa',
+        code: 'MISSING_REQUIRED_FIELDS',
+        campos_faltantes: camposFaltantes
+      });
+    }
+
+    // Actualizar todos los campos de la familia
+    const updateQuery = `
+      UPDATE familias SET
+        apellido_familiar = $1,
+        sector = $2,
+        direccion_familia = $3,
+        numero_contacto = $4,
+        telefono = $5,
+        email = $6,
+        "tamaño_familia" = $7,
+        tipo_vivienda = $8,
+        estado_encuesta = $9,
+        "comunionEnCasa" = $10,
+        tutor_responsable = $11,
+        fecha_ultima_encuesta = NOW()
+      WHERE id_familia = $12
+    `;
+
+    await sequelize.query(updateQuery, {
+      bind: [
+        datosCompletos.apellido_familiar,
+        datosCompletos.sector,
+        datosCompletos.direccion_familia,
+        datosCompletos.numero_contacto || null,
+        datosCompletos.telefono || null,
+        datosCompletos.email || null,
+        datosCompletos.tamaño_familia !== undefined ? datosCompletos.tamaño_familia : 1,
+        datosCompletos.tipo_vivienda || 'Casa',
+        datosCompletos.estado_encuesta || 'pendiente',
+        datosCompletos.comunionEnCasa || false,
+        datosCompletos.tutor_responsable || false,
+        id
+      ],
+      type: QueryTypes.UPDATE,
+      transaction
+    });
+
+    console.log('✅ UPDATE ejecutado correctamente');
+
+    // Obtener los datos actualizados
+    const familiaActualizada = await sequelize.query(
+      `SELECT 
+        id_familia,
+        apellido_familiar,
+        sector,
+        direccion_familia,
+        numero_contacto,
+        telefono,
+        email,
+        "tamaño_familia",
+        tipo_vivienda,
+        estado_encuesta,
+        tutor_responsable,
+        "comunionEnCasa",
+        fecha_ultima_encuesta
+      FROM familias 
+      WHERE id_familia = :id`,
+      {
+        replacements: { id },
+        type: QueryTypes.SELECT,
+        transaction
+      }
+    );
+
+    await transaction.commit();
+
+    console.log('✅ Encuesta completa actualizada exitosamente');
+
+    res.status(200).json({
+      exito: true,
+      mensaje: 'Encuesta actualizada completamente',
+      datos: familiaActualizada[0],
+      metadata: {
+        timestamp: new Date().toISOString(),
+        operacion: 'PUT',
+        registros_afectados: 1
+      }
+    });
+
+  } catch (error) {
+    await transaction.rollback();
+    console.error('❌ Error actualizando encuesta completa:', error);
+
+    res.status(500).json({
+      status: 'error',
+      message: 'Error interno del servidor al actualizar la encuesta',
+      details: process.env.NODE_ENV === 'development' ? error.message : 'Error interno',
+      error_code: 'UPDATE_COMPLETE_ERROR'
+    });
+  }
+};
+
 export default {
   crearEncuesta,
-  eliminarEncuesta
+  eliminarEncuesta,
+  obtenerEncuestas,
+  obtenerEncuestaPorId,
+  actualizarCamposEncuesta,
+  actualizarEncuestaCompleta
 };
