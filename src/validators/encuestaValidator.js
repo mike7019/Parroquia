@@ -89,7 +89,20 @@ export const validarEncuesta = [
   body('familyMembers.*.numeroIdentificacion')
     .optional()
     .isString()
-    .withMessage('El número de identificación debe ser una cadena'),
+    .withMessage('El número de identificación debe ser una cadena')
+    .custom((value) => {
+      if (value && value.trim()) {
+        // Remover caracteres no numéricos para validar longitud
+        const cleanValue = value.replace(/\D/g, '');
+        if (cleanValue.length > 15) {
+          throw new Error('El número de identificación no puede exceder 15 dígitos');
+        }
+        if (cleanValue.length < 1) {
+          throw new Error('El número de identificación debe tener al menos 1 dígito');
+        }
+      }
+      return true;
+    }),
   body('familyMembers.*.tipoIdentificacion')
     .optional()
     .custom((value) => {
@@ -266,6 +279,23 @@ export const validarEncuesta = [
     .optional()
     .isLength({ min: 2, max: 255 })
     .withMessage('El nombre del miembro fallecido debe tener entre 2 y 255 caracteres'),
+  body('deceasedMembers.*.numeroIdentificacion')
+    .optional()
+    .isString()
+    .withMessage('El número de identificación debe ser una cadena')
+    .custom((value) => {
+      if (value && value.trim()) {
+        // Remover caracteres no numéricos para validar longitud
+        const cleanValue = value.replace(/\D/g, '');
+        if (cleanValue.length > 15) {
+          throw new Error('El número de identificación no puede exceder 15 dígitos');
+        }
+        if (cleanValue.length < 1) {
+          throw new Error('El número de identificación debe tener al menos 1 dígito');
+        }
+      }
+      return true;
+    }),
   body('deceasedMembers.*.fechaFallecimiento')
     .optional()
     .isISO8601()

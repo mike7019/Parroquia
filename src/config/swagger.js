@@ -1786,8 +1786,9 @@ const swaggerConfig = {
             },
             numeroIdentificacion: {
               type: 'string',
-              maxLength: 50,
-              description: 'Número de identificación',
+              maxLength: 15,
+              pattern: '^[0-9]*$',
+              description: 'Número de identificación (máximo 15 dígitos)',
               example: '12345678'
             },
             sexo: {
@@ -3246,6 +3247,10 @@ const swaggerConfig = {
       {
         name: 'Familias Consolidado',
         description: '👨‍👩‍👧‍👦 **[NUEVO] Familias Consolidado** - Sistema unificado de consultas familiares que consolida 10+ endpoints. **Filtros:** parentesco, ubicación, sexo, edad. **Incluye:** familias sin padre/madre, estadísticas completas, inferencia de parentesco.'
+      },
+      {
+        name: 'Parroquias Consolidado',
+        description: '🏡 **[NUEVO] Parroquias Consolidado** - Endpoint unificado para consultas de infraestructura parroquial. **Filtros:** municipio, tipos de vivienda, acueducto, aguas residuales, disposición basura. **Incluye:** estadísticas de infraestructura, análisis demográfico, distribución de servicios.'
       },
       {
         name: 'Surveys',

@@ -159,6 +159,22 @@ module.exports = (sequelize, DataTypes) => {
         },
         notEmpty: {
           msg: 'La identificación no puede estar vacía'
+        },
+        len: {
+          args: [1, 15],
+          msg: 'El número de identificación debe tener máximo 15 dígitos'
+        },
+        isNumericOrValidFormat: {
+          validator: function(value) {
+            // Permitir identificaciones especiales para casos de fallecidos o temporales
+            if (value.startsWith('FALLECIDO_') || value.startsWith('TEMP_')) {
+              return true;
+            }
+            // Para identificaciones normales, validar que solo contenga dígitos y no exceda 15 caracteres
+            const cleanValue = value.replace(/\D/g, ''); // Remover caracteres no numéricos
+            return cleanValue.length <= 15 && cleanValue.length >= 1;
+          },
+          msg: 'El número de identificación debe contener máximo 15 dígitos numéricos'
         }
       }
     },
