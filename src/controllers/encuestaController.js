@@ -156,25 +156,59 @@ export const obtenerEncuestas = async (req, res) => {
     // Parámetros de filtros opcionales
     const { sector, municipio, apellido_familiar } = req.query;
 
-    // Construir condiciones WHERE
-    let whereConditions = {};
-    if (sector) whereConditions.sector = { [sequelize.Op.iLike]: `%${sector}%` };
-    if (apellido_familiar) whereConditions.apellido_familiar = { [sequelize.Op.iLike]: `%${apellido_familiar}%` };
+    // Construir condiciones WHERE usando SQL directo
+    let whereClause = '1=1';
+    let replacements = { limit, offset };
+    
+    if (sector) {
+      whereClause += ' AND sector ILIKE :sector';
+      replacements.sector = `%${sector}%`;
+    }
+    if (apellido_familiar) {
+      whereClause += ' AND apellido_familiar ILIKE :apellido_familiar';
+      replacements.apellido_familiar = `%${apellido_familiar}%`;
+    }
 
-    // Obtener encuestas con información básica
-    const { count, rows: encuestas } = await Familias.findAndCountAll({
-      where: whereConditions,
-      order: [['fecha_ultima_encuesta', 'DESC']],
-      limit,
-      offset,
-      distinct: true
+    // Obtener total de registros usando SQL directo
+    const countQuery = `
+      SELECT COUNT(*) as total 
+      FROM familias 
+      WHERE ${whereClause}
+    `;
+    const [{ total }] = await sequelize.query(countQuery, {
+      replacements,
+      type: QueryTypes.SELECT
+    });
+
+    // Obtener encuestas con información básica usando SQL directo (solo columnas existentes)
+    const familiasQuery = `
+      SELECT 
+        id_familia,
+        apellido_familiar,
+        sector,
+        direccion_familia,
+        telefono,
+        email,
+        estado_encuesta,
+        fecha_ultima_encuesta,
+        tamaño_familia,
+        tipo_vivienda,
+        codigo_familia,
+        tutor_responsable
+      FROM familias 
+      WHERE ${whereClause}
+      ORDER BY fecha_ultima_encuesta DESC 
+      LIMIT :limit OFFSET :offset
+    `;
+    
+    const encuestas = await sequelize.query(familiasQuery, {
+      replacements,
+      type: QueryTypes.SELECT
     });
 
     // Para cada familia, obtener información adicional manualmente
     const encuestasFormateadas = await Promise.all(
-      encuestas.map(async (familia) => {
-        const familiaData = familia.toJSON();
-        
+      encuestas.map(async (familiaData) => {
         // Obtener personas de la familia usando SQL directo para evitar errores de modelo
         const personas = await sequelize.query(`
           SELECT 
@@ -199,43 +233,24 @@ export const obtenerEncuestas = async (req, res) => {
           type: QueryTypes.SELECT
         });
 
-        // Obtener información de ubicación (municipio, vereda, sector)
-        let municipioInfo = null;
-        let veredaInfo = null;
-        let sectorInfo = null;
-
-        if (familiaData.id_municipio) {
-          const Municipios = sequelize.models.Municipios;
-          const municipio = await Municipios.findByPk(familiaData.id_municipio);
-          if (municipio) {
-            municipioInfo = {
-              id: municipio.id_municipio,
-              nombre: municipio.nombre_municipio
-            };
-          }
-        }
-
-        if (familiaData.id_vereda) {
-          const Veredas = sequelize.models.Veredas;
-          const vereda = await Veredas.findByPk(familiaData.id_vereda);
-          if (vereda) {
-            veredaInfo = {
-              id: vereda.id_vereda,
-              nombre: vereda.nombre_vereda
-            };
-          }
-        }
-
-        if (familiaData.id_sector) {
-          const Sectores = sequelize.models.Sector;
-          const sector = await Sectores.findByPk(familiaData.id_sector);
-          if (sector) {
-            sectorInfo = {
-              id: sector.id_sector,
-              nombre: sector.nombre_sector
-            };
-          }
-        }
+        // Formatear información de personas
+        const personasFormateadas = personas.map(persona => ({
+          id: persona.id_personas,
+          nombre_completo: `${persona.primer_nombre || ''} ${persona.segundo_nombre || ''} ${persona.primer_apellido || ''} ${persona.segundo_apellido || ''}`.trim(),
+          nombre: persona.primer_nombre,
+          apellido: persona.primer_apellido,
+          identificacion: persona.identificacion,
+          telefono: persona.telefono,
+          email: persona.correo_electronico,
+          fecha_nacimiento: persona.fecha_nacimiento,
+          direccion: persona.direccion,
+          estudios: persona.estudios,
+          edad: persona.fecha_nacimiento ? 
+            Math.floor((new Date() - new Date(persona.fecha_nacimiento)) / (365.25 * 24 * 60 * 60 * 1000)) : null,
+          talla_camisa: persona.talla_camisa,
+          talla_pantalon: persona.talla_pantalon,
+          talla_zapato: persona.talla_zapato
+        }));
 
         return {
           // Información básica de la familia
@@ -249,38 +264,18 @@ export const obtenerEncuestas = async (req, res) => {
           // Información de la encuesta
           estado_encuesta: familiaData.estado_encuesta,
           fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
-          numero_encuestas: familiaData.numero_encuestas,
           codigo_familia: familiaData.codigo_familia,
+          tutor_responsable: familiaData.tutor_responsable,
           
           // Información de vivienda
           tipo_vivienda: familiaData.tipo_vivienda,
           tamaño_familia: familiaData.tamaño_familia,
           
-          // Información geográfica completa
-          ubicacion: {
-            municipio: municipioInfo,
-            vereda: veredaInfo,
-            sector: sectorInfo || { nombre: familiaData.sector }
-          },
           
-          // Información de personas
+          // Información de personas/miembros de familia
           miembros_familia: {
-            total_miembros: personas.length,
-            personas: personas.map(persona => ({
-              id: persona.id_personas,
-              nombre_completo: `${persona.primer_nombre} ${persona.segundo_nombre || ''} ${persona.primer_apellido} ${persona.segundo_apellido || ''}`.trim(),
-              primer_nombre: persona.primer_nombre,
-              segundo_nombre: persona.segundo_nombre,
-              apellidos: `${persona.primer_apellido} ${persona.segundo_apellido || ''}`.trim(),
-              fecha_nacimiento: persona.fecha_nacimiento,
-              telefono: persona.telefono,
-              estudios: persona.estudios,
-              tallas: {
-                camisa: persona.talla_camisa,
-                pantalon: persona.talla_pantalon,
-                zapato: persona.talla_zapato
-              }
-            }))
+            total_miembros: personasFormateadas.length,
+            personas: personasFormateadas
           },
           
           // Metadatos
@@ -294,21 +289,21 @@ export const obtenerEncuestas = async (req, res) => {
     );
 
     // Calcular información de paginación
-    const totalPages = Math.ceil(count / limit);
+    const totalPages = Math.ceil(total / limit);
     
-    console.log(`✅ Se encontraron ${count} encuestas con información completa`);
+    console.log(`✅ Se encontraron ${total} encuestas con información completa`);
 
     res.status(200).json({
       status: 'success',
-      message: `Se encontraron ${count} encuestas`,
+      message: 'Encuestas obtenidas exitosamente',
       data: encuestasFormateadas,
       pagination: {
         currentPage: page,
         totalPages,
-        totalItems: count,
+        totalItems: parseInt(total),
         itemsPerPage: limit,
-        hasNext: page < totalPages,
-        hasPrev: page > 1
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1
       }
     });
 
@@ -317,7 +312,7 @@ export const obtenerEncuestas = async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Error interno del servidor al obtener encuestas',
-      error: error.message
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Error interno'
     });
   }
 };
@@ -330,8 +325,29 @@ export const obtenerEncuestaPorId = async (req, res) => {
     const { id } = req.params;
     console.log(`🔍 Buscando encuesta con ID: ${id}`);
 
-    // Buscar la familia
-    const encuesta = await Familias.findByPk(id);
+    // Buscar la familia usando SQL directo (solo columnas existentes)
+    const familiasQuery = `
+      SELECT 
+        id_familia,
+        apellido_familiar,
+        sector,
+        direccion_familia,
+        telefono,
+        email,
+        estado_encuesta,
+        fecha_ultima_encuesta,
+        tamaño_familia,
+        tipo_vivienda,
+        codigo_familia,
+        tutor_responsable
+      FROM familias 
+      WHERE id_familia = :familiaId
+    `;
+    
+    const [encuesta] = await sequelize.query(familiasQuery, {
+      replacements: { familiaId: id },
+      type: QueryTypes.SELECT
+    });
 
     if (!encuesta) {
       console.log(`❌ Encuesta con ID ${id} no encontrada`);
@@ -344,7 +360,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
 
     console.log(`✅ Encuesta encontrada: ${encuesta.apellido_familiar}`);
 
-    const familiaData = encuesta.toJSON();
+    const familiaData = encuesta;
 
     // Obtener personas de la familia usando SQL directo para evitar errores de modelo
     const personas = await sequelize.query(`
