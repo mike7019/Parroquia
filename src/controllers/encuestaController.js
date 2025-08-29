@@ -180,21 +180,27 @@ export const obtenerEncuestas = async (req, res) => {
       type: QueryTypes.SELECT
     });
 
-    // Obtener encuestas con información básica usando SQL directo (solo columnas existentes)
+    // Obtener encuestas con información básica usando SQL directo (TODAS las columnas)
     const familiasQuery = `
       SELECT 
         id_familia,
         apellido_familiar,
         sector,
         direccion_familia,
+        numero_contacto,
         telefono,
         email,
-        estado_encuesta,
-        fecha_ultima_encuesta,
         tamaño_familia,
         tipo_vivienda,
+        estado_encuesta,
+        numero_encuestas,
+        fecha_ultima_encuesta,
         codigo_familia,
-        tutor_responsable
+        tutor_responsable,
+        id_municipio,
+        id_vereda,
+        id_sector,
+        "comunionEnCasa"
       FROM familias 
       WHERE ${whereClause}
       ORDER BY fecha_ultima_encuesta DESC 
@@ -233,12 +239,88 @@ export const obtenerEncuestas = async (req, res) => {
           type: QueryTypes.SELECT
         });
 
+        // Obtener información de ubicación usando los IDs
+        let municipioInfo = null;
+        let veredaInfo = null;
+        let sectorInfo = null;
+
+        // Obtener información del municipio
+        if (familiaData.id_municipio) {
+          try {
+            const [municipio] = await sequelize.query(`
+              SELECT id_municipio, nombre_municipio 
+              FROM municipios 
+              WHERE id_municipio = :municipioId
+            `, {
+              replacements: { municipioId: familiaData.id_municipio },
+              type: QueryTypes.SELECT
+            });
+            
+            if (municipio) {
+              municipioInfo = {
+                id: municipio.id_municipio,
+                nombre: municipio.nombre_municipio
+              };
+            }
+          } catch (error) {
+            console.log(`⚠️ Error obteniendo municipio ${familiaData.id_municipio}:`, error.message);
+          }
+        }
+
+        // Obtener información de la vereda
+        if (familiaData.id_vereda) {
+          try {
+            const [vereda] = await sequelize.query(`
+              SELECT id_vereda, nombre_vereda 
+              FROM veredas 
+              WHERE id_vereda = :veredaId
+            `, {
+              replacements: { veredaId: familiaData.id_vereda },
+              type: QueryTypes.SELECT
+            });
+            
+            if (vereda) {
+              veredaInfo = {
+                id: vereda.id_vereda,
+                nombre: vereda.nombre_vereda
+              };
+            }
+          } catch (error) {
+            console.log(`⚠️ Error obteniendo vereda ${familiaData.id_vereda}:`, error.message);
+          }
+        }
+
+        // Obtener información del sector específico
+        if (familiaData.id_sector) {
+          try {
+            const [sector] = await sequelize.query(`
+              SELECT id_sector, nombre_sector 
+              FROM sectores 
+              WHERE id_sector = :sectorId
+            `, {
+              replacements: { sectorId: familiaData.id_sector },
+              type: QueryTypes.SELECT
+            });
+            
+            if (sector) {
+              sectorInfo = {
+                id: sector.id_sector,
+                nombre: sector.nombre_sector
+              };
+            }
+          } catch (error) {
+            console.log(`⚠️ Error obteniendo sector ${familiaData.id_sector}:`, error.message);
+          }
+        }
+
         // Formatear información de personas
         const personasFormateadas = personas.map(persona => ({
           id: persona.id_personas,
           nombre_completo: `${persona.primer_nombre || ''} ${persona.segundo_nombre || ''} ${persona.primer_apellido || ''} ${persona.segundo_apellido || ''}`.trim(),
-          nombre: persona.primer_nombre,
-          apellido: persona.primer_apellido,
+          primer_nombre: persona.primer_nombre,
+          segundo_nombre: persona.segundo_nombre,
+          primer_apellido: persona.primer_apellido,
+          segundo_apellido: persona.segundo_apellido,
           identificacion: persona.identificacion,
           telefono: persona.telefono,
           email: persona.correo_electronico,
@@ -253,23 +335,45 @@ export const obtenerEncuestas = async (req, res) => {
         }));
 
         return {
-          // Información básica de la familia
+          // *** ID DE LA ENCUESTA (CRÍTICO) ***
+          id: familiaData.id_familia,
+          id_encuesta: familiaData.id_familia,
           id_familia: familiaData.id_familia,
+          
+          // *** INFORMACIÓN BÁSICA DE LA FAMILIA ***
           apellido_familiar: familiaData.apellido_familiar,
           sector: familiaData.sector,
           direccion_familia: familiaData.direccion_familia,
+          numero_contacto: familiaData.numero_contacto,
           telefono: familiaData.telefono,
           email: familiaData.email,
-          
-          // Información de la encuesta
-          estado_encuesta: familiaData.estado_encuesta,
-          fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
           codigo_familia: familiaData.codigo_familia,
           tutor_responsable: familiaData.tutor_responsable,
           
-          // Información de vivienda
+          // *** INFORMACIÓN DE LA ENCUESTA ***
+          estado_encuesta: familiaData.estado_encuesta,
+          numero_encuestas: familiaData.numero_encuestas,
+          fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
+          
+          // *** INFORMACIÓN DE VIVIENDA ***
           tipo_vivienda: familiaData.tipo_vivienda,
           tamaño_familia: familiaData.tamaño_familia,
+          
+          // *** INFORMACIÓN RELIGIOSA ***
+          comunion_en_casa: familiaData.comunionEnCasa,
+          
+          // *** INFORMACIÓN GEOGRÁFICA COMPLETA ***
+          ubicacion: {
+            municipio: municipioInfo,
+            vereda: veredaInfo,
+            sector_especifico: sectorInfo,
+            sector_texto: familiaData.sector
+          },
+          
+          // *** UBICACIÓN (IDS DIRECTOS) ***
+          id_municipio: familiaData.id_municipio,
+          id_vereda: familiaData.id_vereda,
+          id_sector: familiaData.id_sector,
           
           
           // Información de personas/miembros de familia
@@ -325,21 +429,27 @@ export const obtenerEncuestaPorId = async (req, res) => {
     const { id } = req.params;
     console.log(`🔍 Buscando encuesta con ID: ${id}`);
 
-    // Buscar la familia usando SQL directo (solo columnas existentes)
+    // Buscar la familia usando SQL directo (TODAS las columnas)
     const familiasQuery = `
       SELECT 
         id_familia,
         apellido_familiar,
         sector,
         direccion_familia,
+        numero_contacto,
         telefono,
         email,
-        estado_encuesta,
-        fecha_ultima_encuesta,
         tamaño_familia,
         tipo_vivienda,
+        estado_encuesta,
+        numero_encuestas,
+        fecha_ultima_encuesta,
         codigo_familia,
-        tutor_responsable
+        tutor_responsable,
+        id_municipio,
+        id_vereda,
+        id_sector,
+        "comunionEnCasa"
       FROM familias 
       WHERE id_familia = :familiaId
     `;
