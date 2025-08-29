@@ -1746,7 +1746,18 @@ export const actualizarCamposEncuesta = async (req, res) => {
     const camposValidos = {};
     Object.keys(camposActualizar).forEach(campo => {
       if (camposPermitidos.includes(campo)) {
-        camposValidos[campo] = camposActualizar[campo];
+        let valor = camposActualizar[campo];
+        
+        // Conversión especial para campos boolean
+        if (campo === 'tutor_responsable') {
+          if (typeof valor === 'string') {
+            valor = valor.trim() !== '' && valor.toLowerCase() !== 'false';
+          } else {
+            valor = valor || false;
+          }
+        }
+        
+        camposValidos[campo] = valor;
       }
     });
 
@@ -1915,7 +1926,10 @@ export const actualizarEncuestaCompleta = async (req, res) => {
         datosCompletos.tipo_vivienda || 'Casa',
         datosCompletos.estado_encuesta || 'pendiente',
         datosCompletos.comunionEnCasa || false,
-        datosCompletos.tutor_responsable || false,
+        // Convertir tutor_responsable a boolean - si viene como string, convertir a true/false
+        typeof datosCompletos.tutor_responsable === 'string' ? 
+          datosCompletos.tutor_responsable.trim() !== '' && datosCompletos.tutor_responsable.toLowerCase() !== 'false' : 
+          (datosCompletos.tutor_responsable || false),
         id
       ],
       type: QueryTypes.UPDATE,
