@@ -271,7 +271,7 @@ export const obtenerEncuestas = async (req, res) => {
         if (familiaData.id_vereda) {
           try {
             const [vereda] = await sequelize.query(`
-              SELECT id_vereda, nombre_vereda 
+              SELECT id_vereda, nombre 
               FROM veredas 
               WHERE id_vereda = :veredaId
             `, {
@@ -282,7 +282,7 @@ export const obtenerEncuestas = async (req, res) => {
             if (vereda) {
               veredaInfo = {
                 id: vereda.id_vereda,
-                nombre: vereda.nombre_vereda
+                nombre: vereda.nombre
               };
             }
           } catch (error) {
@@ -294,7 +294,7 @@ export const obtenerEncuestas = async (req, res) => {
         if (familiaData.id_sector) {
           try {
             const [sector] = await sequelize.query(`
-              SELECT id_sector, nombre_sector 
+              SELECT id_sector, nombre 
               FROM sectores 
               WHERE id_sector = :sectorId
             `, {
@@ -305,7 +305,7 @@ export const obtenerEncuestas = async (req, res) => {
             if (sector) {
               sectorInfo = {
                 id: sector.id_sector,
-                nombre: sector.nombre_sector
+                nombre: sector.nombre
               };
             }
           } catch (error) {
@@ -428,6 +428,17 @@ export const obtenerEncuestaPorId = async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`🔍 Buscando encuesta con ID: ${id}`);
+
+    // VERIFICACIÓN ADICIONAL: Verificar si la familia existe directamente
+    console.log(`🔍 Verificando existencia directa de familia ID: ${id}`);
+    const verificacionDirecta = await sequelize.query(
+      'SELECT COUNT(*) as existe FROM familias WHERE id_familia = :familiaId',
+      {
+        replacements: { familiaId: id },
+        type: QueryTypes.SELECT
+      }
+    );
+    console.log(`🔍 Familia existe (verificación directa): ${verificacionDirecta[0].existe}`);
 
     // Buscar la familia usando SQL directo (TODAS las columnas)
     const familiasQuery = `
@@ -1155,6 +1166,12 @@ export const crearEncuesta = async (req, res) => {
 
     const familia = await Familias.create(familiaData, { transaction });
     console.log(`✅ Familia creada con ID: ${familia.id_familia}`);
+    console.log(`✅ Datos familia creados:`, {
+      id: familia.id_familia,
+      apellido: familia.apellido_familiar,
+      telefono: familia.telefono,
+      comunionEnCasa: familia.comunionEnCasa
+    });
     
     // Verificar que se haya creado correctamente el ID
     if (!familia.id_familia) {
@@ -1339,21 +1356,28 @@ export const crearEncuesta = async (req, res) => {
             identificacion: miembro.numeroIdentificacion || identificacionUnica,
             direccion: informacionGeneral.direccion,
             id_familia_familias: familiaId,
-            id_familia: familiaId, // Columna duplicada en la tabla
             id_sexo: sexoId,
             id_tipo_identificacion_tipo_identificacion: tipoIdentificacionId,
             id_estado_civil_estado_civil: estadoCivilId,
             estudios: (miembro.estudio && typeof miembro.estudio === 'object') ? miembro.estudio.nombre : (miembro.estudio || null),
-            en_que_eres_lider: null, // Se puede expandir luego
-            necesidad_enfermo: null, // Se puede expandir luego
+            en_que_eres_lider: null,
+            necesidad_enfermo: null,
+            id_profesion: null, // Campo opcional
             talla_camisa: miembro['talla_camisa/blusa'] || (miembro.talla ? miembro.talla.camisa : null),
             talla_pantalon: miembro.talla_pantalon || (miembro.talla ? miembro.talla.pantalon : null),
-            talla_zapato: miembro.talla_zapato || (miembro.talla ? miembro.talla.calzado : null),
-            id_parroquia: null // Evitar error de clave foránea, usar null por defecto
+            talla_zapato: miembro.talla_zapato || (miembro.talla ? miembro.talla.calzado : null)
           };
 
           // Crear persona usando el modelo importado con timestamps correctos
           console.log(`  🔧 Intentando crear persona: ${primerNombre} (ID: ${identificacionUnica})`);
+          console.log(`  📋 Datos persona:`, {
+            primer_nombre: personaData.primer_nombre,
+            identificacion: personaData.identificacion,
+            telefono: personaData.telefono,
+            correo_electronico: personaData.correo_electronico,
+            id_familia_familias: personaData.id_familia_familias,
+            fecha_nacimiento: personaData.fecha_nacimiento
+          });
           
           await Persona.create(personaData, { transaction });
           personasCreadas++;
@@ -1363,7 +1387,10 @@ export const crearEncuesta = async (req, res) => {
           console.error(`  ❌ Error detallado creando persona ${miembro.nombres}:`);
           console.error(`     - Mensaje: ${error.message}`);
           console.error(`     - Nombre del error: ${error.name}`);
-          // Continuar con el siguiente miembro en lugar de fallar toda la transacción
+          console.error(`     - SQL State: ${error.sql || 'N/A'}`);
+          console.error(`     - Parent error: ${error.parent?.message || 'N/A'}`);
+          // NO continuar - lanzar error para que se ejecute rollback
+          throw error;
         }
       }
     }
@@ -1417,11 +1444,12 @@ export const crearEncuesta = async (req, res) => {
     }
 
     // 7. CONFIRMAR TRANSACCIÓN
+    console.log('🔄 Iniciando commit de transacción...');
     await transaction.commit();
     console.log('✅ Transacción completada exitosamente');
-
-    // 8. RESPUESTA EXITOSA CON METADATOS COMPLETOS
-    res.status(201).json({
+    
+    // 8. RESPUESTA EXITOSA INMEDIATA (antes de verificaciones adicionales)
+    const responseData = {
       status: 'success',
       message: 'Encuesta guardada exitosamente',
       data: {
@@ -1448,32 +1476,56 @@ export const crearEncuesta = async (req, res) => {
           validacion_duplicados: 'verificada'
         }
       }
-    });
+    };
+    
+    res.status(201).json(responseData);
+    console.log('✅ Respuesta 201 enviada exitosamente');
 
   } catch (error) {
-    // ROLLBACK EN CASO DE ERROR
-    await transaction.rollback();
+    // ROLLBACK EN CASO DE ERROR (solo si la transacción aún está activa)
+    console.log('❌ ERROR CAPTURADO - VERIFICANDO ESTADO DE TRANSACCIÓN');
+    console.log('❌ Tipo de error:', error.constructor.name);
+    console.log('❌ Mensaje de error:', error.message);
+    
+    try {
+      // Verificar si la transacción aún está activa
+      if (transaction && !transaction.finished) {
+        console.log('❌ Transacción activa - Iniciando rollback');
+        await transaction.rollback();
+        console.log('❌ ROLLBACK COMPLETADO');
+      } else {
+        console.log('⚠️ Transacción ya finalizada - No se requiere rollback');
+      }
+    } catch (rollbackError) {
+      console.log('❌ Error durante rollback:', rollbackError.message);
+    }
+    
     console.error('❌ Error procesando encuesta:', error);
 
-    // Manejar error específico de miembros duplicados
-    if (error.codigo === 'MIEMBROS_DUPLICADOS') {
-      return res.status(409).json({
-        status: 'error',
-        message: 'Algunos miembros ya pertenecen a otra familia',
-        details: error.message,
-        error_code: 'MIEMBROS_DUPLICADOS',
-        conflictos: error.conflictos || [],
-        sugerencia: 'Verifique los números de identificación de los miembros de la familia'
-      });
-    }
+    // Solo enviar respuesta de error si no se ha enviado ya una respuesta
+    if (!res.headersSent) {
+      // Manejar error específico de miembros duplicados
+      if (error.codigo === 'MIEMBROS_DUPLICADOS') {
+        return res.status(409).json({
+          status: 'error',
+          message: 'Algunos miembros ya pertenecen a otra familia',
+          details: error.message,
+          error_code: 'MIEMBROS_DUPLICADOS',
+          conflictos: error.conflictos || [],
+          sugerencia: 'Verifique los números de identificación de los miembros de la familia'
+        });
+      }
 
-    // Error genérico
-    res.status(500).json({
-      status: 'error',
-      message: 'Error interno del servidor al procesar la encuesta',
-      details: process.env.NODE_ENV === 'development' ? error.message : 'Error interno',
-      error_code: 'ENCUESTA_PROCESSING_ERROR'
-    });
+      // Error genérico
+      res.status(500).json({
+        status: 'error',
+        message: 'Error interno del servidor al procesar la encuesta',
+        details: process.env.NODE_ENV === 'development' ? error.message : 'Error interno',
+        error_code: 'ENCUESTA_PROCESSING_ERROR'
+      });
+    } else {
+      console.log('⚠️ Headers ya enviados - No se puede enviar respuesta de error');
+    }
   }
 };
 

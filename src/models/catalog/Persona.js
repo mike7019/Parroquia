@@ -158,26 +158,27 @@ Persona.associate = function(models) {
     });
   }
   
-  if (models.Municipios) {
-    Persona.belongsTo(models.Municipios, {
-      foreignKey: 'id_municipio',
-      as: 'municipio'
-    });
-  }
+  // COMENTADO: Estas asociaciones referencian columnas que no existen en la tabla personas
+  // if (models.Municipios) {
+  //   Persona.belongsTo(models.Municipios, {
+  //     foreignKey: 'id_municipio',
+  //     as: 'municipio'
+  //   });
+  // }
   
-  if (models.Veredas) {
-    Persona.belongsTo(models.Veredas, {
-      foreignKey: 'id_vereda',
-      as: 'vereda'
-    });
-  }
+  // if (models.Veredas) {
+  //   Persona.belongsTo(models.Veredas, {
+  //     foreignKey: 'id_vereda',
+  //     as: 'vereda'
+  //   });
+  // }
   
-  if (models.Sector) {
-    Persona.belongsTo(models.Sector, {
-      foreignKey: 'id_sector',
-      as: 'sector'
-    });
-  }
+  // if (models.Sector) {
+  //   Persona.belongsTo(models.Sector, {
+  //     foreignKey: 'id_sector',
+  //     as: 'sector'
+  //   });
+  // }
   
   if (models.Parroquia) {
     Persona.belongsTo(models.Parroquia, {

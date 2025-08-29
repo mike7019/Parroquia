@@ -5,9 +5,6 @@ import { validarEncuesta } from '../validators/encuestaValidator.js';
 
 const router = express.Router();
 
-// Aplicar middleware de autenticación a todas las rutas
-router.use(authMiddleware.authenticateToken);
-
 /**
  * @swagger
  * tags:
@@ -397,22 +394,26 @@ router.use(authMiddleware.authenticateToken);
 
 // Ruta GET para obtener todas las encuestas
 router.get('/encuesta', 
+  authMiddleware.authenticateToken,  // Middleware de autenticación
   obtenerEncuestas
 );
 
 // Ruta GET para obtener encuesta por ID
 router.get('/encuesta/:id', 
+  authMiddleware.authenticateToken,  // Middleware de autenticación
   obtenerEncuestaPorId
 );
 
 // Ruta POST para crear encuesta
 router.post('/encuesta', 
+  authMiddleware.authenticateToken,  // Middleware de autenticación
   validarEncuesta,                   // Middleware de validación
   crearEncuesta                      // Controlador
 );
 
 // Ruta DELETE para eliminar encuesta por ID
 router.delete('/encuesta/:id', 
+  authMiddleware.authenticateToken,  // Middleware de autenticación
   eliminarEncuesta                   // Controlador
 );
 
