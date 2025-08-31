@@ -163,6 +163,9 @@ if (process.env.NODE_ENV === 'production') {
 }
 */
 
+// Servir archivos estáticos desde public
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
 // Setup Swagger documentation
 setupSwagger(app);
 
