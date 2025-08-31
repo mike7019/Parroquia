@@ -6,156 +6,7 @@ const { authenticateToken } = authMiddleware;
 const router = express.Router();
 
 // All routes require authentication
-// router.use(authenticateToken);
-
-/**
- * @swagger
- * /api/catalog/municipios:
- *   post:
- *     summary: Create a new municipio
- *     tags: [Municipios]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/MunicipioInput'
- *           examples:
- *             valid_request:
- *               summary: Valid municipio creation request
- *               value:
- *                 nombre_municipio: "Medellín"
- *                 codigo_dane: "05001"
- *                 id_departamento: 1
- *             invalid_departamento:
- *               summary: Invalid departamento ID (will fail)
- *               value:
- *                 nombre_municipio: "Test Municipio"
- *                 codigo_dane: "05999"
- *                 id_departamento: 999
- *     responses:
- *       201:
- *         description: Municipio created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- *             example:
- *               success: true
- *               message: "Municipio creado exitosamente"
- *               data: null
- *               timestamp: "2025-08-08T02:08:28.701Z"
- *       400:
- *         description: Validation error - Missing required fields
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               error:
- *                 message: "nombre_municipio, codigo_dane, and id_departamento are required"
- *                 code: "VALIDATION_ERROR"
- *                 timestamp: "2025-08-08T02:08:28.701Z"
- *       409:
- *         description: Conflict - Municipio already exists
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               error:
- *                 message: "Municipio ya existe con ese nombre o código DANE"
- *                 code: "DUPLICATE_ERROR"
- *                 timestamp: "2025-08-08T02:08:28.701Z"
- *       500:
- *         description: Server error - Including invalid departamento ID
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             examples:
- *               invalid_departamento:
- *                 summary: Invalid departamento ID error
- *                 value:
- *                   success: false
- *                   error:
- *                     message: "Error creating municipio"
- *                     code: "CREATE_ERROR"
- *                     timestamp: "2025-08-08T02:08:28.701Z"
- *                     details: "Error finding or creating municipio: Departamento with ID 999 does not exist"
- *               general_error:
- *                 summary: General server error
- *                 value:
- *                   success: false
- *                   error:
- *                     message: "Error creating municipio"
- *                     code: "CREATE_ERROR"
- *                     timestamp: "2025-08-08T02:08:28.701Z"
- *                     details: "Internal server error"
- */
-router.post('/', municipioController.createMunicipio);
-
-/**
- * @swagger
- * /api/catalog/municipios/bulk:
- *   post:
- *     summary: Bulk create municipios
- *     tags: [Municipios]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - municipios
- *             properties:
- *               municipios:
- *                 type: array
- *                 items:
- *                   oneOf:
- *                     - type: string
- *                       description: Simple municipality name (requires defaultDepartamentoId)
- *                     - $ref: '#/components/schemas/MunicipioInput'
- *               defaultDepartamentoId:
- *                 type: integer
- *                 description: Default department ID for string entries (required when array contains strings)
- *                 example: 1
- *           examples:
- *             mixed_data:
- *               summary: Mixed strings and objects
- *               value:
- *                 municipios:
- *                   - "Municipio Simple"
- *                   - nombre_municipio: "Bogotá D.C."
- *                     codigo_dane: "11001"
- *                     id_departamento: 1
- *                 defaultDepartamentoId: 1
- *             objects_only:
- *               summary: Objects only (no defaultDepartamentoId needed)
- *               value:
- *                 municipios:
- *                   - nombre_municipio: "Medellín"
- *                     codigo_dane: "05001"
- *                     id_departamento: 2
- *                   - nombre_municipio: "Cali"
- *                     codigo_dane: "76001"
- *                     id_departamento: 3
- *     responses:
- *       201:
- *         description: Municipios created successfully
- *       400:
- *         description: Validation error
- *       500:
- *         description: Server error
- */
-router.post('/bulk', municipioController.bulkCreateMunicipios);
+router.use(authenticateToken);
 
 /**
  * @swagger
@@ -165,6 +16,30 @@ router.post('/bulk', municipioController.bulkCreateMunicipios);
  *     tags: [Municipios]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by municipio name
+ *       - in: query
+ *         name: id_departamento
+ *         schema:
+ *           type: integer
+ *         description: Filter by departamento ID
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           default: nombre_municipio
+ *         description: Field to sort by
+ *       - in: query
+ *         name: sortOrder
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *           default: ASC
+ *         description: Sort order
  *     responses:
  *       200:
  *         description: Municipios retrieved successfully
@@ -173,19 +48,22 @@ router.post('/bulk', municipioController.bulkCreateMunicipios);
  *             schema:
  *               type: object
  *               properties:
- *                 status:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
  *                   type: string
- *                   example: success
+ *                   example: Se encontraron 1123 municipios
  *                 data:
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Municipio'
  *                 total:
  *                   type: integer
- *                   example: 1102
- *                 message:
+ *                   example: 1123
+ *                 timestamp:
  *                   type: string
- *                   example: Se encontraron 1102 municipios
+ *                   format: date-time
  *       500:
  *         description: Server error
  *         content:
@@ -197,34 +75,86 @@ router.get('/', municipioController.getAllMunicipios);
 
 /**
  * @swagger
- * /api/catalog/municipios/departamentos:
+ * /api/catalog/municipios/search:
  *   get:
- *     summary: Get all available departamentos
+ *     summary: Search municipios by name
+ *     tags: [Municipios]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Search query for municipio name
+ *         example: mede
+ *     responses:
+ *       200:
+ *         description: Search completed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Búsqueda de municipios completada exitosamente
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Municipio'
+ *                 total:
+ *                   type: integer
+ *                   example: 1
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *       400:
+ *         description: Missing search query
+ *       500:
+ *         description: Server error
+ */
+router.get('/search', municipioController.searchMunicipios);
+
+/**
+ * @swagger
+ * /api/catalog/municipios/statistics:
+ *   get:
+ *     summary: Get municipios statistics
  *     tags: [Municipios]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Departamentos retrieved successfully
+ *         description: Statistics retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               allOf:
- *                 - $ref: '#/components/schemas/ApiResponse'
- *                 - type: object
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Estadísticas obtenidas exitosamente
+ *                 data:
+ *                   type: object
  *                   properties:
- *                     data:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/Departamento'
+ *                     totalMunicipios:
+ *                       type: integer
+ *                       example: 1123
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
  *       500:
  *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get('/departamentos', municipioController.getAllDepartamentos);
+router.get('/statistics', municipioController.getStatistics);
 
 /**
  * @swagger
@@ -241,93 +171,32 @@ router.get('/departamentos', municipioController.getAllDepartamentos);
  *         schema:
  *           type: integer
  *         description: Municipio ID
+ *         example: 1
  *     responses:
  *       200:
  *         description: Municipio retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               allOf:
- *                 - $ref: '#/components/schemas/ApiResponse'
- *                 - type: object
- *                   properties:
- *                     data:
- *                       $ref: '#/components/schemas/Municipio'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Municipio obtenido exitosamente
+ *                 data:
+ *                   $ref: '#/components/schemas/Municipio'
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
  *       404:
  *         description: Municipio not found
  *       500:
  *         description: Server error
  */
 router.get('/:id', municipioController.getMunicipioById);
-
-/**
- * @swagger
- * /api/catalog/municipios/{id}:
- *   put:
- *     summary: Update municipio
- *     tags: [Municipios]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: Municipio ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/MunicipioInput'
- *     responses:
- *       200:
- *         description: Municipio updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               allOf:
- *                 - $ref: '#/components/schemas/ApiResponse'
- *                 - type: object
- *                   properties:
- *                     data:
- *                       $ref: '#/components/schemas/Municipio'
- *       404:
- *         description: Municipio not found
- *       500:
- *         description: Server error
- */
-router.put('/:id', municipioController.updateMunicipio);
-
-/**
- * @swagger
- * /api/catalog/municipios/{id}:
- *   delete:
- *     summary: Delete municipio
- *     tags: [Municipios]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: Municipio ID
- *     responses:
- *       200:
- *         description: Municipio deleted successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- *       404:
- *         description: Municipio not found
- *       500:
- *         description: Server error
- */
-router.delete('/:id', municipioController.deleteMunicipio);
 
 /**
  * @swagger
@@ -344,13 +213,26 @@ router.delete('/:id', municipioController.deleteMunicipio);
  *         schema:
  *           type: string
  *         description: Codigo DANE (5 digits)
+ *         example: "05001"
  *     responses:
  *       200:
  *         description: Municipio retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Municipio obtenido exitosamente
+ *                 data:
+ *                   $ref: '#/components/schemas/Municipio'
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
  *       404:
  *         description: Municipio not found
  *       500:
@@ -373,43 +255,34 @@ router.get('/codigo-dane/:codigo_dane', municipioController.getMunicipioByCodigo
  *         schema:
  *           type: integer
  *         description: Departamento ID
+ *         example: 5
  *     responses:
  *       200:
  *         description: Municipios by departamento retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Municipios por departamento obtenidos exitosamente
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Municipio'
+ *                 total:
+ *                   type: integer
+ *                   example: 125
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
  *       500:
  *         description: Server error
  */
 router.get('/departamento/:id_departamento', municipioController.getMunicipiosByDepartamento);
-
-/**
- * @swagger
- * /api/catalog/municipios/search/codigo-dane/{pattern}:
- *   get:
- *     summary: Search municipios by codigo DANE pattern
- *     tags: [Municipios]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: pattern
- *         required: true
- *         schema:
- *           type: string
- *         description: Search pattern for codigo DANE
- *     responses:
- *       200:
- *         description: Municipios search completed
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- *       500:
- *         description: Server error
- */
-router.get('/search/codigo-dane/:pattern', municipioController.searchMunicipiosByCodigoDane);
 
 export default router;

@@ -2,51 +2,6 @@ import municipioService from '../../services/catalog/municipioService.js';
 import { createSuccessResponse, createErrorResponse } from '../../utils/responses.js';
 
 class MunicipioController {
-  /**
-   * Create a new municipio
-   */
-  async createMunicipio(req, res) {
-    try {
-      const { nombre_municipio, codigo_dane, id_departamento } = req.body;
-
-      if (!nombre_municipio || !codigo_dane || !id_departamento) {
-        return res.status(400).json(
-          createErrorResponse('nombre_municipio, codigo_dane, and id_departamento are required', null, 'VALIDATION_ERROR')
-        );
-      }
-
-      const result = await municipioService.findOrCreateMunicipio({
-        nombre_municipio,
-        codigo_dane,
-        id_departamento 
-      });
-
-      if (!result.created) {
-        return res.status(409).json(
-          createErrorResponse(
-            'Municipio ya existe con ese nombre o código DANE',
-            null,
-            'DUPLICATE_ERROR'
-          )
-        );
-      }
-
-      res.status(201).json(
-        createSuccessResponse(
-          'Municipio creado exitosamente',
-          result.municipio
-        )
-      );
-    } catch (error) {
-      res.status(500).json(
-        createErrorResponse(
-          'Error creating municipio',
-          error.message,
-          'CREATE_ERROR'
-        )
-      );
-    }
-  }
 
   /**
    * Get all municipios
@@ -60,25 +15,83 @@ class MunicipioController {
         id_departamento
       } = req.query;
 
-      const municipios = await municipioService.getAllMunicipios({
+      const result = await municipioService.getAllMunicipios({
         search,
         sortBy,
         sortOrder,
         id_departamento: id_departamento ? parseInt(id_departamento) : null
       });
 
-      res.json(
-        createSuccessResponse(
-          'Municipios retrieved successfully',
-          municipios
-        )
-      );
+      res.json({
+        success: true,
+        message: result.message,
+        data: result.data,
+        total: result.total,
+        timestamp: new Date().toISOString()
+      });
     } catch (error) {
       res.status(500).json(
         createErrorResponse(
           'Error retrieving municipios',
           error.message,
           'FETCH_ERROR'
+        )
+      );
+    }
+  }
+
+  /**
+   * Search municipios by name
+   */
+  async searchMunicipios(req, res) {
+    try {
+      const { q } = req.query;
+
+      if (!q) {
+        return res.status(400).json(
+          createErrorResponse('Search query parameter "q" is required', null, 'VALIDATION_ERROR')
+        );
+      }
+
+      const municipios = await municipioService.searchMunicipiosByName(q);
+
+      res.json({
+        success: true,
+        message: 'Búsqueda de municipios completada exitosamente',
+        data: municipios,
+        total: municipios.length,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json(
+        createErrorResponse(
+          'Error searching municipios',
+          error.message,
+          'SEARCH_ERROR'
+        )
+      );
+    }
+  }
+
+  /**
+   * Get municipios statistics
+   */
+  async getStatistics(req, res) {
+    try {
+      const stats = await municipioService.getStatistics();
+
+      res.json({
+        success: true,
+        message: 'Estadísticas obtenidas exitosamente',
+        data: stats,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json(
+        createErrorResponse(
+          'Error retrieving municipios statistics',
+          error.message,
+          'STATS_ERROR'
         )
       );
     }
@@ -93,12 +106,12 @@ class MunicipioController {
 
       const municipio = await municipioService.getMunicipioById(id);
 
-      res.json(
-        createSuccessResponse(
-          'Municipio retrieved successfully',
-          municipio
-        )
-      );
+      res.json({
+        success: true,
+        message: 'Municipio obtenido exitosamente',
+        data: municipio,
+        timestamp: new Date().toISOString()
+      });
     } catch (error) {
       const statusCode = error.message.includes('not found') ? 404 : 500;
       res.status(statusCode).json(
@@ -106,61 +119,6 @@ class MunicipioController {
           'Error retrieving municipio',
           error.message,
           'FETCH_ERROR'
-        )
-      );
-    }
-  }
-
-  /**
-   * Update municipio
-   */
-  async updateMunicipio(req, res) {
-    try {
-      const { id } = req.params;
-      const updateData = req.body;
-
-      const municipio = await municipioService.updateMunicipio(id, updateData);
-
-      res.json(
-        createSuccessResponse(
-          'Municipio updated successfully',
-          municipio
-        )
-      );
-    } catch (error) {
-      const statusCode = error.message.includes('not found') ? 404 : 500;
-      res.status(statusCode).json(
-        createErrorResponse(
-          'Error updating municipio',
-          error.message,
-          'UPDATE_ERROR'
-        )
-      );
-    }
-  }
-
-  /**
-   * Delete municipio
-   */
-  async deleteMunicipio(req, res) {
-    try {
-      const { id } = req.params;
-
-      const result = await municipioService.deleteMunicipio(id);
-
-      res.json(
-        createSuccessResponse(
-          'Municipio deleted successfully',
-          result
-        )
-      );
-    } catch (error) {
-      const statusCode = error.message.includes('not found') ? 404 : 500;
-      res.status(statusCode).json(
-        createErrorResponse(
-          'Error deleting municipio',
-          error.message,
-          'DELETE_ERROR'
         )
       );
     }
@@ -175,12 +133,12 @@ class MunicipioController {
 
       const municipio = await municipioService.getMunicipioByCodigoDane(codigo_dane);
 
-      res.json(
-        createSuccessResponse(
-          'Municipio retrieved successfully',
-          municipio
-        )
-      );
+      res.json({
+        success: true,
+        message: 'Municipio obtenido exitosamente',
+        data: municipio,
+        timestamp: new Date().toISOString()
+      });
     } catch (error) {
       const statusCode = error.message.includes('not found') ? 404 : 500;
       res.status(statusCode).json(
@@ -202,103 +160,17 @@ class MunicipioController {
 
       const municipios = await municipioService.getMunicipiosByDepartamento(parseInt(id_departamento));
 
-      res.json(
-        createSuccessResponse(
-          'Municipios by departamento retrieved successfully',
-          { municipios, id_departamento: parseInt(id_departamento) }
-        )
-      );
+      res.json({
+        success: true,
+        message: 'Municipios por departamento obtenidos exitosamente',
+        data: municipios,
+        total: municipios.length,
+        timestamp: new Date().toISOString()
+      });
     } catch (error) {
       res.status(500).json(
         createErrorResponse(
           'Error retrieving municipios by departamento',
-          error.message,
-          'FETCH_ERROR'
-        )
-      );
-    }
-  }
-
-  /**
-   * Search municipios by codigo DANE pattern
-   */
-  async searchMunicipiosByCodigoDane(req, res) {
-    try {
-      const { pattern } = req.params;
-
-      const municipios = await municipioService.searchMunicipiosByCodigoDane(pattern);
-
-      res.json(
-        createSuccessResponse(
-          'Municipios search by codigo DANE completed',
-          { municipios, pattern }
-        )
-      );
-    } catch (error) {
-      res.status(500).json(
-        createErrorResponse(
-          'Error searching municipios by codigo DANE',
-          error.message,
-          'SEARCH_ERROR'
-        )
-      );
-    }
-  }
-
-  /**
-   * Bulk create municipios
-   */
-  async bulkCreateMunicipios(req, res) {
-    try {
-      const { municipios, defaultDepartamentoId } = req.body;
-
-      if (!municipios || !Array.isArray(municipios)) {
-        return res.status(400).json(
-          createErrorResponse('municipios array is required', null, 'VALIDATION_ERROR')
-        );
-      }
-
-      const options = {};
-      if (defaultDepartamentoId) {
-        options.defaultDepartamentoId = defaultDepartamentoId;
-      }
-
-      const result = await municipioService.bulkCreateMunicipios(municipios, options);
-
-      res.status(201).json(
-        createSuccessResponse(
-          'Municipios creados exitosamente',
-          null
-        )
-      );
-    } catch (error) {
-      res.status(500).json(
-        createErrorResponse(
-          'Error bulk creating municipios',
-          error.message,
-          'BULK_CREATE_ERROR'
-        )
-      );
-    }
-  }
-
-  /**
-   * Get all available departamentos
-   */
-  async getAllDepartamentos(req, res) {
-    try {
-      const departamentos = await municipioService.getAllDepartamentos();
-
-      res.json(
-        createSuccessResponse(
-          'Departamentos retrieved successfully',
-          departamentos
-        )
-      );
-    } catch (error) {
-      res.status(500).json(
-        createErrorResponse(
-          'Error retrieving departamentos',
           error.message,
           'FETCH_ERROR'
         )

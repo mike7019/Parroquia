@@ -558,155 +558,6 @@ const swaggerConfig = {
             }
           ]
         },
-        Survey: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'string',
-              format: 'uuid',
-              description: 'ID único de la encuesta',
-              example: '123e4567-e89b-12d3-a456-426614174000'
-            },
-            userId: {
-              type: 'integer',
-              description: 'ID del encuestador',
-              example: 1
-            },
-            familyId: {
-              type: 'string',
-              format: 'uuid',
-              description: 'ID de la familia (opcional)',
-              example: '123e4567-e89b-12d3-a456-426614174001'
-            },
-            familyHead: {
-              type: 'string',
-              maxLength: 200,
-              description: 'Nombre del jefe de familia',
-              example: 'María González Pérez'
-            },
-            address: {
-              type: 'string',
-              description: 'Dirección de la familia',
-              example: 'Calle 15 #23-45, Barrio Centro'
-            },
-            phone: {
-              type: 'string',
-              maxLength: 20,
-              description: 'Teléfono de contacto',
-              example: '3001234567'
-            },
-            email: {
-              type: 'string',
-              format: 'email',
-              description: 'Correo electrónico',
-              example: 'maria.gonzalez@email.com'
-            },
-            familySize: {
-              type: 'integer',
-              minimum: 1,
-              maximum: 50,
-              description: 'Tamaño de la familia',
-              example: 4
-            },
-            housingType: {
-              type: 'string',
-              maxLength: 100,
-              description: 'Tipo de vivienda',
-              example: 'Casa propia'
-            },
-            status: {
-              type: 'string',
-              enum: ['draft', 'in_progress', 'completed', 'cancelled'],
-              description: 'Estado de la encuesta',
-              example: 'in_progress'
-            },
-            currentStage: {
-              type: 'integer',
-              minimum: 1,
-              description: 'Etapa actual',
-              example: 2
-            },
-            totalStages: {
-              type: 'integer',
-              minimum: 1,
-              description: 'Total de etapas',
-              example: 4
-            },
-            progress: {
-              type: 'integer',
-              minimum: 0,
-              maximum: 100,
-              description: 'Porcentaje de progreso',
-              example: 50
-            },
-            observations: {
-              type: 'string',
-              description: 'Observaciones adicionales',
-              example: 'Familia muy colaborativa'
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de creación'
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de última actualización'
-            }
-          },
-          required: ['familyHead', 'address', 'familySize', 'housingType']
-        },
-        CreateSurveyRequest: {
-          type: 'object',
-          properties: {
-            familyHead: {
-              type: 'string',
-              maxLength: 200,
-              description: 'Nombre del jefe de familia',
-              example: 'María González Pérez'
-            },
-            address: {
-              type: 'string',
-              description: 'Dirección de la familia',
-              example: 'Calle 15 #23-45, Barrio Centro'
-            },
-            phone: {
-              type: 'string',
-              maxLength: 20,
-              description: 'Teléfono de contacto',
-              example: '3001234567'
-            },
-            email: {
-              type: 'string',
-              format: 'email',
-              description: 'Correo electrónico',
-              example: 'maria.gonzalez@email.com'
-            },
-            familySize: {
-              type: 'integer',
-              minimum: 1,
-              maximum: 50,
-              description: 'Tamaño de la familia',
-              example: 4
-            },
-            housingType: {
-              type: 'string',
-              maxLength: 100,
-              description: 'Tipo de vivienda',
-              example: 'Casa propia'
-            },
-            observations: {
-              type: 'string',
-              description: 'Observaciones adicionales',
-              example: 'Familia muy colaborativa'
-            }
-          },
-          required: ['familyHead', 'address', 'familySize', 'housingType']
-        },
-        CreateSurveyInput: {
-          $ref: '#/components/schemas/CreateSurveyRequest'
-        },
         StageDataInput: {
           type: 'object',
           properties: {
@@ -1754,12 +1605,6 @@ const swaggerConfig = {
               format: 'uuid',
               description: 'ID único del miembro',
               example: '123e4567-e89b-12d3-a456-426614174000'
-            },
-            surveyId: {
-              type: 'string',
-              format: 'uuid',
-              description: 'ID de la encuesta',
-              example: '123e4567-e89b-12d3-a456-426614174001'
             },
             nombres: {
               type: 'string',
@@ -3445,10 +3290,6 @@ const swaggerConfig = {
       {
         name: 'Personas y Capacidades',
         description: '🎯 **[NUEVO] Personas y Capacidades** - Sistema completo para análisis de capacidades, destrezas y análisis geográfico. **Funcionalidades:** Consultas por destrezas/habilidades, análisis geográfico por sectores/veredas, consultas por profesiones, comunidades culturales. **100% coverage final endpoint.**'
-      },
-      {
-        name: 'Surveys',
-        description: '📊 **Encuestas y Familias** - Gestión del sistema de encuestas familiares y registro de datos socioeconómicos.'
       },
       {
         name: 'Parroquias',

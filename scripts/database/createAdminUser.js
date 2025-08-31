@@ -1,6 +1,21 @@
-import sequelize from './config/sequelize.js';
+import { Sequelize } from 'sequelize';
+import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+
+// Cargar variables de entorno
+dotenv.config();
+
+// Configurar Sequelize
+const sequelize = new Sequelize({
+  host: process.env.DB_HOST || 'localhost',
+  username: process.env.DB_USER || 'postgres',
+  password: process.env.DB_PASSWORD || 'password123',
+  database: process.env.DB_NAME || 'parroquia_db',
+  port: parseInt(process.env.DB_PORT) || 5432,
+  dialect: 'postgres',
+  logging: false
+});
 
 async function createAdminUser() {
   try {
@@ -13,7 +28,7 @@ async function createAdminUser() {
     const adminData = {
       id: uuidv4(),
       correo_electronico: 'admin@parroquia.com',
-      contrasena: await bcrypt.hash('admin123', 12),
+      contrasena: await bcrypt.hash('Admin123!', 12),
       primer_nombre: 'Admin',
       segundo_nombre: null,
       primer_apellido: 'Sistema',
@@ -64,7 +79,7 @@ async function createAdminUser() {
 
     console.log(`\n📋 Credenciales:
     📧 Email: admin@parroquia.com
-    🔐 Password: admin123`);
+    🔐 Password: Admin123!`);
 
   } catch (error) {
     console.error('❌ Error:', error.message);

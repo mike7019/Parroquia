@@ -5,36 +5,8 @@ const { authenticateToken } = authMiddleware;
 
 const router = express.Router();
 
-// All routes require authentication
+// Authentication can be enabled/disabled as needed
 // router.use(authenticateToken);
-
-/**
- * @swagger
- * /api/catalog/departamentos:
- *   post:
- *     summary: Create a new departamento
- *     tags: [Departamentos]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/DepartamentoInput'
- *     responses:
- *       201:
- *         description: Departamento created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- *       400:
- *         description: Validation error
- *       500:
- *         description: Server error
- */
-router.post('/', departamentoController.createDepartamento);
 
 /**
  * @swagger
@@ -61,14 +33,89 @@ router.post('/', departamentoController.createDepartamento);
  *                     $ref: '#/components/schemas/Departamento'
  *                 total:
  *                   type: integer
- *                   example: 32
+ *                   example: 33
  *                 message:
  *                   type: string
- *                   example: Se encontraron 32 departamentos
+ *                   example: Se encontraron 33 departamentos
  *       500:
  *         description: Server error
  */
 router.get('/', departamentoController.getAllDepartamentos);
+
+/**
+ * @swagger
+ * /api/catalog/departamentos/search:
+ *   get:
+ *     summary: Search departamentos by name
+ *     tags: [Departamentos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Search term for departamento name
+ *         example: "anti"
+ *     responses:
+ *       200:
+ *         description: Search results
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Departamento'
+ *                 total:
+ *                   type: integer
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Missing search query
+ *       500:
+ *         description: Server error
+ */
+router.get('/search', departamentoController.searchDepartamentos);
+
+/**
+ * @swagger
+ * /api/catalog/departamentos/statistics:
+ *   get:
+ *     summary: Get departamentos statistics
+ *     tags: [Departamentos]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 exito:
+ *                   type: boolean
+ *                   example: true
+ *                 mensaje:
+ *                   type: string
+ *                   example: Estadísticas obtenidas exitosamente
+ *                 datos:
+ *                   type: object
+ *                   properties:
+ *                     totalDepartamentos:
+ *                       type: integer
+ *                       example: 33
+ *       500:
+ *         description: Server error
+ */
+router.get('/statistics', departamentoController.getStatistics);
 
 /**
  * @swagger
@@ -85,6 +132,7 @@ router.get('/', departamentoController.getAllDepartamentos);
  *         schema:
  *           type: integer
  *         description: Departamento ID
+ *         example: 1
  *     responses:
  *       200:
  *         description: Departamento retrieved successfully
@@ -114,6 +162,7 @@ router.get('/:id', departamentoController.getDepartamentoById);
  *         schema:
  *           type: string
  *         description: Codigo DANE (2 digits)
+ *         example: "05"
  *     responses:
  *       200:
  *         description: Departamento retrieved successfully
@@ -127,98 +176,5 @@ router.get('/:id', departamentoController.getDepartamentoById);
  *         description: Server error
  */
 router.get('/codigo-dane/:codigo_dane', departamentoController.getDepartamentoByCodigoDane);
-
-/**
- * @swagger
- * /api/catalog/departamentos/region/{region}:
- *   get:
- *     summary: Get departamentos by region
- *     tags: [Departamentos]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: region
- *         required: true
- *         schema:
- *           type: string
- *         description: Region name
- *     responses:
- *       200:
- *         description: Departamentos by region retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- *       500:
- *         description: Server error
- */
-router.get('/region/:region', departamentoController.getDepartamentosByRegion);
-
-/**
- * @swagger
- * /api/catalog/departamentos/{id}:
- *   put:
- *     summary: Update departamento
- *     tags: [Departamentos]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: Departamento ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/DepartamentoInput'
- *     responses:
- *       200:
- *         description: Departamento updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- *       404:
- *         description: Departamento not found
- *       500:
- *         description: Server error
- */
-router.put('/:id', departamentoController.updateDepartamento);
-
-/**
- * @swagger
- * /api/catalog/departamentos/{id}:
- *   delete:
- *     summary: Delete departamento
- *     tags: [Departamentos]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: Departamento ID
- *     responses:
- *       200:
- *         description: Departamento deleted successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- *       404:
- *         description: Departamento not found
- *       409:
- *         description: Cannot delete departamento with associated municipios
- *       500:
- *         description: Server error
- */
-router.delete('/:id', departamentoController.deleteDepartamento);
 
 export default router;

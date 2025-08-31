@@ -399,45 +399,221 @@ export async function seedRoles() {
   return await safeInsert('roles', data, 'Roles de Usuario');
 }
 
-// Seeder para departamentos
+// Seeder dinámico para departamentos - Consulta la API de Colombia en tiempo real
+// URL: https://api-colombia.com/api/v1/Department
+// Asigna IDs secuenciales del 1 al 33 en orden alfabético
 export async function seedDepartamentos() {
-  const data = [
-    { nombre: 'Amazonas', codigo_dane: '91', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Antioquia', codigo_dane: '05', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Arauca', codigo_dane: '81', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Atlántico', codigo_dane: '08', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Bogotá D.C.', codigo_dane: '11', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Bolívar', codigo_dane: '13', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Boyacá', codigo_dane: '15', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Caldas', codigo_dane: '17', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Caquetá', codigo_dane: '18', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Casanare', codigo_dane: '85', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Cauca', codigo_dane: '19', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Cesar', codigo_dane: '20', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Chocó', codigo_dane: '27', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Córdoba', codigo_dane: '23', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Cundinamarca', codigo_dane: '25', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Guainía', codigo_dane: '94', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Guaviare', codigo_dane: '95', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Huila', codigo_dane: '41', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'La Guajira', codigo_dane: '44', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Magdalena', codigo_dane: '47', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Meta', codigo_dane: '50', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Nariño', codigo_dane: '52', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Norte de Santander', codigo_dane: '54', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Putumayo', codigo_dane: '86', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Quindío', codigo_dane: '63', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Risaralda', codigo_dane: '66', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'San Andrés y Providencia', codigo_dane: '88', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Santander', codigo_dane: '68', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Sucre', codigo_dane: '70', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Tolima', codigo_dane: '73', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Valle del Cauca', codigo_dane: '76', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Vaupés', codigo_dane: '97', created_at: new Date(), updated_at: new Date() },
-    { nombre: 'Vichada', codigo_dane: '99', created_at: new Date(), updated_at: new Date() }
-  ];
+  try {
+    console.log('🌐 Consultando API de Colombia para obtener departamentos...');
+    
+    // Hacer solicitud a la API de Colombia
+    const response = await fetch('https://api-colombia.com/api/v1/Department', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Parroquia-Management-System/1.0'
+      },
+      timeout: 30000 // 30 segundos timeout
+    });
 
-  return await safeInsert('departamentos', data, 'Departamentos de Colombia');
+    if (!response.ok) {
+      throw new Error(`Error en API de Colombia: ${response.status} ${response.statusText}`);
+    }
+
+    const departamentosAPI = await response.json();
+    console.log(`📊 Recibidos ${departamentosAPI.length} departamentos de la API`);
+
+    if (!Array.isArray(departamentosAPI) || departamentosAPI.length === 0) {
+      throw new Error('La API no devolvió datos válidos');
+    }
+
+    // Mapeo de códigos DANE (basado en estructura oficial)
+    const codigosDane = {
+      'Amazonas': '91',
+      'Antioquia': '05', 
+      'Arauca': '81',
+      'Atlántico': '08',
+      'Bogotá': '11',
+      'Bolívar': '13',
+      'Boyacá': '15',
+      'Caldas': '17',
+      'Caquetá': '18',
+      'Casanare': '85',
+      'Cauca': '19',
+      'Cesar': '20',
+      'Chocó': '27',
+      'Córdoba': '23',
+      'Cundinamarca': '25',
+      'Guainía': '94',
+      'Guaviare': '95',
+      'Huila': '41',
+      'La Guajira': '44',
+      'Magdalena': '47',
+      'Meta': '50',
+      'Nariño': '52',
+      'Norte de Santander': '54',
+      'Putumayo': '86',
+      'Quindío': '63',
+      'Risaralda': '66',
+      'San Andrés y Providencia': '88',
+      'Santander': '68',
+      'Sucre': '70',
+      'Tolima': '73',
+      'Valle del Cauca': '76',
+      'Vaupés': '97',
+      'Vichada': '99'
+    };
+
+    // Procesar y mapear datos de la API
+    const data = departamentosAPI
+      .map(dept => ({
+        nombre: dept.name,
+        codigo_dane: codigosDane[dept.name] || '00', // Fallback si no se encuentra
+        created_at: new Date(),
+        updated_at: new Date()
+      }))
+      .sort((a, b) => a.nombre.localeCompare(b.nombre)); // Ordenar alfabéticamente
+
+    console.log(`✅ Procesados ${data.length} departamentos ordenados alfabéticamente`);
+    console.log(`📋 Primer departamento: ${data[0]?.nombre}, Último: ${data[data.length - 1]?.nombre}`);
+
+    // Validar que tenemos los 33 departamentos esperados
+    if (data.length !== 33) {
+      console.warn(`⚠️  Se esperaban 33 departamentos, pero se recibieron ${data.length}`);
+    }
+
+    return await safeInsert('departamentos', data, `Departamentos de Colombia (API en vivo - ${data.length} registros)`);
+
+  } catch (error) {
+    console.error('❌ Error al consultar la API de Colombia:', error.message);
+    
+    // Fallback: datos mínimos si la API falla
+    console.log('🔄 Usando datos de respaldo básicos...');
+    const fallbackData = [
+      { nombre: 'Antioquia', codigo_dane: '05', created_at: new Date(), updated_at: new Date() },
+      { nombre: 'Bogotá', codigo_dane: '11', created_at: new Date(), updated_at: new Date() },
+      { nombre: 'Cundinamarca', codigo_dane: '25', created_at: new Date(), updated_at: new Date() },
+      { nombre: 'Valle del Cauca', codigo_dane: '76', created_at: new Date(), updated_at: new Date() }
+    ];
+
+    return await safeInsert('departamentos', fallbackData, 'Departamentos de Colombia (Datos de respaldo)');
+  }
+}
+
+// Seeder para municipios
+export async function seedMunicipios() {
+  try {
+    console.log('🌐 Consultando API de Colombia para obtener municipios...');
+    
+    // Hacer solicitud a la API de Colombia para ciudades
+    const citiesResponse = await fetch('https://api-colombia.com/api/v1/City', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Parroquia-Management-System/1.0'
+      },
+      timeout: 30000 // 30 segundos timeout
+    });
+
+    if (!citiesResponse.ok) {
+      throw new Error(`Error en API de Colombia (ciudades): ${citiesResponse.status} ${citiesResponse.statusText}`);
+    }
+
+    const ciudadesAPI = await citiesResponse.json();
+    console.log(`📊 Recibidos ${ciudadesAPI.length} municipios de la API`);
+
+    // Hacer solicitud a la API de Colombia para departamentos (mapeo)
+    const departmentsResponse = await fetch('https://api-colombia.com/api/v1/Department', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Parroquia-Management-System/1.0'
+      },
+      timeout: 30000
+    });
+
+    if (!departmentsResponse.ok) {
+      throw new Error(`Error en API de Colombia (departamentos): ${departmentsResponse.status} ${departmentsResponse.statusText}`);
+    }
+
+    const departamentosAPI = await departmentsResponse.json();
+    console.log(`📍 Recibidos ${departamentosAPI.length} departamentos de la API para mapeo`);
+
+    if (!Array.isArray(ciudadesAPI) || ciudadesAPI.length === 0) {
+      throw new Error('La API no devolvió datos válidos para municipios');
+    }
+
+    // Obtener departamentos de nuestra base de datos
+    const departamentosDB = await sequelize.query(
+      'SELECT id_departamento, nombre FROM departamentos ORDER BY nombre',
+      { 
+        type: sequelize.QueryTypes.SELECT
+      }
+    );
+
+    console.log(`🔗 Encontrados ${departamentosDB.length} departamentos en nuestra DB para mapear`);
+
+    // Crear mapeo de API departmentId -> nombre -> nuestro id_departamento
+    const mapeoAPI = {};
+    departamentosAPI.forEach(deptAPI => {
+      const deptDB = departamentosDB.find(db => 
+        db.nombre.toLowerCase().trim() === deptAPI.name.toLowerCase().trim()
+      );
+      if (deptDB) {
+        mapeoAPI[deptAPI.id] = deptDB.id_departamento;
+        console.log(`   ✅ Mapeo: API ID ${deptAPI.id} (${deptAPI.name}) -> DB ID ${deptDB.id_departamento}`);
+      } else {
+        console.warn(`   ⚠️  No se encontró mapeo para: ${deptAPI.name} (API ID: ${deptAPI.id})`);
+      }
+    });
+
+    console.log(`�️  Mapeos creados: ${Object.keys(mapeoAPI).length} de ${departamentosAPI.length} departamentos`);
+
+    // Procesar y mapear datos de ciudades
+    const data = ciudadesAPI
+      .filter(city => city.departmentId && city.name && mapeoAPI[city.departmentId]) // Solo ciudades con mapeo válido
+      .map(city => ({
+        nombre_municipio: city.name.trim(),
+        codigo_dane: city.id ? city.id.toString().padStart(5, '0') : null,
+        id_departamento: mapeoAPI[city.departmentId], // Usar nuestro ID mapeado
+        created_at: new Date(),
+        updated_at: new Date()
+      }))
+      .filter(municipio => municipio.nombre_municipio && municipio.id_departamento) // Filtrar entradas válidas
+      .sort((a, b) => a.nombre_municipio.localeCompare(b.nombre_municipio)); // Ordenar alfabéticamente
+
+    console.log(`✅ Procesados ${data.length} municipios ordenados alfabéticamente`);
+    console.log(`📋 Primer municipio: ${data[0]?.nombre_municipio} (Dept: ${data[0]?.id_departamento})`);
+    console.log(`📋 Último municipio: ${data[data.length - 1]?.nombre_municipio} (Dept: ${data[data.length - 1]?.id_departamento})`);
+
+    // Validar que tenemos un número razonable de municipios
+    if (data.length < 1000) {
+      console.warn(`⚠️  Se procesaron ${data.length} municipios, se esperaban más de 1000`);
+    }
+
+    // Mostrar distribución por departamento
+    const distribucion = {};
+    data.forEach(m => {
+      distribucion[m.id_departamento] = (distribucion[m.id_departamento] || 0) + 1;
+    });
+    console.log(`📊 Distribución por departamento:`, Object.keys(distribucion).length, 'departamentos con municipios');
+
+    return await safeInsert('municipios', data, `Municipios de Colombia (API en vivo - ${data.length} registros con mapeo sincronizado)`);
+
+  } catch (error) {
+    console.error('❌ Error al consultar la API de Colombia para municipios:', error.message);
+    
+    // Fallback: datos mínimos si la API falla
+    console.log('🔄 Usando datos de respaldo básicos para municipios...');
+    const fallbackData = [
+      { nombre_municipio: 'Medellín', codigo_dane: '05001', id_departamento: 1, created_at: new Date(), updated_at: new Date() },
+      { nombre_municipio: 'Bogotá D.C.', codigo_dane: '11001', id_departamento: 2, created_at: new Date(), updated_at: new Date() },
+      { nombre_municipio: 'Cali', codigo_dane: '76001', id_departamento: 3, created_at: new Date(), updated_at: new Date() },
+      { nombre_municipio: 'Barranquilla', codigo_dane: '08001', id_departamento: 4, created_at: new Date(), updated_at: new Date() }
+    ];
+
+    return await safeInsert('municipios', fallbackData, 'Municipios de Colombia (Datos de respaldo)');
+  }
 }
 
 // Seeder para enfermedades
@@ -642,6 +818,7 @@ export async function runConfigSeeders() {
     { name: 'Sexos', fn: seedSexos },
     { name: 'Roles', fn: seedRoles },
     { name: 'Departamentos', fn: seedDepartamentos },
+    { name: 'Municipios', fn: seedMunicipios },
     { name: 'Enfermedades', fn: seedEnfermedades }
   ];
 
@@ -687,6 +864,7 @@ export async function cleanConfigData() {
     'tipos_vivienda',
     'estados_civiles',
     'tipos_identificacion',
+    'municipios',
     'departamentos'
   ];
 
@@ -712,5 +890,6 @@ export default {
   seedSexos,
   seedRoles,
   seedDepartamentos,
+  seedMunicipios,
   seedEnfermedades
 };

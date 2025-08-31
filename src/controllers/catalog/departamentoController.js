@@ -3,49 +3,6 @@ import { createSuccessResponse, createErrorResponse } from '../../utils/response
 
 class DepartamentoController {
   /**
-   * Create a new departamento
-   */
-  async createDepartamento(req, res) {
-    try {
-      const { nombre, codigo_dane, region } = req.body;
-
-      if (!nombre || !codigo_dane) {
-        return res.status(400).json(
-          createErrorResponse('nombre and codigo_dane are required', null, 'VALIDATION_ERROR')
-        );
-      }
-
-      // Usar findOrCreate para evitar duplicados
-      const result = await departamentoService.findOrCreateDepartamento({ 
-        nombre, 
-        codigo_dane, 
-        region 
-      });
-
-      if (!result.created) {
-        return res.status(409).json(
-          createErrorResponse('Departamento con este nombre o código DANE ya existe', null, 'DUPLICATE_ERROR')
-        );
-      }
-
-      res.status(201).json(
-        createSuccessResponse(
-          'Departamento creado exitosamente',
-          null
-        )
-      );
-    } catch (error) {
-      res.status(500).json(
-        createErrorResponse(
-          'Error creating departamento',
-          error.message,
-          'CREATE_ERROR'
-        )
-      );
-    }
-  }
-
-  /**
    * Get all departamentos
    */
   async getAllDepartamentos(req, res) {
@@ -118,82 +75,55 @@ class DepartamentoController {
   }
 
   /**
-   * Update departamento
+   * Get departamentos statistics
    */
-  async updateDepartamento(req, res) {
+  async getStatistics(req, res) {
     try {
-      const { id } = req.params;
-      const updateData = req.body;
-
-      const departamento = await departamentoService.updateDepartamento(id, updateData);
+      const stats = await departamentoService.getStatistics();
 
       res.json(
         createSuccessResponse(
-          'Departamento updated successfully',
-          departamento
-        )
-      );
-    } catch (error) {
-      const statusCode = error.message.includes('not found') ? 404 : 500;
-      res.status(statusCode).json(
-        createErrorResponse(
-          'Error updating departamento',
-          error.message,
-          'UPDATE_ERROR'
-        )
-      );
-    }
-  }
-
-  /**
-   * Delete departamento
-   */
-  async deleteDepartamento(req, res) {
-    try {
-      const { id } = req.params;
-
-      const result = await departamentoService.deleteDepartamento(id);
-
-      res.json(
-        createSuccessResponse(
-          'Departamento deleted successfully',
-          result
-        )
-      );
-    } catch (error) {
-      const statusCode = error.message.includes('not found') ? 404 : 
-                         error.message.includes('Cannot delete') ? 409 : 500;
-      res.status(statusCode).json(
-        createErrorResponse(
-          'Error deleting departamento',
-          error.message,
-          'DELETE_ERROR'
-        )
-      );
-    }
-  }
-
-  /**
-   * Get departamentos by region
-   */
-  async getDepartamentosByRegion(req, res) {
-    try {
-      const { region } = req.params;
-
-      const departamentos = await departamentoService.getDepartamentosByRegion(region);
-
-      res.json(
-        createSuccessResponse(
-          'Departamentos by region retrieved successfully',
-          { departamentos, region }
+          'Estadísticas obtenidas exitosamente',
+          stats
         )
       );
     } catch (error) {
       res.status(500).json(
         createErrorResponse(
-          'Error retrieving departamentos by region',
+          'Error retrieving statistics',
           error.message,
           'FETCH_ERROR'
+        )
+      );
+    }
+  }
+
+  /**
+   * Search departamentos by name
+   */
+  async searchDepartamentos(req, res) {
+    try {
+      const { q } = req.query;
+
+      if (!q) {
+        return res.status(400).json(
+          createErrorResponse(
+            'Search query parameter "q" is required',
+            null,
+            'VALIDATION_ERROR'
+          )
+        );
+      }
+
+      const result = await departamentoService.searchDepartamentosByName(q);
+
+      res.json(result);
+    } catch (error) {
+      res.status(500).json(
+        createErrorResponse(
+          'Error searching departamentos',
+          error.message,
+          'SEARCH_ERROR'
         )
       );
     }

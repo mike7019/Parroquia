@@ -69,11 +69,12 @@ const Parroquia = sequelize.define('Parroquia', {
     {
       name: 'idx_parroquia_nombre',
       fields: ['nombre']
-    },
-    {
-      name: 'idx_parroquia_activo',
-      fields: ['activo']
     }
+    // NOTE: idx_parroquia_activo disabled - column may not exist in DB
+    // {
+    //   name: 'idx_parroquia_activo',
+    //   fields: ['activo']
+    // }
   ]
 });
 
