@@ -3293,6 +3293,10 @@ const swaggerConfig = {
         description: '👨‍👩‍👧‍👦 **Catálogo de Parentescos** - Gestión de tipos de parentesco familiar. **Funcionalidades:** CRUD completo, búsqueda por nombre, paginación, soft delete, restauración, estadísticas. Incluye 30 tipos de parentesco precargados (padre, madre, hijo, hermano, etc.).'
       },
       {
+        name: 'Reportes',
+        description: '📊 **Sistema de Reportes** - Generación de reportes en Excel y PDF del sistema parroquial. **Funcionalidades:** Reportes de familias, personas, difuntos, catálogos, estadísticas demográficas, configuraciones personalizables, exportación múltiple.'
+      },
+      {
         name: 'Catalog',
         description: '📚 **Catálogos Generales** - Operaciones generales de catálogos y configuraciones del sistema.'
       },

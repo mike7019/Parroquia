@@ -412,6 +412,8 @@ class FamiliasConsultasService {
    */
   async consultarFamiliasConPadresMadres(filtros = {}) {
     try {
+      console.log('🔍 Consultando familias con información completa...');
+      
       const whereClauseFamilia = {};
       
       if (filtros.apellido_familiar) {
@@ -436,44 +438,119 @@ class FamiliasConsultasService {
                 attributes: ['nombre']
               }
             ]
+          },
+          {
+            model: Municipios,
+            as: 'municipio',
+            attributes: ['nombre_municipio'],
+            required: false
           }
         ],
         order: [['apellido_familiar', 'ASC']],
-        limit: filtros.limite || 30
+        limit: filtros.limite || 50
       });
 
+      console.log(`📊 Encontradas ${familias.length} familias`);
+
       const resultado = familias.map(familia => {
-        const padres = familia.personas?.filter(p => 
+        const todasPersonas = familia.personas || [];
+        
+        // Excluir personas fallecidas
+        const personasVivas = todasPersonas.filter(p => {
+          // Aquí podrías agregar lógica para verificar si la persona está en DifuntosFamilia
+          return true; // Por ahora incluir todas
+        });
+
+        const padres = personasVivas.filter(p => 
           p.sexo?.nombre?.toLowerCase().includes('masculino') ||
           p.sexo?.nombre?.toLowerCase().includes('hombre') ||
           p.sexo?.nombre?.toLowerCase().includes('m')
-        ) || [];
+        );
         
-        const madres = familia.personas?.filter(p => 
+        const madres = personasVivas.filter(p => 
           p.sexo?.nombre?.toLowerCase().includes('femenino') ||
           p.sexo?.nombre?.toLowerCase().includes('mujer') ||
           p.sexo?.nombre?.toLowerCase().includes('f')
-        ) || [];
+        );
 
         return {
-          apellido_familiar: familia.apellido_familiar,
-          sector: familia.sector,
-          telefono: familia.telefono,
+          // Información de la familia
+          id_familia: familia.id_familia,
+          apellido_familiar: familia.apellido_familiar || 'Sin apellido',
+          sector: familia.sector || 'Sin sector',
+          direccion_familia: familia.direccion_familia || 'Sin dirección',
+          telefono: familia.telefono || familia.numero_contacto || 'Sin teléfono',
+          email: familia.email || 'Sin email',
+          tamaño_familia: familia.tamaño_familia || personasVivas.length,
+          tipo_vivienda: familia.tipo_vivienda || 'No especificado',
+          municipio: familia.municipio?.nombre_municipio || 'Sin municipio',
+          estado_encuesta: familia.estado_encuesta || 'Pendiente',
+          
+          // Conteos
+          total_personas: personasVivas.length,
+          total_padres: padres.length,
+          total_madres: madres.length,
+          
+          // Información detallada de padres
           padres: padres.map(p => ({
-            nombre: `${p.primer_nombre} ${p.primer_apellido}`,
-            documento: p.identificacion,
-            edad: this.calcularEdad(p.fecha_nacimiento)
+            id_persona: p.id_personas,
+            nombre_completo: `${p.primer_nombre || ''} ${p.segundo_nombre || ''} ${p.primer_apellido || ''} ${p.segundo_apellido || ''}`.trim(),
+            primer_nombre: p.primer_nombre,
+            segundo_nombre: p.segundo_nombre,
+            primer_apellido: p.primer_apellido,
+            segundo_apellido: p.segundo_apellido,
+            identificacion: p.identificacion || 'Sin documento',
+            telefono: p.telefono || 'Sin teléfono',
+            correo_electronico: p.correo_electronico || 'Sin correo',
+            fecha_nacimiento: p.fecha_nacimiento,
+            direccion: p.direccion || 'Sin dirección',
+            estudios: p.estudios || 'No especificado'
           })),
-          madres: madres.map(m => ({
-            nombre: `${m.primer_nombre} ${m.primer_apellido}`,
-            documento: m.identificacion,
-            edad: this.calcularEdad(m.fecha_nacimiento)
+          
+          // Información detallada de madres
+          madres: madres.map(p => ({
+            id_persona: p.id_personas,
+            nombre_completo: `${p.primer_nombre || ''} ${p.segundo_nombre || ''} ${p.primer_apellido || ''} ${p.segundo_apellido || ''}`.trim(),
+            primer_nombre: p.primer_nombre,
+            segundo_nombre: p.segundo_nombre,
+            primer_apellido: p.primer_apellido,
+            segundo_apellido: p.segundo_apellido,
+            identificacion: p.identificacion || 'Sin documento',
+            telefono: p.telefono || 'Sin teléfono',
+            correo_electronico: p.correo_electronico || 'Sin correo',
+            fecha_nacimiento: p.fecha_nacimiento,
+            direccion: p.direccion || 'Sin dirección',
+            estudios: p.estudios || 'No especificado'
           })),
-          total_personas: familia.personas?.length || 0
+
+          // Todas las personas de la familia
+          todas_personas: personasVivas.map(p => ({
+            id_persona: p.id_personas,
+            nombre_completo: `${p.primer_nombre || ''} ${p.segundo_nombre || ''} ${p.primer_apellido || ''} ${p.segundo_apellido || ''}`.trim(),
+            sexo: p.sexo?.nombre || 'No especificado',
+            identificacion: p.identificacion || 'Sin documento',
+            telefono: p.telefono || 'Sin teléfono',
+            fecha_nacimiento: p.fecha_nacimiento
+          }))
         };
       });
 
+      console.log(`✅ Procesadas ${resultado.length} familias con información completa`);
+      
       return {
+        exito: true,
+        datos: resultado,
+        total: resultado.length,
+        mensaje: `Se encontraron ${resultado.length} familias`
+      };
+
+    } catch (error) {
+      console.error('❌ Error en consultarFamiliasConPadresMadres:', error);
+      throw new Error(`Error al consultar familias: ${error.message}`);
+    }
+  }
+
+  /**
         exito: true,
         datos: resultado,
         total: resultado.length,

@@ -22,6 +22,7 @@ import encuestaRoutes from './routes/encuestaRoutes.js';
 import difuntosRoutes from './routes/difuntosRoutes.js';
 import familiasConsultasRoutes from './routes/familiasConsultasRoutes.js';
 import debugRoutes from './routes/debugRoutes.js';
+import reporteRoutes from './routes/reporteRoutes.js';
 
 // Import consolidated routes
 import difuntosConsolidadoRoutes from './routes/consolidados/difuntosRoutes.js';
@@ -210,6 +211,7 @@ app.use('/api/situaciones-civiles', situacionCivilRoutes); // Direct access for 
 app.use('/api', encuestaRoutes); // Rutas de encuestas
 app.use('/api/difuntos', difuntosRoutes); // Rutas de difuntos
 app.use('/api/consultas', familiasConsultasRoutes); // Rutas de consultas de familias
+app.use('/api/reportes', reporteRoutes); // Rutas de reportes Excel y PDF
 app.use('/api/debug', debugRoutes); // Rutas de debug (solo desarrollo)
 
 // Consolidated API Routes - High Priority Phase 1
@@ -245,6 +247,7 @@ app.use(errorHandler);
 
 // Database connection and server start
 const startServer = async () => {
+  console.log('🚀 Starting server initialization...');
   try {
     // Test database connection with timeout
     console.log('🔍 Testing database connection...');
@@ -259,10 +262,12 @@ const startServer = async () => {
     // Load all models from subcarpetas
     console.log('📦 Loading all models...');
     try {
+      console.log('🔄 Calling loadAllModels()...');
       await loadAllModels();
       console.log('✅ All models loaded successfully');
       
       // Verificar modelos críticos
+      console.log('🔍 Checking critical models...');
       const criticalModels = ['Municipio', 'Departamento', 'Usuario'];
       const missingModels = criticalModels.filter(modelName => 
         !sequelize.models[modelName] && !sequelize.models[modelName + 's']
@@ -275,11 +280,14 @@ const startServer = async () => {
       }
       
       // Verificar asociaciones del modelo Municipio
+      console.log('🔍 Checking Municipio model associations...');
       const MunicipioModel = sequelize.models.Municipio || sequelize.models.Municipios;
       if (MunicipioModel) {
         const associations = Object.keys(MunicipioModel.associations || {});
         console.log(`✅ Municipio model associations: ${associations.join(', ') || 'None'}`);
       }
+      
+      console.log('🎯 Model loading phase completed successfully');
       
     } catch (error) {
       console.error('❌ Error loading models:', error.message);
@@ -288,8 +296,15 @@ const startServer = async () => {
 
     // Sync database (be careful in production)
     if (process.env.NODE_ENV !== 'production') {
-      await sequelize.sync({ alter: false });
-      console.log('✅ Database synchronized');
+      try {
+        console.log('🔄 Attempting database synchronization...');
+        await sequelize.sync({ alter: false });
+        console.log('✅ Database synchronized');
+      } catch (syncError) {
+        console.error('❌ Database sync error:', syncError.message);
+        console.log('⚠️  Continuing without sync - database may need manual attention');
+        // Don't throw here - continue with server startup
+      }
     }
 
     // Display all registered routes
@@ -647,6 +662,8 @@ const displayRoutes = () => {
 
 // Start the server only if not in test environment
 if (process.env.NODE_ENV !== 'test') {
+  console.log('🔍 Checking NODE_ENV - not test, proceeding to start server...');
+  
   // Add handlers for unhandled errors
   process.on('unhandledRejection', (reason, promise) => {
     console.error('❌ Unhandled Promise Rejection:', reason);
@@ -658,6 +675,7 @@ if (process.env.NODE_ENV !== 'test') {
     process.exit(1);
   });
 
+  console.log('🚀 About to call startServer()...');
   startServer();
 }
 

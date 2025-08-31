@@ -214,22 +214,32 @@ export const obtenerEncuestas = async (req, res) => {
         // Obtener personas de la familia usando SQL directo para evitar errores de modelo
         const personas = await sequelize.query(`
           SELECT 
-            id_personas,
-            primer_nombre,
-            segundo_nombre,
-            primer_apellido,
-            segundo_apellido,
-            identificacion,
-            telefono,
-            correo_electronico,
-            fecha_nacimiento,
-            direccion,
-            estudios,
-            talla_camisa,
-            talla_pantalon,
-            talla_zapato
-          FROM personas 
-          WHERE id_familia_familias = :familiaId
+            p.id_personas,
+            p.primer_nombre,
+            p.segundo_nombre,
+            p.primer_apellido,
+            p.segundo_apellido,
+            p.identificacion,
+            p.telefono,
+            p.correo_electronico,
+            p.fecha_nacimiento,
+            p.direccion,
+            p.estudios,
+            p.talla_camisa,
+            p.talla_pantalon,
+            p.talla_zapato,
+            p.id_sexo,
+            p.id_tipo_identificacion_tipo_identificacion,
+            p.id_estado_civil_estado_civil,
+            s.id_sexo as sexo_id,
+            s.descripcion as sexo_descripcion,
+            ti.id_tipo_identificacion as tipo_id_id,
+            ti.nombre as tipo_id_nombre,
+            ti.codigo as tipo_id_codigo
+          FROM personas p
+          LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
+          LEFT JOIN tipos_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
+          WHERE p.id_familia_familias = :familiaId
         `, {
           replacements: { familiaId: familiaData.id_familia },
           type: QueryTypes.SELECT
@@ -311,7 +321,7 @@ export const obtenerEncuestas = async (req, res) => {
         //   }
         // }
 
-        // Formatear información de personas
+        // Formatear información de personas con datos completos de configuración
         const personasFormateadas = personas.map(persona => ({
           id: persona.id_personas,
           nombre_completo: `${persona.primer_nombre || ''} ${persona.segundo_nombre || ''} ${persona.primer_apellido || ''} ${persona.segundo_apellido || ''}`.trim(),
@@ -319,7 +329,14 @@ export const obtenerEncuestas = async (req, res) => {
           segundo_nombre: persona.segundo_nombre,
           primer_apellido: persona.primer_apellido,
           segundo_apellido: persona.segundo_apellido,
-          identificacion: persona.identificacion,
+          identificacion: {
+            numero: persona.identificacion,
+            tipo: persona.tipo_id_id ? {
+              id: persona.tipo_id_id,
+              nombre: persona.tipo_id_nombre,
+              codigo: persona.tipo_id_codigo
+            } : null
+          },
           telefono: persona.telefono,
           email: persona.correo_electronico,
           fecha_nacimiento: persona.fecha_nacimiento,
@@ -327,20 +344,24 @@ export const obtenerEncuestas = async (req, res) => {
           estudios: persona.estudios,
           edad: persona.fecha_nacimiento ? 
             Math.floor((new Date() - new Date(persona.fecha_nacimiento)) / (365.25 * 24 * 60 * 60 * 1000)) : null,
-          talla_camisa: persona.talla_camisa,
-          talla_pantalon: persona.talla_pantalon,
-          talla_zapato: persona.talla_zapato
+          sexo: persona.sexo_id ? {
+            id: persona.sexo_id,
+            descripcion: persona.sexo_descripcion
+          } : null,
+          id_estado_civil: persona.id_estado_civil_estado_civil,
+          tallas: {
+            camisa: persona.talla_camisa,
+            pantalon: persona.talla_pantalon,
+            zapato: persona.talla_zapato
+          }
         }));
 
         return {
-          // *** ID DE LA ENCUESTA (CRÍTICO) ***
-          id: familiaData.id_familia,
+          // *** ID DE LA ENCUESTA (ÚNICO - eliminamos redundancia) ***
           id_encuesta: familiaData.id_familia,
-          id_familia: familiaData.id_familia,
           
           // *** INFORMACIÓN BÁSICA DE LA FAMILIA ***
           apellido_familiar: familiaData.apellido_familiar,
-          sector: familiaData.sector,
           direccion_familia: familiaData.direccion_familia,
           numero_contacto: familiaData.numero_contacto,
           telefono: familiaData.telefono,
@@ -353,26 +374,22 @@ export const obtenerEncuestas = async (req, res) => {
           numero_encuestas: familiaData.numero_encuestas,
           fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
           
-          // *** INFORMACIÓN DE VIVIENDA ***
-          tipo_vivienda: familiaData.tipo_vivienda,
+          // *** INFORMACIÓN DE VIVIENDA CON ID Y NOMBRE ***
+          tipo_vivienda: {
+            nombre: familiaData.tipo_vivienda
+          },
           tamaño_familia: familiaData.tamaño_familia,
+          
+          // *** INFORMACIÓN GEOGRÁFICA COMPLETA CON ID Y NOMBRE ***
+          sector: {
+            nombre: familiaData.sector
+          },
+          municipio: municipioInfo,
+          vereda: veredaInfo,
+          sector_especifico: sectorInfo,
           
           // *** INFORMACIÓN RELIGIOSA ***
           comunion_en_casa: familiaData.comunionEnCasa,
-          
-          // *** INFORMACIÓN GEOGRÁFICA COMPLETA ***
-          ubicacion: {
-            municipio: municipioInfo,
-            vereda: veredaInfo,
-            sector_especifico: sectorInfo,
-            sector_texto: familiaData.sector
-          },
-          
-          // *** UBICACIÓN (IDS DIRECTOS) *** - COMENTADO: Campos no existen en tabla familias
-          // id_municipio: familiaData.id_municipio,
-          // id_vereda: familiaData.id_vereda,
-          // id_sector: familiaData.id_sector,
-          
           
           // Información de personas/miembros de familia
           miembros_familia: {
@@ -477,28 +494,35 @@ export const obtenerEncuestaPorId = async (req, res) => {
 
     const familiaData = encuesta;
 
-    // Obtener personas de la familia usando SQL directo para evitar errores de modelo
+    // Obtener personas de la familia usando SQL directo con información completa
     const personas = await sequelize.query(`
       SELECT 
-        id_personas,
-        primer_nombre,
-        segundo_nombre,
-        primer_apellido,
-        segundo_apellido,
-        identificacion,
-        telefono,
-        correo_electronico,
-        fecha_nacimiento,
-        direccion,
-        estudios,
-        talla_camisa,
-        talla_pantalon,
-        talla_zapato,
-        id_sexo,
-        id_tipo_identificacion_tipo_identificacion,
-        id_estado_civil_estado_civil
-      FROM personas 
-      WHERE id_familia_familias = :familiaId
+        p.id_personas,
+        p.primer_nombre,
+        p.segundo_nombre,
+        p.primer_apellido,
+        p.segundo_apellido,
+        p.identificacion,
+        p.telefono,
+        p.correo_electronico,
+        p.fecha_nacimiento,
+        p.direccion,
+        p.estudios,
+        p.talla_camisa,
+        p.talla_pantalon,
+        p.talla_zapato,
+        p.id_sexo,
+        p.id_tipo_identificacion_tipo_identificacion,
+        p.id_estado_civil_estado_civil,
+        s.id_sexo as sexo_id,
+        s.descripcion as sexo_descripcion,
+        ti.id_tipo_identificacion as tipo_id_id,
+        ti.nombre as tipo_id_nombre,
+        ti.codigo as tipo_id_codigo
+      FROM personas p
+      LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
+      LEFT JOIN tipos_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
+      WHERE p.id_familia_familias = :familiaId
     `, {
       replacements: { familiaId: familiaData.id_familia },
       type: QueryTypes.SELECT
@@ -600,62 +624,8 @@ export const obtenerEncuestaPorId = async (req, res) => {
     //   }
     // }
 
-    // Para cada persona, obtener información adicional y detallada
-    const personasDetalladas = await Promise.all(
-      personas.map(async (persona) => {
-        let sexoInfo = null;
-        let tipoIdInfo = null;
-        let estadoCivilInfo = null;
-        let parroquiaPersonaInfo = null;
-
-        // Obtener información de sexo
-        if (persona.id_sexo) {
-          const Sexo = sequelize.models.Sexo;
-          const sexo = await Sexo.findByPk(persona.id_sexo);
-          if (sexo) {
-            sexoInfo = {
-              id: sexo.id_sexo,
-              descripcion: sexo.descripcion_sexo
-            };
-          }
-        }
-
-        // Obtener información de tipo de identificación
-        if (persona.id_tipo_identificacion_tipo_identificacion) {
-          const TipoIdentificacion = sequelize.models.TipoIdentificacion;
-          const tipoId = await TipoIdentificacion.findByPk(persona.id_tipo_identificacion_tipo_identificacion);
-          if (tipoId) {
-            tipoIdInfo = {
-              id: tipoId.id_tipo_identificacion,
-              descripcion: tipoId.descripcion_tipo_identificacion
-            };
-          }
-        }
-
-        // Obtener información de estado civil
-        if (persona.id_estado_civil_estado_civil) {
-          const EstadoCivil = sequelize.models.EstadoCivil;
-          const estadoCivil = await EstadoCivil.findByPk(persona.id_estado_civil_estado_civil);
-          if (estadoCivil) {
-            estadoCivilInfo = {
-              id: estadoCivil.id_estado_civil,
-              descripcion: estadoCivil.descripcion_estado_civil
-            };
-          }
-        }
-
-        // Obtener información de parroquia de la persona
-        if (persona.id_parroquia) {
-          const Parroquia = sequelize.models.Parroquia;
-          const parroquia = await Parroquia.findByPk(persona.id_parroquia);
-          if (parroquia) {
-            parroquiaPersonaInfo = {
-              id: parroquia.id_parroquia,
-              nombre: parroquia.nombre_parroquia
-            };
-          }
-        }
-
+    // Para cada persona, formatear información completa usando datos ya obtenidos
+    const personasDetalladas = personas.map((persona) => {
         return {
           id: persona.id_personas,
           informacion_personal: {
@@ -667,13 +637,22 @@ export const obtenerEncuestaPorId = async (req, res) => {
           },
           identificacion: {
             numero: persona.identificacion,
-            tipo: tipoIdInfo
+            tipo: persona.tipo_id_id ? {
+              id: persona.tipo_id_id,
+              nombre: persona.tipo_id_nombre,
+              codigo: persona.tipo_id_codigo
+            } : null
           },
           demografia: {
             fecha_nacimiento: persona.fecha_nacimiento,
-            sexo: sexoInfo
+            sexo: persona.sexo_id ? {
+              id: persona.sexo_id,
+              descripcion: persona.sexo_descripcion
+            } : null
           },
-          estado_civil: estadoCivilInfo,
+          estado_civil: persona.id_estado_civil_estado_civil ? {
+            id: persona.id_estado_civil_estado_civil
+          } : null,
           contacto: {
             telefono: persona.telefono,
             correo_electronico: persona.correo_electronico,
@@ -691,7 +670,6 @@ export const obtenerEncuestaPorId = async (req, res) => {
             pantalon: persona.talla_pantalon,
             zapato: persona.talla_zapato
           },
-          parroquia: parroquiaPersonaInfo,
           es_fallecido: persona.identificacion?.startsWith('FALLECIDO'),
           // Información adicional para fallecidos
           informacion_fallecido: persona.identificacion?.startsWith('FALLECIDO') ? (() => {
@@ -705,8 +683,8 @@ export const obtenerEncuestaPorId = async (req, res) => {
             } catch (error) {
               return {
                 fecha_aniversario: null,
-                era_padre: sexoInfo?.descripcion === 'Masculino',
-                era_madre: sexoInfo?.descripcion === 'Femenino'
+                era_padre: persona.sexo_descripcion === 'Masculino',
+                era_madre: persona.sexo_descripcion === 'Femenino'
               };
             }
           })() : null,
@@ -715,8 +693,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
             ultima_actualizacion: persona.updatedAt
           }
         };
-      })
-    );
+      });
     
     // Construir respuesta completa y estructurada con toda la información
     const encuestaCompleta = {
