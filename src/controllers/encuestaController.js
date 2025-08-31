@@ -2,6 +2,7 @@ import sequelize from '../../config/sequelize.js';
 import { QueryTypes } from 'sequelize';
 import { Familias, Municipios, Parroquia, Sector, Veredas, Sexo, TipoIdentificacion, Persona } from '../models/index.js';
 import crypto from 'crypto';
+import FamiliasConsultasService from '../services/familiasConsultasService.js';
 
 /**
  * Generar identificación única para personas
@@ -1968,11 +1969,54 @@ export const actualizarEncuestaCompleta = async (req, res) => {
   }
 };
 
+/**
+ * Consultar familias con información completa preservando toda la estructura del request
+ */
+const consultarFamiliasConPadresMadres = async (req, res) => {
+  try {
+    console.log('🔍 Consulta de familias con información completa iniciada...');
+    
+    const filtros = {
+      apellido_familiar: req.query.apellido_familiar || '',
+      sector: req.query.sector || '',
+      limite: parseInt(req.query.limite) || 50
+    };
+
+    // Instanciar el servicio
+    const familiasService = new FamiliasConsultasService();
+    
+    // Ejecutar consulta completa
+    const resultado = await familiasService.consultarFamiliasConPadresMadres(filtros);
+
+    console.log(`✅ Consulta completada: ${resultado.total} familias encontradas`);
+
+    res.status(200).json({
+      status: 'success',
+      mensaje: resultado.mensaje,
+      datos: resultado.datos,
+      total: resultado.total,
+      filtros_aplicados: filtros,
+      nota: 'Toda la información del request se preserva en el response'
+    });
+
+  } catch (error) {
+    console.error('❌ Error en consultarFamiliasConPadresMadres:', error);
+    
+    res.status(500).json({
+      status: 'error',
+      message: 'Error al consultar familias con información completa',
+      details: process.env.NODE_ENV === 'development' ? error.message : 'Error interno',
+      error_code: 'CONSULTA_FAMILIAS_ERROR'
+    });
+  }
+};
+
 export default {
   crearEncuesta,
   eliminarEncuesta,
   obtenerEncuestas,
   obtenerEncuestaPorId,
   actualizarCamposEncuesta,
-  actualizarEncuestaCompleta
+  actualizarEncuestaCompleta,
+  consultarFamiliasConPadresMadres
 };

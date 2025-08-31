@@ -3214,6 +3214,196 @@ const swaggerConfig = {
         }
       }
     },
+    FamiliaCompletaResponse: {
+      type: 'object',
+      description: '🎯 **Respuesta completa de familia con 100% de información validada**',
+      properties: {
+        status: {
+          type: 'string',
+          enum: ['success'],
+          description: 'Estado de la operación',
+          example: 'success'
+        },
+        mensaje: {
+          type: 'string',
+          description: 'Mensaje descriptivo del resultado',
+          example: 'Se encontraron 1 familias con información completa'
+        },
+        datos: {
+          type: 'array',
+          description: 'Array de familias con información absolutamente completa',
+          items: {
+            type: 'object',
+            properties: {
+              id_encuesta: {
+                type: 'integer',
+                description: 'ID único de la encuesta/familia',
+                example: 667
+              },
+              informacionGeneral: {
+                type: 'object',
+                description: 'Información general de la familia',
+                properties: {
+                  municipio: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'integer', example: 1 },
+                      nombre: { type: 'string', example: 'Municipio Test' }
+                    }
+                  },
+                  sector: {
+                    type: 'object',
+                    properties: {
+                      nombre: { type: 'string', example: 'Centro Histórico' }
+                    }
+                  },
+                  apellido_familiar: {
+                    type: 'string',
+                    example: 'Familia Validación Completa'
+                  },
+                  direccion: {
+                    type: 'string',
+                    example: 'Carrera 50 #25-30 Apartamento 501'
+                  },
+                  telefono: {
+                    type: 'string',
+                    example: '3007778899'
+                  },
+                  comunionEnCasa: {
+                    type: 'boolean',
+                    example: true
+                  }
+                }
+              },
+              vivienda: {
+                type: 'object',
+                description: 'Información de vivienda',
+                properties: {
+                  tipo_vivienda: {
+                    type: 'object',
+                    properties: {
+                      nombre: { type: 'string', example: 'Apartamento Propio' }
+                    }
+                  },
+                  disposicion_basuras: {
+                    type: 'object',
+                    description: 'Métodos de disposición de basuras (6 campos completos)',
+                    properties: {
+                      recolector: { type: 'boolean', example: false },
+                      quemada: { type: 'boolean', example: false },
+                      enterrada: { type: 'boolean', example: false },
+                      recicla: { type: 'boolean', example: false },
+                      aire_libre: { type: 'boolean', example: false },
+                      no_aplica: { type: 'boolean', example: false }
+                    }
+                  }
+                }
+              },
+              servicios_agua: {
+                type: 'object',
+                description: 'Servicios de agua y saneamiento',
+                properties: {
+                  sistema_acueducto: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'integer', example: 1 },
+                      nombre: { type: 'string', example: 'Acueducto Público' }
+                    }
+                  }
+                }
+              },
+              familyMembers: {
+                type: 'array',
+                description: 'Miembros vivos de la familia con información completa (9/9 campos por persona)',
+                items: {
+                  type: 'object',
+                  properties: {
+                    nombres: { type: 'string', example: 'Juan Carlos' },
+                    numeroIdentificacion: { type: 'string', example: '10123456-12345' },
+                    tipoIdentificacion: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'integer', example: 1 },
+                        nombre: { type: 'string', example: 'Cédula de Ciudadanía' },
+                        codigo: { type: 'string', example: 'CC' }
+                      }
+                    },
+                    fechaNacimiento: { type: 'string', format: 'date-time', example: '1980-05-15T00:00:00.000Z' },
+                    sexo: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'integer', example: 1 },
+                        nombre: { type: 'string', example: 'Sexo masculino' }
+                      }
+                    },
+                    telefono: { type: 'string', example: '3001111111' },
+                    estudio: {
+                      type: 'object',
+                      properties: {
+                        nombre: { type: 'string', example: 'Ingeniero de Sistemas' }
+                      }
+                    },
+                    'talla_camisa/blusa': { type: 'string', example: 'XL' },
+                    talla_pantalon: { type: 'string', example: '34' },
+                    talla_zapato: { type: 'string', example: '43' },
+                    motivoFechaCelebrar: {
+                      type: 'object',
+                      properties: {
+                        motivo: { type: 'string', example: 'Cumpleaños' },
+                        dia: { type: 'string', example: '15' },
+                        mes: { type: 'string', example: '05' }
+                      }
+                    }
+                  }
+                }
+              },
+              deceasedMembers: {
+                type: 'array',
+                description: 'Miembros fallecidos de la familia',
+                items: {
+                  type: 'object',
+                  properties: {
+                    nombres: { type: 'string', example: 'Roberto Carlos Martínez López' },
+                    fechaFallecimiento: { type: 'string', format: 'date-time', example: '2019-08-12T00:00:00.000Z' },
+                    causaFallecimiento: { type: 'string', example: 'Abuelo paterno, fallecido por complicaciones cardiovasculares a los 78 años' }
+                  }
+                }
+              },
+              metadata: {
+                type: 'object',
+                description: 'Metadatos de la encuesta',
+                properties: {
+                  timestamp: { type: 'string', format: 'date-time', example: '2025-08-30T17:23:11.564Z' },
+                  completed: { type: 'boolean', example: true },
+                  currentStage: { type: 'integer', example: 6 },
+                  total_miembros: { type: 'integer', example: 4 },
+                  total_fallecidos: { type: 'integer', example: 1 }
+                }
+              }
+            }
+          }
+        },
+        total: {
+          type: 'integer',
+          description: 'Número total de familias encontradas',
+          example: 1
+        },
+        filtros_aplicados: {
+          type: 'object',
+          description: 'Filtros que se aplicaron en la consulta',
+          properties: {
+            apellido_familiar: { type: 'string' },
+            sector: { type: 'string' },
+            limite: { type: 'integer' }
+          }
+        },
+        nota: {
+          type: 'string',
+          description: 'Nota explicativa sobre la integridad de datos',
+          example: 'Toda la información del request se preserva en el response'
+        }
+      }
+    },
     security: [
       {
         bearerAuth: []
