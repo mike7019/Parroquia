@@ -1,6 +1,5 @@
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import swaggerUiOptions from './swagger-ui-config.js';
 
 /**
  * Swagger configuration using ES6 modules
@@ -9,64 +8,32 @@ const swaggerConfig = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Parroquia Management System API',
+      title: 'Parroquia API',
       version: '1.0.1',
-      description: `
-## Sistema de Gestión Parroquial 
-### API REST completa para la administración integral de comunidades parroquiales
-
-Esta API proporciona un conjunto completo de endpoints para la gestión de:
-- 👥 **Familias y Personas**: Registro completo de miembros de la comunidad
-- 🏠 **Encuestas Familiares**: Información socioeconómica y demográfica
-- ⚰️ **Difuntos**: Registro y consulta de miembros fallecidos
-- 🏥 **Salud**: Seguimiento de condiciones médicas y necesidades
-- 🎯 **Capacidades**: Destrezas, profesiones y habilidades comunitarias
-- ⛪ **Parroquias**: Gestión territorial y administrativa
-- 📍 **Catálogos Geográficos**: Departamentos, municipios, sectores y veredas
-
-### Características principales:
-- 🔐 Autenticación JWT con roles de usuario
-- 📊 Consultas avanzadas con filtros múltiples
-- 📈 Estadísticas y análisis demográficos
-- 🗂️ Reportes en Excel y PDF
-- 🔍 Búsquedas semánticas inteligentes
-- 📱 API RESTful totalmente compatible
-
-### Tecnologías:
-- Node.js + Express.js
-- PostgreSQL con Sequelize ORM
-- JWT Authentication
-- Swagger/OpenAPI 3.0
-      `,
-      termsOfService: 'https://parroquia.com/terms',
+      description: 'Sistema de gestión parroquial - API REST completa con autenticación y gestión de usuarios - Actualizado: Sectores con municipio obligatorio',
       contact: {
-        name: 'Equipo de Desarrollo API Parroquia',
-        email: 'api-support@parroquia.com',
-        url: 'https://parroquia.com/support'
+        name: 'API Support',
+        email: 'support@parroquia.com'
       },
       license: {
-        name: 'MIT License',
+        name: 'MIT',
         url: 'https://opensource.org/licenses/MIT'
       }
     },
     servers: [
       {
         url: process.env.API_URL || 'http://localhost:3000',
-        description: '🚀 Servidor de Desarrollo - Entorno local para desarrollo y testing'
+        description: 'Development server'
       },
       {
-        url: 'http://206.62.139.100:3000',
-        description: '🧪 Servidor de Pruebas - Entorno de testing y validación'
+        url: 'http://206.62.139.100:3000/',
+        description: 'Test server'
       },
       {
         url: 'https://api.parroquia.com',
-        description: '🌐 Servidor de Producción - Entorno live para usuarios finales'
+        description: 'Production server'
       }
     ],
-    externalDocs: {
-      description: '📚 Documentación completa del proyecto',
-      url: 'https://github.com/mike7019/Parroquia/wiki'
-    },
     components: {
       securitySchemes: {
         bearerAuth: {
@@ -3384,6 +3351,56 @@ Esta API proporciona un conjunto completo de endpoints para la gestión de:
  * Generate Swagger specification
  */
 const specs = swaggerJSDoc(swaggerConfig);
+
+/**
+ * Swagger UI options
+ */
+const swaggerUiOptions = {
+  explorer: true,
+  swaggerOptions: {
+    persistAuthorization: true,
+    displayRequestDuration: true,
+    docExpansion: 'none',
+    filter: true,
+    showExtensions: true,
+    tryItOutEnabled: true,
+    deepLinking: true,
+    displayOperationId: false,
+    defaultModelsExpandDepth: 2,
+    defaultModelExpandDepth: 2,
+    defaultModelRendering: 'model',
+    supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+    requestSnippetsEnabled: true,
+    validatorUrl: null, // Disable validator to avoid external requests
+    oauth2RedirectUrl: null,
+    showMutatedRequest: true,
+    requestSnippets: {
+      generators: {
+        curl_bash: {
+          title: "cURL (bash)",
+          syntax: "bash"
+        },
+        curl_powershell: {
+          title: "cURL (PowerShell)",
+          syntax: "powershell"
+        }
+      }
+    }
+  },
+  customCss: `
+    .swagger-ui .topbar { display: none }
+    .swagger-ui .info { margin: 20px 0 }
+    .swagger-ui .scheme-container { margin: 20px 0 }
+    .swagger-ui .info .title { color: #3b4151 }
+    .swagger-ui .model-box { background: #f9f9f9; border: 1px solid #e3e3e3; }
+    .swagger-ui .model { font-family: monospace; }
+    .swagger-ui .model .property { margin: 5px 0; }
+    .swagger-ui .model-toggle { cursor: pointer; }
+    .swagger-ui .models { margin-top: 20px; }
+    .swagger-ui .model-container { border: 1px solid #d3d3d3; margin: 10px 0; }
+  `,
+  customSiteTitle: 'Parroquia API Documentation'
+};
 
 /**
  * Setup Swagger middleware
