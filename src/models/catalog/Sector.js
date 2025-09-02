@@ -24,7 +24,8 @@ const Sector = sequelize.define('Sector', {
   sequelize,
   modelName: 'Sector',
   tableName: 'sectores',
-  timestamps: false // Desactivar timestamps
+  timestamps: true, // Activar timestamps ya que existen en la DB
+  underscored: true // Usar snake_case para las columnas (created_at, updated_at)
 });
 
 // Definir asociaciones

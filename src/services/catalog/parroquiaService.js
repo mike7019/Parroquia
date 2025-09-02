@@ -1,10 +1,10 @@
-// import { Parroquia } from '../../models/index.js'; // TEMPORALMENTE DESACTIVADO
+import models from '../../models/index.js';
 import sequelize from '../../../config/sequelize.js';
 import { Op } from 'sequelize';
 
-// Obtener los modelos desde Sequelize una vez que se carguen
-const getParroquiaModel = () => sequelize.models.Parroquia;
-const getMunicipiosModel = () => sequelize.models.Municipios;
+// Obtener los modelos desde el índice de modelos
+const getParroquiaModel = () => models.Parroquia || sequelize.models.Parroquia;
+const getMunicipiosModel = () => models.Municipios || sequelize.models.Municipios;
 
 class ParroquiaService {
   /**

@@ -28,15 +28,15 @@ const Parroquia = sequelize.define('Parroquia', {
 }, {
   sequelize,
   modelName: 'Parroquia',
-  tableName: 'parroquia',
+  tableName: 'parroquia', // Corregido: tabla singular
   timestamps: false, // Desactivar timestamps
   indexes: [
     {
-      name: 'idx_parroquia_municipio',
+      name: 'idx_parroquias_municipio',
       fields: ['id_municipio']
     },
     {
-      name: 'idx_parroquia_nombre',
+      name: 'idx_parroquias_nombre',
       fields: ['nombre']
     }
   ]
@@ -50,11 +50,8 @@ Parroquia.associate = function(models) {
     as: 'municipio'
   });
   
-  // Una parroquia puede tener muchos sectores
-  Parroquia.hasMany(models.Sector, {
-    foreignKey: 'id_parroquia',
-    as: 'sectores'
-  });
+  // Nota: Los sectores ya no tienen relación con parroquia, 
+  // solo con municipio según los nuevos requerimientos
 };
 
 export default Parroquia;

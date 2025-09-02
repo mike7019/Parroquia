@@ -1,19 +1,20 @@
+import models from '../../models/index.js';
 import sequelize from '../../../config/sequelize.js';
 import { Op } from 'sequelize';
 
 // Función para obtener modelos de forma segura
 const getMunicipioModel = () => {
-  const model = sequelize.models.Municipio || sequelize.models.Municipios;
+  const model = models.Municipios || sequelize.models.Municipios;
   if (!model) {
-    throw new Error('Municipio model not found. Make sure models are loaded.');
+    throw new Error('Municipios model not found. Make sure models are loaded.');
   }
   return model;
 };
 
 const getDepartamentoModel = () => {
-  const model = sequelize.models.Departamento || sequelize.models.Departamentos;
+  const model = models.Departamentos || sequelize.models.Departamentos;
   if (!model) {
-    throw new Error('Departamento model not found. Make sure models are loaded.');
+    throw new Error('Departamentos model not found. Make sure models are loaded.');
   }
   return model;
 };
