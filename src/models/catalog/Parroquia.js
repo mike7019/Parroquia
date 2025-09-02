@@ -32,11 +32,11 @@ const Parroquia = sequelize.define('Parroquia', {
   timestamps: false, // Desactivar timestamps
   indexes: [
     {
-      name: 'idx_parroquias_municipio',
+      name: 'idx_parroquia_municipio',
       fields: ['id_municipio']
     },
     {
-      name: 'idx_parroquias_nombre',
+      name: 'idx_parroquia_nombre',
       fields: ['nombre']
     }
   ]

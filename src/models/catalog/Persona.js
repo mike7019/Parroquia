@@ -113,7 +113,7 @@ const Persona = sequelize.define('Persona', {
     type: DataTypes.BIGINT,
     allowNull: true,
     references: {
-      model: 'parroquias',
+      model: 'parroquia',
       key: 'id_parroquia'
     }
   }
