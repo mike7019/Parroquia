@@ -246,125 +246,251 @@ export const obtenerEncuestas = async (req, res) => {
           type: QueryTypes.SELECT
         });
 
-        // Obtener información de ubicación usando los IDs
+        // Obtener información de ubicación usando texto de la tabla familias
         let municipioInfo = null;
         let veredaInfo = null;
         let sectorInfo = null;
+        let tipoViviendaInfo = null;
 
-        // COMENTADO: Las columnas id_municipio, id_vereda, id_sector no existen en la tabla familias
-        // Obtener información del municipio
-        // if (familiaData.id_municipio) {
-        //   try {
-        //     const [municipio] = await sequelize.query(`
-        //       SELECT id_municipio, nombre_municipio 
-        //       FROM municipios 
-        //       WHERE id_municipio = :municipioId
-        //     `, {
-        //       replacements: { municipioId: familiaData.id_municipio },
-        //       type: QueryTypes.SELECT
-        //     });
-        //     
-        //     if (municipio) {
-        //       municipioInfo = {
-        //         id: municipio.id_municipio,
-        //         nombre: municipio.nombre_municipio
-        //       };
-        //     }
-        //   } catch (error) {
-        //     console.log(`⚠️ Error obteniendo municipio ${familiaData.id_municipio}:`, error.message);
-        //   }
-        // }
-
-        // COMENTADO: Las columnas id_vereda e id_sector no existen en la tabla familias
-        // Obtener información de la vereda
-        // if (familiaData.id_vereda) {
-        //   try {
-        //     const [vereda] = await sequelize.query(`
-        //       SELECT id_vereda, nombre 
-        //       FROM veredas 
-        //       WHERE id_vereda = :veredaId
-        //     `, {
-        //       replacements: { veredaId: familiaData.id_vereda },
-        //       type: QueryTypes.SELECT
-        //     });
-        //     
-        //     if (vereda) {
-        //       veredaInfo = {
-        //         id: vereda.id_vereda,
-        //         nombre: vereda.nombre
-        //       };
-        //     }
-        //   } catch (error) {
-        //     console.log(`⚠️ Error obteniendo vereda ${familiaData.id_vereda}:`, error.message);
-        //   }
-        // }
-
-        // Obtener información del sector específico
-        // if (familiaData.id_sector) {
-        //   try {
-        //     const [sector] = await sequelize.query(`
-        //       SELECT id_sector, nombre 
-        //       FROM sectores 
-        //       WHERE id_sector = :sectorId
-        //     `, {
-        //       replacements: { sectorId: familiaData.id_sector },
-        //       type: QueryTypes.SELECT
-        //     });
-        //     
-        //     if (sector) {
-        //       sectorInfo = {
-        //         id: sector.id_sector,
-        //         nombre: sector.nombre
-        //       };
-        //     }
-        //   } catch (error) {
-        //     console.log(`⚠️ Error obteniendo sector ${familiaData.id_sector}:`, error.message);
-        //   }
-        // }
-
-        // Formatear información de personas con datos completos de configuración
-        const personasFormateadas = personas.map(persona => ({
-          id: persona.id_personas,
-          nombre_completo: `${persona.primer_nombre || ''} ${persona.segundo_nombre || ''} ${persona.primer_apellido || ''} ${persona.segundo_apellido || ''}`.trim(),
-          primer_nombre: persona.primer_nombre,
-          segundo_nombre: persona.segundo_nombre,
-          primer_apellido: persona.primer_apellido,
-          segundo_apellido: persona.segundo_apellido,
-          identificacion: {
-            numero: persona.identificacion,
-            tipo: persona.tipo_id_id ? {
-              id: persona.tipo_id_id,
-              nombre: persona.tipo_id_nombre,
-              codigo: persona.tipo_id_codigo
-            } : null
-          },
-          telefono: persona.telefono,
-          email: persona.correo_electronico,
-          fecha_nacimiento: persona.fecha_nacimiento,
-          direccion: persona.direccion,
-          estudios: persona.estudios,
-          edad: persona.fecha_nacimiento ? 
-            Math.floor((new Date() - new Date(persona.fecha_nacimiento)) / (365.25 * 24 * 60 * 60 * 1000)) : null,
-          sexo: persona.sexo_id ? {
-            id: persona.sexo_id,
-            descripcion: persona.sexo_descripcion
-          } : null,
-          id_estado_civil: persona.id_estado_civil_estado_civil,
-          tallas: {
-            camisa: persona.talla_camisa,
-            pantalon: persona.talla_pantalon,
-            zapato: persona.talla_zapato
+        // Obtener información del tipo de vivienda
+        if (familiaData.tipo_vivienda) {
+          try {
+            const [tipoVivienda] = await sequelize.query(`
+              SELECT id_tipo_vivienda, nombre 
+              FROM tipos_vivienda 
+              WHERE nombre ILIKE :tipoVivienda
+            `, {
+              replacements: { tipoVivienda: `%${familiaData.tipo_vivienda}%` },
+              type: QueryTypes.SELECT
+            });
+            
+            if (tipoVivienda) {
+              tipoViviendaInfo = {
+                id: tipoVivienda.id_tipo_vivienda,
+                nombre: tipoVivienda.nombre
+              };
+            } else {
+              tipoViviendaInfo = {
+                id: null,
+                nombre: familiaData.tipo_vivienda
+              };
+            }
+          } catch (error) {
+            tipoViviendaInfo = {
+              id: null,
+              nombre: familiaData.tipo_vivienda
+            };
           }
+        }
+
+        // Obtener información del sector
+        if (familiaData.sector) {
+          try {
+            const [sector] = await sequelize.query(`
+              SELECT id_sector, nombre 
+              FROM sectores 
+              WHERE nombre ILIKE :sectorNombre
+            `, {
+              replacements: { sectorNombre: `%${familiaData.sector}%` },
+              type: QueryTypes.SELECT
+            });
+            
+            if (sector) {
+              sectorInfo = {
+                id: sector.id_sector,
+                nombre: sector.nombre
+              };
+            } else {
+              sectorInfo = {
+                id: null,
+                nombre: familiaData.sector
+              };
+            }
+          } catch (error) {
+            sectorInfo = {
+              id: null,
+              nombre: familiaData.sector
+            };
+          }
+        }
+
+        // Obtener información de basuras, acueducto y aguas residuales
+        let disposicionBasuras = [];
+        let sistemasAcueducto = [];
+        let sistemasAguasResiduales = [];
+
+        try {
+          // Obtener disposición de basuras
+          const disposiciones = await sequelize.query(`
+            SELECT tdb.id_tipo_disposicion_basura, tdb.nombre 
+            FROM familia_disposicion_basura fdb 
+            JOIN tipos_disposicion_basura tdb ON fdb.id_tipo_disposicion_basura = tdb.id_tipo_disposicion_basura 
+            WHERE fdb.id_familia = :familiaId
+          `, {
+            replacements: { familiaId: familiaData.id_familia },
+            type: QueryTypes.SELECT
+          });
+          
+          disposicionBasuras = disposiciones.map(d => ({
+            id: d.id_tipo_disposicion_basura,
+            nombre: d.nombre
+          }));
+        } catch (error) {
+          console.log(`⚠️ Error obteniendo disposición de basuras: ${error.message}`);
+        }
+
+        try {
+          // Obtener sistemas de acueducto
+          const sistemas = await sequelize.query(`
+            SELECT sa.id_sistema_acueducto, sa.nombre 
+            FROM familia_sistema_acueducto fsa 
+            JOIN sistemas_acueducto sa ON fsa.id_sistema_acueducto = sa.id_sistema_acueducto 
+            WHERE fsa.id_familia = :familiaId
+          `, {
+            replacements: { familiaId: familiaData.id_familia },
+            type: QueryTypes.SELECT
+          });
+          
+          sistemasAcueducto = sistemas.map(s => ({
+            id: s.id_sistema_acueducto,
+            nombre: s.nombre
+          }));
+        } catch (error) {
+          console.log(`⚠️ Error obteniendo sistemas de acueducto: ${error.message}`);
+        }
+
+        try {
+          // Obtener sistemas de aguas residuales
+          const sistemasAR = await sequelize.query(`
+            SELECT tar.id_tipo_aguas_residuales, tar.nombre 
+            FROM familia_aguas_residuales far 
+            JOIN tipos_aguas_residuales tar ON far.id_tipo_aguas_residuales = tar.id_tipo_aguas_residuales 
+            WHERE far.id_familia = :familiaId
+          `, {
+            replacements: { familiaId: familiaData.id_familia },
+            type: QueryTypes.SELECT
+          });
+          
+          sistemasAguasResiduales = sistemasAR.map(s => ({
+            id: s.id_tipo_aguas_residuales,
+            nombre: s.nombre
+          }));
+        } catch (error) {
+          console.log(`⚠️ Error obteniendo sistemas de aguas residuales: ${error.message}`);
+        }
+
+        // Obtener información adicional para cada persona
+        const personasFormateadas = await Promise.all(personas.map(async (persona) => {
+          // Obtener información del estado civil
+          let estadoCivilInfo = null;
+          if (persona.id_estado_civil_estado_civil) {
+            try {
+              const [estadoCivil] = await sequelize.query(`
+                SELECT id_estado_civil, nombre 
+                FROM estados_civiles 
+                WHERE id_estado_civil = :estadoCivilId
+              `, {
+                replacements: { estadoCivilId: persona.id_estado_civil_estado_civil },
+                type: QueryTypes.SELECT
+              });
+              
+              if (estadoCivil) {
+                estadoCivilInfo = {
+                  id: estadoCivil.id_estado_civil,
+                  nombre: estadoCivil.nombre
+                };
+              }
+            } catch (error) {
+              console.log(`⚠️ Error obteniendo estado civil ${persona.id_estado_civil_estado_civil}:`, error.message);
+            }
+          }
+
+          // Obtener información del estudio
+          let estudioInfo = null;
+          if (persona.estudios) {
+            try {
+              // Si estudios contiene un ID numérico, buscar en la tabla
+              const estudioId = parseInt(persona.estudios);
+              if (!isNaN(estudioId)) {
+                const [estudio] = await sequelize.query(`
+                  SELECT id_estudios, nombre 
+                  FROM estudios 
+                  WHERE id_estudios = :estudioId
+                `, {
+                  replacements: { estudioId },
+                  type: QueryTypes.SELECT
+                });
+                
+                if (estudio) {
+                  estudioInfo = {
+                    id: estudio.id_estudios,
+                    nombre: estudio.nombre
+                  };
+                } else {
+                  estudioInfo = {
+                    id: estudioId,
+                    nombre: persona.estudios
+                  };
+                }
+              } else {
+                // Si no es un ID, mantener el texto como nombre
+                estudioInfo = {
+                  id: null,
+                  nombre: persona.estudios
+                };
+              }
+            } catch (error) {
+              estudioInfo = {
+                id: null,
+                nombre: persona.estudios
+              };
+            }
+          }
+
+          return {
+            id: persona.id_personas,
+            nombre_completo: `${persona.primer_nombre || ''} ${persona.segundo_nombre || ''} ${persona.primer_apellido || ''} ${persona.segundo_apellido || ''}`.trim(),
+            primer_nombre: persona.primer_nombre,
+            segundo_nombre: persona.segundo_nombre,
+            primer_apellido: persona.primer_apellido,
+            segundo_apellido: persona.segundo_apellido,
+            identificacion: {
+              numero: persona.identificacion,
+              tipo: persona.tipo_id_id ? {
+                id: persona.tipo_id_id,
+                nombre: persona.tipo_id_nombre,
+                codigo: persona.tipo_id_codigo
+              } : null
+            },
+            telefono: persona.telefono,
+            numero_contacto: persona.telefono, // Agregado: numero_contacto es igual al telefono
+            email: persona.correo_electronico,
+            fecha_nacimiento: persona.fecha_nacimiento,
+            direccion: persona.direccion,
+            estudios: estudioInfo, // Cambiado: ahora devuelve objeto con id y nombre
+            edad: persona.fecha_nacimiento ? 
+              Math.floor((new Date() - new Date(persona.fecha_nacimiento)) / (365.25 * 24 * 60 * 60 * 1000)) : null,
+            sexo: persona.sexo_id ? {
+              id: persona.sexo_id,
+              descripcion: persona.sexo_descripcion
+            } : null,
+            estado_civil: estadoCivilInfo, // Cambiado: ahora devuelve objeto con id y nombre
+            tallas: {
+              camisa: persona.talla_camisa,
+              pantalon: persona.talla_pantalon,
+              zapato: persona.talla_zapato
+            }
+          };
         }));
 
         return {
-          // *** ID DE LA ENCUESTA (ÚNICO - eliminamos redundancia) ***
+          // *** ID DE LA ENCUESTA (ÚNICO) ***
           id_encuesta: familiaData.id_familia,
           
           // *** INFORMACIÓN BÁSICA DE LA FAMILIA ***
           apellido_familiar: familiaData.apellido_familiar,
           direccion_familia: familiaData.direccion_familia,
-          numero_contacto: familiaData.numero_contacto,
+          numero_contacto: familiaData.numero_contacto || familiaData.telefono, // numero_contacto es igual al telefono
           telefono: familiaData.telefono,
           email: familiaData.email,
           codigo_familia: familiaData.codigo_familia,
@@ -376,18 +502,19 @@ export const obtenerEncuestas = async (req, res) => {
           fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
           
           // *** INFORMACIÓN DE VIVIENDA CON ID Y NOMBRE ***
-          tipo_vivienda: {
-            nombre: familiaData.tipo_vivienda
-          },
+          tipo_vivienda: tipoViviendaInfo,
           tamaño_familia: familiaData.tamaño_familia,
           
           // *** INFORMACIÓN GEOGRÁFICA COMPLETA CON ID Y NOMBRE ***
-          sector: {
-            nombre: familiaData.sector
-          },
+          sector: sectorInfo,
           municipio: municipioInfo,
           vereda: veredaInfo,
-          sector_especifico: sectorInfo,
+          // Removido: sector_especifico (no lo necesitas según indicaciones)
+          
+          // *** INFORMACIÓN DE SERVICIOS CON ID Y NOMBRE ***
+          basuras: disposicionBasuras.length > 0 ? disposicionBasuras : null,
+          acueducto: sistemasAcueducto.length > 0 ? sistemasAcueducto[0] : null, // Tomar el primero si hay varios
+          aguas_residuales: sistemasAguasResiduales.length > 0 ? sistemasAguasResiduales[0] : null,
           
           // *** INFORMACIÓN RELIGIOSA ***
           comunion_en_casa: familiaData.comunionEnCasa,

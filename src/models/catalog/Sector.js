@@ -24,9 +24,16 @@ const Sector = sequelize.define('Sector', {
   sequelize,
   modelName: 'Sector',
   tableName: 'sectores',
-  timestamps: true,
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
+  timestamps: false // Desactivar timestamps
 });
+
+// Definir asociaciones
+Sector.associate = function(models) {
+  // Un sector pertenece a un municipio
+  Sector.belongsTo(models.Municipios, {
+    foreignKey: 'id_municipio',
+    as: 'municipio'
+  });
+};
 
 export default Sector;

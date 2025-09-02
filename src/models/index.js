@@ -13,7 +13,11 @@ import Municipios from './catalog/Municipios.js';
 import Departamentos from './catalog/Departamentos.js';
 import Familias from './catalog/Familias.js';
 import TipoDisposicionBasura from './catalog/TipoDisposicionBasura.js';
-import FamiliaDisposicionBasura from './catalog/FamiliaDisposicionBasura.js';
+// Import FamiliaDisposicionBasura from main (CommonJS) instead of catalog
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const FamiliaDisposicionBasura = require('./main/FamiliaDisposicionBasura.cjs')(sequelize, sequelize.Sequelize.DataTypes);
+const FamiliaSistemaAguasResiduales = require('./main/FamiliaSistemaAguasResiduales.cjs')(sequelize, sequelize.Sequelize.DataTypes);
 import TipoAguasResiduales from './catalog/TipoAguasResiduales.js';
 import TipoVivienda from './catalog/TipoVivienda.js';
 import ComunidadCultural from './catalog/ComunidadCultural.js';
@@ -52,7 +56,8 @@ try {
     Usuario, User, Role, UsuarioRole, Parroquia, Veredas, Sexo, Municipios, 
     Departamentos, Sector, TipoIdentificacion, Enfermedad, Familias, Persona, 
     TipoVivienda, Parentesco, SituacionCivil, Estudio, Talla, DifuntosFamilia,
-    TipoDisposicionBasura, FamiliaDisposicionBasura, TipoAguasResiduales, ComunidadCultural
+    TipoDisposicionBasura, FamiliaDisposicionBasura, TipoAguasResiduales, 
+    FamiliaSistemaAguasResiduales, ComunidadCultural
   };
 
   // Ejecutar asociaciones de Familias
@@ -67,6 +72,18 @@ try {
     console.log('✅ Asociaciones de DifuntosFamilia configuradas');
   }
 
+  // Ejecutar asociaciones de FamiliaSistemaAguasResiduales
+  if (FamiliaSistemaAguasResiduales && typeof FamiliaSistemaAguasResiduales.associate === 'function') {
+    FamiliaSistemaAguasResiduales.associate(models);
+    console.log('✅ Asociaciones de FamiliaSistemaAguasResiduales configuradas');
+  }
+
+  // Ejecutar asociaciones de FamiliaDisposicionBasura
+  if (FamiliaDisposicionBasura && typeof FamiliaDisposicionBasura.associate === 'function') {
+    FamiliaDisposicionBasura.associate(models);
+    console.log('✅ Asociaciones de FamiliaDisposicionBasura configuradas');
+  }
+
   // Configurar la asociación inversa crítica para las consultas
   if (Familias && DifuntosFamilia) {
     Familias.hasMany(DifuntosFamilia, {
@@ -77,7 +94,7 @@ try {
   }
 
   // Ejecutar asociaciones de otros modelos críticos si existen
-  const modelsWithAssociations = [Persona, Municipios, Departamentos, Sector, Veredas];
+  const modelsWithAssociations = [Persona, Municipios, Departamentos, Parroquia, Sector, Veredas];
   
   modelsWithAssociations.forEach(model => {
     if (model && typeof model.associate === 'function') {
@@ -122,6 +139,7 @@ export default {
   TipoDisposicionBasura,
   FamiliaDisposicionBasura,
   TipoAguasResiduales,
+  FamiliaSistemaAguasResiduales,
   ComunidadCultural
 };
 
@@ -150,5 +168,6 @@ export {
   TipoDisposicionBasura,
   FamiliaDisposicionBasura,
   TipoAguasResiduales,
+  FamiliaSistemaAguasResiduales,
   ComunidadCultural
 };

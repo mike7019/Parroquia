@@ -7,7 +7,7 @@ class SectorController {
    */
   async createSector(req, res) {
     try {
-      const { nombre, id_municipio } = req.body;
+      const { nombre, municipio_id } = req.body;
 
       // Validaciones básicas
       if (!nombre) {
@@ -16,13 +16,13 @@ class SectorController {
         );
       }
 
-      if (!id_municipio) {
+      if (!municipio_id) {
         return res.status(400).json(
           createErrorResponse('El municipio es obligatorio', null, 'VALIDATION_ERROR')
         );
       }
 
-      if (isNaN(id_municipio)) {
+      if (isNaN(municipio_id)) {
         return res.status(400).json(
           createErrorResponse('El ID del municipio debe ser un número válido', null, 'VALIDATION_ERROR')
         );
@@ -31,7 +31,7 @@ class SectorController {
       // Crear el sector con municipio
       const result = await sectorService.createSector({ 
         nombre, 
-        id_municipio: parseInt(id_municipio) 
+        id_municipio: parseInt(municipio_id)
       });
 
       res.status(201).json(
@@ -239,30 +239,6 @@ class SectorController {
           error.message.includes('not found') ? 'Sector not found' : 'Error deleting sector',
           error.message,
           error.message.includes('not found') ? 'NOT_FOUND' : 'DELETE_ERROR'
-        )
-      );
-    }
-  }
-
-  /**
-   * Get available municipios for sector creation
-   */
-  async getAvailableMunicipios(req, res) {
-    try {
-      const municipios = await sectorService.getAvailableMunicipios();
-
-      res.json(
-        createSuccessResponse(
-          'Municipios disponibles obtenidos exitosamente',
-          municipios
-        )
-      );
-    } catch (error) {
-      res.status(500).json(
-        createErrorResponse(
-          'Error al obtener municipios disponibles',
-          error.message,
-          'FETCH_ERROR'
         )
       );
     }

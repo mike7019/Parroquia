@@ -103,7 +103,7 @@ router.use('/veredas', veredaRoutes);
 router.use('/sexos', sexoRoutes);
 router.use('/municipios', municipioRoutes);
 router.use('/departamentos', departamentoRoutes);
-router.use('/sectors', sectorRoutes);
+router.use('/sectores', sectorRoutes);
 router.use('/tipos-identificacion', tipoIdentificacionRoutes);
 router.use('/enfermedades', enfermedadRoutes);
 router.use('/disposicion-basura', disposicionBasuraRoutes);

@@ -1,27 +1,10 @@
 import sequelize from '../../../config/sequelize.js';
 import { Op } from 'sequelize';
-// Importar directamente los modelos para asegurar que las asociaciones estén definidas
-import Sector from '../../models/catalog/Sector.js';
-import Municipios from '../../models/catalog/Municipios.js';
+import { Sector, Municipios } from '../../models/index.js';
 
-// Asegurar que las asociaciones estén definidas
-if (!Sector.associations.municipio) {
-  Sector.belongsTo(Municipios, {
-    foreignKey: 'id_municipio',
-    as: 'municipio'
-  });
-}
-
-if (!Municipios.associations.sectores) {
-  Municipios.hasMany(Sector, {
-    foreignKey: 'id_municipio',
-    as: 'sectores'
-  });
-}
-
-// Obtener el modelo Sector desde Sequelize una vez que se cargue
+// Helper functions to get models
 const getSectorModel = () => Sector;
-const getMunicipioModel = () => Municipios;
+const getMunicipiosModel = () => Municipios;
 
 class SectorService {
   /**
@@ -31,19 +14,22 @@ class SectorService {
     try {
       // Validar que el municipio existe
       if (sectorData.id_municipio) {
-        const municipio = await getMunicipioModel().findByPk(sectorData.id_municipio);
+        const municipio = await getMunicipiosModel().findByPk(sectorData.id_municipio);
         if (!municipio) {
           throw new Error('El municipio especificado no existe');
         }
       }
 
-      // Verificar que no existe otro sector con el mismo nombre
+      // Verificar que no existe otro sector con el mismo nombre en el mismo municipio
       const existingSector = await getSectorModel().findOne({
-        where: { nombre: sectorData.nombre }
+        where: { 
+          nombre: sectorData.nombre,
+          id_municipio: sectorData.id_municipio
+        }
       });
 
       if (existingSector) {
-        throw new Error('Ya existe un sector con ese nombre');
+        throw new Error('Ya existe un sector con ese nombre en este municipio');
       }
 
       const sector = await getSectorModel().create(sectorData);
@@ -51,7 +37,7 @@ class SectorService {
       // Return created sector with municipio info
       const sectorWithMunicipio = await getSectorModel().findByPk(sector.id_sector, {
         include: [{
-          model: getMunicipioModel(),
+          model: getMunicipiosModel(),
           as: 'municipio',
           attributes: ['id_municipio', 'nombre_municipio']
         }]
@@ -85,11 +71,6 @@ class SectorService {
   async getAllSectors() {
     try {
       const sectors = await getSectorModel().findAll({
-        include: [{
-          model: getMunicipioModel(),
-          as: 'municipio',
-          attributes: ['id_municipio', 'nombre_municipio']
-        }],
         order: [['nombre', 'ASC']]
       });
 
@@ -116,7 +97,7 @@ class SectorService {
     try {
       const sector = await getSectorModel().findByPk(id, {
         include: [{
-          model: getMunicipioModel(),
+          model: getMunicipiosModel(),
           as: 'municipio',
           attributes: ['id_municipio', 'nombre_municipio']
         }]
@@ -142,23 +123,24 @@ class SectorService {
 
       // Validar que el municipio existe si se está actualizando
       if (updateData.id_municipio) {
-        const municipio = await getMunicipioModel().findByPk(updateData.id_municipio);
+        const municipio = await getMunicipiosModel().findByPk(updateData.id_municipio);
         if (!municipio) {
           throw new Error('El municipio especificado no existe');
         }
       }
 
-      // Verificar que no existe otro sector con el mismo nombre (excluyendo el actual)
+      // Verificar que no existe otro sector con el mismo nombre en el mismo municipio (excluyendo el actual)
       if (updateData.nombre && updateData.nombre !== sector.nombre) {
         const existingSector = await getSectorModel().findOne({
           where: { 
             nombre: updateData.nombre,
+            id_municipio: updateData.id_municipio || sector.id_municipio,
             id_sector: { [Op.ne]: id }
           }
         });
 
         if (existingSector) {
-          throw new Error('Ya existe un sector con ese nombre');
+          throw new Error('Ya existe un sector con ese nombre en este municipio');
         }
       }
 
@@ -167,7 +149,7 @@ class SectorService {
       // Return updated sector with municipio info
       const updatedSector = await getSectorModel().findByPk(id, {
         include: [{
-          model: getMunicipioModel(),
+          model: getMunicipiosModel(),
           as: 'municipio',
           attributes: ['id_municipio', 'nombre_municipio']
         }]
@@ -214,31 +196,6 @@ class SectorService {
     }
   }
 
-  /**
-   * Get all available municipios for sector creation
-   */
-  async getAvailableMunicipios() {
-    try {
-      const municipios = await getMunicipioModel().findAll({
-        attributes: ['id_municipio', 'nombre_municipio'],
-        order: [['nombre_municipio', 'ASC']]
-      });
-
-      return {
-        status: 'success',
-        data: municipios,
-        total: municipios.length,
-        message: `Se encontraron ${municipios.length} municipios disponibles`
-      };
-    } catch (error) {
-      return {
-        status: 'error',
-        data: [],
-        total: 0,
-        message: `Error al obtener municipios: ${error.message}`
-      };
-    }
-  }
 }
 
 export default new SectorService();

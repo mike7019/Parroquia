@@ -5,15 +5,19 @@ module.exports = (sequelize, DataTypes) => {
   class FamiliaTipoAguasResiduales extends Model {
     static associate(models) {
       // Relaciones con las tablas principales
-      FamiliaTipoAguasResiduales.belongsTo(models.Familia, {
-        foreignKey: 'id_familia',
-        as: 'familia'
-      });
+      if (models.Familias) {
+        FamiliaTipoAguasResiduales.belongsTo(models.Familias, {
+          foreignKey: 'id_familia',
+          as: 'familia'
+        });
+      }
 
-      FamiliaTipoAguasResiduales.belongsTo(models.TipoAguasResiduales, {
-        foreignKey: 'id_tipo_aguas_residuales',
-        as: 'tipoAguasResiduales'
-      });
+      if (models.TipoAguasResiduales) {
+        FamiliaTipoAguasResiduales.belongsTo(models.TipoAguasResiduales, {
+          foreignKey: 'id_tipo_aguas_residuales',
+          as: 'tipoAguasResiduales'
+        });
+      }
     }
   }
 
@@ -47,13 +51,8 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'FamiliaTipoAguasResiduales',
     tableName: 'familia_sistema_aguas_residuales',
     timestamps: true,
-    indexes: [
-      {
-        unique: true,
-        fields: ['id_familia', 'id_tipo_aguas_residuales'],
-        name: 'unique_familia_tipo_aguas_residuales'
-      }
-    ]
+    // No definir indexes aquí ya que la tabla ya existe con sus índices correctos
+    // indexes: []
   });
 
   return FamiliaTipoAguasResiduales;

@@ -239,25 +239,4 @@ router.put('/:id', sectorController.updateSector);
  */
 router.delete('/:id', sectorController.deleteSector);
 
-/**
- * @swagger
- * /api/catalog/sectors/municipios:
- *   get:
- *     summary: Get available municipios for sector creation
- *     description: Obtiene la lista de municipios disponibles para asignar a un sector.
- *     tags: [Sectors]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Municipios obtenidos exitosamente
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/MunicipiosDisponiblesResponse'
- *       500:
- *         description: Error del servidor
- */
-router.get('/municipios', sectorController.getAvailableMunicipios);
-
 export default router;

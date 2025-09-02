@@ -5,15 +5,19 @@ module.exports = (sequelize, DataTypes) => {
   class FamiliaDisposicionBasura extends Model {
     static associate(models) {
       // Relaciones con las tablas principales
-      FamiliaDisposicionBasura.belongsTo(models.Familia, {
-        foreignKey: 'id_familia',
-        as: 'familia'
-      });
+      if (models.Familias) {
+        FamiliaDisposicionBasura.belongsTo(models.Familias, {
+          foreignKey: 'id_familia',
+          as: 'familia'
+        });
+      }
 
-      FamiliaDisposicionBasura.belongsTo(models.TipoDisposicionBasura, {
-        foreignKey: 'id_tipo_disposicion_basura',
-        as: 'tipoDisposicionBasura'
-      });
+      if (models.TipoDisposicionBasura) {
+        FamiliaDisposicionBasura.belongsTo(models.TipoDisposicionBasura, {
+          foreignKey: 'id_tipo_disposicion_basura',
+          as: 'tipoDisposicionBasura'
+        });
+      }
     }
   }
 
@@ -47,13 +51,8 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'FamiliaDisposicionBasura',
     tableName: 'familia_disposicion_basura',
     timestamps: true,
-    indexes: [
-      {
-        unique: true,
-        fields: ['id_familia', 'id_tipo_disposicion_basura'],
-        name: 'unique_familia_disposicion_basura'
-      }
-    ]
+    // No definir indexes aquí ya que la tabla ya existe con sus índices correctos
+    // indexes: []
   });
 
   return FamiliaDisposicionBasura;

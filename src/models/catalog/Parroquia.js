@@ -18,49 +18,18 @@ const Parroquia = sequelize.define('Parroquia', {
   },
   id_municipio: {
     type: DataTypes.BIGINT,
-    allowNull: false, // Ahora requerido
+    allowNull: false,
     references: {
       model: 'municipios',
       key: 'id_municipio'
     },
     comment: 'ID del municipio al que pertenece la parroquia'
-  },
-  descripcion: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-    comment: 'Descripción opcional de la parroquia'
-  },
-  direccion: {
-    type: DataTypes.STRING(500),
-    allowNull: true,
-    comment: 'Dirección física de la parroquia'
-  },
-  telefono: {
-    type: DataTypes.STRING(20),
-    allowNull: true,
-    comment: 'Número de teléfono de contacto'
-  },
-  email: {
-    type: DataTypes.STRING(100),
-    allowNull: true,
-    validate: {
-      isEmail: true
-    },
-    comment: 'Correo electrónico de contacto'
-  },
-  activo: {
-    type: DataTypes.BOOLEAN,
-    allowNull: true,
-    defaultValue: true,
-    comment: 'Estado activo/inactivo de la parroquia'
   }
 }, {
   sequelize,
   modelName: 'Parroquia',
   tableName: 'parroquia',
-  timestamps: true, // Reactivar timestamps
-  createdAt: 'created_at',
-  updatedAt: 'updated_at',
+  timestamps: false, // Desactivar timestamps
   indexes: [
     {
       name: 'idx_parroquia_municipio',
@@ -70,12 +39,22 @@ const Parroquia = sequelize.define('Parroquia', {
       name: 'idx_parroquia_nombre',
       fields: ['nombre']
     }
-    // NOTE: idx_parroquia_activo disabled - column may not exist in DB
-    // {
-    //   name: 'idx_parroquia_activo',
-    //   fields: ['activo']
-    // }
   ]
 });
+
+// Definir asociaciones
+Parroquia.associate = function(models) {
+  // Una parroquia pertenece a un municipio
+  Parroquia.belongsTo(models.Municipios, {
+    foreignKey: 'id_municipio',
+    as: 'municipio'
+  });
+  
+  // Una parroquia puede tener muchos sectores
+  Parroquia.hasMany(models.Sector, {
+    foreignKey: 'id_parroquia',
+    as: 'sectores'
+  });
+};
 
 export default Parroquia;
