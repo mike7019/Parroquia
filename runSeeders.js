@@ -29,7 +29,8 @@ async function runAllSeeders() {
 }
 
 // Ejecutar solo si este archivo es llamado directamente
-if (import.meta.url === `file://${process.argv[1]}`) {
+const isMainModule = process.argv[1] && process.argv[1].endsWith('runSeeders.js');
+if (isMainModule) {
   runAllSeeders().catch(error => {
     console.error('💥 Error crítico:', error);
     process.exit(1);

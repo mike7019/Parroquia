@@ -75,3 +75,43 @@ export default {
   testConnection,
   getDatabaseInfo
 };
+
+// Auto-run if this file is executed directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  console.log('🚀 Executing database synchronization...');
+  
+  (async () => {
+    try {
+      // Test connection first
+      const connected = await testConnection();
+      if (!connected) {
+        console.error('❌ Cannot proceed without database connection');
+        process.exit(1);
+      }
+      
+      // Load all models  
+      const result = await loadAllModels();
+      console.log(`📊 Loaded ${result.modelCount} models successfully`);
+      
+      // Check for force sync argument
+      const forceSync = process.argv.includes('force') || process.argv.includes('alter');
+      
+      if (forceSync) {
+        console.log('🔄 Force synchronizing database with models...');
+        const syncOptions = process.argv.includes('force') ? { force: true } : { alter: true };
+        await sequelize.sync(syncOptions);
+        console.log('✅ Database forcefully synchronized with current models');
+      } else {
+        console.log('ℹ️  Database sync skipped. Use "force" or "alter" argument to enable.');
+      }
+      
+      console.log('🎉 Database synchronization completed successfully');
+      
+    } catch (error) {
+      console.error('💥 Error during database synchronization:', error);
+      process.exit(1);
+    } finally {
+      await sequelize.close();
+    }
+  })();
+}
