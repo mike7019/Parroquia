@@ -782,7 +782,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
     }
 
     // Para cada persona, formatear información completa usando datos ya obtenidos
-    const personasDetalladas = await Promise.all(personas.map(async (persona) => {
+    const personasDetalladas = personas.map((persona) => {
         return {
           id: persona.id_personas,
           informacion_personal: {
@@ -816,45 +816,11 @@ export const obtenerEncuestaPorId = async (req, res) => {
             direccion: persona.direccion
           },
           educacion_y_liderazgo: {
-            estudios: await (async () => {
-              if (!persona.estudios) {
-                return { id: null, nombre: null, descripcion: null };
-              }
-              
-              try {
-                // Intentar buscar en la tabla estudios
-                const estudiosQuery = await sequelize.query(`
-                  SELECT id_estudios, nombre, descripcion 
-                  FROM estudios 
-                  WHERE id_estudios::text = :estudios OR nombre ILIKE :estudiosName
-                  LIMIT 1
-                `, {
-                  replacements: { 
-                    estudios: persona.estudios,
-                    estudiosName: `%${persona.estudios}%`
-                  },
-                  type: QueryTypes.SELECT
-                });
-
-                if (estudiosQuery.length > 0) {
-                  const estudio = estudiosQuery[0];
-                  return {
-                    id: estudio.id_estudios,
-                    nombre: estudio.nombre,
-                    descripcion: estudio.descripcion
-                  };
-                }
-              } catch (error) {
-                console.log(`⚠️ Error al buscar estudios:`, error.message);
-              }
-              
-              // Si no se encuentra, devolver solo el nombre
-              return {
-                id: null,
-                nombre: persona.estudios,
-                descripcion: null
-              };
-            })(),
+            estudios: {
+              id: null, // No hay tabla de estudios, usar null
+              nombre: persona.estudios || null,
+              descripcion: null // No hay tabla de estudios, usar null
+            },
             liderazgo: persona.en_que_eres_lider
           },
           salud: {
@@ -888,7 +854,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
             ultima_actualizacion: persona.updatedAt
           }
         };
-      }));
+      });
 
     // Construir respuesta completa y estructurada con toda la información
     const encuestaCompleta = {
@@ -1319,7 +1285,7 @@ export const crearEncuesta = async (req, res) => {
       telefono: informacionGeneral.telefono,
       email: informacionGeneral.email || null,
       tamaño_familia: tamanioFamiliaCalculado,
-      tipo_vivienda: vivienda.tipo_vivienda?.nombre || vivienda.tipo_vivienda || 'Casa',
+      tipo_vivienda: vivienda.tipo_vivienda?.id || vivienda.tipo_vivienda?.nombre || vivienda.tipo_vivienda || 'Casa',
       estado_encuesta: 'completed',
       numero_encuestas: 1,
       fecha_ultima_encuesta: new Date().toISOString().split('T')[0],

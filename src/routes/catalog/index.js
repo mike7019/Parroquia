@@ -104,6 +104,8 @@ router.use('/sexos', sexoRoutes);
 router.use('/municipios', municipioRoutes);
 router.use('/departamentos', departamentoRoutes);
 router.use('/sectores', sectorRoutes);
+// English alias for sectors
+router.use('/sectors', sectorRoutes);
 router.use('/tipos-identificacion', tipoIdentificacionRoutes);
 router.use('/enfermedades', enfermedadRoutes);
 router.use('/disposicion-basura', disposicionBasuraRoutes);
