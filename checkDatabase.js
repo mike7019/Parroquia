@@ -42,8 +42,10 @@ async function checkTableExists(tableName) {
       SELECT table_name 
       FROM information_schema.tables 
       WHERE table_schema = 'public' 
-      AND table_name = '${tableName}'
-    `);
+      AND table_name = :tableName
+    `, {
+      replacements: { tableName }
+    });
     
     return results.length > 0;
   } catch (error) {
@@ -90,7 +92,7 @@ async function checkCatalogData() {
 
 async function checkDatabaseHealth() {
   console.log('🔍 DATABASE HEALTH CHECK');
-  console.log('=' * 50);
+  console.log('='.repeat(50));
   
   // Check connection
   const connectionOk = await checkDatabaseConnection();
@@ -117,7 +119,7 @@ async function checkDatabaseHealth() {
   const catalogOk = await checkCatalogData();
   
   // Final assessment
-  console.log('\n' + '=' * 50);
+  console.log('\n' + '='.repeat(50));
   
   if (connectionOk && tablesOk && catalogOk) {
     console.log('🎉 DATABASE HEALTH CHECK PASSED!');
@@ -158,7 +160,7 @@ async function main() {
 }
 
 // Auto-execute if this file is run directly
-if (import.meta.url === `file://${process.argv[1]}` || process.argv[1].endsWith('checkDatabase.js')) {
+if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('checkDatabase.js')) {
   main();
 }
 
