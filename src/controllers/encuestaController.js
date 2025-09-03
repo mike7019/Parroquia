@@ -363,9 +363,9 @@ export const obtenerEncuestas = async (req, res) => {
           // Obtener sistemas de aguas residuales
           const sistemasAR = await sequelize.query(`
             SELECT tar.id_tipo_aguas_residuales, tar.nombre 
-            FROM familia_aguas_residuales far 
-            JOIN tipos_aguas_residuales tar ON far.id_tipo_aguas_residuales = tar.id_tipo_aguas_residuales 
-            WHERE far.id_familia = :familiaId
+            FROM familia_sistema_aguas_residuales fsar 
+            JOIN tipos_aguas_residuales tar ON fsar.id_tipo_aguas_residuales = tar.id_tipo_aguas_residuales 
+            WHERE fsar.id_familia = :familiaId
           `, {
             replacements: { familiaId: familiaData.id_familia },
             type: QueryTypes.SELECT
@@ -583,25 +583,39 @@ export const obtenerEncuestaPorId = async (req, res) => {
     );
     console.log(`🔍 Familia existe (verificación directa): ${verificacionDirecta[0].existe}`);
 
-    // Buscar la familia usando SQL directo (COLUMNAS EXISTENTES SOLAMENTE)
+    // Buscar la familia usando SQL directo con JOINs para obtener IDs
     const familiasQuery = `
       SELECT 
-        id_familia,
-        apellido_familiar,
-        sector,
-        direccion_familia,
-        numero_contacto,
-        telefono,
-        email,
-        tamaño_familia,
-        tipo_vivienda,
-        estado_encuesta,
-        numero_encuestas,
-        fecha_ultima_encuesta,
-        codigo_familia,
-        tutor_responsable
-      FROM familias 
-      WHERE id_familia = :familiaId
+        f.id_familia,
+        f.apellido_familiar,
+        f.sector,
+        f.direccion_familia,
+        f.numero_contacto,
+        f.telefono,
+        f.email,
+        f.tamaño_familia,
+        f.tipo_vivienda,
+        f.estado_encuesta,
+        f.numero_encuestas,
+        f.fecha_ultima_encuesta,
+        f.codigo_familia,
+        f.tutor_responsable,
+        f.numero_contrato_epm,
+        f.id_municipio,
+        f.id_vereda,
+        f.id_sector,
+        m.nombre_municipio,
+        v.nombre as nombre_vereda,
+        s.nombre as nombre_sector,
+        tv.id_tipo_vivienda,
+        tv.nombre as nombre_tipo_vivienda,
+        tv.descripcion as descripcion_tipo_vivienda
+      FROM familias f
+      LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
+      LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
+      LEFT JOIN sectores s ON f.id_sector = s.id_sector
+      LEFT JOIN tipos_vivienda tv ON f.tipo_vivienda = tv.nombre
+      WHERE f.id_familia = :familiaId
     `;
     
     const [encuesta] = await sequelize.query(familiasQuery, {
@@ -701,6 +715,27 @@ export const obtenerEncuestaPorId = async (req, res) => {
       sistemasAcueducto = [];
     }
 
+    // Obtener aguas residuales (siguiendo el mismo patrón que sistemas de acueducto)
+    let tiposAguasResiduales = [];
+    try {
+      const aguasResiduales = await sequelize.query(
+        'SELECT fsar.id_familia, tar.id_tipo_aguas_residuales, tar.nombre, tar.descripcion FROM familia_sistema_aguas_residuales fsar JOIN tipos_aguas_residuales tar ON fsar.id_tipo_aguas_residuales = tar.id_tipo_aguas_residuales WHERE fsar.id_familia = $1',
+        {
+          bind: [familiaData.id_familia],
+          type: sequelize.QueryTypes.SELECT
+        }
+      );
+      
+      tiposAguasResiduales = aguasResiduales.map(ar => ({
+        id: ar.id_tipo_aguas_residuales,
+        nombre: ar.nombre,
+        descripcion: ar.descripcion
+      }));
+    } catch (error) {
+      console.log(`  ⚠️ Error obteniendo tipos de aguas residuales: ${error.message}`);
+      tiposAguasResiduales = [];
+    }
+
     // Obtener información de parroquia si existe
     if (familiaData.id_parroquia) {
       const Parroquia = sequelize.models.Parroquia;
@@ -713,47 +748,41 @@ export const obtenerEncuestaPorId = async (req, res) => {
       }
     }
 
-    // Obtener información de ubicación
+    // Obtener información de ubicación (usar datos obtenidos en la consulta principal)
     let municipioInfo = null;
     let veredaInfo = null;
     let sectorInfo = null;
 
-    if (familiaData.id_municipio) {
-      const Municipios = sequelize.models.Municipios;
-      const municipio = await Municipios.findByPk(familiaData.id_municipio);
-      if (municipio) {
-        municipioInfo = {
-          id: municipio.id_municipio,
-          nombre: municipio.nombre_municipio
-        };
-      }
+    // Usar datos obtenidos directamente de la consulta con JOINs
+    if (familiaData.id_municipio && familiaData.nombre_municipio) {
+      municipioInfo = {
+        id: familiaData.id_municipio,
+        nombre: familiaData.nombre_municipio
+      };
     }
 
-    // COMENTADO: Las columnas id_vereda e id_sector no existen en la tabla familias
-    // if (familiaData.id_vereda) {
-    //   const Veredas = sequelize.models.Veredas;
-    //   const vereda = await Veredas.findByPk(familiaData.id_vereda);
-    //   if (vereda) {
-    //     veredaInfo = {
-    //       id: vereda.id_vereda,
-    //       nombre: vereda.nombre_vereda
-    //     };
-    //   }
-    // }
+    if (familiaData.id_vereda && familiaData.nombre_vereda) {
+      veredaInfo = {
+        id: familiaData.id_vereda,
+        nombre: familiaData.nombre_vereda
+      };
+    }
 
-    // if (familiaData.id_sector) {
-    //   const Sectores = sequelize.models.Sector;
-    //   const sector = await Sectores.findByPk(familiaData.id_sector);
-    //   if (sector) {
-    //     sectorInfo = {
-    //       id: sector.id_sector,
-    //       nombre: sector.nombre_sector
-    //     };
-    //   }
-    // }
+    // Usar datos de sector con ID
+    if (familiaData.id_sector && familiaData.nombre_sector) {
+      sectorInfo = {
+        id: familiaData.id_sector,
+        nombre: familiaData.nombre_sector
+      };
+    } else if (familiaData.sector) {
+      // Fallback para sector como texto
+      sectorInfo = {
+        nombre: familiaData.sector
+      };
+    }
 
     // Para cada persona, formatear información completa usando datos ya obtenidos
-    const personasDetalladas = personas.map((persona) => {
+    const personasDetalladas = await Promise.all(personas.map(async (persona) => {
         return {
           id: persona.id_personas,
           informacion_personal: {
@@ -787,7 +816,45 @@ export const obtenerEncuestaPorId = async (req, res) => {
             direccion: persona.direccion
           },
           educacion_y_liderazgo: {
-            estudios: persona.estudios,
+            estudios: await (async () => {
+              if (!persona.estudios) {
+                return { id: null, nombre: null, descripcion: null };
+              }
+              
+              try {
+                // Intentar buscar en la tabla estudios
+                const estudiosQuery = await sequelize.query(`
+                  SELECT id_estudios, nombre, descripcion 
+                  FROM estudios 
+                  WHERE id_estudios::text = :estudios OR nombre ILIKE :estudiosName
+                  LIMIT 1
+                `, {
+                  replacements: { 
+                    estudios: persona.estudios,
+                    estudiosName: `%${persona.estudios}%`
+                  },
+                  type: QueryTypes.SELECT
+                });
+
+                if (estudiosQuery.length > 0) {
+                  const estudio = estudiosQuery[0];
+                  return {
+                    id: estudio.id_estudios,
+                    nombre: estudio.nombre,
+                    descripcion: estudio.descripcion
+                  };
+                }
+              } catch (error) {
+                console.log(`⚠️ Error al buscar estudios:`, error.message);
+              }
+              
+              // Si no se encuentra, devolver solo el nombre
+              return {
+                id: null,
+                nombre: persona.estudios,
+                descripcion: null
+              };
+            })(),
             liderazgo: persona.en_que_eres_lider
           },
           salud: {
@@ -821,8 +888,8 @@ export const obtenerEncuestaPorId = async (req, res) => {
             ultima_actualizacion: persona.updatedAt
           }
         };
-      });
-    
+      }));
+
     // Construir respuesta completa y estructurada con toda la información
     const encuestaCompleta = {
       // Información básica de la familia
@@ -831,10 +898,10 @@ export const obtenerEncuestaPorId = async (req, res) => {
         apellido_familiar: familiaData.apellido_familiar,
         direccion_familia: familiaData.direccion_familia,
         telefono: familiaData.telefono,
-        email: familiaData.email,
+        email: personasDetalladas.length > 0 && !personasDetalladas[0].es_fallecido ? personasDetalladas[0].contacto?.correo_electronico : familiaData.email, // ✅ CORRECCIÓN: Usar email de primera persona viva
         codigo_familia: familiaData.codigo_familia,
         tutor_responsable: familiaData.tutor_responsable,
-        numero_contrato_epm: null // Campo que se podría agregar luego
+        numero_contrato_epm: familiaData.numero_contrato_epm // ✅ CORRECCIÓN: Usar datos reales del modelo
       },
       
       // Información de la encuesta
@@ -846,11 +913,15 @@ export const obtenerEncuestaPorId = async (req, res) => {
       
       // Información completa de vivienda
       informacion_vivienda: {
-        tipo_vivienda: {
+        tipo_vivienda: familiaData.id_tipo_vivienda ? {
+          id: familiaData.id_tipo_vivienda,
+          nombre: familiaData.nombre_tipo_vivienda,
+          descripcion: familiaData.descripcion_tipo_vivienda
+        } : {
           nombre: familiaData.tipo_vivienda
         },
         tamaño_familia: familiaData.tamaño_familia,
-        sector: familiaData.sector,
+        sector: sectorInfo || { nombre: familiaData.sector },
         disposicion_basuras: {
           recolector: disposicionBasuras.some(d => d.nombre === 'Recolección Pública'),
           quemada: disposicionBasuras.some(d => d.nombre === 'Quema'),
@@ -869,11 +940,16 @@ export const obtenerEncuestaPorId = async (req, res) => {
           nombre: sistemasAcueducto[0].nombre,
           descripcion: sistemasAcueducto[0].descripcion
         } : null,
-        aguas_residuales: null, // Se puede expandir luego
+        aguas_residuales: tiposAguasResiduales.length > 0 ? {
+          id: tiposAguasResiduales[0].id,
+          nombre: tiposAguasResiduales[0].nombre,
+          descripcion: tiposAguasResiduales[0].descripcion
+        } : null,
         pozo_septico: false,    // Se puede expandir luego
         letrina: false,         // Se puede expandir luego
         campo_abierto: false,   // Se puede expandir luego
-        sistemas_registrados: sistemasAcueducto
+        sistemas_registrados: sistemasAcueducto,
+        aguas_residuales_registradas: tiposAguasResiduales
       },
       
       // Información geográfica completa
@@ -886,7 +962,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
       
       // Información detallada de personas con separación de vivos y fallecidos
       miembros_familia: {
-        total_miembros: personas.length,
+        total_miembros: personasDetalladas.length,
         personas: personasDetalladas.filter(p => !p.es_fallecido),
         personas_fallecidas: personasDetalladas.filter(p => p.es_fallecido).map(p => ({
           ...p,
@@ -1335,7 +1411,27 @@ export const crearEncuesta = async (req, res) => {
       }
     }
 
-    // 4. REGISTRAR INFORMACIÓN DE TIPO DE VIVIENDA
+    // 4. REGISTRAR AGUAS RESIDUALES
+    console.log('🚰 Registrando aguas residuales...');
+    if (servicios_agua.aguas_residuales) {
+      try {
+        // Mapear aguas residuales por ID o usar default
+        let aguaResidualesId = servicios_agua.aguas_residuales.id || 1; // Default: Alcantarillado
+
+        await sequelize.query(
+          'INSERT INTO familia_sistema_aguas_residuales (id_familia, id_tipo_aguas_residuales, "createdAt", "updatedAt") VALUES ($1, $2, NOW(), NOW())',
+          {
+            bind: [familiaId, aguaResidualesId],
+            transaction
+          }
+        );
+        console.log(`  ✅ Aguas residuales registradas: ID ${aguaResidualesId}`);
+      } catch (error) {
+        console.log(`  ⚠️ Error registrando aguas residuales: ${error.message}`);
+      }
+    }
+
+    // 5. REGISTRAR INFORMACIÓN DE TIPO DE VIVIENDA
     console.log('🏠 Registrando tipo de vivienda...');
     if (vivienda.tipo_vivienda) {
       const FamiliaTipoVivienda = sequelize.models.FamiliaTipoVivienda;
@@ -1361,7 +1457,7 @@ export const crearEncuesta = async (req, res) => {
       console.log(`  ✅ Tipo vivienda registrado: ID ${tipoViviendaId}`);
     }
 
-    // 5. PROCESAR MIEMBROS VIVOS DE LA FAMILIA
+    // 6. PROCESAR MIEMBROS VIVOS DE LA FAMILIA
     let personasCreadas = 0;
     if (familyMembers.length > 0) {
       console.log(`👥 Procesando ${familyMembers.length} miembros de la familia...`);
@@ -1496,7 +1592,7 @@ export const crearEncuesta = async (req, res) => {
       }
     }
 
-    // 6. PROCESAR MIEMBROS FALLECIDOS
+    // 7. PROCESAR MIEMBROS FALLECIDOS
     let personasFallecidas = 0;
     if (deceasedMembers.length > 0) {
       console.log(`⚰️ Procesando ${deceasedMembers.length} miembros fallecidos...`);
@@ -1544,7 +1640,7 @@ export const crearEncuesta = async (req, res) => {
       }
     }
 
-    // 7. CONFIRMAR TRANSACCIÓN
+    // 8. CONFIRMAR TRANSACCIÓN
     console.log('🔄 Iniciando commit de transacción...');
     await transaction.commit();
     console.log('✅ Transacción completada exitosamente');

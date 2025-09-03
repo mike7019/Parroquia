@@ -295,7 +295,8 @@ const startServer = async () => {
     }
 
     // Sync database (be careful in production)
-    if (process.env.NODE_ENV !== 'production') {
+    // DESHABILITADO: Evita errores de índices duplicados
+    if (false && process.env.NODE_ENV !== 'production') {
       try {
         console.log('🔄 Attempting database synchronization...');
         await sequelize.sync({ alter: false });
@@ -305,6 +306,8 @@ const startServer = async () => {
         console.log('⚠️  Continuing without sync - database may need manual attention');
         // Don't throw here - continue with server startup
       }
+    } else {
+      console.log('ℹ️  Database sync skipped (disabled to avoid index conflicts)');
     }
 
     // Display all registered routes

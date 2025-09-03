@@ -98,6 +98,11 @@ const Familias = sequelize.define('Familias', {
     allowNull: true,
     defaultValue: false,
     comment: 'Solicita Comunión en casa?'
+  },
+  numero_contrato_epm: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    comment: 'Número de contrato con EPM (Empresas Públicas)'
   }
 }, {
   tableName: 'familias',

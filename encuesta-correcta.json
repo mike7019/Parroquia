@@ -1,0 +1,172 @@
+{
+  "informacionGeneral": {
+    "municipio": {
+      "id": 1,
+      "nombre": "Medellín"
+    },
+    "parroquia": {
+      "id": 1,
+      "nombre": "San José"
+    },
+    "sector": {
+      "id": 1,
+      "nombre": "Centro"
+    },
+    "vereda": {
+      "id": 1,
+      "nombre": "La Macarena"
+    },
+    "fecha": "2025-01-02",
+    "apellido_familiar": "Familia Nueva",
+    "direccion": "Calle Nueva 123",
+    "telefono": "3009876543",
+    "numero_contrato_epm": "98765432",
+    "comunionEnCasa": false
+  },
+  "vivienda": {
+    "tipo_vivienda": {
+      "id": 1,
+      "nombre": "Casa"
+    },
+    "disposicion_basuras": {
+      "recolector": true,
+      "quemada": false,
+      "enterrada": false,
+      "recicla": true,
+      "aire_libre": false,
+      "no_aplica": false
+    }
+  },
+  "servicios_agua": {
+    "sistema_acueducto": {
+      "id": 1,
+      "nombre": "Acueducto Público"
+    },
+    "aguas_residuales": {
+      "id": 1,
+      "nombre": "Alcantarillado"
+    },
+    "pozo_septico": false,
+    "letrina": false,
+    "campo_abierto": false
+  },
+  "observaciones": {
+    "sustento_familia": "Trabajo profesional",
+    "observaciones_encuestador": "Familia nueva de prueba",
+    "autorizacion_datos": true
+  },
+  "familyMembers": [
+    {
+      "nombres": "Carlos Alberto Nuevo",
+      "numeroIdentificacion": "99887766",
+      "tipoIdentificacion": {
+        "id": 1,
+        "nombre": "Cédula de Ciudadanía"
+      },
+      "fechaNacimiento": "1985-06-10",
+      "sexo": {
+        "id": 1,
+        "nombre": "Masculino"
+      },
+      "telefono": "3111234567",
+      "situacionCivil": {
+        "id": 1,
+        "nombre": "Casado Civil"
+      },
+      "estudio": {
+        "id": 8,
+        "nombre": "Universitario"
+      },
+      "parentesco": {
+        "id": 1,
+        "nombre": "Jefe de Hogar"
+      },
+      "comunidadCultural": {
+        "id": 1,
+        "nombre": "Ninguna"
+      },
+      "enfermedad": {
+        "id": 1,
+        "nombre": "Ninguna"
+      },
+      "talla_camisa/blusa": "L",
+      "talla_pantalon": "32",
+      "talla_zapato": "41",
+      "profesion": {
+        "id": 1,
+        "nombre": "Estudiante"
+      },
+      "motivoFechaCelebrar": {
+        "motivo": "Cumpleaños",
+        "dia": "10",
+        "mes": "06"
+      }
+    },
+    {
+      "nombres": "Ana Maria Esposa",
+      "numeroIdentificacion": "88776655",
+      "tipoIdentificacion": {
+        "id": 1,
+        "nombre": "Cédula de Ciudadanía"
+      },
+      "fechaNacimiento": "1987-09-15",
+      "sexo": {
+        "id": 2,
+        "nombre": "Femenino"
+      },
+      "telefono": "3221234567",
+      "situacionCivil": {
+        "id": 1,
+        "nombre": "Casado Civil"
+      },
+      "estudio": {
+        "id": 8,
+        "nombre": "Universitario"
+      },
+      "parentesco": {
+        "id": 2,
+        "nombre": "Cónyuge"
+      },
+      "comunidadCultural": {
+        "id": 1,
+        "nombre": "Ninguna"
+      },
+      "enfermedad": {
+        "id": 1,
+        "nombre": "Ninguna"
+      },
+      "talla_camisa/blusa": "M",
+      "talla_pantalon": "28",
+      "talla_zapato": "37",
+      "profesion": {
+        "id": 1,
+        "nombre": "Estudiante"
+      },
+      "motivoFechaCelebrar": {
+        "motivo": "Cumpleaños",
+        "dia": "15",
+        "mes": "09"
+      }
+    }
+  ],
+  "deceasedMembers": [
+    {
+      "nombres": "Roberto Nuevo Fallecido",
+      "fechaFallecimiento": "2022-01-01",
+      "sexo": {
+        "id": 1,
+        "nombre": "Masculino"
+      },
+      "parentesco": {
+        "id": "PADRE",
+        "nombre": "Padre"
+      },
+      "causaFallecimiento": "Causas naturales"
+    }
+  ],
+  "metadata": {
+    "timestamp": "2025-01-02T12:00:00.000Z",
+    "completed": true,
+    "currentStage": 6
+  }
+}
