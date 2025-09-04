@@ -186,6 +186,16 @@ Persona.associate = function(models) {
       as: 'parroquia'
     });
   }
+  
+  // Asociación muchos a muchos con Destrezas
+  if (models.Destreza) {
+    Persona.belongsToMany(models.Destreza, {
+      through: 'persona_destreza',
+      foreignKey: 'id_personas_personas',
+      otherKey: 'id_destrezas_destrezas',
+      as: 'destrezas'
+    });
+  }
 };
 
 export default Persona;

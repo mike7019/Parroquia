@@ -617,36 +617,6 @@ class AuthService {
 
     return { message: 'Verification email sent successfully. Please check your email' };
   }
-
-  /**
-   * Get verification token for development (DEVELOPMENT ONLY)
-   * @param {string} email - User email
-   * @returns {Promise<Object>} Token data
-   */
-  async getVerificationTokenForDev(email) {
-    // Only allow in development
-    if (process.env.NODE_ENV !== 'development') {
-      throw new Error('This method is only available in development mode');
-    }
-
-    const user = await Usuario.findOne({ where: { email } });
-    if (!user) {
-      throw new NotFoundError('User not found');
-    }
-
-    if (user.emailVerified) {
-      throw new ValidationError('Email is already verified');
-    }
-
-    if (!user.emailVerificationToken) {
-      throw new ValidationError('No verification token found for this user. Try requesting a new verification email.');
-    }
-
-    return {
-      email: user.email,
-      token: user.emailVerificationToken
-    };
-  }
 }
 
 export default new AuthService();

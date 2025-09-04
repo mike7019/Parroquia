@@ -385,23 +385,28 @@ class DestrezaService {
       const destrezasSinPersonas = totalDestrezas - destrezasConPersonas;
 
       // Obtener las 5 destrezas más populares (con más personas)
-      const destrezasPopulares = await sequelize.models.Destreza.findAll({
-        attributes: [
-          'id_destreza',
-          'nombre',
-          [sequelize.fn('COUNT', sequelize.col('personas.id_persona')), 'total_personas']
-        ],
-        include: [{
-          model: sequelize.models.Persona,
-          as: 'personas',
-          required: false,
-          attributes: []
-        }],
-        group: ['Destreza.id_destreza', 'Destreza.nombre'],
-        order: [[sequelize.fn('COUNT', sequelize.col('personas.id_persona')), 'DESC']],
-        limit: 5,
-        subQuery: false
+      // Usamos una consulta SQL directa para evitar problemas con GROUP BY
+      const destrezasPopularesQuery = `
+        SELECT 
+          d.id_destreza,
+          d.nombre,
+          COUNT(pd.id_personas_personas) as total_personas
+        FROM destrezas d
+        LEFT JOIN persona_destreza pd ON d.id_destreza = pd.id_destrezas_destrezas
+        GROUP BY d.id_destreza, d.nombre
+        ORDER BY COUNT(pd.id_personas_personas) DESC
+        LIMIT 5
+      `;
+
+      const destrezasPopularesResult = await sequelize.query(destrezasPopularesQuery, {
+        type: sequelize.QueryTypes.SELECT
       });
+
+      const destrezasPopulares = destrezasPopularesResult.map(d => ({
+        id_destreza: d.id_destreza,
+        nombre: d.nombre,
+        total_personas: parseInt(d.total_personas) || 0
+      }));
 
       return {
         exito: true,
@@ -414,11 +419,7 @@ class DestrezaService {
             porcentajeUtilizacion: totalDestrezas > 0 ? 
               Math.round((destrezasConPersonas / totalDestrezas) * 100) : 0
           },
-          destrezasPopulares: destrezasPopulares.map(d => ({
-            id_destreza: d.id_destreza,
-            nombre: d.nombre,
-            total_personas: parseInt(d.getDataValue('total_personas')) || 0
-          }))
+          destrezasPopulares: destrezasPopulares
         }
       };
 

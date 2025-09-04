@@ -292,44 +292,6 @@ class AuthController {
       next(error);
     }
   }
-
-  /**
-   * Get verification token for development (DEVELOPMENT ONLY)
-   */
-  async getVerificationTokenDev(req, res, next) {
-    try {
-      // Only allow in development mode
-      if (process.env.NODE_ENV !== 'development') {
-        return res.status(403).json({
-          status: 'error',
-          message: 'This endpoint is only available in development mode'
-        });
-      }
-
-      const { email } = req.query;
-      
-      if (!email) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Email is required'
-        });
-      }
-
-      const result = await authService.getVerificationTokenForDev(email);
-
-      res.status(200).json({
-        status: 'success',
-        message: 'Verification token retrieved (DEVELOPMENT ONLY)',
-        data: {
-          email: result.email,
-          token: result.token,
-          verificationUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email?token=${result.token}`
-        }
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
 }
 
 export default new AuthController();

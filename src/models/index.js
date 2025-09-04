@@ -18,6 +18,8 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const FamiliaDisposicionBasura = require('./main/FamiliaDisposicionBasura.cjs')(sequelize, sequelize.Sequelize.DataTypes);
 const FamiliaSistemaAguasResiduales = require('./main/FamiliaSistemaAguasResiduales.cjs')(sequelize, sequelize.Sequelize.DataTypes);
+const Destreza = require('./main/Destreza.cjs')(sequelize, sequelize.Sequelize.DataTypes);
+const Profesion = require('./main/Profesion.cjs')(sequelize, sequelize.Sequelize.DataTypes);
 import TipoAguasResiduales from './catalog/TipoAguasResiduales.js';
 import TipoVivienda from './catalog/TipoVivienda.js';
 import ComunidadCultural from './catalog/ComunidadCultural.js';
@@ -57,7 +59,7 @@ try {
     Departamentos, Sector, TipoIdentificacion, Enfermedad, Familias, Persona, 
     TipoVivienda, Parentesco, SituacionCivil, Estudio, Talla, DifuntosFamilia,
     TipoDisposicionBasura, FamiliaDisposicionBasura, TipoAguasResiduales, 
-    FamiliaSistemaAguasResiduales, ComunidadCultural
+    FamiliaSistemaAguasResiduales, ComunidadCultural, Destreza
   };
 
   // Ejecutar asociaciones de Familias
@@ -82,6 +84,12 @@ try {
   if (FamiliaDisposicionBasura && typeof FamiliaDisposicionBasura.associate === 'function') {
     FamiliaDisposicionBasura.associate(models);
     console.log('✅ Asociaciones de FamiliaDisposicionBasura configuradas');
+  }
+
+  // Ejecutar asociaciones de Destreza
+  if (Destreza && typeof Destreza.associate === 'function') {
+    Destreza.associate(models);
+    console.log('✅ Asociaciones de Destreza configuradas');
   }
 
   // Configurar la asociación inversa crítica para las consultas
@@ -140,7 +148,9 @@ export default {
   FamiliaDisposicionBasura,
   TipoAguasResiduales,
   FamiliaSistemaAguasResiduales,
-  ComunidadCultural
+  ComunidadCultural,
+  Destreza,
+  Profesion
 };
 
 export {
@@ -169,5 +179,7 @@ export {
   FamiliaDisposicionBasura,
   TipoAguasResiduales,
   FamiliaSistemaAguasResiduales,
-  ComunidadCultural
+  ComunidadCultural,
+  Destreza,
+  Profesion
 };

@@ -7,7 +7,10 @@ class SectorController {
    */
   async createSector(req, res) {
     try {
-      const { nombre, municipio_id } = req.body;
+      const { nombre, municipio_id, id_municipio } = req.body;
+      
+      // Aceptar tanto municipio_id como id_municipio para compatibilidad
+      const municipioId = municipio_id || id_municipio;
 
       // Validaciones básicas
       if (!nombre) {
@@ -16,13 +19,13 @@ class SectorController {
         );
       }
 
-      if (!municipio_id) {
+      if (!municipioId) {
         return res.status(400).json(
           createErrorResponse('El municipio es obligatorio', null, 'VALIDATION_ERROR')
         );
       }
 
-      if (isNaN(municipio_id)) {
+      if (isNaN(municipioId)) {
         return res.status(400).json(
           createErrorResponse('El ID del municipio debe ser un número válido', null, 'VALIDATION_ERROR')
         );
@@ -31,7 +34,7 @@ class SectorController {
       // Crear el sector con municipio
       const result = await sectorService.createSector({ 
         nombre, 
-        id_municipio: parseInt(municipio_id)
+        id_municipio: parseInt(municipioId)
       });
 
       res.status(201).json(
