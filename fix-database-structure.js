@@ -155,6 +155,117 @@ async function crearTablaTiposIdentificacion() {
   }
 }
 
+async function crearTablasRelaciones() {
+  try {
+    console.log('🔗 Creando tablas de relaciones...');
+    
+    // Tabla familia_sistema_acueducto
+    await sequelize.query(`
+      CREATE TABLE IF NOT EXISTS familia_sistema_acueducto (
+        id SERIAL PRIMARY KEY,
+        id_familia INTEGER NOT NULL,
+        id_sistema_acueducto INTEGER NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        CONSTRAINT fk_familia_sistema_acueducto_familia
+          FOREIGN KEY (id_familia) 
+          REFERENCES familias(id_familia) ON DELETE CASCADE,
+        UNIQUE(id_familia, id_sistema_acueducto)
+      )
+    `, { type: QueryTypes.RAW });
+    
+    // Tabla familia_tipo_vivienda  
+    await sequelize.query(`
+      CREATE TABLE IF NOT EXISTS familia_tipo_vivienda (
+        id SERIAL PRIMARY KEY,
+        id_familia INTEGER NOT NULL,
+        id_tipo_vivienda INTEGER NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        CONSTRAINT fk_familia_tipo_vivienda_familia
+          FOREIGN KEY (id_familia) 
+          REFERENCES familias(id_familia) ON DELETE CASCADE,
+        CONSTRAINT fk_familia_tipo_vivienda_tipo
+          FOREIGN KEY (id_tipo_vivienda) 
+          REFERENCES tipos_vivienda(id_tipo_vivienda),
+        UNIQUE(id_familia, id_tipo_vivienda)
+      )
+    `, { type: QueryTypes.RAW });
+    
+    // Tabla familia_disposicion_basuras
+    await sequelize.query(`
+      CREATE TABLE IF NOT EXISTS familia_disposicion_basuras (
+        id SERIAL PRIMARY KEY,
+        id_familia INTEGER NOT NULL,
+        disposicion VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        CONSTRAINT fk_familia_disposicion_basuras_familia
+          FOREIGN KEY (id_familia) 
+          REFERENCES familias(id_familia) ON DELETE CASCADE
+      )
+    `, { type: QueryTypes.RAW });
+    
+    // Tabla familia_aguas_residuales  
+    await sequelize.query(`
+      CREATE TABLE IF NOT EXISTS familia_aguas_residuales (
+        id SERIAL PRIMARY KEY,
+        id_familia INTEGER NOT NULL,
+        tipo_tratamiento VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        CONSTRAINT fk_familia_aguas_residuales_familia
+          FOREIGN KEY (id_familia) 
+          REFERENCES familias(id_familia) ON DELETE CASCADE
+      )
+    `, { type: QueryTypes.RAW });
+    
+    // Tabla sistemas_acueducto (catálogo)
+    await sequelize.query(`
+      CREATE TABLE IF NOT EXISTS sistemas_acueducto (
+        id_sistema_acueducto SERIAL PRIMARY KEY,
+        nombre VARCHAR(255) NOT NULL UNIQUE,
+        descripcion TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, { type: QueryTypes.RAW });
+    
+    console.log('✅ Tablas de relaciones creadas/verificadas');
+    
+  } catch (error) {
+    console.error('❌ Error creando tablas de relaciones:', error.message);
+  }
+}
+
+async function insertarDatosSistemasAcueducto() {
+  try {
+    console.log('🚰 Insertando sistemas de acueducto básicos...');
+    
+    const sistemas = [
+      'Acueducto Municipal',
+      'Pozo Propio', 
+      'Agua de Lluvia',
+      'Río o Quebrada',
+      'Carro Tanque',
+      'Otro'
+    ];
+    
+    for (const sistema of sistemas) {
+      await sequelize.query(`
+        INSERT INTO sistemas_acueducto (nombre)
+        VALUES ('${sistema}')
+        ON CONFLICT (nombre) DO NOTHING
+      `, { type: QueryTypes.INSERT });
+    }
+    
+    console.log('✅ Sistemas de acueducto insertados');
+    
+  } catch (error) {
+    console.error('❌ Error insertando sistemas de acueducto:', error.message);
+  }
+}
+
 async function insertarDatosBasicos() {
   try {
     console.log('📊 Insertando datos básicos...');
@@ -257,7 +368,10 @@ async function verificarEstructuraFinal() {
     
     const tablas = [
       'departamentos', 'municipios', 'parroquias', 'sectores', 
-      'veredas', 'tipos_vivienda', 'sexos', 'tipos_identificacion'
+      'veredas', 'tipos_vivienda', 'sexos', 'tipos_identificacion',
+      'sistemas_acueducto', 'familia_sistema_acueducto', 
+      'familia_tipo_vivienda', 'familia_disposicion_basuras',
+      'familia_aguas_residuales'
     ];
     
     const resultados = {};
@@ -318,8 +432,12 @@ async function main() {
     await crearTablaSexos();
     await crearTablaTiposIdentificacion();
     
+    // Crear tablas de relaciones (CRÍTICO para encuestas)
+    await crearTablasRelaciones();
+    
     // Insertar datos básicos
     await insertarDatosBasicos();
+    await insertarDatosSistemasAcueducto();
     
     // Verificación final
     const estructuraCompleta = await verificarEstructuraFinal();
