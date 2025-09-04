@@ -54,6 +54,13 @@ async function testEncuestaTransaction() {
       );
       console.log('   ✅ Tipo vivienda registrado');
       
+      console.log('5️⃣ Registrando disposición de basura...');
+      await sequelize.query(
+        'INSERT INTO familia_disposicion_basura (id_familia, id_tipo_disposicion_basura, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
+        { bind: [familiaId, 1], transaction }
+      );
+      console.log('   ✅ Disposición de basura registrada');
+      
       // Si llegamos aquí, hacer commit
       await transaction.commit();
       console.log('\n🎉 ¡TRANSACCIÓN EXITOSA!');
