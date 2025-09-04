@@ -105,7 +105,7 @@ node reset-database.js
 **Flujo recomendado después del reset**:
 ```bash
 # 1. Reset completo
-node reset-database.js
+npm run db:reset
 
 # 2. Sincronizar estructura
 npm run db:sync
@@ -113,9 +113,16 @@ npm run db:sync
 # 3. Cargar datos básicos
 npm run db:seed:config
 
-# 4. Crear usuario admin
+# 4a. Crear admin interactivo (solicita datos)
 npm run admin:create
+
+# 4b. Crear admin por defecto (credenciales fijas)
+npm run admin:create:default
 ```
+
+**Credenciales por defecto** (admin:create:default):
+- Email: `admin@parroquia.com`
+- Contraseña: `Admin123!`
 
 ### Corrección de Estructura de Municipios
 

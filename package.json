@@ -16,6 +16,8 @@
     "db:seed:config": "node runSeeders.js",
     "db:seed:veredas": "node seed-veredas.js",
     "db:seed:complete": "npm run db:seed:config && node seed-parroquias.js && node seed-geographic-data.js && node seed-veredas.js",
+    "admin:create": "node scripts/createAdminUser.js",
+    "admin:create:default": "node create-default-admin.js",
     "pm2:start": "npx pm2 start ecosystem.config.cjs",
     "pm2:stop": "npx pm2 stop ecosystem.config.cjs",
     "pm2:restart": "npx pm2 restart ecosystem.config.cjs",
@@ -24,8 +26,7 @@
     "docker:dev": "docker-compose up --build",
     "docker:db": "docker-compose up postgres -d",
     "docker:down": "docker-compose down",
-    "docs:generate": "node generate-copilot-instructions.js",
-    "admin:create": "node scripts/createAdminUser.js"
+    "docs:generate": "node generate-copilot-instructions.js"
   },
   "keywords": [
     "node",
