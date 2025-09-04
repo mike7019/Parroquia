@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   # PostgreSQL Database
   postgres:
@@ -5,9 +7,9 @@ services:
     container_name: parroquia-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: parroquia_db
-      POSTGRES_USER: parroquia_user
-      POSTGRES_PASSWORD: ParroquiaSecure2025
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -15,7 +17,7 @@ services:
     networks:
       - parroquia-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U parroquia_user -d parroquia_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -28,13 +30,13 @@ services:
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_NAME: parroquia_db
-      DB_USER: parroquia_user
-      DB_PASSWORD: ParroquiaSecure2025
-      JWT_SECRET: supersecreto
-      JWT_REFRESH_SECRET: refrescosecreto
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
     ports:
-      - "3001:3000"   # <-- usa 3001 en el host para no chocar con dokploy
+      - "3001:3000"   # expone el backend en el puerto 3001 del host
     depends_on:
       - postgres
     networks:
