@@ -343,6 +343,24 @@ class DatabaseErrorHandler {
       return result;
       
     } catch (error) {
+      // Si el error ya es un AppError (ConflictError, ValidationError, etc.), 
+      // no lo procesamos como error de Sequelize
+      if (error.name === 'ConflictError' || 
+          error.name === 'ValidationError' || 
+          error.name === 'AuthenticationError' ||
+          error.name === 'AuthorizationError' ||
+          error.statusCode) {
+        logger.error('Application error occurred', {
+          errorName: error.name,
+          message: error.message,
+          statusCode: error.statusCode,
+          code: error.code,
+          context
+        });
+        throw error; // Re-lanzar el error tal como está
+      }
+      
+      // Solo manejar como error de Sequelize si no es un AppError
       throw DatabaseErrorHandler.handleSequelizeError(error, context);
     }
   }
