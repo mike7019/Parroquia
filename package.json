@@ -10,6 +10,8 @@
     "db:sync": "node syncDatabase.js",
     "db:sync:alter": "node syncDatabaseAlter.js",
     "db:sync:force": "node syncDatabaseForce.js",
+    "db:reset": "node reset-database.js",
+    "db:fix:municipios": "node fix-municipios-structure.js",
     "db:check": "node checkDatabase.js",
     "db:seed:config": "node runSeeders.js",
     "db:seed:veredas": "node seed-veredas.js",
