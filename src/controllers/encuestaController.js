@@ -1343,7 +1343,7 @@ export const crearEncuesta = async (req, res) => {
         if (activo && disposicionMapping[tipo]) {
           try {
             await sequelize.query(
-              'INSERT INTO familia_disposicion_basura (id_familia, id_tipo_disposicion_basura, "createdAt", "updatedAt") VALUES ($1, $2, NOW(), NOW())',
+              'INSERT INTO familia_disposicion_basura (id_familia, id_tipo_disposicion_basura, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
               {
                 bind: [familiaId, disposicionMapping[tipo]],
                 transaction
@@ -1365,7 +1365,7 @@ export const crearEncuesta = async (req, res) => {
         let sistemaId = servicios_agua.sistema_acueducto.id || 1; // Default: Acueducto Público
 
         await sequelize.query(
-          'INSERT INTO familia_sistema_acueducto (id_familia, id_sistema_acueducto, "createdAt", "updatedAt") VALUES ($1, $2, NOW(), NOW())',
+          'INSERT INTO familia_sistema_acueducto (id_familia, id_sistema_acueducto, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
           {
             bind: [familiaId, sistemaId],
             transaction
@@ -1385,7 +1385,7 @@ export const crearEncuesta = async (req, res) => {
         let aguaResidualesId = servicios_agua.aguas_residuales.id || 1; // Default: Alcantarillado
 
         await sequelize.query(
-          'INSERT INTO familia_sistema_aguas_residuales (id_familia, id_tipo_aguas_residuales, "createdAt", "updatedAt") VALUES ($1, $2, NOW(), NOW())',
+          'INSERT INTO familia_sistema_aguas_residuales (id_familia, id_tipo_aguas_residuales, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
           {
             bind: [familiaId, aguaResidualesId],
             transaction

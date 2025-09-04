@@ -121,6 +121,15 @@ const CATALOG_DATA = {
     { descripcion: 'Asma', activo: true },
     { descripcion: 'Artritis', activo: true },
     { descripcion: 'Otra', activo: true }
+  ],
+
+  tipos_aguas_residuales: [
+    { nombre: 'Alcantarillado', descripcion: 'Conectado a red de alcantarillado municipal', activo: true },
+    { nombre: 'Pozo Séptico', descripcion: 'Sistema de tratamiento individual', activo: true },
+    { nombre: 'Letrina', descripcion: 'Sistema básico de saneamiento', activo: true },
+    { nombre: 'Campo Abierto', descripcion: 'Sin sistema de tratamiento', activo: true },
+    { nombre: 'Río/Quebrada', descripcion: 'Descarga directa a fuente hídrica', activo: true },
+    { nombre: 'Otro', descripcion: 'Otro sistema no especificado', activo: true }
   ]
 };
 
@@ -320,6 +329,21 @@ class DatabaseSetup {
       id_tipo_vivienda: { type: DataTypes.BIGINT, allowNull: false }
     }, { timestamps: true, createdAt: 'created_at', updatedAt: 'updated_at' });
 
+    // Tabla faltante para aguas residuales
+    this.models.FamiliaSistemaAguasResiduales = this.sequelize.define('familia_sistema_aguas_residuales', {
+      id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
+      id_familia: { type: DataTypes.BIGINT, allowNull: false },
+      id_tipo_aguas_residuales: { type: DataTypes.BIGINT, allowNull: false }
+    }, { timestamps: true, createdAt: 'createdAt', updatedAt: 'updatedAt' });
+
+    // Catálogo para tipos de aguas residuales
+    this.models.TipoAguasResiduales = this.sequelize.define('tipos_aguas_residuales', {
+      id_tipo_aguas_residuales: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
+      nombre: { type: DataTypes.STRING(100), allowNull: false },
+      descripcion: { type: DataTypes.STRING(200) },
+      activo: { type: DataTypes.BOOLEAN, defaultValue: true }
+    }, { timestamps: true, createdAt: 'created_at', updatedAt: 'updated_at' });
+
     // 6. Tabla de usuarios
     this.models.Usuario = this.sequelize.define('usuarios', {
       id_usuario: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
@@ -330,7 +354,7 @@ class DatabaseSetup {
       activo: { type: DataTypes.BOOLEAN, defaultValue: true }
     }, { timestamps: true, createdAt: 'created_at', updatedAt: 'updated_at' });
 
-    console.log('📋 Modelos definidos: 12 tablas principales');
+    console.log('📋 Modelos definidos: 14 tablas principales');
   }
 
   async syncDatabase() {
@@ -409,6 +433,13 @@ class DatabaseSetup {
       }
       console.log(`✅ ${CATALOG_DATA.enfermedades.length} enfermedades cargadas`);
 
+      // 10. Tipos de aguas residuales
+      console.log('🚰 Cargando tipos de aguas residuales...');
+      for (const tipo of CATALOG_DATA.tipos_aguas_residuales) {
+        await this.models.TipoAguasResiduales.create(tipo);
+      }
+      console.log(`✅ ${CATALOG_DATA.tipos_aguas_residuales.length} tipos de aguas residuales cargados`);
+
     } catch (error) {
       console.error('❌ Error cargando catálogos:', error.message);
       throw error;
@@ -457,6 +488,7 @@ class DatabaseSetup {
       { model: this.models.TipoVivienda, name: 'tipos_vivienda' },
       { model: this.models.EstadoCivil, name: 'estados_civiles' },
       { model: this.models.Enfermedad, name: 'enfermedades' },
+      { model: this.models.TipoAguasResiduales, name: 'tipos_aguas_residuales' },
       { model: this.models.Usuario, name: 'usuarios' }
     ];
 
