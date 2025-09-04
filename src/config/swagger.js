@@ -30,8 +30,12 @@ const swaggerConfig = {
         description: 'Test server'
       },
       {
-        url: 'https://api.parroquia.com',
+        url: 'http://72.60.113.85:3001',
         description: 'Production server'
+      },
+      {
+        url: 'https://api.parroquia.com',
+        description: 'Production HTTPS server'
       }
     ],
     components: {
