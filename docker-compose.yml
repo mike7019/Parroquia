@@ -1,4 +1,3 @@
-
 services:
   # PostgreSQL Database
   postgres:
@@ -20,7 +19,27 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  
+
+  # Backend App
+  backend:
+    image: mia-backend-xj2zgp
+    container_name: parroquia-backend
+    restart: unless-stopped
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: parroquia_db
+      DB_USER: parroquia_user
+      DB_PASSWORD: ParroquiaSecure2025
+      JWT_SECRET: supersecreto
+      JWT_REFRESH_SECRET: refrescosecreto
+    ports:
+      - "3001:3000"   # <-- usa 3001 en el host para no chocar con dokploy
+    depends_on:
+      - postgres
+    networks:
+      - parroquia-network
+
 networks:
   parroquia-network:
     driver: bridge
