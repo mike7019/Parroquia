@@ -21,33 +21,3 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  # Backend App
-  backend:
-    image: mia-backend-xj2zgp
-    container_name: parroquia-backend
-    restart: unless-stopped
-    environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: ${POSTGRES_DB}
-      DB_USER: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
-    ports:
-      - "3001:3000"   # expone el backend en el puerto 3001 del host
-    depends_on:
-      - postgres
-    networks:
-      - parroquia-network
-
-networks:
-  parroquia-network:
-    driver: bridge
-
-volumes:
-  postgres_data:
-    driver: local
-  app_logs:
-    driver: local
