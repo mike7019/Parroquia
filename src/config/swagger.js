@@ -55,11 +55,11 @@ const swaggerConfig = {
     servers: [
       {
         url: process.env.API_URL || 'http://localhost:3000',
-        description: 'Development server'
+        description: '🖥️ Servidor de Desarrollo Local'
       },
       {
-        url: 'http://206.62.139.11:3000',
-        description: 'Production server'
+        url: 'http://206.62.139.100:3000',
+        description: '🌐 Servidor de Producción'
       }
     ],
     components: {
@@ -1709,6 +1709,284 @@ const swaggerConfig = {
           },
           required: ['nombres', 'fechaNacimiento', 'tipoIdentificacion', 'numeroIdentificacion', 'sexo', 'situacionCivil', 'parentesco', 'estudio', 'comunidadCultural']
         },
+        // ========================
+        // SCHEMAS DE ENCUESTAS
+        // ========================
+        EncuestaInput: {
+          type: 'object',
+          required: ['informacionGeneral', 'familyMembers'],
+          properties: {
+            informacionGeneral: {
+              type: 'object',
+              required: ['municipio', 'apellido_familiar', 'direccion', 'telefono'],
+              properties: {
+                municipio: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer', example: 1 },
+                    nombre: { type: 'string', example: 'Abejorral' }
+                  }
+                },
+                parroquia: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer', example: 1 },
+                    nombre: { type: 'string', example: 'San José' }
+                  }
+                },
+                sector: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer', example: 1 },
+                    nombre: { type: 'string', example: 'Centro' }
+                  }
+                },
+                vereda: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer', example: 1 },
+                    nombre: { type: 'string', example: 'La Macarena' }
+                  }
+                },
+                fecha: {
+                  type: 'string',
+                  format: 'date',
+                  example: '2025-09-05'
+                },
+                apellido_familiar: {
+                  type: 'string',
+                  example: 'Guerra Perez'
+                },
+                direccion: {
+                  type: 'string',
+                  example: 'Carrera 45 # 23-67'
+                },
+                telefono: {
+                  type: 'string',
+                  example: '3001234567'
+                },
+                numero_contrato_epm: {
+                  type: 'string',
+                  nullable: true,
+                  example: '12345678'
+                },
+                comunionEnCasa: {
+                  type: 'boolean',
+                  example: false
+                }
+              }
+            },
+            vivienda: {
+              type: 'object',
+              properties: {
+                tipo_vivienda: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer', example: 1 },
+                    nombre: { type: 'string', example: 'Casa' }
+                  }
+                },
+                disposicion_basuras: {
+                  type: 'object',
+                  properties: {
+                    recolector: { type: 'boolean', example: true },
+                    quemada: { type: 'boolean', example: false },
+                    enterrada: { type: 'boolean', example: false },
+                    recicla: { type: 'boolean', example: true },
+                    aire_libre: { type: 'boolean', example: false },
+                    no_aplica: { type: 'boolean', example: false }
+                  }
+                }
+              }
+            },
+            servicios_agua: {
+              type: 'object',
+              properties: {
+                sistema_acueducto: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer', example: 1 },
+                    nombre: { type: 'string', example: 'Acueducto Público' }
+                  }
+                },
+                aguas_residuales: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer', example: 1 },
+                    nombre: { type: 'string', example: 'Alcantarillado' }
+                  }
+                },
+                pozo_septico: { type: 'boolean', example: false },
+                letrina: { type: 'boolean', example: false },
+                campo_abierto: { type: 'boolean', example: false }
+              }
+            },
+            observaciones: {
+              type: 'object',
+              properties: {
+                sustento_familia: {
+                  type: 'string',
+                  example: 'Trabajo independiente en ventas'
+                },
+                observaciones_encuestador: {
+                  type: 'string',
+                  example: 'Familia colaborativa, información completa'
+                },
+                autorizacion_datos: {
+                  type: 'boolean',
+                  example: true
+                }
+              }
+            },
+            familyMembers: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/FamilyMemberInput'
+              }
+            },
+            deceasedMembers: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/DeceasedMemberInput'
+              }
+            },
+            metadata: {
+              type: 'object',
+              properties: {
+                timestamp: {
+                  type: 'string',
+                  format: 'date-time',
+                  example: '2025-09-05T10:30:00.000Z'
+                },
+                completed: {
+                  type: 'boolean',
+                  example: true
+                },
+                currentStage: {
+                  type: 'integer',
+                  example: 6
+                }
+              }
+            }
+          }
+        },
+        DeceasedMemberInput: {
+          type: 'object',
+          required: ['nombres', 'fechaFallecimiento', 'sexo', 'parentesco'],
+          properties: {
+            nombres: {
+              type: 'string',
+              example: 'Pedro Antonio Rodríguez'
+            },
+            fechaFallecimiento: {
+              type: 'string',
+              format: 'date',
+              example: '2020-05-15'
+            },
+            sexo: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer', example: 1 },
+                nombre: { type: 'string', example: 'Masculino' }
+              }
+            },
+            parentesco: {
+              type: 'object',
+              properties: {
+                id: { type: 'string', example: 'PADRE' },
+                nombre: { type: 'string', example: 'Padre' }
+              }
+            },
+            causaFallecimiento: {
+              type: 'string',
+              example: 'Enfermedad cardiovascular'
+            }
+          }
+        },
+        EncuestaResponse: {
+          type: 'object',
+          properties: {
+            status: {
+              type: 'string',
+              enum: ['success', 'error'],
+              example: 'success'
+            },
+            message: {
+              type: 'string',
+              example: 'Encuesta guardada exitosamente'
+            },
+            data: {
+              type: 'object',
+              properties: {
+                familia_id: {
+                  type: 'string',
+                  example: '5'
+                },
+                personas_creadas: {
+                  type: 'integer',
+                  example: 1
+                },
+                personas_fallecidas: {
+                  type: 'integer',
+                  example: 1
+                },
+                transaccion_id: {
+                  type: 'string',
+                  example: 'txn_1757054333234'
+                },
+                codigo_familia: {
+                  type: 'string',
+                  example: 'FAM_1757054333193_d01b4286'
+                },
+                informacion_persistida: {
+                  type: 'object',
+                  properties: {
+                    informacion_general: { type: 'boolean', example: true },
+                    vivienda_y_disposicion_basuras: { type: 'boolean', example: true },
+                    servicios_agua: { type: 'boolean', example: true },
+                    miembros_familia: { type: 'boolean', example: true },
+                    personas_fallecidas: { type: 'boolean', example: true },
+                    ubicacion_geografica: { type: 'boolean', example: true }
+                  }
+                },
+                metadata: {
+                  type: 'object',
+                  properties: {
+                    timestamp: {
+                      type: 'string',
+                      format: 'date-time',
+                      example: '2025-09-05T06:38:53.234Z'
+                    },
+                    version: {
+                      type: 'string',
+                      example: '2.0'
+                    },
+                    completada: {
+                      type: 'boolean',
+                      example: true
+                    },
+                    etapa_actual: {
+                      type: 'integer',
+                      example: 6
+                    },
+                    observaciones_procesadas: {
+                      type: 'boolean',
+                      example: true
+                    },
+                    autorizacion_datos: {
+                      type: 'boolean',
+                      example: true
+                    },
+                    validacion_duplicados: {
+                      type: 'string',
+                      example: 'verificada'
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         // Esquemas actualizados de Municipios
         MunicipioBasic: {
           type: 'object',
@@ -3286,6 +3564,10 @@ const swaggerConfig = {
       {
         name: 'Authentication',
         description: '🔐 **Autenticación y Gestión de Cuentas** - Endpoints para login, registro, verificación de email, reset de contraseñas y gestión de tokens JWT.'
+      },
+      {
+        name: 'Encuestas',
+        description: '📋 **Sistema de Encuestas Familiares** - API completa para gestión de encuestas familiares con información demográfica, vivienda, servicios y miembros de familia. **Funcionalidades:** Crear encuestas completas, consultar por ID, listar con paginación, actualizar datos, eliminar registros. **Incluye:** datos geográficos, información de vivienda, servicios básicos, miembros de familia y personas fallecidas.'
       },
       {
         name: 'Users',

@@ -18,7 +18,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/encuestas:
+ * /api/encuesta:
  *   get:
  *     summary: Obtener todas las encuestas con paginación
  *     description: |
@@ -93,9 +93,9 @@ const router = express.Router();
  * @swagger
  * /api/encuesta:
  *   get:
- *     summary: Obtener todas las encuestas con paginación (forma singular)
+ *     summary: Obtener todas las encuestas con paginación
  *     description: |
- *       Alias de /api/encuestas - Obtiene una lista paginada de todas las encuestas familiares registradas.
+ *       Obtiene una lista paginada de todas las encuestas familiares registradas.
  *       
  *       **Características:**
  *       - Paginación automática con límite configurable
@@ -187,7 +187,7 @@ const router = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/EncuestaCompleta'
+ *             $ref: '#/components/schemas/EncuestaInput'
  *           example:
  *             informacionGeneral:
  *               municipio: { id: 1, nombre: "Medellín" }
@@ -295,7 +295,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/encuestas/{id}:
+ * /api/encuesta/{id}:
  *   get:
  *     summary: Obtener encuesta por ID
  *     description: |
@@ -505,7 +505,7 @@ router.delete('/:id',
 
 /**
  * @swagger
- * /api/encuestas/{id}:
+ * /api/encuesta/{id}:
  *   patch:
  *     summary: Actualizar campos específicos de una encuesta
  *     description: |
