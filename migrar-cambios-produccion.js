@@ -9,21 +9,19 @@
  * 2. Datos de departamentos y municipios completos
  * 3. Estructura de tablas actualizada
  * 4. Datos de catálogos básicos
+ * 
+ * NOTA: Las variables de entorno deben estar configuradas en .bashrc
  */
 
 import { Sequelize } from 'sequelize';
-import dotenv from 'dotenv';
 
-// Cargar variables de entorno
-dotenv.config();
-
-// Configuración de base de datos remota
+// Configuración de base de datos remota usando variables de entorno del sistema
 const REMOTE_DB_CONFIG = {
-  host: process.env.REMOTE_DB_HOST || '206.62.139.100',
-  port: process.env.REMOTE_DB_PORT || 5432,
-  database: process.env.REMOTE_DB_NAME || 'parroquia_db',
-  username: process.env.REMOTE_DB_USER || 'parroquia_user',
-  password: process.env.REMOTE_DB_PASSWORD,
+  host: process.env.REMOTE_DB_HOST || process.env.DB_HOST || '206.62.139.100',
+  port: process.env.REMOTE_DB_PORT || process.env.DB_PORT || 5432,
+  database: process.env.REMOTE_DB_NAME || process.env.DB_NAME || 'parroquia_db',
+  username: process.env.REMOTE_DB_USER || process.env.DB_USER || 'parroquia_user',
+  password: process.env.REMOTE_DB_PASSWORD || process.env.DB_PASSWORD,
   dialect: 'postgres',
   logging: console.log,
   pool: {

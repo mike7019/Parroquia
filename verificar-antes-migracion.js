@@ -3,21 +3,19 @@
  * 
  * Este script verifica que todo esté listo para ejecutar
  * la migración a la base de datos de producción
+ * 
+ * NOTA: Las variables de entorno deben estar configuradas en .bashrc
  */
 
 import { Sequelize } from 'sequelize';
-import dotenv from 'dotenv';
 
-// Cargar variables de entorno
-dotenv.config();
-
-// Configuración de base de datos remota
+// Configuración de base de datos remota usando variables del sistema
 const REMOTE_DB_CONFIG = {
-  host: process.env.REMOTE_DB_HOST || '206.62.139.100',
-  port: process.env.REMOTE_DB_PORT || 5432,
-  database: process.env.REMOTE_DB_NAME || 'parroquia_db',
-  username: process.env.REMOTE_DB_USER || 'parroquia_user',
-  password: process.env.REMOTE_DB_PASSWORD,
+  host: process.env.REMOTE_DB_HOST || process.env.DB_HOST || '206.62.139.100',
+  port: process.env.REMOTE_DB_PORT || process.env.DB_PORT || 5432,
+  database: process.env.REMOTE_DB_NAME || process.env.DB_NAME || 'parroquia_db',
+  username: process.env.REMOTE_DB_USER || process.env.DB_USER || 'parroquia_user',
+  password: process.env.REMOTE_DB_PASSWORD || process.env.DB_PASSWORD,
   dialect: 'postgres',
   logging: false
 };
@@ -30,11 +28,24 @@ async function verificarTodo() {
   
   // 1. Verificar variables de entorno
   console.log('1. 📋 Verificando configuración...');
-  if (!process.env.REMOTE_DB_PASSWORD) {
-    console.log('   ❌ REMOTE_DB_PASSWORD no configurada');
-    todoBien = false;
-  } else {
-    console.log('   ✅ Variables de entorno configuradas');
+  
+  const variablesRequeridas = [
+    { name: 'DB_PASSWORD o REMOTE_DB_PASSWORD', value: process.env.DB_PASSWORD || process.env.REMOTE_DB_PASSWORD },
+    { name: 'DB_HOST o REMOTE_DB_HOST', value: process.env.DB_HOST || process.env.REMOTE_DB_HOST || '206.62.139.100' },
+    { name: 'DB_USER o REMOTE_DB_USER', value: process.env.DB_USER || process.env.REMOTE_DB_USER || 'parroquia_user' }
+  ];
+  
+  for (const variable of variablesRequeridas) {
+    if (!variable.value || variable.value === 'undefined') {
+      console.log(`   ❌ ${variable.name} no configurada`);
+      todoBien = false;
+    } else {
+      console.log(`   ✅ ${variable.name} configurada`);
+    }
+  }
+  
+  if (todoBien) {
+    console.log(`   ℹ️  Conectando a: ${REMOTE_DB_CONFIG.host}:${REMOTE_DB_CONFIG.port}/${REMOTE_DB_CONFIG.database}`);
   }
   
   // 2. Verificar conexión a base de datos remota
