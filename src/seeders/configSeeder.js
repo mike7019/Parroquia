@@ -381,18 +381,6 @@ export async function seedRoles() {
       nombre: 'Encuestador',
       created_at: new Date(),
       updated_at: new Date()
-    },
-    {
-      id: uuidv4(),
-      nombre: 'Supervisor',
-      created_at: new Date(),
-      updated_at: new Date()
-    },
-    {
-      id: uuidv4(),
-      nombre: 'Consultor',
-      created_at: new Date(),
-      updated_at: new Date()
     }
   ];
 

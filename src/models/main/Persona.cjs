@@ -55,6 +55,30 @@ module.exports = (sequelize, DataTypes) => {
           as: 'destrezas'
         });
       }
+
+      // Relación con Parentesco
+      if (models.Parentesco) {
+        Persona.belongsTo(models.Parentesco, {
+          foreignKey: 'id_parentesco',
+          as: 'parentesco'
+        });
+      }
+
+      // Relación con ComunidadCultural
+      if (models.ComunidadCultural) {
+        Persona.belongsTo(models.ComunidadCultural, {
+          foreignKey: 'id_comunidad_cultural',
+          as: 'comunidadCultural'
+        });
+      }
+
+      // Relación con Estudio (NivelEducativo)
+      if (models.Estudio) {
+        Persona.belongsTo(models.Estudio, {
+          foreignKey: 'id_nivel_educativo',
+          as: 'nivelEducativo'
+        });
+      }
     }
 
     // Método para obtener información completa del sexo
@@ -179,25 +203,19 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     telefono: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
+      type: DataTypes.STRING(20),
+      allowNull: true,
       validate: {
-        notNull: {
-          msg: 'El teléfono es requerido'
-        },
-        notEmpty: {
-          msg: 'El teléfono no puede estar vacío'
+        len: {
+          args: [0, 20],
+          msg: 'El teléfono no puede exceder 20 caracteres'
         }
       }
     },
     correo_electronico: {
       type: DataTypes.STRING(255),
-      allowNull: false,
-      unique: true,
+      allowNull: true,
       validate: {
-        notNull: {
-          msg: 'El correo electrónico es requerido'
-        },
         isEmail: {
           msg: 'Debe ser un correo electrónico válido'
         }
@@ -290,6 +308,68 @@ module.exports = (sequelize, DataTypes) => {
           msg: 'La talla de zapato no puede exceder 10 caracteres'
         }
       }
+    },
+    id_parentesco: {
+      type: DataTypes.BIGINT,
+      allowNull: true,
+      references: {
+        model: 'parentescos',
+        key: 'id_parentesco'
+      }
+    },
+    id_comunidad_cultural: {
+      type: DataTypes.BIGINT,
+      allowNull: true,
+      references: {
+        model: 'comunidades_culturales',
+        key: 'id_comunidad_cultural'
+      }
+    },
+    id_nivel_educativo: {
+      type: DataTypes.BIGINT,
+      allowNull: true,
+      references: {
+        model: 'niveles_educativos',
+        key: 'id_niveles_educativos'
+      }
+    },
+    motivo_celebrar: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      validate: {
+        len: {
+          args: [0, 100],
+          msg: 'El motivo de celebración no puede exceder 100 caracteres'
+        }
+      }
+    },
+    dia_celebrar: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      validate: {
+        min: {
+          args: 1,
+          msg: 'El día debe ser entre 1 y 31'
+        },
+        max: {
+          args: 31,
+          msg: 'El día debe ser entre 1 y 31'
+        }
+      }
+    },
+    mes_celebrar: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      validate: {
+        min: {
+          args: 1,
+          msg: 'El mes debe ser entre 1 y 12'
+        },
+        max: {
+          args: 12,
+          msg: 'El mes debe ser entre 1 y 12'
+        }
+      }
     }
   }, {
     sequelize,
@@ -302,10 +382,6 @@ module.exports = (sequelize, DataTypes) => {
         fields: ['identificacion']
       },
       {
-        unique: true,
-        fields: ['correo_electronico']
-      },
-      {
         fields: ['id_familia_familias']
       },
       {
@@ -313,6 +389,18 @@ module.exports = (sequelize, DataTypes) => {
       },
       {
         fields: ['id_sexo']
+      },
+      {
+        fields: ['id_parentesco']
+      },
+      {
+        fields: ['id_comunidad_cultural']
+      },
+      {
+        fields: ['id_nivel_educativo']
+      },
+      {
+        fields: ['mes_celebrar', 'dia_celebrar']
       }
     ]
   });

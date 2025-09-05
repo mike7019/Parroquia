@@ -33,6 +33,22 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'id_tipo_vivienda',
         as: 'tiposVivienda'
       });
+
+      // Nueva relación directa con TipoVivienda
+      if (models.TipoVivienda) {
+        Familia.belongsTo(models.TipoVivienda, {
+          foreignKey: 'id_tipo_vivienda',
+          as: 'tipoVivienda'
+        });
+      }
+
+      // Relación con Parroquia
+      if (models.Parroquia) {
+        Familia.belongsTo(models.Parroquia, {
+          foreignKey: 'id_parroquia',
+          as: 'parroquia'
+        });
+      }
     }
   }
 
@@ -98,14 +114,6 @@ module.exports = (sequelize, DataTypes) => {
         max: 50
       }
     },
-    housingType: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-      field: 'tipo_vivienda',
-      validate: {
-        notEmpty: true
-      }
-    },
     surveyStatus: {
       type: DataTypes.STRING(20),
       allowNull: false,
@@ -138,7 +146,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       allowNull: true
     },
-    // Campos eliminados: observaciones y tratamiento_datos se removieron
     // Relaciones geográficas
     id_municipio: {
       type: DataTypes.BIGINT,
@@ -151,6 +158,97 @@ module.exports = (sequelize, DataTypes) => {
     id_sector: {
       type: DataTypes.BIGINT,
       allowNull: true
+    },
+    // NUEVOS CAMPOS PARA ENCUESTA
+    id_parroquia: {
+      type: DataTypes.BIGINT,
+      allowNull: true,
+      references: {
+        model: 'parroquias',
+        key: 'id_parroquia'
+      }
+    },
+    numero_contrato_epm: {
+      type: DataTypes.STRING(50),
+      allowNull: true
+    },
+    comunionEnCasa: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
+    },
+    fecha_encuesta: {
+      type: DataTypes.DATEONLY,
+      allowNull: true
+    },
+    sustento_familia: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    observaciones_encuestador: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    autorizacion_datos: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
+    },
+    // Servicios de agua
+    pozo_septico: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
+    },
+    letrina: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
+    },
+    campo_abierto: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
+    },
+    // Disposición de basuras (campos boolean)
+    disposicion_recolector: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
+    },
+    disposicion_quemada: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
+    },
+    disposicion_enterrada: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
+    },
+    disposicion_recicla: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
+    },
+    disposicion_aire_libre: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
+    },
+    disposicion_no_aplica: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
+    },
+    // Cambiar tipo_vivienda a FK
+    id_tipo_vivienda: {
+      type: DataTypes.BIGINT,
+      allowNull: true,
+      references: {
+        model: 'tipos_viviendas',
+        key: 'id_tipo'
+      }
     }
   }, {
     sequelize,

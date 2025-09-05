@@ -1,0 +1,6740 @@
+[
+  {
+    "id_municipio": 1,
+    "nombre_municipio": "Abejorral",
+    "codigo_dane": "00013",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 2,
+    "nombre_municipio": "Abrego",
+    "codigo_dane": "00859",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 3,
+    "nombre_municipio": "Abriaquí",
+    "codigo_dane": "00014",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 4,
+    "nombre_municipio": "Acacias",
+    "codigo_dane": "00741",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 5,
+    "nombre_municipio": "Acandí",
+    "codigo_dane": "00468",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 6,
+    "nombre_municipio": "Acevedo",
+    "codigo_dane": "00658",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 7,
+    "nombre_municipio": "Achí",
+    "codigo_dane": "00168",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 8,
+    "nombre_municipio": "Agrado",
+    "codigo_dane": "00659",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 9,
+    "nombre_municipio": "Agua de Dios",
+    "codigo_dane": "00629",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 10,
+    "nombre_municipio": "Aguachica",
+    "codigo_dane": "00442",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 11,
+    "nombre_municipio": "Aguada",
+    "codigo_dane": "00916",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 12,
+    "nombre_municipio": "Aguadas",
+    "codigo_dane": "00338",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 13,
+    "nombre_municipio": "Aguazul",
+    "codigo_dane": "00381",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 14,
+    "nombre_municipio": "Agustín Codazzi",
+    "codigo_dane": "00443",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 15,
+    "nombre_municipio": "Aipe",
+    "codigo_dane": "00660",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 16,
+    "nombre_municipio": "Albán",
+    "codigo_dane": "00632",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 17,
+    "nombre_municipio": "Albán",
+    "codigo_dane": "00770",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 18,
+    "nombre_municipio": "Albania",
+    "codigo_dane": "00365",
+    "id_departamento": "9"
+  },
+  {
+    "id_municipio": 19,
+    "nombre_municipio": "Albania",
+    "codigo_dane": "00695",
+    "id_departamento": "19"
+  },
+  {
+    "id_municipio": 20,
+    "nombre_municipio": "Albania",
+    "codigo_dane": "00917",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 21,
+    "nombre_municipio": "Alcalá",
+    "codigo_dane": "01102",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 22,
+    "nombre_municipio": "Aldana",
+    "codigo_dane": "00771",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 23,
+    "nombre_municipio": "Alejandría",
+    "codigo_dane": "00015",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 24,
+    "nombre_municipio": "Algarrobo",
+    "codigo_dane": "00710",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 25,
+    "nombre_municipio": "Algeciras",
+    "codigo_dane": "00661",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 26,
+    "nombre_municipio": "Almaguer",
+    "codigo_dane": "00400",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 27,
+    "nombre_municipio": "Almeida",
+    "codigo_dane": "00218",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 28,
+    "nombre_municipio": "Alpujarra",
+    "codigo_dane": "01026",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 29,
+    "nombre_municipio": "Altamira",
+    "codigo_dane": "00662",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 30,
+    "nombre_municipio": "Alto Baudo",
+    "codigo_dane": "00469",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 31,
+    "nombre_municipio": "Altos del Rosario",
+    "codigo_dane": "00205",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 32,
+    "nombre_municipio": "Alvarado",
+    "codigo_dane": "01027",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 33,
+    "nombre_municipio": "Amagá",
+    "codigo_dane": "00016",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 34,
+    "nombre_municipio": "Amalfi",
+    "codigo_dane": "00017",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 35,
+    "nombre_municipio": "Ambalema",
+    "codigo_dane": "01028",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 36,
+    "nombre_municipio": "Anapoima",
+    "codigo_dane": "00527",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 37,
+    "nombre_municipio": "Ancuyá",
+    "codigo_dane": "00772",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 38,
+    "nombre_municipio": "Andalucía",
+    "codigo_dane": "01097",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 39,
+    "nombre_municipio": "Andes",
+    "codigo_dane": "00018",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 40,
+    "nombre_municipio": "Angelópolis",
+    "codigo_dane": "00019",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 41,
+    "nombre_municipio": "Angostura",
+    "codigo_dane": "00020",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 42,
+    "nombre_municipio": "Anolaima",
+    "codigo_dane": "00633",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 43,
+    "nombre_municipio": "Anorí",
+    "codigo_dane": "00021",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 44,
+    "nombre_municipio": "Anserma",
+    "codigo_dane": "00339",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 45,
+    "nombre_municipio": "Ansermanuevo",
+    "codigo_dane": "01086",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 46,
+    "nombre_municipio": "Anza",
+    "codigo_dane": "00022",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 47,
+    "nombre_municipio": "Anzoátegui",
+    "codigo_dane": "01068",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 48,
+    "nombre_municipio": "Apartadó",
+    "codigo_dane": "00023",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 49,
+    "nombre_municipio": "Apía",
+    "codigo_dane": "00898",
+    "id_departamento": "26"
+  },
+  {
+    "id_municipio": 50,
+    "nombre_municipio": "Apulo",
+    "codigo_dane": "00591",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 51,
+    "nombre_municipio": "Aquitania",
+    "codigo_dane": "00219",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 52,
+    "nombre_municipio": "Aracataca",
+    "codigo_dane": "00711",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 53,
+    "nombre_municipio": "Aranzazu",
+    "codigo_dane": "00340",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 54,
+    "nombre_municipio": "Aratoca",
+    "codigo_dane": "00918",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 55,
+    "nombre_municipio": "Arauca",
+    "codigo_dane": "00143",
+    "id_departamento": "3"
+  },
+  {
+    "id_municipio": 56,
+    "nombre_municipio": "Arauquita",
+    "codigo_dane": "00137",
+    "id_departamento": "3"
+  },
+  {
+    "id_municipio": 57,
+    "nombre_municipio": "Arbeláez",
+    "codigo_dane": "00528",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 58,
+    "nombre_municipio": "Arboleda",
+    "codigo_dane": "00831",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 59,
+    "nombre_municipio": "Arboledas",
+    "codigo_dane": "00843",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 60,
+    "nombre_municipio": "Arboletes",
+    "codigo_dane": "00024",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 61,
+    "nombre_municipio": "Arcabuco",
+    "codigo_dane": "00220",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 62,
+    "nombre_municipio": "Arenal",
+    "codigo_dane": "00169",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 63,
+    "nombre_municipio": "Argelia",
+    "codigo_dane": "00401",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 64,
+    "nombre_municipio": "Argelia",
+    "codigo_dane": "00025",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 65,
+    "nombre_municipio": "Argelia",
+    "codigo_dane": "01075",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 66,
+    "nombre_municipio": "Ariguaní",
+    "codigo_dane": "00712",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 67,
+    "nombre_municipio": "Arjona",
+    "codigo_dane": "00170",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 68,
+    "nombre_municipio": "Armenia",
+    "codigo_dane": "00026",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 69,
+    "nombre_municipio": "Armenia",
+    "codigo_dane": "00885",
+    "id_departamento": "25"
+  },
+  {
+    "id_municipio": 70,
+    "nombre_municipio": "Armero",
+    "codigo_dane": "01029",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 71,
+    "nombre_municipio": "Arroyohondo",
+    "codigo_dane": "00171",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 72,
+    "nombre_municipio": "Astrea",
+    "codigo_dane": "00444",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 73,
+    "nombre_municipio": "Ataco",
+    "codigo_dane": "01030",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 74,
+    "nombre_municipio": "Atrato",
+    "codigo_dane": "00470",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 75,
+    "nombre_municipio": "Ayapel",
+    "codigo_dane": "00499",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 76,
+    "nombre_municipio": "Bagadó",
+    "codigo_dane": "00471",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 77,
+    "nombre_municipio": "Bahía Solano",
+    "codigo_dane": "00472",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 78,
+    "nombre_municipio": "Bajo Baudó",
+    "codigo_dane": "00473",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 79,
+    "nombre_municipio": "Balboa",
+    "codigo_dane": "00402",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 80,
+    "nombre_municipio": "Balboa",
+    "codigo_dane": "00899",
+    "id_departamento": "26"
+  },
+  {
+    "id_municipio": 81,
+    "nombre_municipio": "Baranoa",
+    "codigo_dane": "00145",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 82,
+    "nombre_municipio": "Baraya",
+    "codigo_dane": "00663",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 83,
+    "nombre_municipio": "Barbacoas",
+    "codigo_dane": "00773",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 84,
+    "nombre_municipio": "Barbosa",
+    "codigo_dane": "00027",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 85,
+    "nombre_municipio": "Barbosa",
+    "codigo_dane": "00919",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 86,
+    "nombre_municipio": "Barichara",
+    "codigo_dane": "00920",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 87,
+    "nombre_municipio": "Barranca de Upía",
+    "codigo_dane": "00763",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 88,
+    "nombre_municipio": "Barrancabermeja",
+    "codigo_dane": "00921",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 89,
+    "nombre_municipio": "Barrancas",
+    "codigo_dane": "00696",
+    "id_departamento": "19"
+  },
+  {
+    "id_municipio": 90,
+    "nombre_municipio": "Barranco de Loba",
+    "codigo_dane": "00200",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 91,
+    "nombre_municipio": "Barranco Minas",
+    "codigo_dane": "00645",
+    "id_departamento": "16"
+  },
+  {
+    "id_municipio": 92,
+    "nombre_municipio": "Barranquilla",
+    "codigo_dane": "00144",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 93,
+    "nombre_municipio": "Becerril",
+    "codigo_dane": "00445",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 94,
+    "nombre_municipio": "Belalcázar",
+    "codigo_dane": "00341",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 95,
+    "nombre_municipio": "Belén",
+    "codigo_dane": "00336",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 96,
+    "nombre_municipio": "Belén",
+    "codigo_dane": "00829",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 97,
+    "nombre_municipio": "Belén de Bajira",
+    "codigo_dane": "00493",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 98,
+    "nombre_municipio": "Belén de Los Andaquies",
+    "codigo_dane": "00375",
+    "id_departamento": "9"
+  },
+  {
+    "id_municipio": 99,
+    "nombre_municipio": "Belén de Umbría",
+    "codigo_dane": "00910",
+    "id_departamento": "26"
+  },
+  {
+    "id_municipio": 100,
+    "nombre_municipio": "Bello",
+    "codigo_dane": "00028",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 101,
+    "nombre_municipio": "Belmira",
+    "codigo_dane": "00067",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 102,
+    "nombre_municipio": "Beltrán",
+    "codigo_dane": "00529",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 103,
+    "nombre_municipio": "Berbeo",
+    "codigo_dane": "00221",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 104,
+    "nombre_municipio": "Betania",
+    "codigo_dane": "00029",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 105,
+    "nombre_municipio": "Betéitiva",
+    "codigo_dane": "00222",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 106,
+    "nombre_municipio": "Betulia",
+    "codigo_dane": "00030",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 107,
+    "nombre_municipio": "Betulia",
+    "codigo_dane": "00922",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 108,
+    "nombre_municipio": "Bituima",
+    "codigo_dane": "00530",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 109,
+    "nombre_municipio": "Boavita",
+    "codigo_dane": "00223",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 110,
+    "nombre_municipio": "Bochalema",
+    "codigo_dane": "00845",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 111,
+    "nombre_municipio": "Bogotá D.C.",
+    "codigo_dane": "00167",
+    "id_departamento": "5"
+  },
+  {
+    "id_municipio": 112,
+    "nombre_municipio": "Bojacá",
+    "codigo_dane": "00531",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 113,
+    "nombre_municipio": "Bojaya",
+    "codigo_dane": "00474",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 114,
+    "nombre_municipio": "Bolívar",
+    "codigo_dane": "00403",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 115,
+    "nombre_municipio": "Bolívar",
+    "codigo_dane": "00923",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 116,
+    "nombre_municipio": "Bolívar",
+    "codigo_dane": "01092",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 117,
+    "nombre_municipio": "Bosconia",
+    "codigo_dane": "00446",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 118,
+    "nombre_municipio": "Boyacá",
+    "codigo_dane": "00224",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 119,
+    "nombre_municipio": "Briceño",
+    "codigo_dane": "00225",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 120,
+    "nombre_municipio": "Briceño",
+    "codigo_dane": "00032",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 121,
+    "nombre_municipio": "Bucaramanga",
+    "codigo_dane": "00915",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 122,
+    "nombre_municipio": "Bucarasica",
+    "codigo_dane": "00862",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 123,
+    "nombre_municipio": "Buena Vista",
+    "codigo_dane": "00226",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 124,
+    "nombre_municipio": "Buenaventura",
+    "codigo_dane": "01114",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 125,
+    "nombre_municipio": "Buenavista",
+    "codigo_dane": "00500",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 126,
+    "nombre_municipio": "Buenavista",
+    "codigo_dane": "00886",
+    "id_departamento": "25"
+  },
+  {
+    "id_municipio": 127,
+    "nombre_municipio": "Buenavista",
+    "codigo_dane": "01001",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 128,
+    "nombre_municipio": "Buenos Aires",
+    "codigo_dane": "00404",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 129,
+    "nombre_municipio": "Buesaco",
+    "codigo_dane": "00827",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 130,
+    "nombre_municipio": "Bugalagrande",
+    "codigo_dane": "01087",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 131,
+    "nombre_municipio": "Buriticá",
+    "codigo_dane": "00033",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 132,
+    "nombre_municipio": "Busbanzá",
+    "codigo_dane": "00227",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 133,
+    "nombre_municipio": "Cabrera",
+    "codigo_dane": "00532",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 134,
+    "nombre_municipio": "Cabrera",
+    "codigo_dane": "00924",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 135,
+    "nombre_municipio": "Cabuyaro",
+    "codigo_dane": "00742",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 136,
+    "nombre_municipio": "Cacahual",
+    "codigo_dane": "00650",
+    "id_departamento": "16"
+  },
+  {
+    "id_municipio": 137,
+    "nombre_municipio": "Cáceres",
+    "codigo_dane": "00034",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 138,
+    "nombre_municipio": "Cachipay",
+    "codigo_dane": "00533",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 139,
+    "nombre_municipio": "Cachirá",
+    "codigo_dane": "00865",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 140,
+    "nombre_municipio": "Cácota",
+    "codigo_dane": "00833",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 141,
+    "nombre_municipio": "Caicedo",
+    "codigo_dane": "00035",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 142,
+    "nombre_municipio": "Caicedonia",
+    "codigo_dane": "01080",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 143,
+    "nombre_municipio": "Caimito",
+    "codigo_dane": "01002",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 144,
+    "nombre_municipio": "Cajamarca",
+    "codigo_dane": "01031",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 145,
+    "nombre_municipio": "Cajibío",
+    "codigo_dane": "00405",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 146,
+    "nombre_municipio": "Cajicá",
+    "codigo_dane": "00534",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 147,
+    "nombre_municipio": "Calamar",
+    "codigo_dane": "00172",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 148,
+    "nombre_municipio": "Calamar",
+    "codigo_dane": "00653",
+    "id_departamento": "17"
+  },
+  {
+    "id_municipio": 149,
+    "nombre_municipio": "Calarcá",
+    "codigo_dane": "00895",
+    "id_departamento": "25"
+  },
+  {
+    "id_municipio": 150,
+    "nombre_municipio": "Caldas",
+    "codigo_dane": "00228",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 151,
+    "nombre_municipio": "Caldas",
+    "codigo_dane": "00036",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 152,
+    "nombre_municipio": "Caldono",
+    "codigo_dane": "00406",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 153,
+    "nombre_municipio": "Cali",
+    "codigo_dane": "01093",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 154,
+    "nombre_municipio": "California",
+    "codigo_dane": "00925",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 155,
+    "nombre_municipio": "Calima",
+    "codigo_dane": "01096",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 156,
+    "nombre_municipio": "Caloto",
+    "codigo_dane": "00407",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 157,
+    "nombre_municipio": "Campamento",
+    "codigo_dane": "00037",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 158,
+    "nombre_municipio": "Campo de La Cruz",
+    "codigo_dane": "00163",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 159,
+    "nombre_municipio": "Campoalegre",
+    "codigo_dane": "00664",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 160,
+    "nombre_municipio": "Campohermoso",
+    "codigo_dane": "00229",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 161,
+    "nombre_municipio": "Canalete",
+    "codigo_dane": "00501",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 162,
+    "nombre_municipio": "Candelaria",
+    "codigo_dane": "00146",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 163,
+    "nombre_municipio": "Candelaria",
+    "codigo_dane": "01106",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 164,
+    "nombre_municipio": "Cantagallo",
+    "codigo_dane": "00173",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 165,
+    "nombre_municipio": "Cañasgordas",
+    "codigo_dane": "00038",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 166,
+    "nombre_municipio": "Caparrapí",
+    "codigo_dane": "00535",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 167,
+    "nombre_municipio": "Capitanejo",
+    "codigo_dane": "00998",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 168,
+    "nombre_municipio": "Caqueza",
+    "codigo_dane": "00536",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 169,
+    "nombre_municipio": "Caracolí",
+    "codigo_dane": "00039",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 170,
+    "nombre_municipio": "Caramanta",
+    "codigo_dane": "00040",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 171,
+    "nombre_municipio": "Carcasí",
+    "codigo_dane": "00926",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 172,
+    "nombre_municipio": "Carepa",
+    "codigo_dane": "00041",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 173,
+    "nombre_municipio": "Carmen de Apicala",
+    "codigo_dane": "01064",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 174,
+    "nombre_municipio": "Carmen de Carupa",
+    "codigo_dane": "00630",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 175,
+    "nombre_municipio": "Carmen del Darien",
+    "codigo_dane": "00494",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 176,
+    "nombre_municipio": "Carolina",
+    "codigo_dane": "00042",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 177,
+    "nombre_municipio": "Cartagena",
+    "codigo_dane": "00210",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 178,
+    "nombre_municipio": "Cartagena del Chairá",
+    "codigo_dane": "00376",
+    "id_departamento": "9"
+  },
+  {
+    "id_municipio": 179,
+    "nombre_municipio": "Cartago",
+    "codigo_dane": "01079",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 180,
+    "nombre_municipio": "Carurú",
+    "codigo_dane": "01116",
+    "id_departamento": "32"
+  },
+  {
+    "id_municipio": 181,
+    "nombre_municipio": "Casabianca",
+    "codigo_dane": "01067",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 182,
+    "nombre_municipio": "Castilla la Nueva",
+    "codigo_dane": "00767",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 183,
+    "nombre_municipio": "Caucasia",
+    "codigo_dane": "00043",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 184,
+    "nombre_municipio": "Cepitá",
+    "codigo_dane": "00927",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 185,
+    "nombre_municipio": "Cereté",
+    "codigo_dane": "00502",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 186,
+    "nombre_municipio": "Cerinza",
+    "codigo_dane": "00230",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 187,
+    "nombre_municipio": "Cerrito",
+    "codigo_dane": "00928",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 188,
+    "nombre_municipio": "Cerro San Antonio",
+    "codigo_dane": "00713",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 189,
+    "nombre_municipio": "Cértegui",
+    "codigo_dane": "00475",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 190,
+    "nombre_municipio": "Chachagüí",
+    "codigo_dane": "00830",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 191,
+    "nombre_municipio": "Chaguaní",
+    "codigo_dane": "00537",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 192,
+    "nombre_municipio": "Chalán",
+    "codigo_dane": "01005",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 193,
+    "nombre_municipio": "Chámeza",
+    "codigo_dane": "00382",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 194,
+    "nombre_municipio": "Chaparral",
+    "codigo_dane": "01032",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 195,
+    "nombre_municipio": "Charalá",
+    "codigo_dane": "00929",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 196,
+    "nombre_municipio": "Charta",
+    "codigo_dane": "00930",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 197,
+    "nombre_municipio": "Chía",
+    "codigo_dane": "00634",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 198,
+    "nombre_municipio": "Chigorodó",
+    "codigo_dane": "00044",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 199,
+    "nombre_municipio": "Chimá",
+    "codigo_dane": "00503",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 200,
+    "nombre_municipio": "Chimá",
+    "codigo_dane": "00997",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 201,
+    "nombre_municipio": "Chimichagua",
+    "codigo_dane": "00447",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 202,
+    "nombre_municipio": "Chinácota",
+    "codigo_dane": "00853",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 203,
+    "nombre_municipio": "Chinavita",
+    "codigo_dane": "00231",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 204,
+    "nombre_municipio": "Chinchiná",
+    "codigo_dane": "00342",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 205,
+    "nombre_municipio": "Chinú",
+    "codigo_dane": "00504",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 206,
+    "nombre_municipio": "Chipaque",
+    "codigo_dane": "00538",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 207,
+    "nombre_municipio": "Chipatá",
+    "codigo_dane": "00931",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 208,
+    "nombre_municipio": "Chiquinquirá",
+    "codigo_dane": "00232",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 209,
+    "nombre_municipio": "Chíquiza",
+    "codigo_dane": "00244",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 210,
+    "nombre_municipio": "Chiriguaná",
+    "codigo_dane": "00448",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 211,
+    "nombre_municipio": "Chiscas",
+    "codigo_dane": "00233",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 212,
+    "nombre_municipio": "Chita",
+    "codigo_dane": "00234",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 213,
+    "nombre_municipio": "Chitagá",
+    "codigo_dane": "00857",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 214,
+    "nombre_municipio": "Chitaraque",
+    "codigo_dane": "00235",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 215,
+    "nombre_municipio": "Chivatá",
+    "codigo_dane": "00236",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 216,
+    "nombre_municipio": "Chivolo",
+    "codigo_dane": "00714",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 217,
+    "nombre_municipio": "Chivor",
+    "codigo_dane": "00245",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 218,
+    "nombre_municipio": "Choachí",
+    "codigo_dane": "00539",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 219,
+    "nombre_municipio": "Chocontá",
+    "codigo_dane": "00540",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 220,
+    "nombre_municipio": "Cicuco",
+    "codigo_dane": "00174",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 221,
+    "nombre_municipio": "Ciénaga",
+    "codigo_dane": "00738",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 222,
+    "nombre_municipio": "Ciénaga de Oro",
+    "codigo_dane": "00522",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 223,
+    "nombre_municipio": "Ciénega",
+    "codigo_dane": "00216",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 224,
+    "nombre_municipio": "Cimitarra",
+    "codigo_dane": "00932",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 225,
+    "nombre_municipio": "Circasia",
+    "codigo_dane": "00887",
+    "id_departamento": "25"
+  },
+  {
+    "id_municipio": 226,
+    "nombre_municipio": "Cisneros",
+    "codigo_dane": "00045",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 227,
+    "nombre_municipio": "Ciudad Bolívar",
+    "codigo_dane": "00031",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 228,
+    "nombre_municipio": "Clemencia",
+    "codigo_dane": "00176",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 229,
+    "nombre_municipio": "Cocorná",
+    "codigo_dane": "00046",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 230,
+    "nombre_municipio": "Coello",
+    "codigo_dane": "01033",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 231,
+    "nombre_municipio": "Cogua",
+    "codigo_dane": "00541",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 232,
+    "nombre_municipio": "Colombia",
+    "codigo_dane": "00665",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 233,
+    "nombre_municipio": "Colón",
+    "codigo_dane": "00774",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 234,
+    "nombre_municipio": "Colón",
+    "codigo_dane": "00873",
+    "id_departamento": "24"
+  },
+  {
+    "id_municipio": 235,
+    "nombre_municipio": "Coloso",
+    "codigo_dane": "01003",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 236,
+    "nombre_municipio": "Cómbita",
+    "codigo_dane": "00237",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 237,
+    "nombre_municipio": "Concepción",
+    "codigo_dane": "00047",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 238,
+    "nombre_municipio": "Concepción",
+    "codigo_dane": "00933",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 239,
+    "nombre_municipio": "Concordia",
+    "codigo_dane": "00048",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 240,
+    "nombre_municipio": "Concordia",
+    "codigo_dane": "00715",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 241,
+    "nombre_municipio": "Condoto",
+    "codigo_dane": "00476",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 242,
+    "nombre_municipio": "Confines",
+    "codigo_dane": "00934",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 243,
+    "nombre_municipio": "Consaca",
+    "codigo_dane": "00775",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 244,
+    "nombre_municipio": "Contadero",
+    "codigo_dane": "00776",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 245,
+    "nombre_municipio": "Contratación",
+    "codigo_dane": "00935",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 246,
+    "nombre_municipio": "Convención",
+    "codigo_dane": "00846",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 247,
+    "nombre_municipio": "Copacabana",
+    "codigo_dane": "00049",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 248,
+    "nombre_municipio": "Coper",
+    "codigo_dane": "00238",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 249,
+    "nombre_municipio": "Córdoba",
+    "codigo_dane": "00175",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 250,
+    "nombre_municipio": "Córdoba",
+    "codigo_dane": "00777",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 251,
+    "nombre_municipio": "Córdoba",
+    "codigo_dane": "00888",
+    "id_departamento": "25"
+  },
+  {
+    "id_municipio": 252,
+    "nombre_municipio": "Corinto",
+    "codigo_dane": "00408",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 253,
+    "nombre_municipio": "Coromoro",
+    "codigo_dane": "00936",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 254,
+    "nombre_municipio": "Corozal",
+    "codigo_dane": "01025",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 255,
+    "nombre_municipio": "Corrales",
+    "codigo_dane": "00239",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 256,
+    "nombre_municipio": "Cota",
+    "codigo_dane": "00542",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 257,
+    "nombre_municipio": "Cotorra",
+    "codigo_dane": "00505",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 258,
+    "nombre_municipio": "Covarachía",
+    "codigo_dane": "00240",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 259,
+    "nombre_municipio": "Coveñas",
+    "codigo_dane": "01004",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 260,
+    "nombre_municipio": "Coyaima",
+    "codigo_dane": "01034",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 261,
+    "nombre_municipio": "Cravo Norte",
+    "codigo_dane": "00138",
+    "id_departamento": "3"
+  },
+  {
+    "id_municipio": 262,
+    "nombre_municipio": "Cuaspud",
+    "codigo_dane": "00778",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 263,
+    "nombre_municipio": "Cubará",
+    "codigo_dane": "00241",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 264,
+    "nombre_municipio": "Cubarral",
+    "codigo_dane": "00743",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 265,
+    "nombre_municipio": "Cucaita",
+    "codigo_dane": "00242",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 266,
+    "nombre_municipio": "Cucunubá",
+    "codigo_dane": "00543",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 267,
+    "nombre_municipio": "Cúcuta",
+    "codigo_dane": "00870",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 268,
+    "nombre_municipio": "Cucutilla",
+    "codigo_dane": "00838",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 269,
+    "nombre_municipio": "Cuítiva",
+    "codigo_dane": "00243",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 270,
+    "nombre_municipio": "Cumaral",
+    "codigo_dane": "00744",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 271,
+    "nombre_municipio": "Cumaribo",
+    "codigo_dane": "01124",
+    "id_departamento": "33"
+  },
+  {
+    "id_municipio": 272,
+    "nombre_municipio": "Cumbal",
+    "codigo_dane": "00779",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 273,
+    "nombre_municipio": "Cumbitara",
+    "codigo_dane": "00780",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 274,
+    "nombre_municipio": "Cunday",
+    "codigo_dane": "01035",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 275,
+    "nombre_municipio": "Curillo",
+    "codigo_dane": "00366",
+    "id_departamento": "9"
+  },
+  {
+    "id_municipio": 276,
+    "nombre_municipio": "Curití",
+    "codigo_dane": "00937",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 277,
+    "nombre_municipio": "Curumaní",
+    "codigo_dane": "00449",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 278,
+    "nombre_municipio": "Dabeiba",
+    "codigo_dane": "00050",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 279,
+    "nombre_municipio": "Dagua",
+    "codigo_dane": "01084",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 280,
+    "nombre_municipio": "Dibula",
+    "codigo_dane": "00697",
+    "id_departamento": "19"
+  },
+  {
+    "id_municipio": 281,
+    "nombre_municipio": "Distracción",
+    "codigo_dane": "00698",
+    "id_departamento": "19"
+  },
+  {
+    "id_municipio": 282,
+    "nombre_municipio": "Dolores",
+    "codigo_dane": "01036",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 283,
+    "nombre_municipio": "Don Matías",
+    "codigo_dane": "00051",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 284,
+    "nombre_municipio": "Dosquebradas",
+    "codigo_dane": "00900",
+    "id_departamento": "26"
+  },
+  {
+    "id_municipio": 285,
+    "nombre_municipio": "Duitama",
+    "codigo_dane": "00246",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 286,
+    "nombre_municipio": "Durania",
+    "codigo_dane": "00867",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 287,
+    "nombre_municipio": "Ebéjico",
+    "codigo_dane": "00052",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 288,
+    "nombre_municipio": "El Águila",
+    "codigo_dane": "01104",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 289,
+    "nombre_municipio": "El Bagre",
+    "codigo_dane": "00053",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 290,
+    "nombre_municipio": "El Banco",
+    "codigo_dane": "00716",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 291,
+    "nombre_municipio": "El Cairo",
+    "codigo_dane": "01081",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 292,
+    "nombre_municipio": "El Calvario",
+    "codigo_dane": "00745",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 293,
+    "nombre_municipio": "El Cantón del San Pablo",
+    "codigo_dane": "00490",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 294,
+    "nombre_municipio": "El Carmen",
+    "codigo_dane": "00871",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 295,
+    "nombre_municipio": "El Carmen de Atrato",
+    "codigo_dane": "00491",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 296,
+    "nombre_municipio": "El Carmen de Bolívar",
+    "codigo_dane": "00203",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 297,
+    "nombre_municipio": "El Carmen de Chucurí",
+    "codigo_dane": "00993",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 298,
+    "nombre_municipio": "El Carmen de Viboral",
+    "codigo_dane": "00131",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 299,
+    "nombre_municipio": "El Castillo",
+    "codigo_dane": "00746",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 300,
+    "nombre_municipio": "El Cerrito",
+    "codigo_dane": "01078",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 301,
+    "nombre_municipio": "El Charco",
+    "codigo_dane": "00781",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 302,
+    "nombre_municipio": "El Cocuy",
+    "codigo_dane": "00247",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 303,
+    "nombre_municipio": "El Colegio",
+    "codigo_dane": "00544",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 304,
+    "nombre_municipio": "El Copey",
+    "codigo_dane": "00450",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 305,
+    "nombre_municipio": "El Doncello",
+    "codigo_dane": "00367",
+    "id_departamento": "9"
+  },
+  {
+    "id_municipio": 306,
+    "nombre_municipio": "El Dorado",
+    "codigo_dane": "00747",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 307,
+    "nombre_municipio": "El Dovio",
+    "codigo_dane": "01073",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 308,
+    "nombre_municipio": "El Encanto",
+    "codigo_dane": "00002",
+    "id_departamento": "1"
+  },
+  {
+    "id_municipio": 309,
+    "nombre_municipio": "El Espino",
+    "codigo_dane": "00248",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 310,
+    "nombre_municipio": "El Guacamayo",
+    "codigo_dane": "00938",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 311,
+    "nombre_municipio": "El Guamo",
+    "codigo_dane": "00177",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 312,
+    "nombre_municipio": "El Litoral del San Juan",
+    "codigo_dane": "00489",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 313,
+    "nombre_municipio": "El Molino",
+    "codigo_dane": "00699",
+    "id_departamento": "19"
+  },
+  {
+    "id_municipio": 314,
+    "nombre_municipio": "El Paso",
+    "codigo_dane": "00451",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 315,
+    "nombre_municipio": "El Paujil",
+    "codigo_dane": "00368",
+    "id_departamento": "9"
+  },
+  {
+    "id_municipio": 316,
+    "nombre_municipio": "El Peñol",
+    "codigo_dane": "00782",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 317,
+    "nombre_municipio": "El Peñón",
+    "codigo_dane": "00209",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 318,
+    "nombre_municipio": "El Peñón",
+    "codigo_dane": "00635",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 319,
+    "nombre_municipio": "El Peñón",
+    "codigo_dane": "00999",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 320,
+    "nombre_municipio": "El Piñon",
+    "codigo_dane": "00717",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 321,
+    "nombre_municipio": "El Playón",
+    "codigo_dane": "00939",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 322,
+    "nombre_municipio": "El Retén",
+    "codigo_dane": "00718",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 323,
+    "nombre_municipio": "El Retorno",
+    "codigo_dane": "00656",
+    "id_departamento": "17"
+  },
+  {
+    "id_municipio": 324,
+    "nombre_municipio": "El Roble",
+    "codigo_dane": "01006",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 325,
+    "nombre_municipio": "El Rosal",
+    "codigo_dane": "00545",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 326,
+    "nombre_municipio": "El Rosario",
+    "codigo_dane": "00783",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 327,
+    "nombre_municipio": "El Santuario",
+    "codigo_dane": "00104",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 328,
+    "nombre_municipio": "El Tablón de Gómez",
+    "codigo_dane": "00826",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 329,
+    "nombre_municipio": "El Tambo",
+    "codigo_dane": "00409",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 330,
+    "nombre_municipio": "El Tambo",
+    "codigo_dane": "00784",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 331,
+    "nombre_municipio": "El Tarra",
+    "codigo_dane": "00841",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 332,
+    "nombre_municipio": "El Zulia",
+    "codigo_dane": "00836",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 333,
+    "nombre_municipio": "Elías",
+    "codigo_dane": "00666",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 334,
+    "nombre_municipio": "Encino",
+    "codigo_dane": "00940",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 335,
+    "nombre_municipio": "Enciso",
+    "codigo_dane": "00941",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 336,
+    "nombre_municipio": "Entrerrios",
+    "codigo_dane": "00054",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 337,
+    "nombre_municipio": "Envigado",
+    "codigo_dane": "00055",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 338,
+    "nombre_municipio": "Espinal",
+    "codigo_dane": "01037",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 339,
+    "nombre_municipio": "Facatativá",
+    "codigo_dane": "00642",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 340,
+    "nombre_municipio": "Falan",
+    "codigo_dane": "01038",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 341,
+    "nombre_municipio": "Filadelfia",
+    "codigo_dane": "00343",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 342,
+    "nombre_municipio": "Filandia",
+    "codigo_dane": "00889",
+    "id_departamento": "25"
+  },
+  {
+    "id_municipio": 343,
+    "nombre_municipio": "Firavitoba",
+    "codigo_dane": "00249",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 344,
+    "nombre_municipio": "Flandes",
+    "codigo_dane": "01039",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 345,
+    "nombre_municipio": "Florencia",
+    "codigo_dane": "00364",
+    "id_departamento": "9"
+  },
+  {
+    "id_municipio": 346,
+    "nombre_municipio": "Florencia",
+    "codigo_dane": "00410",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 347,
+    "nombre_municipio": "Floresta",
+    "codigo_dane": "00250",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 348,
+    "nombre_municipio": "Florián",
+    "codigo_dane": "00942",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 349,
+    "nombre_municipio": "Florida",
+    "codigo_dane": "01112",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 350,
+    "nombre_municipio": "Floridablanca",
+    "codigo_dane": "00943",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 351,
+    "nombre_municipio": "Fomeque",
+    "codigo_dane": "00546",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 352,
+    "nombre_municipio": "Fonseca",
+    "codigo_dane": "00700",
+    "id_departamento": "19"
+  },
+  {
+    "id_municipio": 353,
+    "nombre_municipio": "Fortul",
+    "codigo_dane": "00139",
+    "id_departamento": "3"
+  },
+  {
+    "id_municipio": 354,
+    "nombre_municipio": "Fosca",
+    "codigo_dane": "00547",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 355,
+    "nombre_municipio": "Francisco Pizarro",
+    "codigo_dane": "00806",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 356,
+    "nombre_municipio": "Fredonia",
+    "codigo_dane": "00056",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 357,
+    "nombre_municipio": "Fresno",
+    "codigo_dane": "01040",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 358,
+    "nombre_municipio": "Frontino",
+    "codigo_dane": "00133",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 359,
+    "nombre_municipio": "Fuente de Oro",
+    "codigo_dane": "00764",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 360,
+    "nombre_municipio": "Fundación",
+    "codigo_dane": "00719",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 361,
+    "nombre_municipio": "Funes",
+    "codigo_dane": "00785",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 362,
+    "nombre_municipio": "Funza",
+    "codigo_dane": "00548",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 363,
+    "nombre_municipio": "Fúquene",
+    "codigo_dane": "00549",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 364,
+    "nombre_municipio": "Fusagasugá",
+    "codigo_dane": "00640",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 365,
+    "nombre_municipio": "Gachala",
+    "codigo_dane": "00550",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 366,
+    "nombre_municipio": "Gachancipá",
+    "codigo_dane": "00551",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 367,
+    "nombre_municipio": "Gachantivá",
+    "codigo_dane": "00251",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 368,
+    "nombre_municipio": "Gachetá",
+    "codigo_dane": "00552",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 369,
+    "nombre_municipio": "Galán",
+    "codigo_dane": "00944",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 370,
+    "nombre_municipio": "Galapa",
+    "codigo_dane": "00147",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 371,
+    "nombre_municipio": "Galeras",
+    "codigo_dane": "01007",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 372,
+    "nombre_municipio": "Gama",
+    "codigo_dane": "00637",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 373,
+    "nombre_municipio": "Gamarra",
+    "codigo_dane": "00452",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 374,
+    "nombre_municipio": "Gambita",
+    "codigo_dane": "00945",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 375,
+    "nombre_municipio": "Gameza",
+    "codigo_dane": "00252",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 376,
+    "nombre_municipio": "Garagoa",
+    "codigo_dane": "00253",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 377,
+    "nombre_municipio": "Garzón",
+    "codigo_dane": "00667",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 378,
+    "nombre_municipio": "Génova",
+    "codigo_dane": "00896",
+    "id_departamento": "25"
+  },
+  {
+    "id_municipio": 379,
+    "nombre_municipio": "Gigante",
+    "codigo_dane": "00668",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 380,
+    "nombre_municipio": "Ginebra",
+    "codigo_dane": "01089",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 381,
+    "nombre_municipio": "Giraldo",
+    "codigo_dane": "00057",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 382,
+    "nombre_municipio": "Girardot",
+    "codigo_dane": "00553",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 383,
+    "nombre_municipio": "Girardota",
+    "codigo_dane": "00058",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 384,
+    "nombre_municipio": "Girón",
+    "codigo_dane": "00946",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 385,
+    "nombre_municipio": "Gómez Plata",
+    "codigo_dane": "00059",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 386,
+    "nombre_municipio": "González",
+    "codigo_dane": "00453",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 387,
+    "nombre_municipio": "Gramalote",
+    "codigo_dane": "00840",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 388,
+    "nombre_municipio": "Granada",
+    "codigo_dane": "00134",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 389,
+    "nombre_municipio": "Granada",
+    "codigo_dane": "00554",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 390,
+    "nombre_municipio": "Granada",
+    "codigo_dane": "00748",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 391,
+    "nombre_municipio": "Guaca",
+    "codigo_dane": "00947",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 392,
+    "nombre_municipio": "Guacamayas",
+    "codigo_dane": "00254",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 393,
+    "nombre_municipio": "Guacarí",
+    "codigo_dane": "01085",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 394,
+    "nombre_municipio": "Guachené",
+    "codigo_dane": "00411",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 395,
+    "nombre_municipio": "Guachetá",
+    "codigo_dane": "00555",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 396,
+    "nombre_municipio": "Guachucal",
+    "codigo_dane": "00786",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 397,
+    "nombre_municipio": "Guadalajara de Buga",
+    "codigo_dane": "01095",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 398,
+    "nombre_municipio": "Guadalupe",
+    "codigo_dane": "00669",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 399,
+    "nombre_municipio": "Guadalupe",
+    "codigo_dane": "00060",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 400,
+    "nombre_municipio": "Guadalupe",
+    "codigo_dane": "00948",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 401,
+    "nombre_municipio": "Guaduas",
+    "codigo_dane": "00556",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 402,
+    "nombre_municipio": "Guaitarilla",
+    "codigo_dane": "00787",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 403,
+    "nombre_municipio": "Gualmatán",
+    "codigo_dane": "00788",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 404,
+    "nombre_municipio": "Guamal",
+    "codigo_dane": "00720",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 405,
+    "nombre_municipio": "Guamal",
+    "codigo_dane": "00749",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 406,
+    "nombre_municipio": "Guamo",
+    "codigo_dane": "01041",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 407,
+    "nombre_municipio": "Guapi",
+    "codigo_dane": "00412",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 408,
+    "nombre_municipio": "Guapotá",
+    "codigo_dane": "00949",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 409,
+    "nombre_municipio": "Guaranda",
+    "codigo_dane": "01008",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 410,
+    "nombre_municipio": "Guarne",
+    "codigo_dane": "00061",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 411,
+    "nombre_municipio": "Guasca",
+    "codigo_dane": "00557",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 412,
+    "nombre_municipio": "Guatapé",
+    "codigo_dane": "00062",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 413,
+    "nombre_municipio": "Guataquí",
+    "codigo_dane": "00558",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 414,
+    "nombre_municipio": "Guatavita",
+    "codigo_dane": "00559",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 415,
+    "nombre_municipio": "Guateque",
+    "codigo_dane": "00255",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 416,
+    "nombre_municipio": "Guática",
+    "codigo_dane": "00901",
+    "id_departamento": "26"
+  },
+  {
+    "id_municipio": 417,
+    "nombre_municipio": "Guavatá",
+    "codigo_dane": "00950",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 418,
+    "nombre_municipio": "Guayabal de Siquima",
+    "codigo_dane": "00627",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 419,
+    "nombre_municipio": "Guayabetal",
+    "codigo_dane": "00560",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 420,
+    "nombre_municipio": "Guayatá",
+    "codigo_dane": "00256",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 421,
+    "nombre_municipio": "Güepsa",
+    "codigo_dane": "00951",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 422,
+    "nombre_municipio": "Güicán",
+    "codigo_dane": "00257",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 423,
+    "nombre_municipio": "Gutiérrez",
+    "codigo_dane": "00561",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 424,
+    "nombre_municipio": "Hacarí",
+    "codigo_dane": "00847",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 425,
+    "nombre_municipio": "Hatillo de Loba",
+    "codigo_dane": "00202",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 426,
+    "nombre_municipio": "Hato",
+    "codigo_dane": "00996",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 427,
+    "nombre_municipio": "Hato Corozal",
+    "codigo_dane": "00383",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 428,
+    "nombre_municipio": "Hatonuevo",
+    "codigo_dane": "00701",
+    "id_departamento": "19"
+  },
+  {
+    "id_municipio": 429,
+    "nombre_municipio": "Heliconia",
+    "codigo_dane": "00063",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 430,
+    "nombre_municipio": "Herrán",
+    "codigo_dane": "00848",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 431,
+    "nombre_municipio": "Herveo",
+    "codigo_dane": "01042",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 432,
+    "nombre_municipio": "Hispania",
+    "codigo_dane": "00064",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 433,
+    "nombre_municipio": "Hobo",
+    "codigo_dane": "00670",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 434,
+    "nombre_municipio": "Honda",
+    "codigo_dane": "01043",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 435,
+    "nombre_municipio": "Ibagué",
+    "codigo_dane": "01069",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 436,
+    "nombre_municipio": "Icononzo",
+    "codigo_dane": "01044",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 437,
+    "nombre_municipio": "Iles",
+    "codigo_dane": "00789",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 438,
+    "nombre_municipio": "Imués",
+    "codigo_dane": "00790",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 439,
+    "nombre_municipio": "Inírida",
+    "codigo_dane": "00644",
+    "id_departamento": "16"
+  },
+  {
+    "id_municipio": 440,
+    "nombre_municipio": "Inzá",
+    "codigo_dane": "00413",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 441,
+    "nombre_municipio": "Ipiales",
+    "codigo_dane": "00791",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 442,
+    "nombre_municipio": "Iquira",
+    "codigo_dane": "00671",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 443,
+    "nombre_municipio": "Isnos",
+    "codigo_dane": "00672",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 444,
+    "nombre_municipio": "Istmina",
+    "codigo_dane": "00466",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 445,
+    "nombre_municipio": "Itagui",
+    "codigo_dane": "00065",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 446,
+    "nombre_municipio": "Ituango",
+    "codigo_dane": "00066",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 447,
+    "nombre_municipio": "Iza",
+    "codigo_dane": "00258",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 448,
+    "nombre_municipio": "Jambaló",
+    "codigo_dane": "00414",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 449,
+    "nombre_municipio": "Jamundí",
+    "codigo_dane": "01113",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 450,
+    "nombre_municipio": "Jardín",
+    "codigo_dane": "00135",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 451,
+    "nombre_municipio": "Jenesano",
+    "codigo_dane": "00259",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 452,
+    "nombre_municipio": "Jericó",
+    "codigo_dane": "00260",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 453,
+    "nombre_municipio": "Jericó",
+    "codigo_dane": "00068",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 454,
+    "nombre_municipio": "Jerusalén",
+    "codigo_dane": "00562",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 455,
+    "nombre_municipio": "Jesús María",
+    "codigo_dane": "00952",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 456,
+    "nombre_municipio": "Jordán",
+    "codigo_dane": "00953",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 457,
+    "nombre_municipio": "Juan de Acosta",
+    "codigo_dane": "00161",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 458,
+    "nombre_municipio": "Junín",
+    "codigo_dane": "00563",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 459,
+    "nombre_municipio": "Juradó",
+    "codigo_dane": "00477",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 460,
+    "nombre_municipio": "La Apartada",
+    "codigo_dane": "00525",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 461,
+    "nombre_municipio": "La Argentina",
+    "codigo_dane": "00673",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 462,
+    "nombre_municipio": "La Belleza",
+    "codigo_dane": "00954",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 463,
+    "nombre_municipio": "La Calera",
+    "codigo_dane": "00564",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 464,
+    "nombre_municipio": "La Capilla",
+    "codigo_dane": "00262",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 465,
+    "nombre_municipio": "La Ceja",
+    "codigo_dane": "00069",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 466,
+    "nombre_municipio": "La Celia",
+    "codigo_dane": "00902",
+    "id_departamento": "26"
+  },
+  {
+    "id_municipio": 467,
+    "nombre_municipio": "La Chorrera",
+    "codigo_dane": "00003",
+    "id_departamento": "1"
+  },
+  {
+    "id_municipio": 468,
+    "nombre_municipio": "La Cruz",
+    "codigo_dane": "00792",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 469,
+    "nombre_municipio": "La Cumbre",
+    "codigo_dane": "01107",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 470,
+    "nombre_municipio": "La Dorada",
+    "codigo_dane": "00344",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 471,
+    "nombre_municipio": "La Esperanza",
+    "codigo_dane": "00855",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 472,
+    "nombre_municipio": "La Estrella",
+    "codigo_dane": "00070",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 473,
+    "nombre_municipio": "La Florida",
+    "codigo_dane": "00793",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 474,
+    "nombre_municipio": "La Gloria",
+    "codigo_dane": "00454",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 475,
+    "nombre_municipio": "La Guadalupe",
+    "codigo_dane": "00649",
+    "id_departamento": "16"
+  },
+  {
+    "id_municipio": 476,
+    "nombre_municipio": "La Jagua de Ibirico",
+    "codigo_dane": "00465",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 477,
+    "nombre_municipio": "La Jagua del Pilar",
+    "codigo_dane": "00707",
+    "id_departamento": "19"
+  },
+  {
+    "id_municipio": 478,
+    "nombre_municipio": "La Llanada",
+    "codigo_dane": "00794",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 479,
+    "nombre_municipio": "La Macarena",
+    "codigo_dane": "00752",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 480,
+    "nombre_municipio": "La Merced",
+    "codigo_dane": "00345",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 481,
+    "nombre_municipio": "La Mesa",
+    "codigo_dane": "00565",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 482,
+    "nombre_municipio": "La Montañita",
+    "codigo_dane": "00378",
+    "id_departamento": "9"
+  },
+  {
+    "id_municipio": 483,
+    "nombre_municipio": "La Palma",
+    "codigo_dane": "00566",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 484,
+    "nombre_municipio": "La Paz",
+    "codigo_dane": "00459",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 485,
+    "nombre_municipio": "La Paz",
+    "codigo_dane": "00956",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 486,
+    "nombre_municipio": "La Pedrera",
+    "codigo_dane": "00004",
+    "id_departamento": "1"
+  },
+  {
+    "id_municipio": 487,
+    "nombre_municipio": "La Peña",
+    "codigo_dane": "00567",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 488,
+    "nombre_municipio": "La Pintada",
+    "codigo_dane": "00071",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 489,
+    "nombre_municipio": "La Plata",
+    "codigo_dane": "00674",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 490,
+    "nombre_municipio": "La Playa",
+    "codigo_dane": "00852",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 491,
+    "nombre_municipio": "La Primavera",
+    "codigo_dane": "01122",
+    "id_departamento": "33"
+  },
+  {
+    "id_municipio": 492,
+    "nombre_municipio": "La Salina",
+    "codigo_dane": "00384",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 493,
+    "nombre_municipio": "La Sierra",
+    "codigo_dane": "00415",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 494,
+    "nombre_municipio": "La Tebaida",
+    "codigo_dane": "00890",
+    "id_departamento": "25"
+  },
+  {
+    "id_municipio": 495,
+    "nombre_municipio": "La Tola",
+    "codigo_dane": "00795",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 496,
+    "nombre_municipio": "La Unión",
+    "codigo_dane": "00072",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 497,
+    "nombre_municipio": "La Unión",
+    "codigo_dane": "00796",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 498,
+    "nombre_municipio": "La Unión",
+    "codigo_dane": "01009",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 499,
+    "nombre_municipio": "La Unión",
+    "codigo_dane": "01082",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 500,
+    "nombre_municipio": "La Uvita",
+    "codigo_dane": "00335",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 501,
+    "nombre_municipio": "La Vega",
+    "codigo_dane": "00416",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 502,
+    "nombre_municipio": "La Vega",
+    "codigo_dane": "00568",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 503,
+    "nombre_municipio": "La Victoria",
+    "codigo_dane": "00263",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 504,
+    "nombre_municipio": "La Victoria",
+    "codigo_dane": "00005",
+    "id_departamento": "1"
+  },
+  {
+    "id_municipio": 505,
+    "nombre_municipio": "La Victoria",
+    "codigo_dane": "01088",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 506,
+    "nombre_municipio": "La Virginia",
+    "codigo_dane": "00903",
+    "id_departamento": "26"
+  },
+  {
+    "id_municipio": 507,
+    "nombre_municipio": "Labateca",
+    "codigo_dane": "00864",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 508,
+    "nombre_municipio": "Labranzagrande",
+    "codigo_dane": "00261",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 509,
+    "nombre_municipio": "Landázuri",
+    "codigo_dane": "00955",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 510,
+    "nombre_municipio": "Lebríja",
+    "codigo_dane": "00957",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 511,
+    "nombre_municipio": "Leguízamo",
+    "codigo_dane": "00877",
+    "id_departamento": "24"
+  },
+  {
+    "id_municipio": 512,
+    "nombre_municipio": "Leiva",
+    "codigo_dane": "00797",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 513,
+    "nombre_municipio": "Lejanías",
+    "codigo_dane": "00753",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 514,
+    "nombre_municipio": "Lenguazaque",
+    "codigo_dane": "00569",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 515,
+    "nombre_municipio": "Lérida",
+    "codigo_dane": "01071",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 516,
+    "nombre_municipio": "Leticia",
+    "codigo_dane": "00001",
+    "id_departamento": "1"
+  },
+  {
+    "id_municipio": 517,
+    "nombre_municipio": "Líbano",
+    "codigo_dane": "01070",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 518,
+    "nombre_municipio": "Liborina",
+    "codigo_dane": "00073",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 519,
+    "nombre_municipio": "Linares",
+    "codigo_dane": "00798",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 520,
+    "nombre_municipio": "Lloró",
+    "codigo_dane": "00478",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 521,
+    "nombre_municipio": "López",
+    "codigo_dane": "00417",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 522,
+    "nombre_municipio": "Lorica",
+    "codigo_dane": "00506",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 523,
+    "nombre_municipio": "Los Andes",
+    "codigo_dane": "00799",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 524,
+    "nombre_municipio": "Los Córdobas",
+    "codigo_dane": "00507",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 525,
+    "nombre_municipio": "Los Palmitos",
+    "codigo_dane": "01010",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 526,
+    "nombre_municipio": "Los Patios",
+    "codigo_dane": "00860",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 527,
+    "nombre_municipio": "Los Santos",
+    "codigo_dane": "00958",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 528,
+    "nombre_municipio": "Lourdes",
+    "codigo_dane": "00844",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 529,
+    "nombre_municipio": "Luruaco",
+    "codigo_dane": "00148",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 530,
+    "nombre_municipio": "Macanal",
+    "codigo_dane": "00264",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 531,
+    "nombre_municipio": "Macaravita",
+    "codigo_dane": "00959",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 532,
+    "nombre_municipio": "Maceo",
+    "codigo_dane": "00074",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 533,
+    "nombre_municipio": "Macheta",
+    "codigo_dane": "00570",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 534,
+    "nombre_municipio": "Madrid",
+    "codigo_dane": "00571",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 535,
+    "nombre_municipio": "Magangué",
+    "codigo_dane": "00178",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 536,
+    "nombre_municipio": "Magüí",
+    "codigo_dane": "00800",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 537,
+    "nombre_municipio": "Mahates",
+    "codigo_dane": "00179",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 538,
+    "nombre_municipio": "Maicao",
+    "codigo_dane": "00702",
+    "id_departamento": "19"
+  },
+  {
+    "id_municipio": 539,
+    "nombre_municipio": "Majagual",
+    "codigo_dane": "01011",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 540,
+    "nombre_municipio": "Málaga",
+    "codigo_dane": "00960",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 541,
+    "nombre_municipio": "Malambo",
+    "codigo_dane": "00149",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 542,
+    "nombre_municipio": "Mallama",
+    "codigo_dane": "00801",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 543,
+    "nombre_municipio": "Manatí",
+    "codigo_dane": "00150",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 544,
+    "nombre_municipio": "Manaure",
+    "codigo_dane": "00455",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 545,
+    "nombre_municipio": "Manaure",
+    "codigo_dane": "00703",
+    "id_departamento": "19"
+  },
+  {
+    "id_municipio": 546,
+    "nombre_municipio": "Maní",
+    "codigo_dane": "00396",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 547,
+    "nombre_municipio": "Manizales",
+    "codigo_dane": "00337",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 548,
+    "nombre_municipio": "Manta",
+    "codigo_dane": "00572",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 549,
+    "nombre_municipio": "Manzanares",
+    "codigo_dane": "00346",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 550,
+    "nombre_municipio": "Mapiripán",
+    "codigo_dane": "00750",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 551,
+    "nombre_municipio": "Mapiripana",
+    "codigo_dane": "00646",
+    "id_departamento": "16"
+  },
+  {
+    "id_municipio": 552,
+    "nombre_municipio": "Margarita",
+    "codigo_dane": "00180",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 553,
+    "nombre_municipio": "María la Baja",
+    "codigo_dane": "00211",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 554,
+    "nombre_municipio": "Marinilla",
+    "codigo_dane": "00075",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 555,
+    "nombre_municipio": "Maripí",
+    "codigo_dane": "00265",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 556,
+    "nombre_municipio": "Mariquita",
+    "codigo_dane": "01045",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 557,
+    "nombre_municipio": "Marmato",
+    "codigo_dane": "00347",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 558,
+    "nombre_municipio": "Marquetalia",
+    "codigo_dane": "00363",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 559,
+    "nombre_municipio": "Marsella",
+    "codigo_dane": "00904",
+    "id_departamento": "26"
+  },
+  {
+    "id_municipio": 560,
+    "nombre_municipio": "Marulanda",
+    "codigo_dane": "00348",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 561,
+    "nombre_municipio": "Matanza",
+    "codigo_dane": "00961",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 562,
+    "nombre_municipio": "Medellín",
+    "codigo_dane": "00012",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 563,
+    "nombre_municipio": "Medina",
+    "codigo_dane": "00573",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 564,
+    "nombre_municipio": "Medio Atrato",
+    "codigo_dane": "00479",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 565,
+    "nombre_municipio": "Medio Baudó",
+    "codigo_dane": "00480",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 566,
+    "nombre_municipio": "Medio San Juan",
+    "codigo_dane": "00481",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 567,
+    "nombre_municipio": "Melgar",
+    "codigo_dane": "01046",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 568,
+    "nombre_municipio": "Mercaderes",
+    "codigo_dane": "00418",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 569,
+    "nombre_municipio": "Mesetas",
+    "codigo_dane": "00751",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 570,
+    "nombre_municipio": "Milán",
+    "codigo_dane": "00377",
+    "id_departamento": "9"
+  },
+  {
+    "id_municipio": 571,
+    "nombre_municipio": "Miraflores",
+    "codigo_dane": "00266",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 572,
+    "nombre_municipio": "Miraflores",
+    "codigo_dane": "00655",
+    "id_departamento": "17"
+  },
+  {
+    "id_municipio": 573,
+    "nombre_municipio": "Miranda",
+    "codigo_dane": "00419",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 574,
+    "nombre_municipio": "Miriti Paraná",
+    "codigo_dane": "00011",
+    "id_departamento": "1"
+  },
+  {
+    "id_municipio": 575,
+    "nombre_municipio": "Mistrató",
+    "codigo_dane": "00905",
+    "id_departamento": "26"
+  },
+  {
+    "id_municipio": 576,
+    "nombre_municipio": "Mitú",
+    "codigo_dane": "01115",
+    "id_departamento": "32"
+  },
+  {
+    "id_municipio": 577,
+    "nombre_municipio": "Mocoa",
+    "codigo_dane": "00872",
+    "id_departamento": "24"
+  },
+  {
+    "id_municipio": 578,
+    "nombre_municipio": "Mogotes",
+    "codigo_dane": "00962",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 579,
+    "nombre_municipio": "Molagavita",
+    "codigo_dane": "00963",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 580,
+    "nombre_municipio": "Momil",
+    "codigo_dane": "00508",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 581,
+    "nombre_municipio": "Mompós",
+    "codigo_dane": "00182",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 582,
+    "nombre_municipio": "Mongua",
+    "codigo_dane": "00267",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 583,
+    "nombre_municipio": "Monguí",
+    "codigo_dane": "00268",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 584,
+    "nombre_municipio": "Moniquirá",
+    "codigo_dane": "00269",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 585,
+    "nombre_municipio": "Montebello",
+    "codigo_dane": "00076",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 586,
+    "nombre_municipio": "Montecristo",
+    "codigo_dane": "00181",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 587,
+    "nombre_municipio": "Montelíbano",
+    "codigo_dane": "00524",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 588,
+    "nombre_municipio": "Montenegro",
+    "codigo_dane": "00891",
+    "id_departamento": "25"
+  },
+  {
+    "id_municipio": 589,
+    "nombre_municipio": "Montería",
+    "codigo_dane": "00498",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 590,
+    "nombre_municipio": "Monterrey",
+    "codigo_dane": "00385",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 591,
+    "nombre_municipio": "Moñitos",
+    "codigo_dane": "00509",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 592,
+    "nombre_municipio": "Morales",
+    "codigo_dane": "00183",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 593,
+    "nombre_municipio": "Morales",
+    "codigo_dane": "00420",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 594,
+    "nombre_municipio": "Morelia",
+    "codigo_dane": "00369",
+    "id_departamento": "9"
+  },
+  {
+    "id_municipio": 595,
+    "nombre_municipio": "Morichal",
+    "codigo_dane": "00652",
+    "id_departamento": "16"
+  },
+  {
+    "id_municipio": 596,
+    "nombre_municipio": "Morroa",
+    "codigo_dane": "01012",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 597,
+    "nombre_municipio": "Mosquera",
+    "codigo_dane": "00574",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 598,
+    "nombre_municipio": "Mosquera",
+    "codigo_dane": "00802",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 599,
+    "nombre_municipio": "Motavita",
+    "codigo_dane": "00215",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 600,
+    "nombre_municipio": "Murillo",
+    "codigo_dane": "01047",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 601,
+    "nombre_municipio": "Murindó",
+    "codigo_dane": "00077",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 602,
+    "nombre_municipio": "Mutatá",
+    "codigo_dane": "00078",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 603,
+    "nombre_municipio": "Mutiscua",
+    "codigo_dane": "00835",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 604,
+    "nombre_municipio": "Muzo",
+    "codigo_dane": "00270",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 605,
+    "nombre_municipio": "Nariño",
+    "codigo_dane": "00575",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 606,
+    "nombre_municipio": "Nariño",
+    "codigo_dane": "00803",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 607,
+    "nombre_municipio": "Nariño",
+    "codigo_dane": "00079",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 608,
+    "nombre_municipio": "Nátaga",
+    "codigo_dane": "00675",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 609,
+    "nombre_municipio": "Natagaima",
+    "codigo_dane": "01048",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 610,
+    "nombre_municipio": "Nechí",
+    "codigo_dane": "00081",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 611,
+    "nombre_municipio": "Necoclí",
+    "codigo_dane": "00080",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 612,
+    "nombre_municipio": "Neira",
+    "codigo_dane": "00349",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 613,
+    "nombre_municipio": "Neiva",
+    "codigo_dane": "00657",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 614,
+    "nombre_municipio": "Nemocón",
+    "codigo_dane": "00576",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 615,
+    "nombre_municipio": "Nilo",
+    "codigo_dane": "00577",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 616,
+    "nombre_municipio": "Nimaima",
+    "codigo_dane": "00578",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 617,
+    "nombre_municipio": "Nobsa",
+    "codigo_dane": "00271",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 618,
+    "nombre_municipio": "Nocaima",
+    "codigo_dane": "00579",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 619,
+    "nombre_municipio": "Norcasia",
+    "codigo_dane": "00350",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 620,
+    "nombre_municipio": "Norosí",
+    "codigo_dane": "00184",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 621,
+    "nombre_municipio": "Nóvita",
+    "codigo_dane": "00482",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 622,
+    "nombre_municipio": "Nueva Granada",
+    "codigo_dane": "00721",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 623,
+    "nombre_municipio": "Nuevo Colón",
+    "codigo_dane": "00272",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 624,
+    "nombre_municipio": "Nunchía",
+    "codigo_dane": "00395",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 625,
+    "nombre_municipio": "Nuquí",
+    "codigo_dane": "00483",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 626,
+    "nombre_municipio": "Obando",
+    "codigo_dane": "01091",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 627,
+    "nombre_municipio": "Ocamonte",
+    "codigo_dane": "00964",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 628,
+    "nombre_municipio": "Ocaña",
+    "codigo_dane": "00861",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 629,
+    "nombre_municipio": "Oiba",
+    "codigo_dane": "00965",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 630,
+    "nombre_municipio": "Oicatá",
+    "codigo_dane": "00273",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 631,
+    "nombre_municipio": "Olaya",
+    "codigo_dane": "00082",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 632,
+    "nombre_municipio": "Olaya Herrera",
+    "codigo_dane": "00804",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 633,
+    "nombre_municipio": "Onzaga",
+    "codigo_dane": "00966",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 634,
+    "nombre_municipio": "Oporapa",
+    "codigo_dane": "00676",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 635,
+    "nombre_municipio": "Orito",
+    "codigo_dane": "00874",
+    "id_departamento": "24"
+  },
+  {
+    "id_municipio": 636,
+    "nombre_municipio": "Orocué",
+    "codigo_dane": "00398",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 637,
+    "nombre_municipio": "Ortega",
+    "codigo_dane": "01049",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 638,
+    "nombre_municipio": "Ospina",
+    "codigo_dane": "00805",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 639,
+    "nombre_municipio": "Otanche",
+    "codigo_dane": "00274",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 640,
+    "nombre_municipio": "Ovejas",
+    "codigo_dane": "01013",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 641,
+    "nombre_municipio": "Pachavita",
+    "codigo_dane": "00275",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 642,
+    "nombre_municipio": "Pacho",
+    "codigo_dane": "00581",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 643,
+    "nombre_municipio": "Pacoa",
+    "codigo_dane": "01120",
+    "id_departamento": "32"
+  },
+  {
+    "id_municipio": 644,
+    "nombre_municipio": "Pácora",
+    "codigo_dane": "00351",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 645,
+    "nombre_municipio": "Padilla",
+    "codigo_dane": "00421",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 646,
+    "nombre_municipio": "Páez",
+    "codigo_dane": "00276",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 647,
+    "nombre_municipio": "Páez",
+    "codigo_dane": "00440",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 648,
+    "nombre_municipio": "Paicol",
+    "codigo_dane": "00677",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 649,
+    "nombre_municipio": "Pailitas",
+    "codigo_dane": "00456",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 650,
+    "nombre_municipio": "Paime",
+    "codigo_dane": "00582",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 651,
+    "nombre_municipio": "Paipa",
+    "codigo_dane": "00277",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 652,
+    "nombre_municipio": "Pajarito",
+    "codigo_dane": "00278",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 653,
+    "nombre_municipio": "Palermo",
+    "codigo_dane": "00678",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 654,
+    "nombre_municipio": "Palestina",
+    "codigo_dane": "00352",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 655,
+    "nombre_municipio": "Palestina",
+    "codigo_dane": "00679",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 656,
+    "nombre_municipio": "Palmar",
+    "codigo_dane": "00967",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 657,
+    "nombre_municipio": "Palmar de Varela",
+    "codigo_dane": "00162",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 658,
+    "nombre_municipio": "Palmas del Socorro",
+    "codigo_dane": "00988",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 659,
+    "nombre_municipio": "Palmira",
+    "codigo_dane": "01100",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 660,
+    "nombre_municipio": "Palmito",
+    "codigo_dane": "01014",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 661,
+    "nombre_municipio": "Palocabildo",
+    "codigo_dane": "01050",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 662,
+    "nombre_municipio": "Pamplona",
+    "codigo_dane": "00868",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 663,
+    "nombre_municipio": "Pamplonita",
+    "codigo_dane": "00869",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 664,
+    "nombre_municipio": "Pana Pana",
+    "codigo_dane": "00651",
+    "id_departamento": "16"
+  },
+  {
+    "id_municipio": 665,
+    "nombre_municipio": "Pandi",
+    "codigo_dane": "00583",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 666,
+    "nombre_municipio": "Panqueba",
+    "codigo_dane": "00279",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 667,
+    "nombre_municipio": "Papunahua",
+    "codigo_dane": "01118",
+    "id_departamento": "32"
+  },
+  {
+    "id_municipio": 668,
+    "nombre_municipio": "Páramo",
+    "codigo_dane": "00968",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 669,
+    "nombre_municipio": "Paratebueno",
+    "codigo_dane": "00584",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 670,
+    "nombre_municipio": "Pasca",
+    "codigo_dane": "00585",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 671,
+    "nombre_municipio": "Pasto",
+    "codigo_dane": "00769",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 672,
+    "nombre_municipio": "Patía",
+    "codigo_dane": "00422",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 673,
+    "nombre_municipio": "Pauna",
+    "codigo_dane": "00280",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 674,
+    "nombre_municipio": "Paya",
+    "codigo_dane": "00281",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 675,
+    "nombre_municipio": "Paz de Ariporo",
+    "codigo_dane": "00394",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 676,
+    "nombre_municipio": "Paz de Río",
+    "codigo_dane": "00327",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 677,
+    "nombre_municipio": "Pedraza",
+    "codigo_dane": "00722",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 678,
+    "nombre_municipio": "Pelaya",
+    "codigo_dane": "00457",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 679,
+    "nombre_municipio": "Pensilvania",
+    "codigo_dane": "00353",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 680,
+    "nombre_municipio": "Peñol",
+    "codigo_dane": "00083",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 681,
+    "nombre_municipio": "Peque",
+    "codigo_dane": "00084",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 682,
+    "nombre_municipio": "Pereira",
+    "codigo_dane": "00897",
+    "id_departamento": "26"
+  },
+  {
+    "id_municipio": 683,
+    "nombre_municipio": "Pesca",
+    "codigo_dane": "00282",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 684,
+    "nombre_municipio": "Piamonte",
+    "codigo_dane": "00423",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 685,
+    "nombre_municipio": "Piedecuesta",
+    "codigo_dane": "00969",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 686,
+    "nombre_municipio": "Piedras",
+    "codigo_dane": "01051",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 687,
+    "nombre_municipio": "Piendamó",
+    "codigo_dane": "00424",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 688,
+    "nombre_municipio": "Pijao",
+    "codigo_dane": "00892",
+    "id_departamento": "25"
+  },
+  {
+    "id_municipio": 689,
+    "nombre_municipio": "Pijiño del Carmen",
+    "codigo_dane": "00735",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 690,
+    "nombre_municipio": "Pinchote",
+    "codigo_dane": "00970",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 691,
+    "nombre_municipio": "Pinillos",
+    "codigo_dane": "00185",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 692,
+    "nombre_municipio": "Piojó",
+    "codigo_dane": "00151",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 693,
+    "nombre_municipio": "Pisba",
+    "codigo_dane": "00283",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 694,
+    "nombre_municipio": "Pital",
+    "codigo_dane": "00680",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 695,
+    "nombre_municipio": "Pitalito",
+    "codigo_dane": "00681",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 696,
+    "nombre_municipio": "Pivijay",
+    "codigo_dane": "00723",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 697,
+    "nombre_municipio": "Planadas",
+    "codigo_dane": "01052",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 698,
+    "nombre_municipio": "Planeta Rica",
+    "codigo_dane": "00510",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 699,
+    "nombre_municipio": "Plato",
+    "codigo_dane": "00724",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 700,
+    "nombre_municipio": "Policarpa",
+    "codigo_dane": "00807",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 701,
+    "nombre_municipio": "Polonuevo",
+    "codigo_dane": "00152",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 702,
+    "nombre_municipio": "Ponedera",
+    "codigo_dane": "00166",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 703,
+    "nombre_municipio": "Popayán",
+    "codigo_dane": "00399",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 704,
+    "nombre_municipio": "Pore",
+    "codigo_dane": "00386",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 705,
+    "nombre_municipio": "Potosí",
+    "codigo_dane": "00808",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 706,
+    "nombre_municipio": "Pradera",
+    "codigo_dane": "01098",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 707,
+    "nombre_municipio": "Prado",
+    "codigo_dane": "01053",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 708,
+    "nombre_municipio": "Providencia",
+    "codigo_dane": "00809",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 709,
+    "nombre_municipio": "Providencia",
+    "codigo_dane": "00911",
+    "id_departamento": "27"
+  },
+  {
+    "id_municipio": 710,
+    "nombre_municipio": "Pueblo Bello",
+    "codigo_dane": "00458",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 711,
+    "nombre_municipio": "Pueblo Nuevo",
+    "codigo_dane": "00511",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 712,
+    "nombre_municipio": "Pueblo Rico",
+    "codigo_dane": "00906",
+    "id_departamento": "26"
+  },
+  {
+    "id_municipio": 713,
+    "nombre_municipio": "Pueblo Viejo",
+    "codigo_dane": "00737",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 714,
+    "nombre_municipio": "Pueblorrico",
+    "codigo_dane": "00085",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 715,
+    "nombre_municipio": "Puente Nacional",
+    "codigo_dane": "00971",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 716,
+    "nombre_municipio": "Puerres",
+    "codigo_dane": "00810",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 717,
+    "nombre_municipio": "Puerto Alegría",
+    "codigo_dane": "00010",
+    "id_departamento": "1"
+  },
+  {
+    "id_municipio": 718,
+    "nombre_municipio": "Puerto Arica",
+    "codigo_dane": "00006",
+    "id_departamento": "1"
+  },
+  {
+    "id_municipio": 719,
+    "nombre_municipio": "Puerto Asís",
+    "codigo_dane": "00883",
+    "id_departamento": "24"
+  },
+  {
+    "id_municipio": 720,
+    "nombre_municipio": "Puerto Berrío",
+    "codigo_dane": "00086",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 721,
+    "nombre_municipio": "Puerto Boyacá",
+    "codigo_dane": "00284",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 722,
+    "nombre_municipio": "Puerto Caicedo",
+    "codigo_dane": "00875",
+    "id_departamento": "24"
+  },
+  {
+    "id_municipio": 723,
+    "nombre_municipio": "Puerto Carreño",
+    "codigo_dane": "01121",
+    "id_departamento": "33"
+  },
+  {
+    "id_municipio": 724,
+    "nombre_municipio": "Puerto Colombia",
+    "codigo_dane": "00165",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 725,
+    "nombre_municipio": "Puerto Colombia",
+    "codigo_dane": "00648",
+    "id_departamento": "16"
+  },
+  {
+    "id_municipio": 726,
+    "nombre_municipio": "Puerto Concordia",
+    "codigo_dane": "00754",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 727,
+    "nombre_municipio": "Puerto Escondido",
+    "codigo_dane": "00512",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 728,
+    "nombre_municipio": "Puerto Gaitán",
+    "codigo_dane": "00755",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 729,
+    "nombre_municipio": "Puerto Guzmán",
+    "codigo_dane": "00876",
+    "id_departamento": "24"
+  },
+  {
+    "id_municipio": 730,
+    "nombre_municipio": "Puerto Libertador",
+    "codigo_dane": "00526",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 731,
+    "nombre_municipio": "Puerto Lleras",
+    "codigo_dane": "00757",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 732,
+    "nombre_municipio": "Puerto López",
+    "codigo_dane": "00756",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 733,
+    "nombre_municipio": "Puerto Nare",
+    "codigo_dane": "00087",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 734,
+    "nombre_municipio": "Puerto Nariño",
+    "codigo_dane": "00007",
+    "id_departamento": "1"
+  },
+  {
+    "id_municipio": 735,
+    "nombre_municipio": "Puerto Parra",
+    "codigo_dane": "00914",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 736,
+    "nombre_municipio": "Puerto Rico",
+    "codigo_dane": "00370",
+    "id_departamento": "9"
+  },
+  {
+    "id_municipio": 737,
+    "nombre_municipio": "Puerto Rico",
+    "codigo_dane": "00758",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 738,
+    "nombre_municipio": "Puerto Rondón",
+    "codigo_dane": "00140",
+    "id_departamento": "3"
+  },
+  {
+    "id_municipio": 739,
+    "nombre_municipio": "Puerto Salgar",
+    "codigo_dane": "00586",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 740,
+    "nombre_municipio": "Puerto Santander",
+    "codigo_dane": "00008",
+    "id_departamento": "1"
+  },
+  {
+    "id_municipio": 741,
+    "nombre_municipio": "Puerto Santander",
+    "codigo_dane": "00839",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 742,
+    "nombre_municipio": "Puerto Tejada",
+    "codigo_dane": "00425",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 743,
+    "nombre_municipio": "Puerto Triunfo",
+    "codigo_dane": "00088",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 744,
+    "nombre_municipio": "Puerto Wilches",
+    "codigo_dane": "00913",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 745,
+    "nombre_municipio": "Pulí",
+    "codigo_dane": "00587",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 746,
+    "nombre_municipio": "Pupiales",
+    "codigo_dane": "00811",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 747,
+    "nombre_municipio": "Puracé",
+    "codigo_dane": "00426",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 748,
+    "nombre_municipio": "Purificación",
+    "codigo_dane": "01054",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 749,
+    "nombre_municipio": "Purísima",
+    "codigo_dane": "00513",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 750,
+    "nombre_municipio": "Quebradanegra",
+    "codigo_dane": "00588",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 751,
+    "nombre_municipio": "Quetame",
+    "codigo_dane": "00589",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 752,
+    "nombre_municipio": "Quibdó",
+    "codigo_dane": "00467",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 753,
+    "nombre_municipio": "Quimbaya",
+    "codigo_dane": "00893",
+    "id_departamento": "25"
+  },
+  {
+    "id_municipio": 754,
+    "nombre_municipio": "Quinchía",
+    "codigo_dane": "00907",
+    "id_departamento": "26"
+  },
+  {
+    "id_municipio": 755,
+    "nombre_municipio": "Quípama",
+    "codigo_dane": "00285",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 756,
+    "nombre_municipio": "Quipile",
+    "codigo_dane": "00590",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 757,
+    "nombre_municipio": "Ragonvalia",
+    "codigo_dane": "00854",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 758,
+    "nombre_municipio": "Ramiriquí",
+    "codigo_dane": "00286",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 759,
+    "nombre_municipio": "Ráquira",
+    "codigo_dane": "00287",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 760,
+    "nombre_municipio": "Recetor",
+    "codigo_dane": "00387",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 761,
+    "nombre_municipio": "Regidor",
+    "codigo_dane": "00186",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 762,
+    "nombre_municipio": "Remedios",
+    "codigo_dane": "00089",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 763,
+    "nombre_municipio": "Remolino",
+    "codigo_dane": "00725",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 764,
+    "nombre_municipio": "Repelón",
+    "codigo_dane": "00164",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 765,
+    "nombre_municipio": "Restrepo",
+    "codigo_dane": "00759",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 766,
+    "nombre_municipio": "Restrepo",
+    "codigo_dane": "01083",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 767,
+    "nombre_municipio": "Retiro",
+    "codigo_dane": "00090",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 768,
+    "nombre_municipio": "Ricaurte",
+    "codigo_dane": "00592",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 769,
+    "nombre_municipio": "Ricaurte",
+    "codigo_dane": "00812",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 770,
+    "nombre_municipio": "Rio Blanco",
+    "codigo_dane": "01055",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 771,
+    "nombre_municipio": "Río de Oro",
+    "codigo_dane": "00464",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 772,
+    "nombre_municipio": "Río Iro",
+    "codigo_dane": "00484",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 773,
+    "nombre_municipio": "Río Quito",
+    "codigo_dane": "00485",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 774,
+    "nombre_municipio": "Río Viejo",
+    "codigo_dane": "00187",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 775,
+    "nombre_municipio": "Riofrío",
+    "codigo_dane": "01101",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 776,
+    "nombre_municipio": "Riohacha",
+    "codigo_dane": "00694",
+    "id_departamento": "19"
+  },
+  {
+    "id_municipio": 777,
+    "nombre_municipio": "Rionegro",
+    "codigo_dane": "00091",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 778,
+    "nombre_municipio": "Rionegro",
+    "codigo_dane": "00972",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 779,
+    "nombre_municipio": "Riosucio",
+    "codigo_dane": "00354",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 780,
+    "nombre_municipio": "Riosucio",
+    "codigo_dane": "00486",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 781,
+    "nombre_municipio": "Risaralda",
+    "codigo_dane": "00355",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 782,
+    "nombre_municipio": "Rivera",
+    "codigo_dane": "00682",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 783,
+    "nombre_municipio": "Roberto Payán",
+    "codigo_dane": "00813",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 784,
+    "nombre_municipio": "Roldanillo",
+    "codigo_dane": "01074",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 785,
+    "nombre_municipio": "Roncesvalles",
+    "codigo_dane": "01056",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 786,
+    "nombre_municipio": "Rondón",
+    "codigo_dane": "00288",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 787,
+    "nombre_municipio": "Rosas",
+    "codigo_dane": "00427",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 788,
+    "nombre_municipio": "Rovira",
+    "codigo_dane": "01057",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 789,
+    "nombre_municipio": "Sabana de Torres",
+    "codigo_dane": "00992",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 790,
+    "nombre_municipio": "Sabanagrande",
+    "codigo_dane": "00153",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 791,
+    "nombre_municipio": "Sabanalarga",
+    "codigo_dane": "00092",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 792,
+    "nombre_municipio": "Sabanalarga",
+    "codigo_dane": "00154",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 793,
+    "nombre_municipio": "Sabanalarga",
+    "codigo_dane": "00388",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 794,
+    "nombre_municipio": "Sabanas de San Angel",
+    "codigo_dane": "00734",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 795,
+    "nombre_municipio": "Sabaneta",
+    "codigo_dane": "00093",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 796,
+    "nombre_municipio": "Saboyá",
+    "codigo_dane": "00289",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 797,
+    "nombre_municipio": "Sácama",
+    "codigo_dane": "00389",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 798,
+    "nombre_municipio": "Sáchica",
+    "codigo_dane": "00290",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 799,
+    "nombre_municipio": "Sahagún",
+    "codigo_dane": "00514",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 800,
+    "nombre_municipio": "Saladoblanco",
+    "codigo_dane": "00683",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 801,
+    "nombre_municipio": "Salamina",
+    "codigo_dane": "00356",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 802,
+    "nombre_municipio": "Salamina",
+    "codigo_dane": "00726",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 803,
+    "nombre_municipio": "Salazar",
+    "codigo_dane": "00837",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 804,
+    "nombre_municipio": "Saldaña",
+    "codigo_dane": "01058",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 805,
+    "nombre_municipio": "Salento",
+    "codigo_dane": "00894",
+    "id_departamento": "25"
+  },
+  {
+    "id_municipio": 806,
+    "nombre_municipio": "Salgar",
+    "codigo_dane": "00094",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 807,
+    "nombre_municipio": "Samacá",
+    "codigo_dane": "00291",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 808,
+    "nombre_municipio": "Samaná",
+    "codigo_dane": "00357",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 809,
+    "nombre_municipio": "Samaniego",
+    "codigo_dane": "00814",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 810,
+    "nombre_municipio": "Sampués",
+    "codigo_dane": "01024",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 811,
+    "nombre_municipio": "San Agustín",
+    "codigo_dane": "00693",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 812,
+    "nombre_municipio": "San Alberto",
+    "codigo_dane": "00460",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 813,
+    "nombre_municipio": "San Andrés",
+    "codigo_dane": "00912",
+    "id_departamento": "27"
+  },
+  {
+    "id_municipio": 814,
+    "nombre_municipio": "San Andrés",
+    "codigo_dane": "00973",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 815,
+    "nombre_municipio": "San Andrés de Cuerquía",
+    "codigo_dane": "00127",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 816,
+    "nombre_municipio": "San Andrés de Tumaco",
+    "codigo_dane": "00828",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 817,
+    "nombre_municipio": "San Andrés Sotavento",
+    "codigo_dane": "00515",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 818,
+    "nombre_municipio": "San Antero",
+    "codigo_dane": "00516",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 819,
+    "nombre_municipio": "San Antonio",
+    "codigo_dane": "01066",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 820,
+    "nombre_municipio": "San Antonio del Tequendama",
+    "codigo_dane": "00628",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 821,
+    "nombre_municipio": "San Benito",
+    "codigo_dane": "00995",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 822,
+    "nombre_municipio": "San Benito Abad",
+    "codigo_dane": "01015",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 823,
+    "nombre_municipio": "San Bernardo",
+    "codigo_dane": "00593",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 824,
+    "nombre_municipio": "San Bernardo",
+    "codigo_dane": "00816",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 825,
+    "nombre_municipio": "San Bernardo del Viento",
+    "codigo_dane": "00497",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 826,
+    "nombre_municipio": "San Calixto",
+    "codigo_dane": "00851",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 827,
+    "nombre_municipio": "San Carlos",
+    "codigo_dane": "00132",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 828,
+    "nombre_municipio": "San Carlos",
+    "codigo_dane": "00523",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 829,
+    "nombre_municipio": "San Carlos de Guaroa",
+    "codigo_dane": "00765",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 830,
+    "nombre_municipio": "San Cayetano",
+    "codigo_dane": "00594",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 831,
+    "nombre_municipio": "San Cayetano",
+    "codigo_dane": "00850",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 832,
+    "nombre_municipio": "San Cristóbal",
+    "codigo_dane": "00212",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 833,
+    "nombre_municipio": "San Diego",
+    "codigo_dane": "00461",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 834,
+    "nombre_municipio": "San Eduardo",
+    "codigo_dane": "00292",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 835,
+    "nombre_municipio": "San Estanislao",
+    "codigo_dane": "00188",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 836,
+    "nombre_municipio": "San Felipe",
+    "codigo_dane": "00647",
+    "id_departamento": "16"
+  },
+  {
+    "id_municipio": 837,
+    "nombre_municipio": "San Fernando",
+    "codigo_dane": "00189",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 838,
+    "nombre_municipio": "San Francisco",
+    "codigo_dane": "00095",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 839,
+    "nombre_municipio": "San Francisco",
+    "codigo_dane": "00595",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 840,
+    "nombre_municipio": "San Francisco",
+    "codigo_dane": "00879",
+    "id_departamento": "24"
+  },
+  {
+    "id_municipio": 841,
+    "nombre_municipio": "San Gil",
+    "codigo_dane": "00974",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 842,
+    "nombre_municipio": "San Jacinto",
+    "codigo_dane": "00208",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 843,
+    "nombre_municipio": "San Jacinto del Cauca",
+    "codigo_dane": "00206",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 844,
+    "nombre_municipio": "San Jerónimo",
+    "codigo_dane": "00096",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 845,
+    "nombre_municipio": "San Joaquín",
+    "codigo_dane": "00975",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 846,
+    "nombre_municipio": "San José",
+    "codigo_dane": "00358",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 847,
+    "nombre_municipio": "San José de La Montaña",
+    "codigo_dane": "00129",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 848,
+    "nombre_municipio": "San José de Miranda",
+    "codigo_dane": "00990",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 849,
+    "nombre_municipio": "San José de Pare",
+    "codigo_dane": "00331",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 850,
+    "nombre_municipio": "San José de Uré",
+    "codigo_dane": "00521",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 851,
+    "nombre_municipio": "San José del Fragua",
+    "codigo_dane": "00374",
+    "id_departamento": "9"
+  },
+  {
+    "id_municipio": 852,
+    "nombre_municipio": "San José del Guaviare",
+    "codigo_dane": "00654",
+    "id_departamento": "17"
+  },
+  {
+    "id_municipio": 853,
+    "nombre_municipio": "San José del Palmar",
+    "codigo_dane": "00492",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 854,
+    "nombre_municipio": "San Juan de Arama",
+    "codigo_dane": "00766",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 855,
+    "nombre_municipio": "San Juan de Betulia",
+    "codigo_dane": "01022",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 856,
+    "nombre_municipio": "San Juan de Río Seco",
+    "codigo_dane": "00625",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 857,
+    "nombre_municipio": "San Juan de Urabá",
+    "codigo_dane": "00130",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 858,
+    "nombre_municipio": "San Juan del Cesar",
+    "codigo_dane": "00708",
+    "id_departamento": "19"
+  },
+  {
+    "id_municipio": 859,
+    "nombre_municipio": "San Juan Nepomuceno",
+    "codigo_dane": "00190",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 860,
+    "nombre_municipio": "San Juanito",
+    "codigo_dane": "00760",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 861,
+    "nombre_municipio": "San Lorenzo",
+    "codigo_dane": "00817",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 862,
+    "nombre_municipio": "San Luis",
+    "codigo_dane": "00097",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 863,
+    "nombre_municipio": "San Luis",
+    "codigo_dane": "01065",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 864,
+    "nombre_municipio": "San Luis de Gaceno",
+    "codigo_dane": "00330",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 865,
+    "nombre_municipio": "San Luis de Gaceno",
+    "codigo_dane": "00393",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 866,
+    "nombre_municipio": "San Luis de Sincé",
+    "codigo_dane": "01021",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 867,
+    "nombre_municipio": "San Marcos",
+    "codigo_dane": "01016",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 868,
+    "nombre_municipio": "San Martín",
+    "codigo_dane": "00462",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 869,
+    "nombre_municipio": "San Martín",
+    "codigo_dane": "00761",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 870,
+    "nombre_municipio": "San Martín de Loba",
+    "codigo_dane": "00204",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 871,
+    "nombre_municipio": "San Mateo",
+    "codigo_dane": "00293",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 872,
+    "nombre_municipio": "San Miguel",
+    "codigo_dane": "00880",
+    "id_departamento": "24"
+  },
+  {
+    "id_municipio": 873,
+    "nombre_municipio": "San Miguel",
+    "codigo_dane": "00976",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 874,
+    "nombre_municipio": "San Miguel de Sema",
+    "codigo_dane": "00332",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 875,
+    "nombre_municipio": "San Onofre",
+    "codigo_dane": "01017",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 876,
+    "nombre_municipio": "San Pablo",
+    "codigo_dane": "00818",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 877,
+    "nombre_municipio": "San Pablo de Borbur",
+    "codigo_dane": "00207",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 878,
+    "nombre_municipio": "San Pablo de Borbur",
+    "codigo_dane": "00329",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 879,
+    "nombre_municipio": "San Pedro",
+    "codigo_dane": "00098",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 880,
+    "nombre_municipio": "San Pedro",
+    "codigo_dane": "01018",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 881,
+    "nombre_municipio": "San Pedro",
+    "codigo_dane": "01094",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 882,
+    "nombre_municipio": "San Pedro de Cartago",
+    "codigo_dane": "00825",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 883,
+    "nombre_municipio": "San Pedro de Uraba",
+    "codigo_dane": "00124",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 884,
+    "nombre_municipio": "San Pelayo",
+    "codigo_dane": "00517",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 885,
+    "nombre_municipio": "San Rafael",
+    "codigo_dane": "00099",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 886,
+    "nombre_municipio": "San Roque",
+    "codigo_dane": "00100",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 887,
+    "nombre_municipio": "San Sebastián",
+    "codigo_dane": "00439",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 888,
+    "nombre_municipio": "San Sebastián de Buenavista",
+    "codigo_dane": "00733",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 889,
+    "nombre_municipio": "San Vicente",
+    "codigo_dane": "00101",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 890,
+    "nombre_municipio": "San Vicente de Chucurí",
+    "codigo_dane": "00989",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 891,
+    "nombre_municipio": "San Vicente del Caguán",
+    "codigo_dane": "00379",
+    "id_departamento": "9"
+  },
+  {
+    "id_municipio": 892,
+    "nombre_municipio": "San Zenón",
+    "codigo_dane": "00727",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 893,
+    "nombre_municipio": "Sandoná",
+    "codigo_dane": "00815",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 894,
+    "nombre_municipio": "Santa Ana",
+    "codigo_dane": "00728",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 895,
+    "nombre_municipio": "Santa Bárbara",
+    "codigo_dane": "00102",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 896,
+    "nombre_municipio": "Santa Bárbara",
+    "codigo_dane": "00819",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 897,
+    "nombre_municipio": "Santa Bárbara",
+    "codigo_dane": "00977",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 898,
+    "nombre_municipio": "Santa Bárbara de Pinto",
+    "codigo_dane": "00736",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 899,
+    "nombre_municipio": "Santa Catalina",
+    "codigo_dane": "00191",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 900,
+    "nombre_municipio": "Santa Helena del Opón",
+    "codigo_dane": "00991",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 901,
+    "nombre_municipio": "Santa Isabel",
+    "codigo_dane": "01059",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 902,
+    "nombre_municipio": "Santa Lucía",
+    "codigo_dane": "00155",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 903,
+    "nombre_municipio": "Santa María",
+    "codigo_dane": "00295",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 904,
+    "nombre_municipio": "Santa María",
+    "codigo_dane": "00684",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 905,
+    "nombre_municipio": "Santa Marta",
+    "codigo_dane": "00709",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 906,
+    "nombre_municipio": "Santa Rosa",
+    "codigo_dane": "00192",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 907,
+    "nombre_municipio": "Santa Rosa",
+    "codigo_dane": "00428",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 908,
+    "nombre_municipio": "Santa Rosa de Cabal",
+    "codigo_dane": "00909",
+    "id_departamento": "26"
+  },
+  {
+    "id_municipio": 909,
+    "nombre_municipio": "Santa Rosa de Osos",
+    "codigo_dane": "00126",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 910,
+    "nombre_municipio": "Santa Rosa de Viterbo",
+    "codigo_dane": "00328",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 911,
+    "nombre_municipio": "Santa Rosa del Sur",
+    "codigo_dane": "00201",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 912,
+    "nombre_municipio": "Santa Rosalía",
+    "codigo_dane": "01123",
+    "id_departamento": "33"
+  },
+  {
+    "id_municipio": 913,
+    "nombre_municipio": "Santa Sofía",
+    "codigo_dane": "00296",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 914,
+    "nombre_municipio": "Santacruz",
+    "codigo_dane": "00768",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 915,
+    "nombre_municipio": "Santafé de Antioquia",
+    "codigo_dane": "00125",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 916,
+    "nombre_municipio": "Santana",
+    "codigo_dane": "00294",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 917,
+    "nombre_municipio": "Santander de Quilichao",
+    "codigo_dane": "00438",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 918,
+    "nombre_municipio": "Santiago",
+    "codigo_dane": "00863",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 919,
+    "nombre_municipio": "Santiago",
+    "codigo_dane": "00881",
+    "id_departamento": "24"
+  },
+  {
+    "id_municipio": 920,
+    "nombre_municipio": "Santiago de Tolú",
+    "codigo_dane": "01023",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 921,
+    "nombre_municipio": "Santo Domingo",
+    "codigo_dane": "00103",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 922,
+    "nombre_municipio": "Santo Tomás",
+    "codigo_dane": "00156",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 923,
+    "nombre_municipio": "Santuario",
+    "codigo_dane": "00908",
+    "id_departamento": "26"
+  },
+  {
+    "id_municipio": 924,
+    "nombre_municipio": "Sapuyes",
+    "codigo_dane": "00820",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 925,
+    "nombre_municipio": "Saravena",
+    "codigo_dane": "00141",
+    "id_departamento": "3"
+  },
+  {
+    "id_municipio": 926,
+    "nombre_municipio": "Sardinata",
+    "codigo_dane": "00858",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 927,
+    "nombre_municipio": "Sasaima",
+    "codigo_dane": "00638",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 928,
+    "nombre_municipio": "Sativanorte",
+    "codigo_dane": "00297",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 929,
+    "nombre_municipio": "Sativasur",
+    "codigo_dane": "00298",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 930,
+    "nombre_municipio": "Segovia",
+    "codigo_dane": "00105",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 931,
+    "nombre_municipio": "Sesquilé",
+    "codigo_dane": "00596",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 932,
+    "nombre_municipio": "Sevilla",
+    "codigo_dane": "01076",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 933,
+    "nombre_municipio": "Siachoque",
+    "codigo_dane": "00299",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 934,
+    "nombre_municipio": "Sibaté",
+    "codigo_dane": "00597",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 935,
+    "nombre_municipio": "Sibundoy",
+    "codigo_dane": "00878",
+    "id_departamento": "24"
+  },
+  {
+    "id_municipio": 936,
+    "nombre_municipio": "Silos",
+    "codigo_dane": "00832",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 937,
+    "nombre_municipio": "Silvania",
+    "codigo_dane": "00598",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 938,
+    "nombre_municipio": "Silvia",
+    "codigo_dane": "00429",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 939,
+    "nombre_municipio": "Simacota",
+    "codigo_dane": "00978",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 940,
+    "nombre_municipio": "Simijaca",
+    "codigo_dane": "00599",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 941,
+    "nombre_municipio": "Simití",
+    "codigo_dane": "00193",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 942,
+    "nombre_municipio": "Sincelejo",
+    "codigo_dane": "01000",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 943,
+    "nombre_municipio": "Sipí",
+    "codigo_dane": "00487",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 944,
+    "nombre_municipio": "Sitionuevo",
+    "codigo_dane": "00729",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 945,
+    "nombre_municipio": "Soacha",
+    "codigo_dane": "00600",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 946,
+    "nombre_municipio": "Soatá",
+    "codigo_dane": "00300",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 947,
+    "nombre_municipio": "Socha",
+    "codigo_dane": "00302",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 948,
+    "nombre_municipio": "Socorro",
+    "codigo_dane": "00979",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 949,
+    "nombre_municipio": "Socotá",
+    "codigo_dane": "00301",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 950,
+    "nombre_municipio": "Sogamoso",
+    "codigo_dane": "00303",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 951,
+    "nombre_municipio": "Solano",
+    "codigo_dane": "00371",
+    "id_departamento": "9"
+  },
+  {
+    "id_municipio": 952,
+    "nombre_municipio": "Soledad",
+    "codigo_dane": "00157",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 953,
+    "nombre_municipio": "Solita",
+    "codigo_dane": "00372",
+    "id_departamento": "9"
+  },
+  {
+    "id_municipio": 954,
+    "nombre_municipio": "Somondoco",
+    "codigo_dane": "00304",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 955,
+    "nombre_municipio": "Sonsón",
+    "codigo_dane": "00136",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 956,
+    "nombre_municipio": "Sopetrán",
+    "codigo_dane": "00106",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 957,
+    "nombre_municipio": "Soplaviento",
+    "codigo_dane": "00194",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 958,
+    "nombre_municipio": "Sopó",
+    "codigo_dane": "00636",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 959,
+    "nombre_municipio": "Sora",
+    "codigo_dane": "00305",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 960,
+    "nombre_municipio": "Soracá",
+    "codigo_dane": "00307",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 961,
+    "nombre_municipio": "Sotaquirá",
+    "codigo_dane": "00306",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 962,
+    "nombre_municipio": "Sotara",
+    "codigo_dane": "00430",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 963,
+    "nombre_municipio": "Suaita",
+    "codigo_dane": "00980",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 964,
+    "nombre_municipio": "Suan",
+    "codigo_dane": "00158",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 965,
+    "nombre_municipio": "Suárez",
+    "codigo_dane": "00431",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 966,
+    "nombre_municipio": "Suárez",
+    "codigo_dane": "01072",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 967,
+    "nombre_municipio": "Suaza",
+    "codigo_dane": "00685",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 968,
+    "nombre_municipio": "Subachoque",
+    "codigo_dane": "00601",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 969,
+    "nombre_municipio": "Sucre",
+    "codigo_dane": "00432",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 970,
+    "nombre_municipio": "Sucre",
+    "codigo_dane": "00981",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 971,
+    "nombre_municipio": "Sucre",
+    "codigo_dane": "01019",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 972,
+    "nombre_municipio": "Suesca",
+    "codigo_dane": "00602",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 973,
+    "nombre_municipio": "Supatá",
+    "codigo_dane": "00603",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 974,
+    "nombre_municipio": "Supía",
+    "codigo_dane": "00359",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 975,
+    "nombre_municipio": "Suratá",
+    "codigo_dane": "00982",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 976,
+    "nombre_municipio": "Susa",
+    "codigo_dane": "00604",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 977,
+    "nombre_municipio": "Susacón",
+    "codigo_dane": "00308",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 978,
+    "nombre_municipio": "Sutamarchán",
+    "codigo_dane": "00309",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 979,
+    "nombre_municipio": "Sutatausa",
+    "codigo_dane": "00605",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 980,
+    "nombre_municipio": "Sutatenza",
+    "codigo_dane": "00310",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 981,
+    "nombre_municipio": "Tabio",
+    "codigo_dane": "00606",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 982,
+    "nombre_municipio": "Tadó",
+    "codigo_dane": "00495",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 983,
+    "nombre_municipio": "Talaigua Nuevo",
+    "codigo_dane": "00195",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 984,
+    "nombre_municipio": "Tamalameque",
+    "codigo_dane": "00463",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 985,
+    "nombre_municipio": "Támara",
+    "codigo_dane": "00397",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 986,
+    "nombre_municipio": "Tame",
+    "codigo_dane": "00142",
+    "id_departamento": "3"
+  },
+  {
+    "id_municipio": 987,
+    "nombre_municipio": "Támesis",
+    "codigo_dane": "00107",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 988,
+    "nombre_municipio": "Taminango",
+    "codigo_dane": "00821",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 989,
+    "nombre_municipio": "Tangua",
+    "codigo_dane": "00822",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 990,
+    "nombre_municipio": "Taraira",
+    "codigo_dane": "01117",
+    "id_departamento": "32"
+  },
+  {
+    "id_municipio": 991,
+    "nombre_municipio": "Tarapacá",
+    "codigo_dane": "00009",
+    "id_departamento": "1"
+  },
+  {
+    "id_municipio": 992,
+    "nombre_municipio": "Tarazá",
+    "codigo_dane": "00108",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 993,
+    "nombre_municipio": "Tarqui",
+    "codigo_dane": "00686",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 994,
+    "nombre_municipio": "Tarso",
+    "codigo_dane": "00109",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 995,
+    "nombre_municipio": "Tasco",
+    "codigo_dane": "00311",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 996,
+    "nombre_municipio": "Tauramena",
+    "codigo_dane": "00390",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 997,
+    "nombre_municipio": "Tausa",
+    "codigo_dane": "00607",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 998,
+    "nombre_municipio": "Tello",
+    "codigo_dane": "00688",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 999,
+    "nombre_municipio": "Tena",
+    "codigo_dane": "00608",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1000,
+    "nombre_municipio": "Tenerife",
+    "codigo_dane": "00730",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 1001,
+    "nombre_municipio": "Tenjo",
+    "codigo_dane": "00609",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1002,
+    "nombre_municipio": "Tenza",
+    "codigo_dane": "00312",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1003,
+    "nombre_municipio": "Teorama",
+    "codigo_dane": "00842",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 1004,
+    "nombre_municipio": "Teruel",
+    "codigo_dane": "00689",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 1005,
+    "nombre_municipio": "Tesalia",
+    "codigo_dane": "00687",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 1006,
+    "nombre_municipio": "Tibacuy",
+    "codigo_dane": "00610",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1007,
+    "nombre_municipio": "Tibaná",
+    "codigo_dane": "00313",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1008,
+    "nombre_municipio": "Tibasosa",
+    "codigo_dane": "00334",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1009,
+    "nombre_municipio": "Tibirita",
+    "codigo_dane": "00611",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1010,
+    "nombre_municipio": "Tibú",
+    "codigo_dane": "00849",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 1011,
+    "nombre_municipio": "Tierralta",
+    "codigo_dane": "00518",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 1012,
+    "nombre_municipio": "Timaná",
+    "codigo_dane": "00690",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 1013,
+    "nombre_municipio": "Timbío",
+    "codigo_dane": "00433",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 1014,
+    "nombre_municipio": "Timbiquí",
+    "codigo_dane": "00434",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 1015,
+    "nombre_municipio": "Tinjacá",
+    "codigo_dane": "00314",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1016,
+    "nombre_municipio": "Tipacoque",
+    "codigo_dane": "00315",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1017,
+    "nombre_municipio": "Tiquisio",
+    "codigo_dane": "00196",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 1018,
+    "nombre_municipio": "Titiribí",
+    "codigo_dane": "00110",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 1019,
+    "nombre_municipio": "Toca",
+    "codigo_dane": "00316",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1020,
+    "nombre_municipio": "Tocaima",
+    "codigo_dane": "00612",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1021,
+    "nombre_municipio": "Tocancipá",
+    "codigo_dane": "00613",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1022,
+    "nombre_municipio": "Togüí",
+    "codigo_dane": "00325",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1023,
+    "nombre_municipio": "Toledo",
+    "codigo_dane": "00111",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 1024,
+    "nombre_municipio": "Toledo",
+    "codigo_dane": "00834",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 1025,
+    "nombre_municipio": "Tolú Viejo",
+    "codigo_dane": "01020",
+    "id_departamento": "29"
+  },
+  {
+    "id_municipio": 1026,
+    "nombre_municipio": "Tona",
+    "codigo_dane": "00983",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 1027,
+    "nombre_municipio": "Tópaga",
+    "codigo_dane": "00317",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1028,
+    "nombre_municipio": "Topaipí",
+    "codigo_dane": "00614",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1029,
+    "nombre_municipio": "Toribio",
+    "codigo_dane": "00435",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 1030,
+    "nombre_municipio": "Toro",
+    "codigo_dane": "01105",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 1031,
+    "nombre_municipio": "Tota",
+    "codigo_dane": "00318",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1032,
+    "nombre_municipio": "Totoró",
+    "codigo_dane": "00436",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 1033,
+    "nombre_municipio": "Trinidad",
+    "codigo_dane": "00391",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 1034,
+    "nombre_municipio": "Trujillo",
+    "codigo_dane": "01109",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 1035,
+    "nombre_municipio": "Tubará",
+    "codigo_dane": "00159",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 1036,
+    "nombre_municipio": "Tuchín",
+    "codigo_dane": "00519",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 1037,
+    "nombre_municipio": "Tuluá",
+    "codigo_dane": "01111",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 1038,
+    "nombre_municipio": "Tunja",
+    "codigo_dane": "00217",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1039,
+    "nombre_municipio": "Tununguá",
+    "codigo_dane": "00214",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1040,
+    "nombre_municipio": "Túquerres",
+    "codigo_dane": "00823",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 1041,
+    "nombre_municipio": "Turbaco",
+    "codigo_dane": "00197",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 1042,
+    "nombre_municipio": "Turbaná",
+    "codigo_dane": "00198",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 1043,
+    "nombre_municipio": "Turbo",
+    "codigo_dane": "00112",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 1044,
+    "nombre_municipio": "Turmequé",
+    "codigo_dane": "00319",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1045,
+    "nombre_municipio": "Tuta",
+    "codigo_dane": "00333",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1046,
+    "nombre_municipio": "Tutazá",
+    "codigo_dane": "00320",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1047,
+    "nombre_municipio": "Ubalá",
+    "codigo_dane": "00615",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1048,
+    "nombre_municipio": "Ubaque",
+    "codigo_dane": "00616",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1049,
+    "nombre_municipio": "Ulloa",
+    "codigo_dane": "01108",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 1050,
+    "nombre_municipio": "Umbita",
+    "codigo_dane": "00321",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1051,
+    "nombre_municipio": "Une",
+    "codigo_dane": "00617",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1052,
+    "nombre_municipio": "Unguía",
+    "codigo_dane": "00488",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 1053,
+    "nombre_municipio": "Unión Panamericana",
+    "codigo_dane": "00496",
+    "id_departamento": "13"
+  },
+  {
+    "id_municipio": 1054,
+    "nombre_municipio": "Uramita",
+    "codigo_dane": "00113",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 1055,
+    "nombre_municipio": "Uribe",
+    "codigo_dane": "00739",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 1056,
+    "nombre_municipio": "Uribia",
+    "codigo_dane": "00704",
+    "id_departamento": "19"
+  },
+  {
+    "id_municipio": 1057,
+    "nombre_municipio": "Urrao",
+    "codigo_dane": "00114",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 1058,
+    "nombre_municipio": "Urumita",
+    "codigo_dane": "00705",
+    "id_departamento": "19"
+  },
+  {
+    "id_municipio": 1059,
+    "nombre_municipio": "Usiacurí",
+    "codigo_dane": "00160",
+    "id_departamento": "4"
+  },
+  {
+    "id_municipio": 1060,
+    "nombre_municipio": "Útica",
+    "codigo_dane": "00618",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1061,
+    "nombre_municipio": "Valdivia",
+    "codigo_dane": "00115",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 1062,
+    "nombre_municipio": "Valencia",
+    "codigo_dane": "00520",
+    "id_departamento": "14"
+  },
+  {
+    "id_municipio": 1063,
+    "nombre_municipio": "Valle de Guamez",
+    "codigo_dane": "00882",
+    "id_departamento": "24"
+  },
+  {
+    "id_municipio": 1064,
+    "nombre_municipio": "Valle de San José",
+    "codigo_dane": "00994",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 1065,
+    "nombre_municipio": "Valle de San Juan",
+    "codigo_dane": "01063",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 1066,
+    "nombre_municipio": "Valledupar",
+    "codigo_dane": "00441",
+    "id_departamento": "12"
+  },
+  {
+    "id_municipio": 1067,
+    "nombre_municipio": "Valparaíso",
+    "codigo_dane": "00116",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 1068,
+    "nombre_municipio": "Valparaíso",
+    "codigo_dane": "00373",
+    "id_departamento": "9"
+  },
+  {
+    "id_municipio": 1069,
+    "nombre_municipio": "Vegachí",
+    "codigo_dane": "00117",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 1070,
+    "nombre_municipio": "Vélez",
+    "codigo_dane": "00984",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 1071,
+    "nombre_municipio": "Venadillo",
+    "codigo_dane": "01060",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 1072,
+    "nombre_municipio": "Venecia",
+    "codigo_dane": "00118",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 1073,
+    "nombre_municipio": "Venecia",
+    "codigo_dane": "00580",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1074,
+    "nombre_municipio": "Ventaquemada",
+    "codigo_dane": "00322",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1075,
+    "nombre_municipio": "Vergara",
+    "codigo_dane": "00631",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1076,
+    "nombre_municipio": "Versalles",
+    "codigo_dane": "01103",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 1077,
+    "nombre_municipio": "Vetas",
+    "codigo_dane": "00985",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 1078,
+    "nombre_municipio": "Vianí",
+    "codigo_dane": "00619",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1079,
+    "nombre_municipio": "Victoria",
+    "codigo_dane": "00360",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 1080,
+    "nombre_municipio": "Vigía del Fuerte",
+    "codigo_dane": "00128",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 1081,
+    "nombre_municipio": "Vijes",
+    "codigo_dane": "01110",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 1082,
+    "nombre_municipio": "Villa Caro",
+    "codigo_dane": "00866",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 1083,
+    "nombre_municipio": "Villa de Leyva",
+    "codigo_dane": "00326",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1084,
+    "nombre_municipio": "Villa de San Diego de Ubate",
+    "codigo_dane": "00626",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1085,
+    "nombre_municipio": "Villa del Rosario",
+    "codigo_dane": "00856",
+    "id_departamento": "23"
+  },
+  {
+    "id_municipio": 1086,
+    "nombre_municipio": "Villa Rica",
+    "codigo_dane": "00437",
+    "id_departamento": "11"
+  },
+  {
+    "id_municipio": 1087,
+    "nombre_municipio": "Villagarzón",
+    "codigo_dane": "00884",
+    "id_departamento": "24"
+  },
+  {
+    "id_municipio": 1088,
+    "nombre_municipio": "Villagómez",
+    "codigo_dane": "00620",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1089,
+    "nombre_municipio": "Villahermosa",
+    "codigo_dane": "01061",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 1090,
+    "nombre_municipio": "Villamaría",
+    "codigo_dane": "00361",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 1091,
+    "nombre_municipio": "Villanueva",
+    "codigo_dane": "00199",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 1092,
+    "nombre_municipio": "Villanueva",
+    "codigo_dane": "00392",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 1093,
+    "nombre_municipio": "Villanueva",
+    "codigo_dane": "00706",
+    "id_departamento": "19"
+  },
+  {
+    "id_municipio": 1094,
+    "nombre_municipio": "Villanueva",
+    "codigo_dane": "00986",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 1095,
+    "nombre_municipio": "Villapinzón",
+    "codigo_dane": "00621",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1096,
+    "nombre_municipio": "Villarrica",
+    "codigo_dane": "01062",
+    "id_departamento": "30"
+  },
+  {
+    "id_municipio": 1097,
+    "nombre_municipio": "Villavicencio",
+    "codigo_dane": "00740",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 1098,
+    "nombre_municipio": "Villavieja",
+    "codigo_dane": "00691",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 1099,
+    "nombre_municipio": "Villeta",
+    "codigo_dane": "00622",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1100,
+    "nombre_municipio": "Viotá",
+    "codigo_dane": "00623",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1101,
+    "nombre_municipio": "Viracachá",
+    "codigo_dane": "00323",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1102,
+    "nombre_municipio": "Vista Hermosa",
+    "codigo_dane": "00762",
+    "id_departamento": "21"
+  },
+  {
+    "id_municipio": 1103,
+    "nombre_municipio": "Viterbo",
+    "codigo_dane": "00362",
+    "id_departamento": "8"
+  },
+  {
+    "id_municipio": 1104,
+    "nombre_municipio": "Yacopí",
+    "codigo_dane": "00639",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1105,
+    "nombre_municipio": "Yacuanquer",
+    "codigo_dane": "00824",
+    "id_departamento": "22"
+  },
+  {
+    "id_municipio": 1106,
+    "nombre_municipio": "Yaguará",
+    "codigo_dane": "00692",
+    "id_departamento": "18"
+  },
+  {
+    "id_municipio": 1107,
+    "nombre_municipio": "Yalí",
+    "codigo_dane": "00119",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 1108,
+    "nombre_municipio": "Yarumal",
+    "codigo_dane": "00120",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 1109,
+    "nombre_municipio": "Yavaraté",
+    "codigo_dane": "01119",
+    "id_departamento": "32"
+  },
+  {
+    "id_municipio": 1110,
+    "nombre_municipio": "Yolombó",
+    "codigo_dane": "00121",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 1111,
+    "nombre_municipio": "Yondó",
+    "codigo_dane": "00122",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 1112,
+    "nombre_municipio": "Yopal",
+    "codigo_dane": "00380",
+    "id_departamento": "10"
+  },
+  {
+    "id_municipio": 1113,
+    "nombre_municipio": "Yotoco",
+    "codigo_dane": "01099",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 1114,
+    "nombre_municipio": "Yumbo",
+    "codigo_dane": "01090",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 1115,
+    "nombre_municipio": "Zambrano",
+    "codigo_dane": "00213",
+    "id_departamento": "6"
+  },
+  {
+    "id_municipio": 1116,
+    "nombre_municipio": "Zapatoca",
+    "codigo_dane": "00987",
+    "id_departamento": "28"
+  },
+  {
+    "id_municipio": 1117,
+    "nombre_municipio": "Zapayán",
+    "codigo_dane": "00731",
+    "id_departamento": "20"
+  },
+  {
+    "id_municipio": 1118,
+    "nombre_municipio": "Zaragoza",
+    "codigo_dane": "00123",
+    "id_departamento": "2"
+  },
+  {
+    "id_municipio": 1119,
+    "nombre_municipio": "Zarzal",
+    "codigo_dane": "01077",
+    "id_departamento": "31"
+  },
+  {
+    "id_municipio": 1120,
+    "nombre_municipio": "Zetaquira",
+    "codigo_dane": "00324",
+    "id_departamento": "7"
+  },
+  {
+    "id_municipio": 1121,
+    "nombre_municipio": "Zipacón",
+    "codigo_dane": "00624",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1122,
+    "nombre_municipio": "Zipaquirá",
+    "codigo_dane": "00641",
+    "id_departamento": "15"
+  },
+  {
+    "id_municipio": 1123,
+    "nombre_municipio": "Zona Bananera",
+    "codigo_dane": "00732",
+    "id_departamento": "20"
+  }
+]

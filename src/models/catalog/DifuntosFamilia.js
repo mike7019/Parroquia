@@ -8,6 +8,7 @@ const DifuntosFamilia = sequelize.define('DifuntosFamilia', {
   id_difunto: {
     type: DataTypes.BIGINT,
     primaryKey: true,
+    autoIncrement: true,
     allowNull: false,
     field: 'id_difunto'
   },
@@ -52,6 +53,30 @@ const DifuntosFamilia = sequelize.define('DifuntosFamilia', {
       key: 'id_familia'
     }
   },
+  // Nuevos campos Fase 3
+  id_sexo: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    field: 'id_sexo',
+    references: {
+      model: 'sexos',
+      key: 'id_sexo'
+    }
+  },
+  id_parentesco: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    field: 'id_parentesco',
+    references: {
+      model: 'parentescos',
+      key: 'id_parentesco'
+    }
+  },
+  causa_fallecimiento: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    field: 'causa_fallecimiento'
+  },
   createdAt: {
     type: DataTypes.DATE,
     allowNull: false,
@@ -85,6 +110,21 @@ DifuntosFamilia.associate = function(models) {
     DifuntosFamilia.belongsTo(models.Familias, {
       foreignKey: 'id_familia_familias',
       as: 'familia'
+    });
+  }
+  
+  // Nuevas asociaciones Fase 3
+  if (models.Sexo) {
+    DifuntosFamilia.belongsTo(models.Sexo, {
+      foreignKey: 'id_sexo',
+      as: 'sexo'
+    });
+  }
+  
+  if (models.Parentesco) {
+    DifuntosFamilia.belongsTo(models.Parentesco, {
+      foreignKey: 'id_parentesco',
+      as: 'parentesco'
     });
   }
 };

@@ -21,6 +21,7 @@ const FamiliaSistemaAguasResiduales = require('./main/FamiliaSistemaAguasResidua
 const Destreza = require('./main/Destreza.cjs')(sequelize, sequelize.Sequelize.DataTypes);
 const Profesion = require('./main/Profesion.cjs')(sequelize, sequelize.Sequelize.DataTypes);
 import TipoAguasResiduales from './catalog/TipoAguasResiduales.js';
+import SistemaAcueducto from './catalog/SistemaAcueducto.js';
 import TipoVivienda from './catalog/TipoVivienda.js';
 import ComunidadCultural from './catalog/ComunidadCultural.js';
 import DifuntosFamilia from './catalog/DifuntosFamilia.js';
@@ -147,6 +148,7 @@ export default {
   TipoDisposicionBasura,
   FamiliaDisposicionBasura,
   TipoAguasResiduales,
+  SistemaAcueducto,
   FamiliaSistemaAguasResiduales,
   ComunidadCultural,
   Destreza,
@@ -178,6 +180,7 @@ export {
   TipoDisposicionBasura,
   FamiliaDisposicionBasura,
   TipoAguasResiduales,
+  SistemaAcueducto,
   FamiliaSistemaAguasResiduales,
   ComunidadCultural,
   Destreza,

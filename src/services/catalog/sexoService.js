@@ -63,22 +63,42 @@ class SexoService {
         throw new Error('Sexo not found');
       }
 
-      // Check if another sexo with the same name or code exists
-      const existingSexo = await getSexoModel().findOne({
-        where: { 
-          [Op.or]: [
-            { nombre: { [Op.iLike]: nombre } },
-            { codigo: { [Op.iLike]: codigo } }
-          ],
-          id_sexo: { [Op.ne]: id }
-        }
-      });
-
-      if (existingSexo) {
-        throw new Error('Sexo with this name or code already exists');
+      // Construir condiciones de búsqueda solo para campos que se están actualizando
+      const searchConditions = [];
+      if (nombre !== undefined && nombre !== sexo.nombre) {
+        searchConditions.push({ nombre: { [Op.iLike]: nombre } });
+      }
+      if (codigo !== undefined && codigo !== sexo.codigo) {
+        searchConditions.push({ codigo: { [Op.iLike]: codigo } });
       }
 
-      await sexo.update({ nombre, codigo, descripcion });
+      // Solo verificar duplicados si hay condiciones de búsqueda
+      if (searchConditions.length > 0) {
+        const existingSexo = await getSexoModel().findOne({
+          where: { 
+            [Op.or]: searchConditions,
+            id_sexo: { [Op.ne]: id }
+          }
+        });
+
+        if (existingSexo) {
+          if (existingSexo.nombre === nombre) {
+            throw new Error('Sexo with this name already exists');
+          }
+          if (existingSexo.codigo === codigo) {
+            throw new Error('Sexo with this code already exists');
+          }
+        }
+      }
+
+      // Solo actualizar campos que están presentes en sexoData
+      const updateData = {};
+      if (nombre !== undefined) updateData.nombre = nombre;
+      if (codigo !== undefined) updateData.codigo = codigo;
+      if (descripcion !== undefined) updateData.descripcion = descripcion;
+
+      await sexo.update(updateData);
+      await sexo.reload(); // Recargar para obtener los valores actualizados
       return sexo;
     } catch (error) {
       throw new Error(`Error updating sexo: ${error.message}`);

@@ -3,148 +3,323 @@ import { QueryTypes } from 'sequelize';
 import { Familias, Municipios, Parroquia, Sector, Veredas, Sexo, TipoIdentificacion, Persona } from '../models/index.js';
 import crypto from 'crypto';
 import FamiliasConsultasService from '../services/familiasConsultasService.js';
+import { generarIdentificacionUnica } from '../middlewares/encuestaValidation.js';
 
 /**
- * Generar identificación única para personas
+ * Funciones auxiliares para reducir complejidad del controller principal
  */
-const generarIdentificacionUnica = async (tipo = 'TEMP', contadorIntento = 0) => {
-  try {
-    // Generar UUID corto para mayor unicidad
-    const uuid = crypto.randomUUID().slice(0, 8);
-    const timestamp = Date.now();
-    const identificacion = `${tipo}_${timestamp}_${uuid}_${contadorIntento}`;
-    
-    // Verificar que no exista en la base de datos
-    const existe = await Persona.findOne({
-      where: { identificacion }
-    });
-    
-    if (existe && contadorIntento < 10) {
-      // Si existe, intentar con un contador diferente
-      return await generarIdentificacionUnica(tipo, contadorIntento + 1);
-    }
-    
-    if (contadorIntento >= 10) {
-      throw new Error('No se pudo generar identificación única después de 10 intentos');
-    }
-    
-    return identificacion;
-  } catch (error) {
-    console.error('Error generando identificación única:', error);
-    // Fallback con timestamp más específico
-    return `${tipo}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-};
 
 /**
- * Verificar si una familia ya existe para evitar duplicados
+ * Registrar disposición de basuras
  */
-const verificarFamiliaExistente = async (apellidoFamiliar, telefono, direccion) => {
-  try {
-    const familiaExistente = await Familias.findOne({
-      where: {
-        apellido_familiar: apellidoFamiliar,
-        telefono: telefono,
-        direccion_familia: direccion
+const registrarDisposicionBasuras = async (familiaId, disposicionBasuras, transaction) => {
+  console.log('🗑️ Registrando disposición de basuras...');
+  if (!disposicionBasuras) return;
+
+  const disposicionMapping = {
+    recolector: 1,    // "Recolección Pública"
+    quemada: 2,       // "Quema"
+    enterrada: 3,     // "Entierro"
+    recicla: 4,       // "Reciclaje"
+    aire_libre: 6,    // "Botadero"
+    no_aplica: 7      // "Otro"
+  };
+
+  for (const [tipo, activo] of Object.entries(disposicionBasuras)) {
+    if (activo && disposicionMapping[tipo]) {
+      try {
+        // Verificar si ya existe antes de insertar
+        const existingRecord = await sequelize.query(
+          'SELECT id FROM familia_disposicion_basura WHERE id_familia = $1 AND id_tipo_disposicion_basura = $2',
+          {
+            bind: [familiaId, disposicionMapping[tipo]],
+            type: QueryTypes.SELECT,
+            transaction
+          }
+        );
+        
+        if (existingRecord.length === 0) {
+          await sequelize.query(
+            'INSERT INTO familia_disposicion_basura (id_familia, id_tipo_disposicion_basura, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
+            {
+              bind: [familiaId, disposicionMapping[tipo]],
+              transaction
+            }
+          );
+          console.log(`  ✅ Disposición registrada: ${tipo}`);
+        } else {
+          console.log(`  ℹ️ Disposición ya existe: ${tipo}`);
+        }
+      } catch (error) {
+        console.log(`  ⚠️ Error registrando ${tipo}: ${error.message}`);
       }
-    });
-    
-    return familiaExistente;
-  } catch (error) {
-    console.error('Error verificando familia existente:', error);
-    return null;
+    }
   }
 };
 
 /**
- * Validar que los miembros de la familia no pertenezcan a otra familia
- * Verifica números de identificación únicos en la base de datos
+ * Registrar sistema de acueducto
  */
-const validarMiembrosUnicos = async (familyMembers = [], deceasedMembers = []) => {
+const registrarSistemaAcueducto = async (familiaId, sistemaAcueducto, transaction) => {
+  console.log('💧 Registrando sistema de acueducto...');
+  if (!sistemaAcueducto) return;
+
   try {
-    console.log('🔍 Validando que los miembros no pertenezcan a otra familia...');
+    let sistemaId = sistemaAcueducto.id || 1; // Default: Acueducto Público
     
-    // Recopilar todas las identificaciones a validar
-    const identificacionesAValidar = [];
+    // Verificar si ya existe antes de insertar
+    const existingRecord = await sequelize.query(
+      'SELECT id FROM familia_sistema_acueducto WHERE id_familia = $1 AND id_sistema_acueducto = $2',
+      {
+        bind: [familiaId, sistemaId],
+        type: QueryTypes.SELECT,
+        transaction
+      }
+    );
     
-    // Agregar identificaciones de miembros vivos
-    if (familyMembers && familyMembers.length > 0) {
-      familyMembers.forEach(member => {
-        if (member.numeroIdentificacion) {
-          identificacionesAValidar.push(member.numeroIdentificacion);
+    if (existingRecord.length === 0) {
+      await sequelize.query(
+        'INSERT INTO familia_sistema_acueducto (id_familia, id_sistema_acueducto, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
+        {
+          bind: [familiaId, sistemaId],
+          transaction
         }
+      );
+      console.log(`  ✅ Sistema acueducto registrado: ID ${sistemaId}`);
+    } else {
+      console.log(`  ℹ️ Sistema acueducto ya existe: ID ${sistemaId}`);
+    }
+  } catch (error) {
+    console.log(`  ⚠️ Error registrando sistema acueducto: ${error.message}`);
+  }
+};
+
+/**
+ * Registrar aguas residuales
+ */
+const registrarAguasResiduales = async (familiaId, aguasResiduales, transaction) => {
+  console.log('🚰 Registrando aguas residuales...');
+  if (!aguasResiduales) return;
+
+  try {
+    let aguaResidualesId = aguasResiduales.id || 1; // Default: Alcantarillado
+    
+    // Verificar si ya existe antes de insertar
+    const existingRecord = await sequelize.query(
+      'SELECT id FROM familia_sistema_aguas_residuales WHERE id_familia = $1 AND id_tipo_aguas_residuales = $2',
+      {
+        bind: [familiaId, aguaResidualesId],
+        type: QueryTypes.SELECT,
+        transaction
+      }
+    );
+    
+    if (existingRecord.length === 0) {
+      await sequelize.query(
+        'INSERT INTO familia_sistema_aguas_residuales (id_familia, id_tipo_aguas_residuales, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
+        {
+          bind: [familiaId, aguaResidualesId],
+          transaction
+        }
+      );
+      console.log(`  ✅ Aguas residuales registradas: ID ${aguaResidualesId}`);
+    } else {
+      console.log(`  ℹ️ Aguas residuales ya existen: ID ${aguaResidualesId}`);
+    }
+  } catch (error) {
+    console.log(`  ⚠️ Error registrando aguas residuales: ${error.message}`);
+  }
+};
+
+/**
+ * Registrar tipo de vivienda
+ */
+const registrarTipoVivienda = async (familiaId, tipoVivienda, transaction) => {
+  console.log('🏠 Registrando tipo de vivienda...');
+  if (!tipoVivienda) return;
+
+  try {
+    let tipoViviendaId = tipoVivienda.id;
+    if (!tipoViviendaId) {
+      const TipoVivienda = sequelize.models.TiposVivienda;
+      const tipo = await TipoVivienda.findOne({
+        where: { nombre: { [sequelize.Op.iLike]: `%${tipoVivienda.nombre}%` } }
       });
+      tipoViviendaId = tipo?.id_tipo_vivienda || 1; // Default: Casa
     }
+
+    // Verificar si ya existe antes de insertar
+    const existingRecord = await sequelize.query(
+      'SELECT id_familia FROM familia_tipo_vivienda WHERE id_familia = $1 AND id_tipo_vivienda = $2',
+      {
+        bind: [familiaId, tipoViviendaId],
+        type: QueryTypes.SELECT,
+        transaction
+      }
+    );
     
-    // Agregar identificaciones de miembros fallecidos
-    if (deceasedMembers && deceasedMembers.length > 0) {
-      deceasedMembers.forEach(member => {
-        if (member.numeroIdentificacion) {
-          identificacionesAValidar.push(member.numeroIdentificacion);
+    if (existingRecord.length === 0) {
+      await sequelize.query(
+        'INSERT INTO familia_tipo_vivienda (id_familia, id_tipo_vivienda, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
+        {
+          bind: [familiaId, tipoViviendaId],
+          transaction
         }
-      });
+      );
+      console.log(`  ✅ Tipo vivienda registrado: ID ${tipoViviendaId}`);
+    } else {
+      console.log(`  ℹ️ Tipo vivienda ya existe: ID ${tipoViviendaId}`);
     }
-    
-    if (identificacionesAValidar.length === 0) {
-      console.log('  ✅ No hay identificaciones para validar');
-      return;
-    }
-    
-    console.log(`  🔍 Validando ${identificacionesAValidar.length} identificaciones...`);
-    
-    // Buscar personas existentes con estas identificaciones usando consulta SQL directa
-    const personasExistentes = await sequelize.query(`
-      SELECT 
-        p.identificacion,
-        p.primer_nombre,
-        p.primer_apellido,
-        p.id_familia_familias,
-        f.apellido_familiar,
-        f.id_familia
-      FROM personas p
-      LEFT JOIN familias f ON p.id_familia_familias = f.id_familia
-      WHERE p.identificacion IN (:identificaciones)
-    `, {
-      replacements: { identificaciones: identificacionesAValidar },
-      type: QueryTypes.SELECT
-    });
-    
-    if (personasExistentes.length > 0) {
-      console.log(`  ❌ Se encontraron ${personasExistentes.length} personas que ya pertenecen a otras familias`);
+  } catch (error) {
+    console.log(`  ⚠️ Error registrando tipo de vivienda: ${error.message}`);
+  }
+};
+
+/**
+ * Procesar miembros vivos de la familia
+ */
+const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGeneral, transaction) => {
+  let personasCreadas = 0;
+  if (familyMembers.length === 0) return personasCreadas;
+
+  console.log(`👥 Procesando ${familyMembers.length} miembros de la familia...`);
+  
+  for (const miembro of familyMembers) {
+    try {
+      const nombres = miembro.nombres.trim().split(' ');
+      const primerNombre = nombres[0] || '';
+      const segundoNombre = nombres.slice(1).join(' ') || null;
+
+      // Mapear IDs de manera simplificada
+      const sexoId = mapearSexo(miembro.sexo);
+      const tipoIdentificacionId = mapearTipoIdentificacion(miembro.tipoIdentificacion);
+      const estadoCivilId = mapearEstadoCivil(miembro.situacionCivil);
+
+      const fechaNacimiento = miembro.fechaNacimiento || miembro.fecha_nacimiento;
+      const identificacionUnica = await generarIdentificacionUnica('TEMP');
       
-      // Formatear conflictos para la respuesta
-      const conflictos = personasExistentes.map(persona => ({
-        identificacion: persona.identificacion,
-        nombre_completo: `${persona.primer_nombre} ${persona.primer_apellido || ''}`.trim(),
-        familia_actual: {
-          id: persona.id_familia,
-          apellido: persona.apellido_familiar || 'Sin apellido familiar'
-        }
-      }));
+      const personaData = {
+        primer_nombre: primerNombre,
+        segundo_nombre: segundoNombre,
+        primer_apellido: informacionGeneral.apellido_familiar,
+        segundo_apellido: null,
+        fecha_nacimiento: fechaNacimiento ? new Date(fechaNacimiento) : new Date('1900-01-01'),
+        telefono: miembro.telefono || informacionGeneral.telefono,
+        correo_electronico: `${primerNombre.toLowerCase()}.${Date.now()}.${personasCreadas}@temp.com`,
+        identificacion: miembro.numeroIdentificacion || identificacionUnica,
+        direccion: informacionGeneral.direccion,
+        id_familia_familias: familiaId,
+        id_sexo: sexoId,
+        id_tipo_identificacion_tipo_identificacion: tipoIdentificacionId,
+        id_estado_civil_estado_civil: estadoCivilId,
+        estudios: (miembro.estudio && typeof miembro.estudio === 'object') ? miembro.estudio.nombre : (miembro.estudio || null),
+        en_que_eres_lider: null,
+        necesidad_enfermo: null,
+        id_profesion: null,
+        talla_camisa: miembro['talla_camisa/blusa'] || (miembro.talla ? miembro.talla.camisa : null),
+        talla_pantalon: miembro.talla_pantalon || (miembro.talla ? miembro.talla.pantalon : null),
+        talla_zapato: miembro.talla_zapato || (miembro.talla ? miembro.talla.calzado : null)
+      };
+
+      await Persona.create(personaData, { transaction });
+      personasCreadas++;
+      console.log(`  ✅ Persona creada exitosamente: ${primerNombre}`);
       
-      // Lanzar error con detalles de los conflictos
-      const error = new Error(`Las siguientes personas ya pertenecen a otra familia: ${conflictos.map(c => `${c.nombre_completo} (${c.identificacion})`).join(', ')}`);
-      error.codigo = 'MIEMBROS_DUPLICADOS';
-      error.conflictos = conflictos;
+    } catch (error) {
+      console.error(`  ❌ Error creando persona ${miembro.nombres}:`, error.message);
       throw error;
     }
-    
-    console.log('  ✅ Todos los miembros son únicos');
-    
-  } catch (error) {
-    if (error.codigo === 'MIEMBROS_DUPLICADOS') {
-      throw error; // Re-lanzar errores de validación
-    }
-    
-    console.log(`  ❌ Error validando miembros únicos: ${error.name} [${error.constructor.name}]: ${error.message}`);
-    console.log(error.stack);
-    throw new Error(`Error al validar miembros únicos: ${error.message}`);
   }
+
+  return personasCreadas;
 };
 
 /**
- * Obtener todas las encuestas con paginación
+ * Procesar miembros fallecidos
  */
+const procesarMiembrosFallecidos = async (familiaId, deceasedMembers, informacionGeneral, transaction) => {
+  let personasFallecidas = 0;
+  if (deceasedMembers.length === 0) return personasFallecidas;
+
+  console.log(`⚰️ Procesando ${deceasedMembers.length} miembros fallecidos...`);
+  
+  for (const fallecido of deceasedMembers) {
+    try {
+      const nombres = fallecido.nombres.trim().split(' ');
+      const primerNombre = nombres[0] || '';
+      const segundoNombre = nombres.slice(1).join(' ') || null;
+
+      const identificacionUnica = await generarIdentificacionUnica('FALLECIDO');
+
+      const personaFallecidaData = {
+        primer_nombre: primerNombre,
+        segundo_nombre: segundoNombre,
+        primer_apellido: informacionGeneral.apellido_familiar,
+        segundo_apellido: null,
+        fecha_nacimiento: '1900-01-01',
+        telefono: 'N/A',
+        correo_electronico: `fallecido.${Date.now()}.${personasFallecidas}@temp.com`,
+        identificacion: identificacionUnica,
+        direccion: informacionGeneral.direccion,
+        id_familia_familias: familiaId,
+        id_familia: familiaId,
+        id_parroquia: null,
+        estudios: JSON.stringify({
+          es_fallecido: true,
+          fecha_aniversario: fallecido.fechaFallecimiento || fallecido.fechaAniversario || null,
+          era_padre: fallecido.eraPadre || false,
+          era_madre: fallecido.eraMadre || false,
+          causa_fallecimiento: fallecido.causaFallecimiento || null
+        })
+      };
+
+      await Persona.create(personaFallecidaData, { transaction });
+      personasFallecidas++;
+      console.log(`  ⚰️ Persona fallecida registrada: ${primerNombre}`);
+      
+    } catch (error) {
+      console.error(`  ❌ Error registrando persona fallecida ${fallecido.nombres}:`, error.message);
+    }
+  }
+
+  return personasFallecidas;
+};
+
+/**
+ * Funciones de mapeo simplificadas
+ */
+const mapearSexo = (sexo) => {
+  if (!sexo) return null;
+  if (typeof sexo === 'object' && sexo.id) return parseInt(sexo.id);
+  
+  const sexoMapping = {
+    'Hombre': 1, 'Mujer': 2, 'Masculino': 1, 'Femenino': 2,
+    'M': 1, 'F': 2, 'O': 3, 'Otro': 3
+  };
+  return sexoMapping[sexo] || null;
+};
+
+const mapearTipoIdentificacion = (tipoId) => {
+  if (!tipoId) return null;
+  if (typeof tipoId === 'object' && tipoId.id) return parseInt(tipoId.id);
+  
+  const tipoIdMapping = { 'CC': 1, 'TI': 2, 'RC': 3, 'CE': 4, 'PP': 5 };
+  return tipoIdMapping[tipoId] || null;
+};
+
+const mapearEstadoCivil = (estadoCivil) => {
+  if (!estadoCivil) return null;
+  if (typeof estadoCivil === 'object' && estadoCivil.id) return parseInt(estadoCivil.id);
+  
+  const estadoCivilMapping = {
+    'Soltero': 1, 'Soltera': 1, 'Soltero(a)': 1,
+    'Casado Civil': 2, 'Casado': 2, 'Casada': 2, 'Casado(a)': 2,
+    'Viudo': 4, 'Viuda': 4, 'Viudo(a)': 4,
+    'Divorciado': 3, 'Divorciada': 3, 'Divorciado(a)': 3,
+    'Unión Libre': 5, 'Union Libre': 5
+  };
+  return estadoCivilMapping[estadoCivil] || null;
+};
 export const obtenerEncuestas = async (req, res) => {
   try {
     console.log('📋 Obteniendo lista de encuestas...');
@@ -181,26 +356,41 @@ export const obtenerEncuestas = async (req, res) => {
       type: QueryTypes.SELECT
     });
 
-    // Obtener encuestas con información básica usando SQL directo (COLUMNAS EXISTENTES SOLAMENTE)
+    // Obtener encuestas con información básica incluyendo datos geográficos usando SQL directo
     const familiasQuery = `
       SELECT 
-        id_familia,
-        apellido_familiar,
-        sector,
-        direccion_familia,
-        numero_contacto,
-        telefono,
-        email,
-        tamaño_familia,
-        tipo_vivienda,
-        estado_encuesta,
-        numero_encuestas,
-        fecha_ultima_encuesta,
-        codigo_familia,
-        tutor_responsable
-      FROM familias 
+        f.id_familia,
+        f.apellido_familiar,
+        f.sector,
+        f.direccion_familia,
+        f.numero_contacto,
+        f.telefono,
+        f.email,
+        f.tamaño_familia,
+        f.tipo_vivienda,
+        f.estado_encuesta,
+        f.numero_encuestas,
+        f.fecha_ultima_encuesta,
+        f.codigo_familia,
+        f.tutor_responsable,
+        f.id_municipio,
+        f.id_vereda,
+        f.id_sector,
+        f.id_parroquia,
+        m.nombre_municipio,
+        v.nombre as nombre_vereda,
+        s.nombre as nombre_sector,
+        p.nombre as nombre_parroquia,
+        tv.id_tipo_vivienda,
+        tv.nombre as nombre_tipo_vivienda
+      FROM familias f
+      LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
+      LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
+      LEFT JOIN sectores s ON f.id_sector = s.id_sector
+      LEFT JOIN parroquias p ON f.id_parroquia = p.id_parroquia
+      LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
       WHERE ${whereClause}
-      ORDER BY fecha_ultima_encuesta DESC 
+      ORDER BY f.fecha_ultima_encuesta DESC 
       LIMIT :limit OFFSET :offset
     `;
     
@@ -212,7 +402,7 @@ export const obtenerEncuestas = async (req, res) => {
     // Para cada familia, obtener información adicional manualmente
     const encuestasFormateadas = await Promise.all(
       encuestas.map(async (familiaData) => {
-        // Obtener personas de la familia usando SQL directo para evitar errores de modelo
+        // Obtener personas VIVAS de la familia (excluir fallecidos)
         const personas = await sequelize.query(`
           SELECT 
             p.id_personas,
@@ -236,46 +426,151 @@ export const obtenerEncuestas = async (req, res) => {
             s.descripcion as sexo_descripcion,
             ti.id_tipo_identificacion as tipo_id_id,
             ti.nombre as tipo_id_nombre,
-            ti.codigo as tipo_id_codigo
+            ti.codigo as tipo_id_codigo,
+            sc.id_situacion_civil as estado_civil_id,
+            sc.nombre as estado_civil_nombre
           FROM personas p
           LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
           LEFT JOIN tipos_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
-          WHERE p.id_familia_familias = :familiaId
+          LEFT JOIN situaciones_civiles sc ON p.id_estado_civil_estado_civil = sc.id_situacion_civil
+          WHERE p.id_familia_familias = :familiaId 
+          AND (p.identificacion NOT LIKE 'FALLECIDO%' OR p.identificacion IS NULL)
         `, {
           replacements: { familiaId: familiaData.id_familia },
           type: QueryTypes.SELECT
         });
 
-        // Obtener información de ubicación usando texto de la tabla familias
+        // Obtener personas FALLECIDAS por separado
+        const personasFallecidas = await sequelize.query(`
+          SELECT 
+            p.id_personas,
+            p.primer_nombre,
+            p.segundo_nombre,
+            p.primer_apellido,
+            p.segundo_apellido,
+            p.identificacion,
+            p.estudios,
+            p.fecha_nacimiento
+          FROM personas p
+          WHERE p.id_familia_familias = :familiaId 
+          AND p.identificacion LIKE 'FALLECIDO%'
+        `, {
+          replacements: { familiaId: familiaData.id_familia },
+          type: QueryTypes.SELECT
+        });
+
+        // Obtener información de ubicación usando datos ya obtenidos con JOINs
         let municipioInfo = null;
         let veredaInfo = null;
         let sectorInfo = null;
+        let parroquiaInfo = null;
         let tipoViviendaInfo = null;
 
-        // Obtener información del tipo de vivienda
-        if (familiaData.tipo_vivienda) {
+        // Usar datos de municipio ya obtenidos en el JOIN
+        if (familiaData.id_municipio && familiaData.nombre_municipio) {
+          municipioInfo = {
+            id: familiaData.id_municipio,
+            nombre: familiaData.nombre_municipio
+          };
+        }
+
+        // Usar datos de vereda ya obtenidos en el JOIN
+        if (familiaData.id_vereda && familiaData.nombre_vereda) {
+          veredaInfo = {
+            id: familiaData.id_vereda,
+            nombre: familiaData.nombre_vereda
+          };
+        }
+
+        // Usar datos de sector ya obtenidos en el JOIN
+        if (familiaData.id_sector && familiaData.nombre_sector) {
+          sectorInfo = {
+            id: familiaData.id_sector,
+            nombre: familiaData.nombre_sector
+          };
+        } else if (familiaData.sector) {
+          // Fallback para sector como texto
+          sectorInfo = {
+            id: null,
+            nombre: familiaData.sector
+          };
+        }
+
+        // Usar datos de parroquia ya obtenidos en el JOIN
+        if (familiaData.id_parroquia && familiaData.nombre_parroquia) {
+          parroquiaInfo = {
+            id: familiaData.id_parroquia,
+            nombre: familiaData.nombre_parroquia
+          };
+        } else if (familiaData.id_parroquia) {
+          // Si tenemos id_parroquia pero no nombre, buscar en la tabla parroquias
           try {
-            const [tipoVivienda] = await sequelize.query(`
-              SELECT id_tipo_vivienda, nombre 
-              FROM tipos_vivienda 
-              WHERE nombre ILIKE :tipoVivienda
-            `, {
-              replacements: { tipoVivienda: `%${familiaData.tipo_vivienda}%` },
-              type: QueryTypes.SELECT
-            });
+            const parroquiaDb = await sequelize.query(
+              'SELECT id_parroquia, nombre FROM parroquias WHERE id_parroquia = :id',
+              {
+                replacements: { id: parseInt(familiaData.id_parroquia) },
+                type: QueryTypes.SELECT
+              }
+            );
             
-            if (tipoVivienda) {
-              tipoViviendaInfo = {
-                id: tipoVivienda.id_tipo_vivienda,
-                nombre: tipoVivienda.nombre
+            if (parroquiaDb.length > 0) {
+              parroquiaInfo = {
+                id: parroquiaDb[0].id_parroquia,
+                nombre: parroquiaDb[0].nombre
               };
             } else {
-              tipoViviendaInfo = {
-                id: null,
-                nombre: familiaData.tipo_vivienda
+              parroquiaInfo = {
+                id: familiaData.id_parroquia,
+                nombre: 'Parroquia no encontrada'
               };
             }
           } catch (error) {
+            console.error('Error buscando parroquia:', error);
+            parroquiaInfo = {
+              id: familiaData.id_parroquia,
+              nombre: `ID: ${familiaData.id_parroquia}`
+            };
+          }
+        }
+
+        // Usar datos de tipo de vivienda ya obtenidos en el JOIN
+        if (familiaData.id_tipo_vivienda && familiaData.nombre_tipo_vivienda) {
+          tipoViviendaInfo = {
+            id: familiaData.id_tipo_vivienda,
+            nombre: familiaData.nombre_tipo_vivienda
+          };
+        } else if (familiaData.tipo_vivienda) {
+          // Si tipo_vivienda es un número, buscar en la tabla tipos_vivienda
+          if (!isNaN(familiaData.tipo_vivienda)) {
+            try {
+              const tipoViviendaDb = await sequelize.query(
+                'SELECT id_tipo_vivienda, nombre FROM tipos_vivienda WHERE id_tipo_vivienda = :id AND activo = true',
+                {
+                  replacements: { id: parseInt(familiaData.tipo_vivienda) },
+                  type: QueryTypes.SELECT
+                }
+              );
+              
+              if (tipoViviendaDb.length > 0) {
+                tipoViviendaInfo = {
+                  id: tipoViviendaDb[0].id_tipo_vivienda,
+                  nombre: tipoViviendaDb[0].nombre
+                };
+              } else {
+                tipoViviendaInfo = {
+                  id: null,
+                  nombre: 'Tipo no encontrado'
+                };
+              }
+            } catch (error) {
+              console.error('Error buscando tipo de vivienda:', error);
+              tipoViviendaInfo = {
+                id: null,
+                nombre: `ID: ${familiaData.tipo_vivienda}`
+              };
+            }
+          } else {
+            // Fallback para tipo de vivienda como texto
             tipoViviendaInfo = {
               id: null,
               nombre: familiaData.tipo_vivienda
@@ -283,38 +578,7 @@ export const obtenerEncuestas = async (req, res) => {
           }
         }
 
-        // Obtener información del sector
-        if (familiaData.sector) {
-          try {
-            const [sector] = await sequelize.query(`
-              SELECT id_sector, nombre 
-              FROM sectores 
-              WHERE nombre ILIKE :sectorNombre
-            `, {
-              replacements: { sectorNombre: `%${familiaData.sector}%` },
-              type: QueryTypes.SELECT
-            });
-            
-            if (sector) {
-              sectorInfo = {
-                id: sector.id_sector,
-                nombre: sector.nombre
-              };
-            } else {
-              sectorInfo = {
-                id: null,
-                nombre: familiaData.sector
-              };
-            }
-          } catch (error) {
-            sectorInfo = {
-              id: null,
-              nombre: familiaData.sector
-            };
-          }
-        }
-
-        // Obtener información de basuras, acueducto y aguas residuales
+        // Obtener información de basuras, acueducto y aguas residuales - SIEMPRE DEVOLVER ARRAYS
         let disposicionBasuras = [];
         let sistemasAcueducto = [];
         let sistemasAguasResiduales = [];
@@ -337,6 +601,7 @@ export const obtenerEncuestas = async (req, res) => {
           }));
         } catch (error) {
           console.log(`⚠️ Error obteniendo disposición de basuras: ${error.message}`);
+          disposicionBasuras = []; // Array vacío en lugar de null
         }
 
         try {
@@ -357,6 +622,7 @@ export const obtenerEncuestas = async (req, res) => {
           }));
         } catch (error) {
           console.log(`⚠️ Error obteniendo sistemas de acueducto: ${error.message}`);
+          sistemasAcueducto = []; // Array vacío en lugar de null
         }
 
         try {
@@ -377,67 +643,71 @@ export const obtenerEncuestas = async (req, res) => {
           }));
         } catch (error) {
           console.log(`⚠️ Error obteniendo sistemas de aguas residuales: ${error.message}`);
+          sistemasAguasResiduales = []; // Array vacío en lugar de null
         }
 
-        // Obtener información adicional para cada persona
+        // Obtener información adicional para cada persona VIVA
         const personasFormateadas = await Promise.all(personas.map(async (persona) => {
-          // Obtener información del estado civil
-          let estadoCivilInfo = null;
-          if (persona.id_estado_civil_estado_civil) {
-            try {
-              const [estadoCivil] = await sequelize.query(`
-                SELECT id_estado_civil, nombre 
-                FROM estados_civiles 
-                WHERE id_estado_civil = :estadoCivilId
-              `, {
-                replacements: { estadoCivilId: persona.id_estado_civil_estado_civil },
-                type: QueryTypes.SELECT
-              });
-              
-              if (estadoCivil) {
-                estadoCivilInfo = {
-                  id: estadoCivil.id_estado_civil,
-                  nombre: estadoCivil.nombre
-                };
-              }
-            } catch (error) {
-              console.log(`⚠️ Error obteniendo estado civil ${persona.id_estado_civil_estado_civil}:`, error.message);
-            }
-          }
-
-          // Obtener información del estudio
+          // Información del estudio - manejar casos donde estudios contiene JSON
           let estudioInfo = null;
           if (persona.estudios) {
             try {
-              // Si estudios contiene un ID numérico, buscar en la tabla
-              const estudioId = parseInt(persona.estudios);
-              if (!isNaN(estudioId)) {
-                const [estudio] = await sequelize.query(`
-                  SELECT id_estudios, nombre 
-                  FROM estudios 
-                  WHERE id_estudios = :estudioId
-                `, {
-                  replacements: { estudioId },
-                  type: QueryTypes.SELECT
-                });
-                
-                if (estudio) {
-                  estudioInfo = {
-                    id: estudio.id_estudios,
-                    nombre: estudio.nombre
-                  };
-                } else {
-                  estudioInfo = {
-                    id: estudioId,
-                    nombre: persona.estudios
-                  };
-                }
-              } else {
-                // Si no es un ID, mantener el texto como nombre
+              // Verificar si es un JSON string (típicamente para fallecidos que no deberían estar aquí)
+              if (persona.estudios.startsWith('{') && persona.estudios.includes('es_fallecido')) {
+                // Si es un fallecido que se coló, usar placeholder
                 estudioInfo = {
                   id: null,
-                  nombre: persona.estudios
+                  nombre: 'Datos inconsistentes - revisar'
                 };
+              } else {
+                // Si estudios contiene un ID numérico, buscar en la tabla
+                const estudioId = parseInt(persona.estudios);
+                if (!isNaN(estudioId)) {
+                  const [estudio] = await sequelize.query(`
+                    SELECT id_niveles_educativos as id, nivel as nombre 
+                    FROM niveles_educativos 
+                    WHERE id_niveles_educativos = :estudioId
+                  `, {
+                    replacements: { estudioId },
+                    type: QueryTypes.SELECT
+                  });
+                  
+                  if (estudio) {
+                    estudioInfo = {
+                      id: estudio.id,
+                      nombre: estudio.nombre
+                    };
+                  } else {
+                    estudioInfo = {
+                      id: estudioId,
+                      nombre: persona.estudios
+                    };
+                  }
+                } else {
+                  // Si no es un ID, intentar buscar por nombre/nivel
+                  const [estudio] = await sequelize.query(`
+                    SELECT id_niveles_educativos as id, nivel as nombre 
+                    FROM niveles_educativos 
+                    WHERE LOWER(nivel) LIKE LOWER(:nivelBusqueda)
+                    AND activo = true
+                  `, {
+                    replacements: { nivelBusqueda: `%${persona.estudios}%` },
+                    type: QueryTypes.SELECT
+                  });
+                  
+                  if (estudio) {
+                    estudioInfo = {
+                      id: estudio.id,
+                      nombre: estudio.nombre
+                    };
+                  } else {
+                    // Si no se encuentra en el catálogo, mantener el texto original con ID null
+                    estudioInfo = {
+                      id: null,
+                      nombre: persona.estudios
+                    };
+                  }
+                }
               }
             } catch (error) {
               estudioInfo = {
@@ -450,10 +720,6 @@ export const obtenerEncuestas = async (req, res) => {
           return {
             id: persona.id_personas,
             nombre_completo: `${persona.primer_nombre || ''} ${persona.segundo_nombre || ''} ${persona.primer_apellido || ''} ${persona.segundo_apellido || ''}`.trim(),
-            primer_nombre: persona.primer_nombre,
-            segundo_nombre: persona.segundo_nombre,
-            primer_apellido: persona.primer_apellido,
-            segundo_apellido: persona.segundo_apellido,
             identificacion: {
               numero: persona.identificacion,
               tipo: persona.tipo_id_id ? {
@@ -463,7 +729,6 @@ export const obtenerEncuestas = async (req, res) => {
               } : null
             },
             telefono: persona.telefono,
-            numero_contacto: persona.telefono, // Agregado: numero_contacto es igual al telefono
             email: persona.correo_electronico,
             fecha_nacimiento: persona.fecha_nacimiento,
             direccion: persona.direccion,
@@ -474,7 +739,10 @@ export const obtenerEncuestas = async (req, res) => {
               id: persona.sexo_id,
               descripcion: persona.sexo_descripcion
             } : null,
-            estado_civil: estadoCivilInfo, // Cambiado: ahora devuelve objeto con id y nombre
+            estado_civil: persona.estado_civil_id ? {
+              id: persona.estado_civil_id,
+              nombre: persona.estado_civil_nombre
+            } : null, // CORREGIDO: Ahora incluye estado civil real
             tallas: {
               camisa: persona.talla_camisa,
               pantalon: persona.talla_pantalon,
@@ -483,18 +751,52 @@ export const obtenerEncuestas = async (req, res) => {
           };
         }));
 
+        // Procesar personas FALLECIDAS por separado
+        const personasFallecidaFormateadas = personasFallecidas.map(fallecido => {
+          let infoFallecido = {};
+          try {
+            // Parsear el JSON del campo estudios para fallecidos
+            infoFallecido = JSON.parse(fallecido.estudios || '{}');
+          } catch (error) {
+            infoFallecido = {};
+          }
+
+          return {
+            id: fallecido.id_personas,
+            nombre_completo: `${fallecido.primer_nombre || ''} ${fallecido.segundo_nombre || ''} ${fallecido.primer_apellido || ''} ${fallecido.segundo_apellido || ''}`.trim(),
+            identificacion: {
+              numero: fallecido.identificacion,
+              tipo: null // Los fallecidos no tienen tipo de identificación válido
+            },
+            fecha_fallecimiento: infoFallecido.fecha_aniversario || null,
+            era_padre: infoFallecido.era_padre || false,
+            era_madre: infoFallecido.era_madre || false,
+            causa_fallecimiento: infoFallecido.causa_fallecimiento || null,
+            es_fallecido: true
+          };
+        });
+
+        const familiaInfo = {
+          // *** INFORMACIÓN BÁSICA DE LA FAMILIA ***
+          apellido_familiar: familiaData.apellido_familiar,
+          direccion_familia: familiaData.direccion_familia,
+          telefono: familiaData.telefono,
+          codigo_familia: familiaData.codigo_familia,
+        };
+        
+        // Solo agregar campos opcionales si no son null
+        if (familiaData.email !== null) {
+          familiaInfo.email = familiaData.email;
+        }
+        if (familiaData.tutor_responsable !== null) {
+          familiaInfo.tutor_responsable = familiaData.tutor_responsable;
+        }
+
         return {
           // *** ID DE LA ENCUESTA (ÚNICO) ***
           id_encuesta: familiaData.id_familia,
           
-          // *** INFORMACIÓN BÁSICA DE LA FAMILIA ***
-          apellido_familiar: familiaData.apellido_familiar,
-          direccion_familia: familiaData.direccion_familia,
-          numero_contacto: familiaData.numero_contacto || familiaData.telefono, // numero_contacto es igual al telefono
-          telefono: familiaData.telefono,
-          email: familiaData.email,
-          codigo_familia: familiaData.codigo_familia,
-          tutor_responsable: familiaData.tutor_responsable,
+          ...familiaInfo,
           
           // *** INFORMACIÓN DE LA ENCUESTA ***
           estado_encuesta: familiaData.estado_encuesta,
@@ -509,20 +811,27 @@ export const obtenerEncuestas = async (req, res) => {
           sector: sectorInfo,
           municipio: municipioInfo,
           vereda: veredaInfo,
+          parroquia: parroquiaInfo,
           // Removido: sector_especifico (no lo necesitas según indicaciones)
           
           // *** INFORMACIÓN DE SERVICIOS CON ID Y NOMBRE ***
-          basuras: disposicionBasuras.length > 0 ? disposicionBasuras : null,
-          acueducto: sistemasAcueducto.length > 0 ? sistemasAcueducto[0] : null, // Tomar el primero si hay varios
-          aguas_residuales: sistemasAguasResiduales.length > 0 ? sistemasAguasResiduales[0] : null,
+          basuras: disposicionBasuras, // Siempre array, nunca null
+          acueducto: sistemasAcueducto.length > 0 ? sistemasAcueducto[0] : null, // null cuando no hay información
+          aguas_residuales: sistemasAguasResiduales.length > 0 ? sistemasAguasResiduales[0] : null, // null cuando no hay información
           
           // *** INFORMACIÓN RELIGIOSA ***
           comunion_en_casa: familiaData.comunionEnCasa,
           
-          // Información de personas/miembros de familia
+          // Información de personas/miembros de familia - SEPARADOS CORRECTAMENTE
           miembros_familia: {
             total_miembros: personasFormateadas.length,
             personas: personasFormateadas
+          },
+          
+          // NUEVO: Personas fallecidas por separado
+          personas_fallecidas: {
+            total_fallecidos: personasFallecidaFormateadas.length,
+            fallecidos: personasFallecidaFormateadas
           },
           
           // Metadatos
@@ -572,18 +881,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
     const { id } = req.params;
     console.log(`🔍 Buscando encuesta con ID: ${id}`);
 
-    // VERIFICACIÓN ADICIONAL: Verificar si la familia existe directamente
-    console.log(`🔍 Verificando existencia directa de familia ID: ${id}`);
-    const verificacionDirecta = await sequelize.query(
-      'SELECT COUNT(*) as existe FROM familias WHERE id_familia = :familiaId',
-      {
-        replacements: { familiaId: id },
-        type: QueryTypes.SELECT
-      }
-    );
-    console.log(`🔍 Familia existe (verificación directa): ${verificacionDirecta[0].existe}`);
-
-    // Buscar la familia usando SQL directo con JOINs para obtener IDs
+    // Buscar la familia usando la misma consulta que obtenerEncuestas
     const familiasQuery = `
       SELECT 
         f.id_familia,
@@ -600,30 +898,31 @@ export const obtenerEncuestaPorId = async (req, res) => {
         f.fecha_ultima_encuesta,
         f.codigo_familia,
         f.tutor_responsable,
-        f.numero_contrato_epm,
         f.id_municipio,
         f.id_vereda,
         f.id_sector,
+        f.id_parroquia,
         m.nombre_municipio,
         v.nombre as nombre_vereda,
         s.nombre as nombre_sector,
+        p.nombre as nombre_parroquia,
         tv.id_tipo_vivienda,
-        tv.nombre as nombre_tipo_vivienda,
-        tv.descripcion as descripcion_tipo_vivienda
+        tv.nombre as nombre_tipo_vivienda
       FROM familias f
       LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
       LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
       LEFT JOIN sectores s ON f.id_sector = s.id_sector
-      LEFT JOIN tipos_vivienda tv ON f.tipo_vivienda = tv.nombre
+      LEFT JOIN parroquias p ON f.id_parroquia = p.id_parroquia
+      LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
       WHERE f.id_familia = :familiaId
     `;
     
-    const [encuesta] = await sequelize.query(familiasQuery, {
+    const [familiaData] = await sequelize.query(familiasQuery, {
       replacements: { familiaId: id },
       type: QueryTypes.SELECT
     });
 
-    if (!encuesta) {
+    if (!familiaData) {
       console.log(`❌ Encuesta con ID ${id} no encontrada`);
       return res.status(404).json({
         status: 'error',
@@ -632,11 +931,10 @@ export const obtenerEncuestaPorId = async (req, res) => {
       });
     }
 
-    console.log(`✅ Encuesta encontrada: ${encuesta.apellido_familiar}`);
+    console.log(`✅ Encuesta encontrada: ${familiaData.apellido_familiar}`);
 
-    const familiaData = encuesta;
-
-    // Obtener personas de la familia usando SQL directo con información completa
+    // Usar exactamente la misma lógica que obtenerEncuestas para una familia individual
+    // Obtener personas VIVAS de la familia (excluir fallecidos)
     const personas = await sequelize.query(`
       SELECT 
         p.id_personas,
@@ -660,100 +958,47 @@ export const obtenerEncuestaPorId = async (req, res) => {
         s.descripcion as sexo_descripcion,
         ti.id_tipo_identificacion as tipo_id_id,
         ti.nombre as tipo_id_nombre,
-        ti.codigo as tipo_id_codigo
+        ti.codigo as tipo_id_codigo,
+        sc.id_situacion_civil as estado_civil_id,
+        sc.nombre as estado_civil_nombre
       FROM personas p
       LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
       LEFT JOIN tipos_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
-      WHERE p.id_familia_familias = :familiaId
+      LEFT JOIN situaciones_civiles sc ON p.id_estado_civil_estado_civil = sc.id_situacion_civil
+      WHERE p.id_familia_familias = :familiaId 
+      AND (p.identificacion NOT LIKE 'FALLECIDO%' OR p.identificacion IS NULL)
     `, {
       replacements: { familiaId: familiaData.id_familia },
       type: QueryTypes.SELECT
     });
 
-    // Obtener información adicional de vivienda y servicios
-    let disposicionBasuras = [];
-    let sistemasAcueducto = [];
-    let parroquiaInfo = null;
+    // Obtener personas FALLECIDAS por separado
+    const personasFallecidas = await sequelize.query(`
+      SELECT 
+        p.id_personas,
+        p.primer_nombre,
+        p.segundo_nombre,
+        p.primer_apellido,
+        p.segundo_apellido,
+        p.identificacion,
+        p.estudios,
+        p.fecha_nacimiento
+      FROM personas p
+      WHERE p.id_familia_familias = :familiaId 
+      AND p.identificacion LIKE 'FALLECIDO%'
+    `, {
+      replacements: { familiaId: familiaData.id_familia },
+      type: QueryTypes.SELECT
+    });
 
-    // Obtener disposición de basuras
-    try {
-      const disposiciones = await sequelize.query(
-        'SELECT fdb.id_familia, tdb.id_tipo_disposicion_basura, tdb.nombre, tdb.descripcion FROM familia_disposicion_basura fdb JOIN tipos_disposicion_basura tdb ON fdb.id_tipo_disposicion_basura = tdb.id_tipo_disposicion_basura WHERE fdb.id_familia = $1',
-        {
-          bind: [familiaData.id_familia],
-          type: sequelize.QueryTypes.SELECT
-        }
-      );
-      
-      disposicionBasuras = disposiciones.map(d => ({
-        id: d.id_tipo_disposicion_basura,
-        nombre: d.nombre,
-        descripcion: d.descripcion
-      }));
-    } catch (error) {
-      console.log(`  ⚠️ Error obteniendo disposición de basuras: ${error.message}`);
-      disposicionBasuras = [];
-    }
-
-    // Obtener sistemas de acueducto
-    try {
-      const sistemas = await sequelize.query(
-        'SELECT fsa.id_familia, sa.id_sistema_acueducto, sa.nombre, sa.descripcion FROM familia_sistema_acueducto fsa JOIN sistemas_acueducto sa ON fsa.id_sistema_acueducto = sa.id_sistema_acueducto WHERE fsa.id_familia = $1',
-        {
-          bind: [familiaData.id_familia],
-          type: sequelize.QueryTypes.SELECT
-        }
-      );
-      
-      sistemasAcueducto = sistemas.map(s => ({
-        id: s.id_sistema_acueducto,
-        nombre: s.nombre,
-        descripcion: s.descripcion
-      }));
-    } catch (error) {
-      console.log(`  ⚠️ Error obteniendo sistemas de acueducto: ${error.message}`);
-      sistemasAcueducto = [];
-    }
-
-    // Obtener aguas residuales (siguiendo el mismo patrón que sistemas de acueducto)
-    let tiposAguasResiduales = [];
-    try {
-      const aguasResiduales = await sequelize.query(
-        'SELECT fsar.id_familia, tar.id_tipo_aguas_residuales, tar.nombre, tar.descripcion FROM familia_sistema_aguas_residuales fsar JOIN tipos_aguas_residuales tar ON fsar.id_tipo_aguas_residuales = tar.id_tipo_aguas_residuales WHERE fsar.id_familia = $1',
-        {
-          bind: [familiaData.id_familia],
-          type: sequelize.QueryTypes.SELECT
-        }
-      );
-      
-      tiposAguasResiduales = aguasResiduales.map(ar => ({
-        id: ar.id_tipo_aguas_residuales,
-        nombre: ar.nombre,
-        descripcion: ar.descripcion
-      }));
-    } catch (error) {
-      console.log(`  ⚠️ Error obteniendo tipos de aguas residuales: ${error.message}`);
-      tiposAguasResiduales = [];
-    }
-
-    // Obtener información de parroquia si existe
-    if (familiaData.id_parroquia) {
-      const Parroquia = sequelize.models.Parroquia;
-      const parroquia = await Parroquia.findByPk(familiaData.id_parroquia);
-      if (parroquia) {
-        parroquiaInfo = {
-          id: parroquia.id_parroquia,
-          nombre: parroquia.nombre_parroquia
-        };
-      }
-    }
-
-    // Obtener información de ubicación (usar datos obtenidos en la consulta principal)
+    // Obtener información de ubicación usando datos ya obtenidos con JOINs
     let municipioInfo = null;
     let veredaInfo = null;
     let sectorInfo = null;
+    let parroquiaInfo = null;
+    let tipoViviendaInfo = null;
 
-    // Usar datos obtenidos directamente de la consulta con JOINs
+    // Usar datos de municipio ya obtenidos en el JOIN
     if (familiaData.id_municipio && familiaData.nombre_municipio) {
       municipioInfo = {
         id: familiaData.id_municipio,
@@ -761,6 +1006,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
       };
     }
 
+    // Usar datos de vereda ya obtenidos en el JOIN
     if (familiaData.id_vereda && familiaData.nombre_vereda) {
       veredaInfo = {
         id: familiaData.id_vereda,
@@ -768,7 +1014,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
       };
     }
 
-    // Usar datos de sector con ID
+    // Usar datos de sector ya obtenidos en el JOIN
     if (familiaData.id_sector && familiaData.nombre_sector) {
       sectorInfo = {
         id: familiaData.id_sector,
@@ -777,209 +1023,361 @@ export const obtenerEncuestaPorId = async (req, res) => {
     } else if (familiaData.sector) {
       // Fallback para sector como texto
       sectorInfo = {
+        id: null,
         nombre: familiaData.sector
       };
     }
 
-    // Para cada persona, formatear información completa usando datos ya obtenidos
-    const personasDetalladas = personas.map((persona) => {
-        return {
-          id: persona.id_personas,
-          informacion_personal: {
-            primer_nombre: persona.primer_nombre,
-            segundo_nombre: persona.segundo_nombre,
-            primer_apellido: persona.primer_apellido,
-            segundo_apellido: persona.segundo_apellido,
-            nombre_completo: `${persona.primer_nombre} ${persona.segundo_nombre || ''} ${persona.primer_apellido} ${persona.segundo_apellido || ''}`.trim()
-          },
-          identificacion: {
-            numero: persona.identificacion,
-            tipo: persona.tipo_id_id ? {
-              id: persona.tipo_id_id,
-              nombre: persona.tipo_id_nombre,
-              codigo: persona.tipo_id_codigo
-            } : null
-          },
-          demografia: {
-            fecha_nacimiento: persona.fecha_nacimiento,
-            sexo: persona.sexo_id ? {
-              id: persona.sexo_id,
-              descripcion: persona.sexo_descripcion
-            } : null
-          },
-          estado_civil: persona.id_estado_civil_estado_civil ? {
-            id: persona.id_estado_civil_estado_civil
-          } : null,
-          contacto: {
-            telefono: persona.telefono,
-            correo_electronico: persona.correo_electronico,
-            direccion: persona.direccion
-          },
-          educacion_y_liderazgo: {
-            estudios: {
-              id: null, // No hay tabla de estudios, usar null
-              nombre: persona.estudios || null,
-              descripcion: null // No hay tabla de estudios, usar null
-            },
-            liderazgo: persona.en_que_eres_lider
-          },
-          salud: {
-            necesidades_medicas: persona.necesidad_enfermo
-          },
-          tallas: {
-            camisa: persona.talla_camisa,
-            pantalon: persona.talla_pantalon,
-            zapato: persona.talla_zapato
-          },
-          es_fallecido: persona.identificacion?.startsWith('FALLECIDO'),
-          // Información adicional para fallecidos
-          informacion_fallecido: persona.identificacion?.startsWith('FALLECIDO') ? (() => {
-            try {
-              const fallecidoData = JSON.parse(persona.estudios || '{}');
-              return {
-                fecha_aniversario: fallecidoData.fecha_aniversario || null,
-                era_padre: fallecidoData.era_padre || false,
-                era_madre: fallecidoData.era_madre || false
-              };
-            } catch (error) {
-              return {
-                fecha_aniversario: null,
-                era_padre: persona.sexo_descripcion === 'Masculino',
-                era_madre: persona.sexo_descripcion === 'Femenino'
-              };
-            }
-          })() : null,
-          metadata_persona: {
-            fecha_registro: persona.createdAt,
-            ultima_actualizacion: persona.updatedAt
+    // Usar datos de parroquia ya obtenidos en el JOIN
+    if (familiaData.id_parroquia && familiaData.nombre_parroquia) {
+      parroquiaInfo = {
+        id: familiaData.id_parroquia,
+        nombre: familiaData.nombre_parroquia
+      };
+    } else if (familiaData.id_parroquia) {
+      // Si tenemos id_parroquia pero no nombre, buscar en la tabla parroquias
+      try {
+        const parroquiaDb = await sequelize.query(
+          'SELECT id_parroquia, nombre FROM parroquias WHERE id_parroquia = :id',
+          {
+            replacements: { id: parseInt(familiaData.id_parroquia) },
+            type: QueryTypes.SELECT
           }
-        };
-      });
-
-    // Construir respuesta completa y estructurada con toda la información
-    const encuestaCompleta = {
-      // Información básica de la familia
-      informacion_general: {
-        id_familia: familiaData.id_familia,
-        apellido_familiar: familiaData.apellido_familiar,
-        direccion_familia: familiaData.direccion_familia,
-        telefono: familiaData.telefono,
-        email: personasDetalladas.length > 0 && !personasDetalladas[0].es_fallecido ? personasDetalladas[0].contacto?.correo_electronico : familiaData.email, // ✅ CORRECCIÓN: Usar email de primera persona viva
-        codigo_familia: familiaData.codigo_familia,
-        tutor_responsable: familiaData.tutor_responsable,
-        numero_contrato_epm: familiaData.numero_contrato_epm // ✅ CORRECCIÓN: Usar datos reales del modelo
-      },
-      
-      // Información de la encuesta
-      estado_encuesta: {
-        estado: familiaData.estado_encuesta,
-        fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
-        numero_encuestas: familiaData.numero_encuestas
-      },
-      
-      // Información completa de vivienda
-      informacion_vivienda: {
-        tipo_vivienda: familiaData.id_tipo_vivienda ? {
-          id: familiaData.id_tipo_vivienda,
-          nombre: familiaData.nombre_tipo_vivienda,
-          descripcion: familiaData.descripcion_tipo_vivienda
-        } : {
-          nombre: familiaData.tipo_vivienda
-        },
-        tamaño_familia: familiaData.tamaño_familia,
-        sector: sectorInfo || { nombre: familiaData.sector },
-        disposicion_basuras: {
-          recolector: disposicionBasuras.some(d => d.nombre === 'Recolección Pública'),
-          quemada: disposicionBasuras.some(d => d.nombre === 'Quema'),
-          enterrada: disposicionBasuras.some(d => d.nombre === 'Entierro'),
-          recicla: disposicionBasuras.some(d => d.nombre === 'Reciclaje'),
-          aire_libre: disposicionBasuras.some(d => d.nombre === 'Botadero'),
-          no_aplica: disposicionBasuras.some(d => d.nombre === 'Otro'),
-          tipos_registrados: disposicionBasuras
+        );
+        
+        if (parroquiaDb.length > 0) {
+          parroquiaInfo = {
+            id: parroquiaDb[0].id_parroquia,
+            nombre: parroquiaDb[0].nombre
+          };
+        } else {
+          parroquiaInfo = {
+            id: familiaData.id_parroquia,
+            nombre: 'Parroquia no encontrada'
+          };
         }
-      },
-      
-      // Información completa de servicios de agua
-      servicios_agua: {
-        sistema_acueducto: sistemasAcueducto.length > 0 ? {
-          id: sistemasAcueducto[0].id,
-          nombre: sistemasAcueducto[0].nombre,
-          descripcion: sistemasAcueducto[0].descripcion
-        } : null,
-        aguas_residuales: tiposAguasResiduales.length > 0 ? {
-          id: tiposAguasResiduales[0].id,
-          nombre: tiposAguasResiduales[0].nombre,
-          descripcion: tiposAguasResiduales[0].descripcion
-        } : null,
-        pozo_septico: false,    // Se puede expandir luego
-        letrina: false,         // Se puede expandir luego
-        campo_abierto: false,   // Se puede expandir luego
-        sistemas_registrados: sistemasAcueducto,
-        aguas_residuales_registradas: tiposAguasResiduales
-      },
-      
-      // Información geográfica completa
-      ubicacion: {
-        municipio: municipioInfo,
-        vereda: veredaInfo,
-        sector: sectorInfo || { nombre: familiaData.sector },
-        parroquia: parroquiaInfo
-      },
-      
-      // Información detallada de personas con separación de vivos y fallecidos
-      miembros_familia: {
-        total_miembros: personasDetalladas.length,
-        personas: personasDetalladas.filter(p => !p.es_fallecido),
-        personas_fallecidas: personasDetalladas.filter(p => p.es_fallecido).map(p => ({
-          ...p,
-          fecha_aniversario: p.informacion_fallecido?.fecha_aniversario || null,
-          era_padre: p.informacion_fallecido?.era_padre || false,
-          era_madre: p.informacion_fallecido?.era_madre || false,
-          tipo_fallecimiento: 'natural', // Campo adicional
-          años_desde_fallecimiento: p.informacion_fallecido?.fecha_aniversario ? 
-            new Date().getFullYear() - new Date(p.informacion_fallecido.fecha_aniversario).getFullYear() : null,
-          // Limpiar campos que no aplican para fallecidos
-          educacion_y_liderazgo: {
-            estudios: 'N/A - Persona fallecida',
-            liderazgo: null
-          },
-          contacto: {
-            telefono: 'N/A',
-            correo_electronico: 'N/A',
-            direccion: p.contacto.direccion // Mantener dirección familiar
+      } catch (error) {
+        console.error('Error buscando parroquia:', error);
+        parroquiaInfo = {
+          id: familiaData.id_parroquia,
+          nombre: `ID: ${familiaData.id_parroquia}`
+        };
+      }
+    }
+
+    // Usar datos de tipo de vivienda ya obtenidos en el JOIN
+    if (familiaData.id_tipo_vivienda && familiaData.nombre_tipo_vivienda) {
+      tipoViviendaInfo = {
+        id: familiaData.id_tipo_vivienda,
+        nombre: familiaData.nombre_tipo_vivienda
+      };
+    } else if (familiaData.tipo_vivienda) {
+      // Si tipo_vivienda es un número, buscar en la tabla tipos_vivienda
+      if (!isNaN(familiaData.tipo_vivienda)) {
+        try {
+          const tipoViviendaDb = await sequelize.query(
+            'SELECT id_tipo_vivienda, nombre FROM tipos_vivienda WHERE id_tipo_vivienda = :id AND activo = true',
+            {
+              replacements: { id: parseInt(familiaData.tipo_vivienda) },
+              type: QueryTypes.SELECT
+            }
+          );
+          
+          if (tipoViviendaDb.length > 0) {
+            tipoViviendaInfo = {
+              id: tipoViviendaDb[0].id_tipo_vivienda,
+              nombre: tipoViviendaDb[0].nombre
+            };
+          } else {
+            tipoViviendaInfo = {
+              id: null,
+              nombre: 'Tipo no encontrado'
+            };
           }
-        }))
+        } catch (error) {
+          console.error('Error buscando tipo de vivienda:', error);
+          tipoViviendaInfo = {
+            id: null,
+            nombre: `ID: ${familiaData.tipo_vivienda}`
+          };
+        }
+      } else {
+        // Fallback para tipo de vivienda como texto
+        tipoViviendaInfo = {
+          id: null,
+          nombre: familiaData.tipo_vivienda
+        };
+      }
+    }
+
+    // Obtener información de basuras, acueducto y aguas residuales - SIEMPRE DEVOLVER ARRAYS
+    let disposicionBasuras = [];
+    let sistemasAcueducto = [];
+    let sistemasAguasResiduales = [];
+
+    try {
+      // Obtener disposición de basuras
+      const disposiciones = await sequelize.query(`
+        SELECT tdb.id_tipo_disposicion_basura, tdb.nombre 
+        FROM familia_disposicion_basura fdb 
+        JOIN tipos_disposicion_basura tdb ON fdb.id_tipo_disposicion_basura = tdb.id_tipo_disposicion_basura 
+        WHERE fdb.id_familia = :familiaId
+      `, {
+        replacements: { familiaId: familiaData.id_familia },
+        type: QueryTypes.SELECT
+      });
+      
+      disposicionBasuras = disposiciones.map(d => ({
+        id: d.id_tipo_disposicion_basura,
+        nombre: d.nombre
+      }));
+    } catch (error) {
+      console.log(`⚠️ Error obteniendo disposición de basuras: ${error.message}`);
+      disposicionBasuras = [];
+    }
+
+    try {
+      // Obtener sistemas de acueducto
+      const sistemas = await sequelize.query(`
+        SELECT sa.id_sistema_acueducto, sa.nombre 
+        FROM familia_sistema_acueducto fsa 
+        JOIN sistemas_acueducto sa ON fsa.id_sistema_acueducto = sa.id_sistema_acueducto 
+        WHERE fsa.id_familia = :familiaId
+      `, {
+        replacements: { familiaId: familiaData.id_familia },
+        type: QueryTypes.SELECT
+      });
+      
+      sistemasAcueducto = sistemas.map(s => ({
+        id: s.id_sistema_acueducto,
+        nombre: s.nombre
+      }));
+    } catch (error) {
+      console.log(`⚠️ Error obteniendo sistemas de acueducto: ${error.message}`);
+      sistemasAcueducto = [];
+    }
+
+    try {
+      // Obtener sistemas de aguas residuales
+      const sistemasAR = await sequelize.query(`
+        SELECT tar.id_tipo_aguas_residuales, tar.nombre 
+        FROM familia_sistema_aguas_residuales fsar 
+        JOIN tipos_aguas_residuales tar ON fsar.id_tipo_aguas_residuales = tar.id_tipo_aguas_residuales 
+        WHERE fsar.id_familia = :familiaId
+      `, {
+        replacements: { familiaId: familiaData.id_familia },
+        type: QueryTypes.SELECT
+      });
+      
+      sistemasAguasResiduales = sistemasAR.map(s => ({
+        id: s.id_tipo_aguas_residuales,
+        nombre: s.nombre
+      }));
+    } catch (error) {
+      console.log(`⚠️ Error obteniendo sistemas de aguas residuales: ${error.message}`);
+      sistemasAguasResiduales = [];
+    }
+
+    // Obtener información adicional para cada persona VIVA (misma lógica que obtenerEncuestas)
+    const personasFormateadas = await Promise.all(personas.map(async (persona) => {
+      // Información del estudio - manejar casos donde estudios contiene JSON
+      let estudioInfo = null;
+      if (persona.estudios) {
+        try {
+          // Verificar si es un JSON string (típicamente para fallecidos que no deberían estar aquí)
+          if (persona.estudios.startsWith('{') && persona.estudios.includes('es_fallecido')) {
+            // Si es un fallecido que se coló, usar placeholder
+            estudioInfo = {
+              id: null,
+              nombre: 'Datos inconsistentes - revisar'
+            };
+          } else {
+            // Si estudios contiene un ID numérico, buscar en la tabla
+            const estudioId = parseInt(persona.estudios);
+            if (!isNaN(estudioId)) {
+              const [estudio] = await sequelize.query(`
+                SELECT id_niveles_educativos as id, nivel as nombre 
+                FROM niveles_educativos 
+                WHERE id_niveles_educativos = :estudioId
+              `, {
+                replacements: { estudioId },
+                type: QueryTypes.SELECT
+              });
+              
+              if (estudio) {
+                estudioInfo = {
+                  id: estudio.id,
+                  nombre: estudio.nombre
+                };
+              } else {
+                estudioInfo = {
+                  id: estudioId,
+                  nombre: persona.estudios
+                };
+              }
+            } else {
+              // Si no es un ID, intentar buscar por nombre/nivel
+              const [estudio] = await sequelize.query(`
+                SELECT id_niveles_educativos as id, nivel as nombre 
+                FROM niveles_educativos 
+                WHERE LOWER(nivel) LIKE LOWER(:nivelBusqueda)
+                AND activo = true
+              `, {
+                replacements: { nivelBusqueda: `%${persona.estudios}%` },
+                type: QueryTypes.SELECT
+              });
+              
+              if (estudio) {
+                estudioInfo = {
+                  id: estudio.id,
+                  nombre: estudio.nombre
+                };
+              } else {
+                // Si no se encuentra en el catálogo, mantener el texto original con ID null
+                estudioInfo = {
+                  id: null,
+                  nombre: persona.estudios
+                };
+              }
+            }
+          }
+        } catch (error) {
+          estudioInfo = {
+            id: null,
+            nombre: persona.estudios
+          };
+        }
+      }
+
+      return {
+        id: persona.id_personas,
+        nombre_completo: `${persona.primer_nombre || ''} ${persona.segundo_nombre || ''} ${persona.primer_apellido || ''} ${persona.segundo_apellido || ''}`.trim(),
+        identificacion: {
+          numero: persona.identificacion,
+          tipo: persona.tipo_id_id ? {
+            id: persona.tipo_id_id,
+            nombre: persona.tipo_id_nombre,
+            codigo: persona.tipo_id_codigo
+          } : null
+        },
+        telefono: persona.telefono,
+        email: persona.correo_electronico,
+        fecha_nacimiento: persona.fecha_nacimiento,
+        direccion: persona.direccion,
+        estudios: estudioInfo,
+        edad: persona.fecha_nacimiento ? 
+          Math.floor((new Date() - new Date(persona.fecha_nacimiento)) / (365.25 * 24 * 60 * 60 * 1000)) : null,
+        sexo: persona.sexo_id ? {
+          id: persona.sexo_id,
+          descripcion: persona.sexo_descripcion
+        } : null,
+        estado_civil: persona.estado_civil_id ? {
+          id: persona.estado_civil_id,
+          nombre: persona.estado_civil_nombre
+        } : null,
+        tallas: {
+          camisa: persona.talla_camisa,
+          pantalon: persona.talla_pantalon,
+          zapato: persona.talla_zapato
+        }
+      };
+    }));
+
+    // Procesar personas FALLECIDAS por separado (misma lógica que obtenerEncuestas)
+    const personasFallecidaFormateadas = personasFallecidas.map(fallecido => {
+      let infoFallecido = {};
+      try {
+        // Parsear el JSON del campo estudios para fallecidos
+        infoFallecido = JSON.parse(fallecido.estudios || '{}');
+      } catch (error) {
+        infoFallecido = {};
+      }
+
+      return {
+        id: fallecido.id_personas,
+        nombre_completo: `${fallecido.primer_nombre || ''} ${fallecido.segundo_nombre || ''} ${fallecido.primer_apellido || ''} ${fallecido.segundo_apellido || ''}`.trim(),
+        identificacion: {
+          numero: fallecido.identificacion,
+          tipo: null // Los fallecidos no tienen tipo de identificación válido
+        },
+        fecha_fallecimiento: infoFallecido.fecha_aniversario || null,
+        era_padre: infoFallecido.era_padre || false,
+        era_madre: infoFallecido.era_madre || false,
+        causa_fallecimiento: infoFallecido.causa_fallecimiento || null,
+        es_fallecido: true
+      };
+    });
+
+    const familiaInfo = {
+      // *** INFORMACIÓN BÁSICA DE LA FAMILIA ***
+      apellido_familiar: familiaData.apellido_familiar,
+      direccion_familia: familiaData.direccion_familia,
+      telefono: familiaData.telefono,
+      codigo_familia: familiaData.codigo_familia,
+    };
+    
+    // Solo agregar campos opcionales si no son null
+    if (familiaData.email !== null) {
+      familiaInfo.email = familiaData.email;
+    }
+    if (familiaData.tutor_responsable !== null) {
+      familiaInfo.tutor_responsable = familiaData.tutor_responsable;
+    }
+
+    // Usar exactamente la misma estructura que obtenerEncuestas
+    const encuestaFormateada = {
+      // *** ID DE LA ENCUESTA (ÚNICO) ***
+      id_encuesta: familiaData.id_familia,
+      
+      ...familiaInfo,
+      
+      // *** INFORMACIÓN DE LA ENCUESTA ***
+      estado_encuesta: familiaData.estado_encuesta,
+      numero_encuestas: familiaData.numero_encuestas,
+      fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
+      
+      // *** INFORMACIÓN DE VIVIENDA CON ID Y NOMBRE ***
+      tipo_vivienda: tipoViviendaInfo,
+      tamaño_familia: familiaData.tamaño_familia,
+      
+      // *** INFORMACIÓN GEOGRÁFICA COMPLETA CON ID Y NOMBRE ***
+      sector: sectorInfo,
+      municipio: municipioInfo,
+      vereda: veredaInfo,
+      parroquia: parroquiaInfo,
+      
+      // *** INFORMACIÓN DE SERVICIOS CON ID Y NOMBRE ***
+      basuras: disposicionBasuras, // Siempre array, nunca null
+      acueducto: sistemasAcueducto.length > 0 ? sistemasAcueducto[0] : null, // null cuando no hay información
+      aguas_residuales: sistemasAguasResiduales.length > 0 ? sistemasAguasResiduales[0] : null, // null cuando no hay información
+      
+      // *** INFORMACIÓN RELIGIOSA ***
+      comunion_en_casa: familiaData.comunionEnCasa,
+      
+      // Información de personas/miembros de familia - SEPARADOS CORRECTAMENTE
+      miembros_familia: {
+        total_miembros: personasFormateadas.length,
+        personas: personasFormateadas
       },
       
-      // Observaciones (campos que se pueden expandir luego)
-      observaciones: {
-        sustento_familia: null,           // Campo que se podría agregar a la tabla familias
-        observaciones_encuestador: null, // Campo que se podría agregar a la tabla familias
-        autorizacion_datos: null         // Campo que se podría agregar a la tabla familias
+      // NUEVO: Personas fallecidas por separado
+      personas_fallecidas: {
+        total_fallecidos: personasFallecidaFormateadas.length,
+        fallecidos: personasFallecidaFormateadas
       },
       
-      // Metadatos de la encuesta
+      // Metadatos
       metadatos: {
         fecha_creacion: familiaData.fecha_ultima_encuesta,
         estado: familiaData.estado_encuesta,
-        version: '2.0',
-        ultima_actualizacion: new Date().toISOString(),
-        campos_disponibles: {
-          informacion_general: true,
-          vivienda: true,
-          servicios_agua: true,
-          ubicacion_geografica: true,
-          miembros_detallados: true,
-          disposicion_basuras: disposicionBasuras.length > 0,
-          sistemas_acueducto: sistemasAcueducto.length > 0
-        }
+        version: '1.0'
       }
     };
 
     res.status(200).json({
       status: 'success',
       message: 'Encuesta obtenida exitosamente',
-      data: encuestaCompleta
+      data: encuestaFormateada
     });
 
   } catch (error) {
@@ -1191,92 +1589,21 @@ export const crearEncuesta = async (req, res) => {
       metadata = {}
     } = req.body;
 
-    // Validaciones básicas
-    if (!informacionGeneral || !vivienda || !servicios_agua || !observaciones) {
-      await transaction.rollback();
-      return res.status(400).json({
-        status: 'error',
-        message: 'Faltan secciones obligatorias en la encuesta',
-        errors: ['informacionGeneral, vivienda, servicios_agua y observaciones son requeridos']
-      });
-    }
-
-    console.log('✅ Validaciones básicas completadas');
-
-    // VALIDAR MIEMBROS ÚNICOS - No pueden pertenecer a otra familia
-    console.log('🔍 Validando que los miembros no pertenezcan a otra familia...');
-    await validarMiembrosUnicos(familyMembers, deceasedMembers || []);
-    console.log('✅ Validación de miembros únicos completada');
-
-    // VERIFICAR SI LA FAMILIA YA EXISTE
-    console.log('🔍 Verificando familia existente...');
-    const familiaExistente = await verificarFamiliaExistente(
-      informacionGeneral.apellido_familiar,
-      informacionGeneral.telefono,
-      informacionGeneral.direccion
-    );
-
-    if (familiaExistente) {
-      // MEJORA: Detectar posibles errores de formulación comparando miembros
-      const miembrosExistentes = await sequelize.query(`
-        SELECT identificacion, primer_nombre, primer_apellido 
-        FROM personas 
-        WHERE id_familia_familias = :familiaId
-      `, {
-        replacements: { familiaId: familiaExistente.id_familia },
-        type: QueryTypes.SELECT
-      });
-
-      const identificacionesNuevas = familyMembers?.map(m => m.numeroIdentificacion).filter(Boolean) || [];
-      const identificacionesExistentes = miembrosExistentes.map(m => m.identificacion).filter(Boolean);
-      
-      const hayMiembrosNuevos = identificacionesNuevas.some(id => !identificacionesExistentes.includes(id));
-      
-      let mensajeDetallado = 'Esta familia ya está registrada en el sistema.';
-      if (hayMiembrosNuevos) {
-        mensajeDetallado = 'Esta familia ya existe pero detectamos miembros con identificaciones diferentes. Esto podría indicar un error en la formulación de la encuesta.';
-        console.log('🚨 Detectado posible error de formulación: misma familia con miembros diferentes');
-      }
-
-      await transaction.rollback();
-      console.log(`⚠️ Familia duplicada detectada: ${familiaExistente.apellido_familiar}`);
-      return res.status(409).json({
-        status: 'error',
-        message: mensajeDetallado,
-        code: 'DUPLICATE_FAMILY',
-        data: {
-          familia_existente: {
-            id: familiaExistente.id_familia,
-            apellido: familiaExistente.apellido_familiar,
-            telefono: familiaExistente.telefono,
-            direccion: familiaExistente.direccion_familia,
-            fecha_registro: familiaExistente.fecha_ultima_encuesta,
-            miembros_existentes: miembrosExistentes.map(m => ({
-              identificacion: m.identificacion,
-              nombre: `${m.primer_nombre} ${m.primer_apellido}`
-            }))
-          },
-          miembros_en_nueva_encuesta: familyMembers?.map(m => ({
-            identificacion: m.numeroIdentificacion,
-            nombre: `${m.nombres} ${m.apellidos}`
-          })) || [],
-          posible_error_formulacion: hayMiembrosNuevos,
-          instrucciones: hayMiembrosNuevos ? [
-            "⚠️ POSIBLE ERROR: Verificar si cambiaste incorrectamente las cédulas de miembros existentes",
-            "Si es la misma familia, usa el endpoint de actualización en lugar de crear una nueva"
-          ] : [
-            "Familia ya registrada anteriormente",
-            "Si deseas actualizar la información, usa el endpoint de actualización correspondiente"
-          ]
-        }
-      });
-    }
+    console.log('✅ Validaciones completadas por middlewares');
+    console.log('🔍 DEBUG - informacionGeneral.parroquia:', JSON.stringify(informacionGeneral.parroquia, null, 2));
+    console.log('🔍 DEBUG - parroquia ID extraído:', informacionGeneral.parroquia?.id);
 
     // 1. CREAR FAMILIA
     console.log('💾 Creando registro de familia...');
     
-    // Calcular tamaño de familia (mínimo 1)
     const tamanioFamiliaCalculado = Math.max(1, (familyMembers.length || 0) + (deceasedMembers.length || 0));
+    
+    // DEBUG: Log para verificar valores de ID geográficos
+    console.log('🌍 DEBUG - Valores geográficos a guardar:');
+    console.log('  id_municipio:', informacionGeneral.municipio?.id ? parseInt(informacionGeneral.municipio.id) : null);
+    console.log('  id_parroquia:', informacionGeneral.parroquia?.id ? parseInt(informacionGeneral.parroquia.id) : null);
+    console.log('  id_sector:', informacionGeneral.sector?.id ? parseInt(informacionGeneral.sector.id) : null);
+    console.log('  id_vereda:', informacionGeneral.vereda?.id ? parseInt(informacionGeneral.vereda.id) : null);
     
     const familiaData = {
       apellido_familiar: informacionGeneral.apellido_familiar,
@@ -1290,328 +1617,70 @@ export const crearEncuesta = async (req, res) => {
       numero_encuestas: 1,
       fecha_ultima_encuesta: new Date().toISOString().split('T')[0],
       codigo_familia: `FAM_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
-      tutor_responsable: null, // Se puede definir luego
+      tutor_responsable: null,
       id_municipio: informacionGeneral.municipio?.id ? parseInt(informacionGeneral.municipio.id) : null,
+      id_parroquia: informacionGeneral.parroquia?.id ? parseInt(informacionGeneral.parroquia.id) : null,
       id_vereda: informacionGeneral.vereda?.id ? parseInt(informacionGeneral.vereda.id) : null,
       id_sector: informacionGeneral.sector?.id ? parseInt(informacionGeneral.sector.id) : null,
       comunionEnCasa: informacionGeneral.comunionEnCasa || false
     };
 
-    // Debug: mostrar datos que se van a insertar
-    console.log('📋 Datos de familia a insertar:', {
-      apellido_familiar: familiaData.apellido_familiar,
-      sector: familiaData.sector,
-      tamaño_familia: familiaData.tamaño_familia,
-      tipo_vivienda: familiaData.tipo_vivienda
-      // COMENTADO: id_municipio no existe en la tabla familias
-      // id_municipio: familiaData.id_municipio
-    });
+    console.log('🔍 DEBUG - familiaData a guardar:', JSON.stringify({
+      id_municipio: familiaData.id_municipio,
+      id_parroquia: familiaData.id_parroquia,
+      id_vereda: familiaData.id_vereda,
+      id_sector: familiaData.id_sector
+    }, null, 2));
 
     const familia = await Familias.create(familiaData, { transaction });
     console.log(`✅ Familia creada con ID: ${familia.id_familia}`);
-    console.log(`✅ Datos familia creados:`, {
-      id: familia.id_familia,
-      apellido: familia.apellido_familiar,
-      telefono: familia.telefono,
-      comunionEnCasa: familia.comunionEnCasa
-    });
     
-    // Verificar que se haya creado correctamente el ID
+    // FIX TEMPORAL: Sequelize no está guardando id_parroquia en el create, forzar con UPDATE directo
+    if (familiaData.id_parroquia && !familia.id_parroquia) {
+      console.log('🔧 FIX: Actualizando id_parroquia manualmente...');
+      await sequelize.query(
+        'UPDATE familias SET id_parroquia = $1 WHERE id_familia = $2',
+        {
+          bind: [familiaData.id_parroquia, familia.id_familia],
+          transaction
+        }
+      );
+      console.log(`✅ id_parroquia actualizado a: ${familiaData.id_parroquia}`);
+    }
+    
+    // DEBUG: Verificar qué se guardó realmente
+    console.log('🔍 DEBUG - Familia guardada en BD:', JSON.stringify({
+      id_familia: familia.id_familia,
+      id_municipio: familia.id_municipio,
+      id_parroquia: familia.id_parroquia,
+      id_sector: familia.id_sector,
+      id_vereda: familia.id_vereda
+    }, null, 2));
+    
+    // DEBUG ADICIONAL: Verificar objeto completo de familia retornado por Sequelize
+    console.log('🔍 DEBUG - Familia objeto completo:', familia.toJSON ? JSON.stringify(familia.toJSON(), null, 2) : 'No toJSON available');
+    
     if (!familia.id_familia) {
       throw new Error('Error al crear la familia: ID no generado correctamente');
     }
     
     const familiaId = familia.id_familia;
 
-    // 2. REGISTRAR DISPOSICIÓN DE BASURAS (simplificado)
-    console.log('🗑️ Registrando disposición de basuras...');
-    if (vivienda.disposicion_basuras) {
-      const basuras = vivienda.disposicion_basuras;
-      
-      // Mapear tipos de disposición de basura a IDs
-      const disposicionMapping = {
-        recolector: 1,    // "Recolección Pública"
-        quemada: 2,       // "Quema"
-        enterrada: 3,     // "Entierro"
-        recicla: 4,       // "Reciclaje"
-        aire_libre: 6,    // "Botadero"
-        no_aplica: 7      // "Otro"
-      };
+    // 2. REGISTRAR SERVICIOS (usando funciones auxiliares)
+    await registrarDisposicionBasuras(familiaId, vivienda.disposicion_basuras, transaction);
+    await registrarSistemaAcueducto(familiaId, servicios_agua.sistema_acueducto, transaction);
+    await registrarAguasResiduales(familiaId, servicios_agua.aguas_residuales, transaction);
+    await registrarTipoVivienda(familiaId, vivienda.tipo_vivienda, transaction);
 
-      // Crear registros para cada tipo de disposición que sea true
-      for (const [tipo, activo] of Object.entries(basuras)) {
-        if (activo && disposicionMapping[tipo]) {
-          try {
-            await sequelize.query(
-              'INSERT INTO familia_disposicion_basura (id_familia, id_tipo_disposicion_basura, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
-              {
-                bind: [familiaId, disposicionMapping[tipo]],
-                transaction
-              }
-            );
-            console.log(`  ✅ Disposición registrada: ${tipo}`);
-          } catch (error) {
-            console.log(`  ⚠️ Error registrando ${tipo}: ${error.message}`);
-          }
-        }
-      }
-    }
+    // 3. PROCESAR MIEMBROS DE LA FAMILIA
+    const personasCreadas = await procesarMiembrosFamilia(familiaId, familyMembers, informacionGeneral, transaction);
+    const personasFallecidas = await procesarMiembrosFallecidos(familiaId, deceasedMembers, informacionGeneral, transaction);
 
-    // 3. REGISTRAR SISTEMA DE ACUEDUCTO (simplificado)
-    console.log('💧 Registrando sistema de acueducto...');
-    if (servicios_agua.sistema_acueducto) {
-      try {
-        // Mapear sistema de acueducto por ID o usar default
-        let sistemaId = servicios_agua.sistema_acueducto.id || 1; // Default: Acueducto Público
-
-        await sequelize.query(
-          'INSERT INTO familia_sistema_acueducto (id_familia, id_sistema_acueducto, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
-          {
-            bind: [familiaId, sistemaId],
-            transaction
-          }
-        );
-        console.log(`  ✅ Sistema acueducto registrado: ID ${sistemaId}`);
-      } catch (error) {
-        console.log(`  ⚠️ Error registrando sistema acueducto: ${error.message}`);
-      }
-    }
-
-    // 4. REGISTRAR AGUAS RESIDUALES
-    console.log('🚰 Registrando aguas residuales...');
-    if (servicios_agua.aguas_residuales) {
-      try {
-        // Mapear aguas residuales por ID o usar default
-        let aguaResidualesId = servicios_agua.aguas_residuales.id || 1; // Default: Alcantarillado
-
-        await sequelize.query(
-          'INSERT INTO familia_sistema_aguas_residuales (id_familia, id_tipo_aguas_residuales, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
-          {
-            bind: [familiaId, aguaResidualesId],
-            transaction
-          }
-        );
-        console.log(`  ✅ Aguas residuales registradas: ID ${aguaResidualesId}`);
-      } catch (error) {
-        console.log(`  ⚠️ Error registrando aguas residuales: ${error.message}`);
-      }
-    }
-
-    // 5. REGISTRAR INFORMACIÓN DE TIPO DE VIVIENDA
-    console.log('🏠 Registrando tipo de vivienda...');
-    if (vivienda.tipo_vivienda) {
-      const FamiliaTipoVivienda = sequelize.models.FamiliaTipoVivienda;
-      
-      // Buscar el tipo de vivienda por ID o nombre
-      let tipoViviendaId = vivienda.tipo_vivienda.id;
-      if (!tipoViviendaId) {
-        const TipoVivienda = sequelize.models.TiposVivienda;
-        const tipo = await TipoVivienda.findOne({
-          where: { nombre: { [sequelize.Op.iLike]: `%${vivienda.tipo_vivienda.nombre}%` } }
-        });
-        tipoViviendaId = tipo?.id_tipo_vivienda || 1; // Default: Casa
-      }
-
-      // Crear registro sin campo 'id' (usa composite key)
-      await sequelize.query(
-        'INSERT INTO familia_tipo_vivienda (id_familia, id_tipo_vivienda, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
-        {
-          bind: [familiaId, tipoViviendaId],
-          transaction
-        }
-      );
-      console.log(`  ✅ Tipo vivienda registrado: ID ${tipoViviendaId}`);
-    }
-
-    // 6. PROCESAR MIEMBROS VIVOS DE LA FAMILIA
-    let personasCreadas = 0;
-    if (familyMembers.length > 0) {
-      console.log(`👥 Procesando ${familyMembers.length} miembros de la familia...`);
-      
-      for (const miembro of familyMembers) {
-        try {
-          // Dividir nombres
-          const nombres = miembro.nombres.trim().split(' ');
-          const primerNombre = nombres[0] || '';
-          const segundoNombre = nombres.slice(1).join(' ') || null;
-
-          // Mapear sexo - el JSON tiene objeto con id y nombre
-          let sexoId = null;
-          if (miembro.sexo) {
-            if (typeof miembro.sexo === 'object' && miembro.sexo.id) {
-              sexoId = parseInt(miembro.sexo.id);
-            } else if (typeof miembro.sexo === 'string') {
-              const sexoMapping = {
-                'Hombre': 1,        // Masculino
-                'Mujer': 2,         // Femenino  
-                'Masculino': 1,
-                'Femenino': 2,
-                'M': 1,
-                'F': 2,
-                'O': 3,
-                'Otro': 3
-              };
-              sexoId = sexoMapping[miembro.sexo] || null;
-            }
-          }
-
-          // Mapear tipo de identificación - el JSON tiene objeto con id y nombre
-          let tipoIdentificacionId = null;
-          if (miembro.tipoIdentificacion) {
-            if (typeof miembro.tipoIdentificacion === 'object' && miembro.tipoIdentificacion.id) {
-              tipoIdentificacionId = parseInt(miembro.tipoIdentificacion.id);
-            } else if (typeof miembro.tipoIdentificacion === 'string') {
-              const tipoIdMapping = {
-                'CC': 1,
-                'TI': 2,
-                'RC': 3,
-                'CE': 4,
-                'PP': 5
-              };
-              tipoIdentificacionId = tipoIdMapping[miembro.tipoIdentificacion] || null;
-            }
-          }
-
-          // Mapear estado civil - el JSON tiene objeto con id y nombre
-          let estadoCivilId = null;
-          if (miembro.situacionCivil) {
-            if (typeof miembro.situacionCivil === 'object' && miembro.situacionCivil.id) {
-              estadoCivilId = parseInt(miembro.situacionCivil.id);
-            } else if (typeof miembro.situacionCivil === 'string') {
-              const estadoCivilMapping = {
-                'Soltero': 1,
-                'Soltera': 1,
-                'Soltero(a)': 1,
-                'Casado Civil': 2,
-                'Casado': 2,
-                'Casada': 2,
-                'Casado(a)': 2,
-                'Viudo': 4,
-                'Viuda': 4,
-                'Viudo(a)': 4,
-                'Divorciado': 3,
-                'Divorciada': 3,
-                'Divorciado(a)': 3,
-                'Unión Libre': 5,
-                'Union Libre': 5
-              };
-              estadoCivilId = estadoCivilMapping[miembro.situacionCivil] || null;
-            }
-          }
-
-          // Extraer fecha de nacimiento
-          const fechaNacimiento = miembro.fechaNacimiento || miembro.fecha_nacimiento;
-          if (!fechaNacimiento) {
-            console.log(`  ⚠️ Advertencia: ${primerNombre} no tiene fecha de nacimiento, usando fecha por defecto`);
-          }
-
-          // Generar identificación única
-          const identificacionUnica = await generarIdentificacionUnica('TEMP');
-          
-          const personaData = {
-            primer_nombre: primerNombre,
-            segundo_nombre: segundoNombre,
-            primer_apellido: informacionGeneral.apellido_familiar,
-            segundo_apellido: null,
-            fecha_nacimiento: fechaNacimiento ? new Date(fechaNacimiento) : new Date('1900-01-01'),
-            telefono: miembro.telefono || informacionGeneral.telefono,
-            correo_electronico: `${primerNombre.toLowerCase()}.${Date.now()}.${personasCreadas}@temp.com`,
-            identificacion: miembro.numeroIdentificacion || identificacionUnica,
-            direccion: informacionGeneral.direccion,
-            id_familia_familias: familiaId,
-            id_sexo: sexoId,
-            id_tipo_identificacion_tipo_identificacion: tipoIdentificacionId,
-            id_estado_civil_estado_civil: estadoCivilId,
-            estudios: (miembro.estudio && typeof miembro.estudio === 'object') ? miembro.estudio.nombre : (miembro.estudio || null),
-            en_que_eres_lider: null,
-            necesidad_enfermo: null,
-            id_profesion: null, // Campo opcional
-            talla_camisa: miembro['talla_camisa/blusa'] || (miembro.talla ? miembro.talla.camisa : null),
-            talla_pantalon: miembro.talla_pantalon || (miembro.talla ? miembro.talla.pantalon : null),
-            talla_zapato: miembro.talla_zapato || (miembro.talla ? miembro.talla.calzado : null)
-          };
-
-          // Crear persona usando el modelo importado con timestamps correctos
-          console.log(`  🔧 Intentando crear persona: ${primerNombre} (ID: ${identificacionUnica})`);
-          console.log(`  📋 Datos persona:`, {
-            primer_nombre: personaData.primer_nombre,
-            identificacion: personaData.identificacion,
-            telefono: personaData.telefono,
-            correo_electronico: personaData.correo_electronico,
-            id_familia_familias: personaData.id_familia_familias,
-            fecha_nacimiento: personaData.fecha_nacimiento
-          });
-          
-          await Persona.create(personaData, { transaction });
-          personasCreadas++;
-          console.log(`  ✅ Persona creada exitosamente: ${primerNombre}`);
-          
-        } catch (error) {
-          console.error(`  ❌ Error detallado creando persona ${miembro.nombres}:`);
-          console.error(`     - Mensaje: ${error.message}`);
-          console.error(`     - Nombre del error: ${error.name}`);
-          console.error(`     - SQL State: ${error.sql || 'N/A'}`);
-          console.error(`     - Parent error: ${error.parent?.message || 'N/A'}`);
-          // NO continuar - lanzar error para que se ejecute rollback
-          throw error;
-        }
-      }
-    }
-
-    // 7. PROCESAR MIEMBROS FALLECIDOS
-    let personasFallecidas = 0;
-    if (deceasedMembers.length > 0) {
-      console.log(`⚰️ Procesando ${deceasedMembers.length} miembros fallecidos...`);
-      
-      for (const fallecido of deceasedMembers) {
-        try {
-          const nombres = fallecido.nombres.trim().split(' ');
-          const primerNombre = nombres[0] || '';
-          const segundoNombre = nombres.slice(1).join(' ') || null;
-
-          // Generar identificación única para fallecidos
-          const identificacionUnica = await generarIdentificacionUnica('FALLECIDO');
-
-          const personaFallecidaData = {
-            primer_nombre: primerNombre,
-            segundo_nombre: segundoNombre,
-            primer_apellido: informacionGeneral.apellido_familiar,
-            segundo_apellido: null,
-            fecha_nacimiento: '1900-01-01', // Fecha placeholder para fallecidos
-            telefono: 'N/A',
-            correo_electronico: `fallecido.${Date.now()}.${personasFallecidas}@temp.com`,
-            identificacion: identificacionUnica,
-            direccion: informacionGeneral.direccion,
-            id_familia_familias: familiaId,
-            id_familia: familiaId,
-            id_parroquia: null, // Evitar error de clave foránea, usar null por defecto
-            // Campos adicionales para fallecidos en el campo 'estudios' como JSON temporal
-            estudios: JSON.stringify({
-              es_fallecido: true,
-              fecha_aniversario: fallecido.fechaFallecimiento || fallecido.fechaAniversario || null,
-              era_padre: fallecido.eraPadre || false,
-              era_madre: fallecido.eraMadre || false,
-              causa_fallecimiento: fallecido.causaFallecimiento || null
-            })
-          };
-
-          console.log(`  🔧 Creando persona fallecida: ${primerNombre} (ID: ${identificacionUnica})`);
-          await Persona.create(personaFallecidaData, { transaction });
-          personasFallecidas++;
-          console.log(`  ⚰️ Persona fallecida registrada: ${primerNombre}`);
-          
-        } catch (error) {
-          console.error(`  ❌ Error registrando persona fallecida ${fallecido.nombres}:`, error.message);
-        }
-      }
-    }
-
-    // 8. CONFIRMAR TRANSACCIÓN
-    console.log('🔄 Iniciando commit de transacción...');
+    // 4. CONFIRMAR TRANSACCIÓN
     await transaction.commit();
     console.log('✅ Transacción completada exitosamente');
     
-    // 8. RESPUESTA EXITOSA INMEDIATA (antes de verificaciones adicionales)
+    // 5. RESPUESTA EXITOSA
     const responseData = {
       status: 'success',
       message: 'Encuesta guardada exitosamente',
@@ -1645,19 +1714,13 @@ export const crearEncuesta = async (req, res) => {
     console.log('✅ Respuesta 201 enviada exitosamente');
 
   } catch (error) {
-    // ROLLBACK EN CASO DE ERROR (solo si la transacción aún está activa)
     console.log('❌ ERROR CAPTURADO - VERIFICANDO ESTADO DE TRANSACCIÓN');
-    console.log('❌ Tipo de error:', error.constructor.name);
-    console.log('❌ Mensaje de error:', error.message);
     
     try {
-      // Verificar si la transacción aún está activa
       if (transaction && !transaction.finished) {
         console.log('❌ Transacción activa - Iniciando rollback');
         await transaction.rollback();
         console.log('❌ ROLLBACK COMPLETADO');
-      } else {
-        console.log('⚠️ Transacción ya finalizada - No se requiere rollback');
       }
     } catch (rollbackError) {
       console.log('❌ Error durante rollback:', rollbackError.message);
@@ -1665,29 +1728,13 @@ export const crearEncuesta = async (req, res) => {
     
     console.error('❌ Error procesando encuesta:', error);
 
-    // Solo enviar respuesta de error si no se ha enviado ya una respuesta
     if (!res.headersSent) {
-      // Manejar error específico de miembros duplicados
-      if (error.codigo === 'MIEMBROS_DUPLICADOS') {
-        return res.status(409).json({
-          status: 'error',
-          message: 'Algunos miembros ya pertenecen a otra familia',
-          details: error.message,
-          error_code: 'MIEMBROS_DUPLICADOS',
-          conflictos: error.conflictos || [],
-          sugerencia: 'Verifique los números de identificación de los miembros de la familia'
-        });
-      }
-
-      // Error genérico
       res.status(500).json({
         status: 'error',
         message: 'Error interno del servidor al procesar la encuesta',
         details: process.env.NODE_ENV === 'development' ? error.message : 'Error interno',
         error_code: 'ENCUESTA_PROCESSING_ERROR'
       });
-    } else {
-      console.log('⚠️ Headers ya enviados - No se puede enviar respuesta de error');
     }
   }
 };
@@ -1700,24 +1747,11 @@ export const eliminarEncuesta = async (req, res) => {
   
   try {
     const { id } = req.params;
-    console.log(`🗑️ Iniciando eliminación de encuesta con ID: ${id}`);
+    const encuesta = req.encuesta; // Viene del middleware de validación
 
-    // 1. VERIFICAR QUE LA ENCUESTA EXISTE
-    const encuesta = await Familias.findByPk(id);
-    
-    if (!encuesta) {
-      await transaction.rollback();
-      console.log(`❌ Encuesta con ID ${id} no encontrada`);
-      return res.status(404).json({
-        status: 'error',
-        message: 'Encuesta no encontrada',
-        code: 'NOT_FOUND'
-      });
-    }
+    console.log(`🗑️ Iniciando eliminación de encuesta: ${encuesta.apellido_familiar}`);
 
-    console.log(`✅ Encuesta encontrada: ${encuesta.apellido_familiar}`);
-
-    // 2. OBTENER ESTADÍSTICAS ANTES DE ELIMINAR
+    // Obtener estadísticas antes de eliminar
     const personas = await sequelize.query(`
       SELECT COUNT(*) as total FROM personas WHERE id_familia_familias = :familiaId
     `, {
@@ -1726,7 +1760,6 @@ export const eliminarEncuesta = async (req, res) => {
     });
 
     const totalPersonas = parseInt(personas[0].total) || 0;
-
     const estadisticasEliminacion = {
       familia_id: id,
       apellido_familiar: encuesta.apellido_familiar,
@@ -1734,68 +1767,23 @@ export const eliminarEncuesta = async (req, res) => {
       fecha_eliminacion: new Date().toISOString()
     };
 
-    console.log(`📊 Estadísticas de eliminación:`, estadisticasEliminacion);
+    console.log(`📊 Eliminando: ${totalPersonas} personas`);
 
-    // 3. ELIMINAR REGISTROS RELACIONADOS EN ORDEN CORRECTO
-    console.log('🔄 Eliminando registros relacionados...');
-
-    // 3.1 Eliminar personas de la familia
+    // Eliminar registros relacionados
     const personasEliminadas = await Persona.destroy({
       where: { id_familia_familias: id },
       transaction
     });
-    console.log(`  👥 Personas eliminadas: ${personasEliminadas}`);
 
-    // 3.2 Eliminar registros de disposición de basuras
-    const disposicionEliminada = await sequelize.query(
-      'DELETE FROM familia_disposicion_basura WHERE id_familia = $1',
-      {
-        bind: [id],
-        transaction
-      }
-    );
-    console.log(`  🗑️ Registros de disposición de basura eliminados`);
+    // Eliminar registros de servicios
+    await Promise.all([
+      sequelize.query('DELETE FROM familia_disposicion_basura WHERE id_familia = $1', { bind: [id], transaction }),
+      sequelize.query('DELETE FROM familia_sistema_acueducto WHERE id_familia = $1', { bind: [id], transaction }),
+      sequelize.query('DELETE FROM familia_sistema_aguas_residuales WHERE id_familia = $1', { bind: [id], transaction }).catch(() => {}),
+      sequelize.query('DELETE FROM familia_tipo_vivienda WHERE id_familia = $1', { bind: [id], transaction }).catch(() => {})
+    ]);
 
-    // 3.3 Eliminar registros de sistema de acueducto
-    const acueductoEliminado = await sequelize.query(
-      'DELETE FROM familia_sistema_acueducto WHERE id_familia = $1',
-      {
-        bind: [id],
-        transaction
-      }
-    );
-    console.log(`  💧 Registros de sistema de acueducto eliminados`);
-
-    // 3.4 Eliminar registros de sistema de aguas residuales (si existen)
-    try {
-      await sequelize.query(
-        'DELETE FROM familia_sistema_aguas_residuales WHERE id_familia = $1',
-        {
-          bind: [id],
-          transaction
-        }
-      );
-      console.log(`  🌊 Registros de aguas residuales eliminados`);
-    } catch (error) {
-      console.log(`  ⚠️ No hay registros de aguas residuales o tabla no existe`);
-    }
-
-    // 3.5 Eliminar registros de tipo de vivienda (si existen)
-    try {
-      await sequelize.query(
-        'DELETE FROM familia_tipo_vivienda WHERE id_familia = $1',
-        {
-          bind: [id],
-          transaction
-        }
-      );
-      console.log(`  🏠 Registros de tipo de vivienda eliminados`);
-    } catch (error) {
-      console.log(`  ⚠️ No hay registros de tipo de vivienda o tabla no existe`);
-    }
-
-    // 4. ELIMINAR EL REGISTRO PRINCIPAL DE LA FAMILIA
-    console.log('🏠 Eliminando registro principal de familia...');
+    // Eliminar familia principal
     const familiaEliminada = await Familias.destroy({
       where: { id_familia: id },
       transaction
@@ -1803,7 +1791,6 @@ export const eliminarEncuesta = async (req, res) => {
 
     if (familiaEliminada === 0) {
       await transaction.rollback();
-      console.log(`❌ No se pudo eliminar la familia con ID ${id}`);
       return res.status(500).json({
         status: 'error',
         message: 'No se pudo eliminar la encuesta',
@@ -1811,11 +1798,9 @@ export const eliminarEncuesta = async (req, res) => {
       });
     }
 
-    // 5. CONFIRMAR TRANSACCIÓN
     await transaction.commit();
     console.log('✅ Eliminación completada exitosamente');
 
-    // 6. RESPUESTA EXITOSA
     res.status(200).json({
       status: 'success',
       message: `Encuesta de la familia ${estadisticasEliminacion.apellido_familiar} eliminada exitosamente`,
@@ -1839,7 +1824,6 @@ export const eliminarEncuesta = async (req, res) => {
     });
 
   } catch (error) {
-    // ROLLBACK EN CASO DE ERROR
     await transaction.rollback();
     console.error('❌ Error eliminando encuesta:', error);
 
@@ -1854,89 +1838,16 @@ export const eliminarEncuesta = async (req, res) => {
 
 /**
  * PATCH - Actualizar campos específicos de una encuesta
- * Permite actualizar uno o varios campos de la familia sin afectar el resto
  */
 export const actualizarCamposEncuesta = async (req, res) => {
   const transaction = await sequelize.transaction();
   
   try {
     const { id } = req.params;
-    const camposActualizar = req.body;
+    const camposValidos = req.camposValidos; // Viene del middleware
 
     console.log(`🔄 Actualizando campos específicos de encuesta ID: ${id}`);
-    console.log('📝 Campos a actualizar:', Object.keys(camposActualizar));
-
-    // Validar que el ID sea válido
-    if (!id || isNaN(id)) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'ID de encuesta inválido',
-        code: 'INVALID_ID'
-      });
-    }
-
-    // Verificar que la familia existe
-    const familiaExistente = await sequelize.query(
-      'SELECT id_familia, apellido_familiar FROM familias WHERE id_familia = :id',
-      {
-        replacements: { id },
-        type: QueryTypes.SELECT,
-        transaction
-      }
-    );
-
-    if (!familiaExistente || familiaExistente.length === 0) {
-      await transaction.rollback();
-      return res.status(404).json({
-        status: 'error',
-        message: 'Encuesta no encontrada',
-        code: 'ENCUESTA_NOT_FOUND'
-      });
-    }
-
-    // Campos permitidos para actualizar en la tabla familias
-    const camposPermitidos = [
-      'apellido_familiar',
-      'sector', 
-      'direccion_familia',
-      'numero_contacto',
-      'telefono',
-      'email',
-      'tamaño_familia',
-      'tipo_vivienda',
-      'estado_encuesta',
-      'tutor_responsable', // Este es boolean
-      'comunionEnCasa'
-    ];
-
-    // Filtrar solo campos permitidos
-    const camposValidos = {};
-    Object.keys(camposActualizar).forEach(campo => {
-      if (camposPermitidos.includes(campo)) {
-        let valor = camposActualizar[campo];
-        
-        // Conversión especial para campos boolean
-        if (campo === 'tutor_responsable') {
-          if (typeof valor === 'string') {
-            valor = valor.trim() !== '' && valor.toLowerCase() !== 'false';
-          } else {
-            valor = valor || false;
-          }
-        }
-        
-        camposValidos[campo] = valor;
-      }
-    });
-
-    if (Object.keys(camposValidos).length === 0) {
-      await transaction.rollback();
-      return res.status(400).json({
-        status: 'error',
-        message: 'No se proporcionaron campos válidos para actualizar',
-        code: 'NO_VALID_FIELDS',
-        campos_permitidos: camposPermitidos
-      });
-    }
+    console.log('📝 Campos a actualizar:', Object.keys(camposValidos));
 
     // Construir query dinámico de actualización
     const setClauses = Object.keys(camposValidos).map(campo => `"${campo}" = :${campo}`);
@@ -1956,19 +1867,10 @@ export const actualizarCamposEncuesta = async (req, res) => {
     // Obtener los datos actualizados
     const familiaActualizada = await sequelize.query(
       `SELECT 
-        id_familia,
-        apellido_familiar,
-        sector,
-        direccion_familia,
-        numero_contacto,
-        telefono,
-        email,
-        "tamaño_familia",
-        tipo_vivienda,
-        estado_encuesta,
-        tutor_responsable,
-        "comunionEnCasa",
-        fecha_ultima_encuesta
+        id_familia, apellido_familiar, sector, direccion_familia,
+        numero_contacto, telefono, email, "tamaño_familia",
+        tipo_vivienda, estado_encuesta, tutor_responsable,
+        "comunionEnCasa", fecha_ultima_encuesta
       FROM familias 
       WHERE id_familia = :id`,
       {
@@ -1979,7 +1881,6 @@ export const actualizarCamposEncuesta = async (req, res) => {
     );
 
     await transaction.commit();
-
     console.log('✅ Campos actualizados exitosamente');
 
     res.status(200).json({
@@ -2009,7 +1910,6 @@ export const actualizarCamposEncuesta = async (req, res) => {
 
 /**
  * PUT - Actualizar encuesta completa
- * Reemplaza todos los datos de la familia con los nuevos datos proporcionados
  */
 export const actualizarEncuestaCompleta = async (req, res) => {
   const transaction = await sequelize.transaction();
@@ -2019,64 +1919,14 @@ export const actualizarEncuestaCompleta = async (req, res) => {
     const datosCompletos = req.body;
 
     console.log(`🔄 Actualizando encuesta completa ID: ${id}`);
-    console.log('📝 Datos recibidos:', JSON.stringify(datosCompletos, null, 2));
-
-    // Validar que el ID sea válido
-    if (!id || isNaN(id)) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'ID de encuesta inválido',
-        code: 'INVALID_ID'
-      });
-    }
-
-    // Verificar que la familia existe
-    const familiaExistente = await sequelize.query(
-      'SELECT id_familia, apellido_familiar FROM familias WHERE id_familia = :id',
-      {
-        replacements: { id },
-        type: QueryTypes.SELECT,
-        transaction
-      }
-    );
-
-    if (!familiaExistente || familiaExistente.length === 0) {
-      await transaction.rollback();
-      return res.status(404).json({
-        status: 'error',
-        message: 'Encuesta no encontrada',
-        code: 'ENCUESTA_NOT_FOUND'
-      });
-    }
-
-    // Validaciones requeridas para actualización completa
-    const camposRequeridos = ['apellido_familiar', 'sector', 'direccion_familia'];
-    const camposFaltantes = camposRequeridos.filter(campo => !datosCompletos[campo]);
-
-    if (camposFaltantes.length > 0) {
-      await transaction.rollback();
-      return res.status(400).json({
-        status: 'error',
-        message: 'Faltan campos requeridos para actualización completa',
-        code: 'MISSING_REQUIRED_FIELDS',
-        campos_faltantes: camposFaltantes
-      });
-    }
 
     // Actualizar todos los campos de la familia
     const updateQuery = `
       UPDATE familias SET
-        apellido_familiar = $1,
-        sector = $2,
-        direccion_familia = $3,
-        numero_contacto = $4,
-        telefono = $5,
-        email = $6,
-        "tamaño_familia" = $7,
-        tipo_vivienda = $8,
-        estado_encuesta = $9,
-        "comunionEnCasa" = $10,
-        tutor_responsable = $11,
+        apellido_familiar = $1, sector = $2, direccion_familia = $3,
+        numero_contacto = $4, telefono = $5, email = $6,
+        "tamaño_familia" = $7, tipo_vivienda = $8, estado_encuesta = $9,
+        "comunionEnCasa" = $10, tutor_responsable = $11,
         fecha_ultima_encuesta = NOW()
       WHERE id_familia = $12
     `;
@@ -2093,7 +1943,6 @@ export const actualizarEncuestaCompleta = async (req, res) => {
         datosCompletos.tipo_vivienda || 'Casa',
         datosCompletos.estado_encuesta || 'pendiente',
         datosCompletos.comunionEnCasa || false,
-        // Convertir tutor_responsable a boolean - si viene como string, convertir a true/false
         typeof datosCompletos.tutor_responsable === 'string' ? 
           datosCompletos.tutor_responsable.trim() !== '' && datosCompletos.tutor_responsable.toLowerCase() !== 'false' : 
           (datosCompletos.tutor_responsable || false),
@@ -2103,24 +1952,13 @@ export const actualizarEncuestaCompleta = async (req, res) => {
       transaction
     });
 
-    console.log('✅ UPDATE ejecutado correctamente');
-
     // Obtener los datos actualizados
     const familiaActualizada = await sequelize.query(
       `SELECT 
-        id_familia,
-        apellido_familiar,
-        sector,
-        direccion_familia,
-        numero_contacto,
-        telefono,
-        email,
-        "tamaño_familia",
-        tipo_vivienda,
-        estado_encuesta,
-        tutor_responsable,
-        "comunionEnCasa",
-        fecha_ultima_encuesta
+        id_familia, apellido_familiar, sector, direccion_familia,
+        numero_contacto, telefono, email, "tamaño_familia",
+        tipo_vivienda, estado_encuesta, tutor_responsable,
+        "comunionEnCasa", fecha_ultima_encuesta
       FROM familias 
       WHERE id_familia = :id`,
       {
@@ -2131,7 +1969,6 @@ export const actualizarEncuestaCompleta = async (req, res) => {
     );
 
     await transaction.commit();
-
     console.log('✅ Encuesta completa actualizada exitosamente');
 
     res.status(200).json({

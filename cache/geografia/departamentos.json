@@ -1,0 +1,167 @@
+[
+  {
+    "id_departamento": 1,
+    "nombre": "Amazonas",
+    "codigo_dane": "91"
+  },
+  {
+    "id_departamento": 2,
+    "nombre": "Antioquia",
+    "codigo_dane": "05"
+  },
+  {
+    "id_departamento": 3,
+    "nombre": "Arauca",
+    "codigo_dane": "81"
+  },
+  {
+    "id_departamento": 4,
+    "nombre": "Atlántico",
+    "codigo_dane": "08"
+  },
+  {
+    "id_departamento": 5,
+    "nombre": "Bogotá",
+    "codigo_dane": "11"
+  },
+  {
+    "id_departamento": 6,
+    "nombre": "Bolívar",
+    "codigo_dane": "13"
+  },
+  {
+    "id_departamento": 7,
+    "nombre": "Boyacá",
+    "codigo_dane": "15"
+  },
+  {
+    "id_departamento": 8,
+    "nombre": "Caldas",
+    "codigo_dane": "17"
+  },
+  {
+    "id_departamento": 9,
+    "nombre": "Caquetá",
+    "codigo_dane": "18"
+  },
+  {
+    "id_departamento": 10,
+    "nombre": "Casanare",
+    "codigo_dane": "85"
+  },
+  {
+    "id_departamento": 11,
+    "nombre": "Cauca",
+    "codigo_dane": "19"
+  },
+  {
+    "id_departamento": 12,
+    "nombre": "Cesar",
+    "codigo_dane": "20"
+  },
+  {
+    "id_departamento": 13,
+    "nombre": "Chocó",
+    "codigo_dane": "27"
+  },
+  {
+    "id_departamento": 14,
+    "nombre": "Córdoba",
+    "codigo_dane": "23"
+  },
+  {
+    "id_departamento": 15,
+    "nombre": "Cundinamarca",
+    "codigo_dane": "25"
+  },
+  {
+    "id_departamento": 16,
+    "nombre": "Guainía",
+    "codigo_dane": "94"
+  },
+  {
+    "id_departamento": 17,
+    "nombre": "Guaviare",
+    "codigo_dane": "95"
+  },
+  {
+    "id_departamento": 18,
+    "nombre": "Huila",
+    "codigo_dane": "41"
+  },
+  {
+    "id_departamento": 19,
+    "nombre": "La Guajira",
+    "codigo_dane": "44"
+  },
+  {
+    "id_departamento": 20,
+    "nombre": "Magdalena",
+    "codigo_dane": "47"
+  },
+  {
+    "id_departamento": 21,
+    "nombre": "Meta",
+    "codigo_dane": "50"
+  },
+  {
+    "id_departamento": 22,
+    "nombre": "Nariño",
+    "codigo_dane": "52"
+  },
+  {
+    "id_departamento": 23,
+    "nombre": "Norte de Santander",
+    "codigo_dane": "54"
+  },
+  {
+    "id_departamento": 24,
+    "nombre": "Putumayo",
+    "codigo_dane": "86"
+  },
+  {
+    "id_departamento": 25,
+    "nombre": "Quindío",
+    "codigo_dane": "63"
+  },
+  {
+    "id_departamento": 26,
+    "nombre": "Risaralda",
+    "codigo_dane": "66"
+  },
+  {
+    "id_departamento": 27,
+    "nombre": "San Andrés y Providencia",
+    "codigo_dane": "88"
+  },
+  {
+    "id_departamento": 28,
+    "nombre": "Santander",
+    "codigo_dane": "68"
+  },
+  {
+    "id_departamento": 29,
+    "nombre": "Sucre",
+    "codigo_dane": "70"
+  },
+  {
+    "id_departamento": 30,
+    "nombre": "Tolima",
+    "codigo_dane": "73"
+  },
+  {
+    "id_departamento": 31,
+    "nombre": "Valle del Cauca",
+    "codigo_dane": "76"
+  },
+  {
+    "id_departamento": 32,
+    "nombre": "Vaupés",
+    "codigo_dane": "97"
+  },
+  {
+    "id_departamento": 33,
+    "nombre": "Vichada",
+    "codigo_dane": "99"
+  }
+]

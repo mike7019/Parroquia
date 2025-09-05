@@ -203,12 +203,12 @@ app.get('/api/ip-test', (req, res) => {
 });
 
 // API Routes
+app.use('/api/encuesta', encuestaRoutes); // Rutas de encuestas corregidas
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/catalog', catalogRoutes);
 app.use('/api/parentescos', parentescoRoutes); // Direct access for compatibility
 app.use('/api/situaciones-civiles', situacionCivilRoutes); // Direct access for compatibility
-app.use('/api', encuestaRoutes); // Rutas de encuestas
 app.use('/api/difuntos', difuntosRoutes); // Rutas de difuntos
 app.use('/api/consultas', familiasConsultasRoutes); // Rutas de consultas de familias
 app.use('/api/reportes', reporteRoutes); // Rutas de reportes Excel y PDF

@@ -1,0 +1,99 @@
+{
+  "informacionGeneral": {
+    "municipio": {
+      "id": 2,
+      "nombre": "MEDELLÍN"
+    },
+    "parroquia": {
+      "id": 1,
+      "nombre": "San José"
+    },
+    "sector": {
+      "nombre": "Centro Test"
+    },
+    "vereda": {
+      "id": 1,
+      "nombre": "La Macarena"
+    },
+    "fecha": "2025-09-04",
+    "apellido_familiar": "Familia Test Corregida MCP",
+    "direccion": "Carrera Test 123 # 45-67",
+    "telefono": "3001234567",
+    "numero_contrato_epm": "EPM1725481006",
+    "comunionEnCasa": false
+  },
+  "vivienda": {
+    "tipo_vivienda": {
+      "id": 1,
+      "nombre": "Casa"
+    },
+    "disposicion_basuras": {
+      "recolector": true,
+      "quemada": false,
+      "enterrada": false,
+      "recicla": true,
+      "aire_libre": false,
+      "no_aplica": false
+    }
+  },
+  "servicios_agua": {
+    "sistema_acueducto": {
+      "id": 1,
+      "nombre": "Acueducto Público"
+    },
+    "aguas_residuales": {
+      "id": 1,
+      "nombre": "Alcantarillado"
+    },
+    "pozo_septico": false,
+    "letrina": false,
+    "campo_abierto": false
+  },
+  "observaciones": {
+    "sustento_familia": "Trabajo de prueba automatizada",
+    "observaciones_encuestador": "Encuesta generada para validar estructura de BD con datos MCP",
+    "autorizacion_datos": true
+  },
+  "familyMembers": [
+    {
+      "nombres": "Carlos Test MCP",
+      "numeroIdentificacion": "TESTMCP1725481006",
+      "fechaNacimiento": "1990-01-01",
+      "sexo": {
+        "id": 1,
+        "nombre": "Masculino"
+      },
+      "telefono": "3201234567",
+      "estudio": {
+        "nombre": "Técnico en Sistemas"
+      },
+      "talla_camisa/blusa": "M",
+      "talla_pantalon": "30",
+      "talla_zapato": "40",
+      "motivoFechaCelebrar": {
+        "motivo": "Cumpleaños",
+        "dia": "01",
+        "mes": "01"
+      }
+    }
+  ],
+  "deceasedMembers": [],
+  "metadata": {
+    "timestamp": "2025-09-04T20:36:46.009Z",
+    "completed": true,
+    "currentStage": 6,
+    "observaciones_estructura": [
+      "JSON corregido basado en consulta MCP PostgreSQL",
+      "Usando solo IDs reales existentes en BD",
+      "Campos comentados por falta de datos en catálogos",
+      "Estructura compatible con encuestaController.js",
+      "PROBLEMA CRÍTICO: tipos_identificacion tabla VACÍA",
+      "PROBLEMA CRÍTICO: sexos solo tiene Masculino (ID: 1)",
+      "VERIFICADO: municipios tiene ID 2=MEDELLÍN válido",
+      "VERIFICADO: tipos_vivienda tiene ID 1=Casa válido",
+      "VERIFICADO: sistemas_acueducto tiene ID 1=Acueducto Público válido",
+      "VERIFICADO: tipos_aguas_residuales tiene ID 1=Alcantarillado válido",
+      "VERIFICADO: tipos_disposicion_basura tiene IDs 1-5 válidos"
+    ]
+  }
+}

@@ -35,85 +35,48 @@ const DB_CONFIG = {
 // Datos de catálogos
 const CATALOGOS = {
   departamentos: [
-    { codigo: '05', nombre: 'ANTIOQUIA', activo: true },
-    { codigo: '08', nombre: 'ATLÁNTICO', activo: true },
-    { codigo: '11', nombre: 'BOGOTÁ', activo: true },
-    { codigo: '13', nombre: 'BOLÍVAR', activo: true },
-    { codigo: '15', nombre: 'BOYACÁ', activo: true },
-    { codigo: '17', nombre: 'CALDAS', activo: true },
-    { codigo: '18', nombre: 'CAQUETÁ', activo: true },
-    { codigo: '19', nombre: 'CAUCA', activo: true },
-    { codigo: '20', nombre: 'CESAR', activo: true },
-    { codigo: '23', nombre: 'CÓRDOBA', activo: true },
-    { codigo: '25', nombre: 'CUNDINAMARCA', activo: true },
-    { codigo: '27', nombre: 'CHOCÓ', activo: true },
-    { codigo: '41', nombre: 'HUILA', activo: true },
-    { codigo: '44', nombre: 'LA GUAJIRA', activo: true },
-    { codigo: '47', nombre: 'MAGDALENA', activo: true },
-    { codigo: '50', nombre: 'META', activo: true },
-    { codigo: '52', nombre: 'NARIÑO', activo: true },
-    { codigo: '54', nombre: 'NORTE DE SANTANDER', activo: true },
-    { codigo: '63', nombre: 'QUINDÍO', activo: true },
-    { codigo: '66', nombre: 'RISARALDA', activo: true },
-    { codigo: '68', nombre: 'SANTANDER', activo: true },
-    { codigo: '70', nombre: 'SUCRE', activo: true },
-    { codigo: '73', nombre: 'TOLIMA', activo: true },
-    { codigo: '76', nombre: 'VALLE DEL CAUCA', activo: true },
-    { codigo: '81', nombre: 'ARAUCA', activo: true },
-    { codigo: '85', nombre: 'CASANARE', activo: true },
-    { codigo: '86', nombre: 'PUTUMAYO', activo: true },
-    { codigo: '88', nombre: 'ARCHIPIÉLAGO DE SAN ANDRÉS', activo: true },
-    { codigo: '91', nombre: 'AMAZONAS', activo: true },
-    { codigo: '94', nombre: 'GUAINÍA', activo: true },
-    { codigo: '95', nombre: 'GUAVIARE', activo: true },
-    { codigo: '97', nombre: 'VAUPÉS', activo: true },
-    { codigo: '99', nombre: 'VICHADA', activo: true }
+    { codigo_dane: '05', nombre: 'ANTIOQUIA' },
+    { codigo_dane: '11', nombre: 'BOGOTÁ' },
+    { codigo_dane: '76', nombre: 'VALLE DEL CAUCA' }
   ],
   municipios: [
-    { codigo: '05001', nombre: 'MEDELLÍN', codigo_departamento: '05', activo: true },
-    { codigo: '05002', nombre: 'ABEJORRAL', codigo_departamento: '05', activo: true },
-    { codigo: '05004', nombre: 'ABRIAQUÍ', codigo_departamento: '05', activo: true },
-    { codigo: '05021', nombre: 'ALEJANDRÍA', codigo_departamento: '05', activo: true },
-    { codigo: '05030', nombre: 'AMAGÁ', codigo_departamento: '05', activo: true },
-    { codigo: '05031', nombre: 'AMALFI', codigo_departamento: '05', activo: true },
-    { codigo: '05034', nombre: 'ANDES', codigo_departamento: '05', activo: true },
-    { codigo: '05036', nombre: 'ANGELÓPOLIS', codigo_departamento: '05', activo: true },
-    { codigo: '05038', nombre: 'ANGOSTURA', codigo_departamento: '05', activo: true },
-    { codigo: '05040', nombre: 'ANORÍ', codigo_departamento: '05', activo: true }
+    { codigo_dane: '05001', nombre_municipio: 'MEDELLÍN', id_departamento: 1 },
+    { codigo_dane: '11001', nombre_municipio: 'BOGOTÁ', id_departamento: 2 },
+    { codigo_dane: '76001', nombre_municipio: 'CALI', id_departamento: 3 },
+    { codigo_dane: '05266', nombre_municipio: 'RIONEGRO', id_departamento: 1 }
   ],
   sistemas_acueducto: [
-    { nombre: 'Acueducto Municipal', descripcion: 'Servicio público de acueducto', activo: true },
-    { nombre: 'Pozo Propio', descripcion: 'Pozo de agua individual', activo: true },
-    { nombre: 'Aljibe', descripcion: 'Depósito de agua lluvia', activo: true },
-    { nombre: 'Río/Quebrada', descripcion: 'Captación directa de fuente hídrica', activo: true },
-    { nombre: 'Carro Tanque', descripcion: 'Suministro por vehículo', activo: true },
-    { nombre: 'Otro', descripcion: 'Otro sistema no especificado', activo: true }
+    { nombre: 'Acueducto Municipal', descripcion: 'Servicio público de acueducto' },
+    { nombre: 'Pozo Propio', descripcion: 'Pozo de agua individual' },
+    { nombre: 'Aljibe', descripcion: 'Depósito de agua lluvia' },
+    { nombre: 'Río/Quebrada', descripcion: 'Captación directa de fuente hídrica' },
+    { nombre: 'Carro Tanque', descripcion: 'Suministro por vehículo' },
+    { nombre: 'Otro', descripcion: 'Otro sistema no especificado' }
   ],
   tipos_aguas_residuales: [
-    { nombre: 'Alcantarillado', descripcion: 'Conectado a red de alcantarillado municipal', activo: true },
-    { nombre: 'Pozo Séptico', descripcion: 'Sistema de tratamiento individual', activo: true },
-    { nombre: 'Letrina', descripcion: 'Sistema básico de saneamiento', activo: true },
-    { nombre: 'Campo Abierto', descripcion: 'Sin sistema de tratamiento', activo: true },
-    { nombre: 'Río/Quebrada', descripcion: 'Descarga directa a fuente hídrica', activo: true },
-    { nombre: 'Otro', descripcion: 'Otro sistema no especificado', activo: true }
+    { nombre: 'Alcantarillado', descripcion: 'Conectado a red de alcantarillado municipal' },
+    { nombre: 'Pozo Séptico', descripcion: 'Sistema de tratamiento individual' },
+    { nombre: 'Letrina', descripcion: 'Sistema básico de saneamiento' },
+    { nombre: 'Campo Abierto', descripcion: 'Sin sistema de tratamiento' },
+    { nombre: 'Río/Quebrada', descripcion: 'Descarga directa a fuente hídrica' }
   ],
   tipos_disposicion_basura: [
-    { nombre: 'Recolección Pública', descripcion: 'Servicio municipal de recolección', activo: true },
-    { nombre: 'Quema', descripcion: 'Quema de residuos', activo: true },
-    { nombre: 'Entierro', descripcion: 'Enterrar los residuos', activo: true },
-    { nombre: 'Reciclaje', descripcion: 'Separación y reciclaje', activo: true },
-    { nombre: 'Compostaje', descripcion: 'Compostaje de orgánicos', activo: true },
-    { nombre: 'Botadero', descripcion: 'Disposición en botadero', activo: true },
-    { nombre: 'Separación por Colores', descripcion: 'Separación clasificada por colores', activo: true },
-    { nombre: 'Otro', descripcion: 'Otro método no especificado', activo: true }
+    { nombre: 'Recolección Pública', descripcion: 'Servicio municipal de recolección' },
+    { nombre: 'Quema', descripcion: 'Quema de residuos' },
+    { nombre: 'Entierro', descripcion: 'Enterrar los residuos' },
+    { nombre: 'Reciclaje', descripcion: 'Separación y reciclaje' },
+    { nombre: 'Compostaje', descripcion: 'Compostaje de orgánicos' },
+    { nombre: 'Botadero', descripcion: 'Disposición en botadero' },
+    { nombre: 'Separación por Colores', descripcion: 'Separación clasificada por colores' },
+    { nombre: 'Otro', descripcion: 'Otro método no especificado' }
   ],
   tipos_vivienda: [
-    { nombre: 'Casa', descripcion: 'Vivienda tipo casa', activo: true },
-    { nombre: 'Apartamento', descripcion: 'Vivienda tipo apartamento', activo: true },
-    { nombre: 'Finca', descripcion: 'Vivienda rural tipo finca', activo: true },
-    { nombre: 'Rancho', descripcion: 'Vivienda tipo rancho', activo: true },
-    { nombre: 'Inquilinato', descripcion: 'Vivienda en inquilinato', activo: true },
-    { nombre: 'Otro', descripcion: 'Otro tipo de vivienda', activo: true }
+    { nombre: 'Casa', descripcion: 'Vivienda tipo casa' },
+    { nombre: 'Apartamento', descripcion: 'Vivienda tipo apartamento' },
+    { nombre: 'Finca', descripcion: 'Vivienda rural tipo finca' },
+    { nombre: 'Rancho', descripcion: 'Vivienda tipo rancho' },
+    { nombre: 'Inquilinato', descripcion: 'Vivienda en inquilinato' },
+    { nombre: 'Otro', descripcion: 'Otro tipo de vivienda' }
   ]
 };
 
@@ -152,37 +115,21 @@ async function setupCompleteSystem() {
     console.log('\n📋 PASO 2: Creando estructura de tablas...');
     console.log('─────────────────────────────────────────────────────────');
 
-    // Definir todos los modelos
-    const Departamento = sequelize.define('departamentos', {
-      id_departamento: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
-      codigo: { type: DataTypes.STRING(5), allowNull: false, unique: true },
-      nombre: { type: DataTypes.STRING(100), allowNull: false },
-      activo: { type: DataTypes.BOOLEAN, defaultValue: true }
-    }, { 
-      timestamps: true, 
-      createdAt: 'created_at', 
-      updatedAt: 'updated_at',
-      tableName: 'departamentos'
-    });
-
-    const Municipio = sequelize.define('municipios', {
-      id_municipio: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
-      codigo: { type: DataTypes.STRING(10), allowNull: false, unique: true },
-      nombre: { type: DataTypes.STRING(100), allowNull: false },
-      codigo_departamento: { type: DataTypes.STRING(5), allowNull: false },
-      activo: { type: DataTypes.BOOLEAN, defaultValue: true }
-    }, { 
-      timestamps: true, 
-      createdAt: 'created_at', 
-      updatedAt: 'updated_at',
-      tableName: 'municipios'
-    });
-
-    const SistemaAcueducto = sequelize.define('sistemas_acueducto', {
+    // Importar los modelos reales existentes
+    const { default: modelos } = await import('./src/models/index.js');
+    const { 
+      Departamentos: Departamento, 
+      Municipios: Municipio,
+      TipoAguasResiduales,
+      TipoDisposicionBasura,
+      TipoVivienda
+    } = modelos;
+    
+    // Para modelos que no estén disponibles, usar definiciones temporales
+    const SistemaAcueducto = modelos.SistemaAcueducto || sequelize.define('sistemas_acueducto', {
       id_sistema_acueducto: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
       nombre: { type: DataTypes.STRING(100), allowNull: false },
-      descripcion: { type: DataTypes.STRING(200) },
-      activo: { type: DataTypes.BOOLEAN, defaultValue: true }
+      descripcion: { type: DataTypes.STRING(200) }
     }, { 
       timestamps: true, 
       createdAt: 'created_at', 
@@ -190,41 +137,7 @@ async function setupCompleteSystem() {
       tableName: 'sistemas_acueducto'
     });
 
-    const TipoAguasResiduales = sequelize.define('tipos_aguas_residuales', {
-      id_tipo_aguas_residuales: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
-      nombre: { type: DataTypes.STRING(100), allowNull: false },
-      descripcion: { type: DataTypes.STRING(200) },
-      activo: { type: DataTypes.BOOLEAN, defaultValue: true }
-    }, { 
-      timestamps: true, 
-      createdAt: 'created_at', 
-      updatedAt: 'updated_at',
-      tableName: 'tipos_aguas_residuales'
-    });
-
-    const TipoDisposicionBasura = sequelize.define('tipos_disposicion_basura', {
-      id_tipo_disposicion_basura: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
-      nombre: { type: DataTypes.STRING(100), allowNull: false },
-      descripcion: { type: DataTypes.STRING(200) },
-      activo: { type: DataTypes.BOOLEAN, defaultValue: true }
-    }, { 
-      timestamps: true, 
-      createdAt: 'created_at', 
-      updatedAt: 'updated_at',
-      tableName: 'tipos_disposicion_basura'
-    });
-
-    const TipoVivienda = sequelize.define('tipos_vivienda', {
-      id_tipo_vivienda: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
-      nombre: { type: DataTypes.STRING(100), allowNull: false },
-      descripcion: { type: DataTypes.STRING(200) },
-      activo: { type: DataTypes.BOOLEAN, defaultValue: true }
-    }, { 
-      timestamps: true, 
-      createdAt: 'created_at', 
-      updatedAt: 'updated_at',
-      tableName: 'tipos_vivienda'
-    });
+    // Los modelos de catálogo ya están importados arriba
 
     // Usuarios para autenticación
     const Usuario = sequelize.define('usuarios', {
@@ -303,23 +216,50 @@ async function setupCompleteSystem() {
     // Departamentos
     let existingCount = await Departamento.count();
     if (existingCount === 0) {
+      const departamentosCreados = [];
       for (const dept of CATALOGOS.departamentos) {
-        await Departamento.create(dept);
+        const deptCreado = await Departamento.create(dept);
+        departamentosCreados.push(deptCreado);
       }
       console.log(`✅ Departamentos: ${CATALOGOS.departamentos.length} registros cargados`);
-    } else {
-      console.log(`ℹ️ Departamentos: ${existingCount} registros existentes`);
-    }
-
-    // Municipios
-    existingCount = await Municipio.count();
-    if (existingCount === 0) {
-      for (const mun of CATALOGOS.municipios) {
+      
+      // Municipios - usar los IDs reales de los departamentos creados
+      const municipiosActualizados = [
+        { codigo_dane: '05001', nombre_municipio: 'MEDELLÍN', id_departamento: departamentosCreados[0].id_departamento },
+        { codigo_dane: '11001', nombre_municipio: 'BOGOTÁ', id_departamento: departamentosCreados[1].id_departamento },
+        { codigo_dane: '76001', nombre_municipio: 'CALI', id_departamento: departamentosCreados[2].id_departamento },
+        { codigo_dane: '05266', nombre_municipio: 'RIONEGRO', id_departamento: departamentosCreados[0].id_departamento }
+      ];
+      
+      for (const mun of municipiosActualizados) {
         await Municipio.create(mun);
       }
-      console.log(`✅ Municipios: ${CATALOGOS.municipios.length} registros cargados`);
+      console.log(`✅ Municipios: ${municipiosActualizados.length} registros cargados`);
     } else {
-      console.log(`ℹ️ Municipios: ${existingCount} registros existentes`);
+      console.log(`ℹ️ Departamentos: ${existingCount} registros existentes`);
+      
+      // Cargar municipios si no existen
+      const existingMunicipios = await Municipio.count();
+      if (existingMunicipios === 0) {
+        // Obtener departamentos existentes para los municipios
+        const antioquia = await Departamento.findOne({ where: { codigo_dane: '05' } });
+        const bogota = await Departamento.findOne({ where: { codigo_dane: '11' } });
+        const valle = await Departamento.findOne({ where: { codigo_dane: '76' } });
+        
+        const municipiosActualizados = [
+          { codigo_dane: '05001', nombre_municipio: 'MEDELLÍN', id_departamento: antioquia.id_departamento },
+          { codigo_dane: '11001', nombre_municipio: 'BOGOTÁ', id_departamento: bogota.id_departamento },
+          { codigo_dane: '76001', nombre_municipio: 'CALI', id_departamento: valle.id_departamento },
+          { codigo_dane: '05266', nombre_municipio: 'RIONEGRO', id_departamento: antioquia.id_departamento }
+        ];
+        
+        for (const mun of municipiosActualizados) {
+          await Municipio.create(mun);
+        }
+        console.log(`✅ Municipios: ${municipiosActualizados.length} registros cargados`);
+      } else {
+        console.log(`ℹ️ Municipios: ${existingMunicipios} registros existentes`);
+      }
     }
 
     // Sistemas de acueducto

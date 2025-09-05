@@ -2,6 +2,7 @@ import express from 'express';
 import { crearEncuesta, obtenerEncuestas, obtenerEncuestaPorId, eliminarEncuesta, actualizarCamposEncuesta, actualizarEncuestaCompleta } from '../controllers/encuestaController.js';
 import authMiddleware from '../middlewares/auth.js';
 import { validarEncuesta } from '../validators/encuestaValidator.js';
+import EncuestaValidationMiddleware from '../middlewares/encuestaValidation.js';
 
 const router = express.Router();
 
@@ -9,16 +10,92 @@ const router = express.Router();
  * @swagger
  * tags:
  *   name: Encuestas
- *   description: API para gestión de encuestas familiares completas con información demográfica, vivienda, servicios y miembros de familia
+ *   description: |
+ *     API para gestión de encuestas familiares completas con información demográfica, vivienda, servicios y miembros de familia.
+ *     
+ *     **Nota**: Todas las rutas soportan tanto la forma plural (/encuestas) como singular (/encuesta) para mayor flexibilidad.
+ */
+
+/**
+ * @swagger
+ * /api/encuestas:
+ *   get:
+ *     summary: Obtener todas las encuestas con paginación
+ *     description: |
+ *       Obtiene una lista paginada de todas las encuestas familiares registradas.
+ *       
+ *       **Características:**
+ *       - Paginación automática con límite configurable
+ *       - Filtros opcionales por sector, municipio y apellido familiar
+ *       - Información básica de personas asociadas
+ *       - Ordenado por fecha de última encuesta (más recientes primero)
+ *     tags: [Encuestas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 10
+ *         description: Número de elementos por página
+ *       - in: query
+ *         name: sector
+ *         schema:
+ *           type: string
+ *         description: Filtrar por sector (búsqueda parcial)
+ *       - in: query
+ *         name: municipio
+ *         schema:
+ *           type: string
+ *         description: Filtrar por municipio (búsqueda parcial)
+ *       - in: query
+ *         name: apellido_familiar
+ *         schema:
+ *           type: string
+ *         description: Filtrar por apellido familiar (búsqueda parcial)
+ *     responses:
+ *       200:
+ *         description: Lista de encuestas obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 message:
+ *                   type: string
+ *                   example: "Se encontraron 25 encuestas"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/EncuestaResumen'
+ *                 pagination:
+ *                   $ref: '#/components/schemas/PaginationInfo'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
  * @swagger
  * /api/encuesta:
  *   get:
- *     summary: Obtener todas las encuestas con paginación
+ *     summary: Obtener todas las encuestas con paginación (forma singular)
  *     description: |
- *       Obtiene una lista paginada de todas las encuestas familiares registradas.
+ *       Alias de /api/encuestas - Obtiene una lista paginada de todas las encuestas familiares registradas.
  *       
  *       **Características:**
  *       - Paginación automática con límite configurable
@@ -218,7 +295,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/encuesta/{id}:
+ * /api/encuestas/{id}:
  *   get:
  *     summary: Obtener encuesta por ID
  *     description: |
@@ -393,33 +470,42 @@ const router = express.Router();
  */
 
 // Ruta GET para obtener todas las encuestas
-router.get('/encuesta', 
+router.get('/', 
   authMiddleware.authenticateToken,  // Middleware de autenticación
   obtenerEncuestas
 );
 
 // Ruta GET para obtener encuesta por ID
+router.get('/:id', 
+  authMiddleware.authenticateToken,  // Middleware de autenticación
+  obtenerEncuestaPorId
+);
 router.get('/encuesta/:id', 
   authMiddleware.authenticateToken,  // Middleware de autenticación
   obtenerEncuestaPorId
 );
 
 // Ruta POST para crear encuesta
-router.post('/encuesta', 
+router.post('/', 
   authMiddleware.authenticateToken,  // Middleware de autenticación
-  validarEncuesta,                   // Middleware de validación
+  EncuestaValidationMiddleware.validarEstructuraBasica,  // Validar estructura
+  EncuestaValidationMiddleware.validarIdentificacionesUnicas,  // Validar IDs únicos en familia
+  EncuestaValidationMiddleware.validarMiembrosUnicos,  // Validar miembros únicos en BD
+  EncuestaValidationMiddleware.verificarFamiliaExistente,  // Verificar familia no existe
   crearEncuesta                      // Controlador
 );
 
 // Ruta DELETE para eliminar encuesta por ID
-router.delete('/encuesta/:id', 
+router.delete('/:id', 
   authMiddleware.authenticateToken,  // Middleware de autenticación
+  EncuestaValidationMiddleware.validarIdEncuesta,  // Validar ID
+  EncuestaValidationMiddleware.validarEncuestaExiste,  // Verificar que existe
   eliminarEncuesta                   // Controlador
 );
 
 /**
  * @swagger
- * /api/encuesta/{id}:
+ * /api/encuestas/{id}:
  *   patch:
  *     summary: Actualizar campos específicos de una encuesta
  *     description: |
@@ -726,14 +812,20 @@ router.delete('/encuesta/:id',
  */
 
 // Ruta PATCH para actualizar campos específicos de encuesta
-router.patch('/encuesta/:id', 
+router.patch('/:id', 
   authMiddleware.authenticateToken,  // Middleware de autenticación
+  EncuestaValidationMiddleware.validarIdEncuesta,  // Validar ID
+  EncuestaValidationMiddleware.validarEncuestaExiste,  // Verificar que existe
+  EncuestaValidationMiddleware.validarCamposActualizacion,  // Validar campos permitidos
   actualizarCamposEncuesta          // Controlador
 );
 
 // Ruta PUT para actualizar encuesta completa
-router.put('/encuesta/:id', 
+router.put('/:id', 
   authMiddleware.authenticateToken,  // Middleware de autenticación
+  EncuestaValidationMiddleware.validarIdEncuesta,  // Validar ID
+  EncuestaValidationMiddleware.validarEncuestaExiste,  // Verificar que existe
+  EncuestaValidationMiddleware.validarActualizacionCompleta,  // Validar campos requeridos
   actualizarEncuestaCompleta        // Controlador
 );
 

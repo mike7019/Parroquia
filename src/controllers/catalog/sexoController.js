@@ -7,15 +7,40 @@ class SexoController {
    */
   async createSexo(req, res) {
     try {
-      const { nombre } = req.body;
+      const { nombre, codigo, descripcion } = req.body;
 
+      // Validar campos requeridos
       if (!nombre || nombre.trim() === '') {
         return res.status(400).json(
-          createErrorResponse('Nombre is required', null, 'VALIDATION_ERROR')
+          createErrorResponse('El nombre es requerido', null, 'VALIDATION_ERROR')
         );
       }
 
-      const sexo = await sexoService.createSexo({ nombre: nombre.trim() });
+      if (!codigo || codigo.trim() === '') {
+        return res.status(400).json(
+          createErrorResponse('El código es requerido', null, 'VALIDATION_ERROR')
+        );
+      }
+
+      // Validar que el código sea válido
+      const validCodes = ['M', 'F', 'O'];
+      if (!validCodes.includes(codigo.toUpperCase())) {
+        return res.status(400).json(
+          createErrorResponse(
+            'El código debe ser M (Masculino), F (Femenino) u O (Otro)', 
+            null, 
+            'VALIDATION_ERROR'
+          )
+        );
+      }
+
+      const sexoData = {
+        nombre: nombre.trim(),
+        codigo: codigo.toUpperCase(),
+        descripcion: descripcion ? descripcion.trim() : null
+      };
+
+      const sexo = await sexoService.createSexo(sexoData);
 
       res.status(201).json(
         createSuccessResponse(
@@ -92,7 +117,7 @@ class SexoController {
   async updateSexo(req, res) {
     try {
       const { id } = req.params;
-      const { nombre } = req.body;
+      const { nombre, codigo, descripcion } = req.body;
 
       if (!id || isNaN(parseInt(id))) {
         return res.status(400).json(
@@ -100,13 +125,50 @@ class SexoController {
         );
       }
 
-      if (!nombre || nombre.trim() === '') {
+      // Validar que al menos un campo esté presente
+      if (!nombre && !codigo && !descripcion) {
         return res.status(400).json(
-          createErrorResponse('Nombre is required', null, 'VALIDATION_ERROR')
+          createErrorResponse(
+            'Al menos un campo (nombre, codigo, descripcion) es requerido para actualizar', 
+            null, 
+            'VALIDATION_ERROR'
+          )
         );
       }
 
-      const sexo = await sexoService.updateSexo(parseInt(id), { nombre: nombre.trim() });
+      // Validar código si se proporciona
+      if (codigo !== undefined) {
+        if (!codigo || codigo.trim() === '') {
+          return res.status(400).json(
+            createErrorResponse('El código no puede estar vacío', null, 'VALIDATION_ERROR')
+          );
+        }
+
+        const validCodes = ['M', 'F', 'O'];
+        if (!validCodes.includes(codigo.toUpperCase())) {
+          return res.status(400).json(
+            createErrorResponse(
+              'El código debe ser M (Masculino), F (Femenino) u O (Otro)', 
+              null, 
+              'VALIDATION_ERROR'
+            )
+          );
+        }
+      }
+
+      // Validar nombre si se proporciona
+      if (nombre !== undefined && (!nombre || nombre.trim() === '')) {
+        return res.status(400).json(
+          createErrorResponse('El nombre no puede estar vacío', null, 'VALIDATION_ERROR')
+        );
+      }
+
+      const sexoData = {};
+      if (nombre !== undefined) sexoData.nombre = nombre.trim();
+      if (codigo !== undefined) sexoData.codigo = codigo.toUpperCase();
+      if (descripcion !== undefined) sexoData.descripcion = descripcion ? descripcion.trim() : null;
+
+      const sexo = await sexoService.updateSexo(parseInt(id), sexoData);
 
       res.json(
         createSuccessResponse(
@@ -128,7 +190,7 @@ class SexoController {
       if (error.message.includes('already exists')) {
         return res.status(409).json(
           createErrorResponse(
-            'Sexo with this name already exists',
+            'Sexo with this name or code already exists',
             error.message,
             'DUPLICATE_ERROR'
           )

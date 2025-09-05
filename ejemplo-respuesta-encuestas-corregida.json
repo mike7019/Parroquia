@@ -1,0 +1,132 @@
+{
+  "metadata": {
+    "timestamp": "2025-09-05T02:01:51.164Z",
+    "endpoint": "GET /api/encuesta",
+    "status": 200,
+    "correcciones_aplicadas": [
+      "✅ Separación de fallecidos vs vivos",
+      "✅ Datos geográficos completos con ID",
+      "✅ Estados civiles normalizados",
+      "✅ Servicios básicos estandarizados",
+      "✅ Consultas optimizadas con JOINs"
+    ]
+  },
+  "estructura_respuesta": {
+    "status": "success",
+    "message": "Encuestas obtenidas exitosamente",
+    "data": [
+      {
+        "id_encuesta": "11",
+        "apellido_familiar": "Rodríguez García",
+        "direccion_familia": "Carrera 45 # 23-67",
+        "telefono": "3001234567",
+        "codigo_familia": "FAM_1757022545240_28b18324",
+        "estado_encuesta": "completed",
+        "numero_encuestas": 1,
+        "fecha_ultima_encuesta": "2025-09-04",
+        "tipo_vivienda": null,
+        "tamaño_familia": 2,
+        "sector": {
+          "id": "1",
+          "nombre": "Sector San José"
+        },
+        "municipio": {
+          "id": "3",
+          "nombre": "BOGOTÁ"
+        },
+        "vereda": {
+          "id": "1",
+          "nombre": "El Alamo"
+        },
+        "basuras": [
+          {
+            "id": "1",
+            "nombre": "Recolección Pública"
+          },
+          {
+            "id": "4",
+            "nombre": "Reciclaje"
+          }
+        ],
+        "acueducto": {
+          "id": "1",
+          "nombre": "Acueducto Público"
+        },
+        "aguas_residuales": {
+          "id": "1",
+          "nombre": "Alcantarillado"
+        },
+        "miembros_familia": {
+          "total_miembros": 1,
+          "personas": [
+            {
+              "id": "3",
+              "nombre_completo": "Carlos Andrés Rodríguez García Rodríguez García",
+              "identificacion": {
+                "numero": "12345678",
+                "tipo": {
+                  "id": "1",
+                  "nombre": "Cédula de Ciudadanía",
+                  "codigo": "CC"
+                }
+              },
+              "telefono": "32066666666",
+              "email": "carlos.1757022545252.0@temp.com",
+              "fecha_nacimiento": "1985-03-14",
+              "direccion": "Carrera 45 # 23-67",
+              "estudios": {
+                "id": null,
+                "nombre": "Universitario"
+              },
+              "edad": 40,
+              "sexo": {
+                "id": "1",
+                "descripcion": "Sexo masculino"
+              },
+              "estado_civil": {
+                "id": 1,
+                "nombre": "Soltero(a)"
+              },
+              "tallas": {
+                "camisa": "L",
+                "pantalon": "32",
+                "zapato": "42"
+              }
+            }
+          ]
+        },
+        "personas_fallecidas": {
+          "total_fallecidos": 1,
+          "fallecidos": [
+            {
+              "id": "4",
+              "nombre_completo": "Pedro Antonio Rodríguez Rodríguez García",
+              "identificacion": {
+                "numero": "FALLECIDO_1757022545257_a20d0d9a_0",
+                "tipo": null
+              },
+              "fecha_fallecimiento": "2020-05-15",
+              "era_padre": false,
+              "era_madre": false,
+              "causa_fallecimiento": "Enfermedad cardiovascular",
+              "es_fallecido": true
+            }
+          ]
+        },
+        "metadatos": {
+          "fecha_creacion": "2025-09-04",
+          "estado": "completed",
+          "version": "1.0"
+        }
+      }
+    ],
+    "pagination": {
+      "currentPage": 1,
+      "totalPages": 4,
+      "totalItems": 4,
+      "itemsPerPage": 1,
+      "hasNextPage": true,
+      "hasPrevPage": false
+    }
+  }
+}
