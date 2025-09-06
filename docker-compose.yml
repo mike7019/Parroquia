@@ -24,51 +24,51 @@ services:
       retries: 5
 
   # API Application
-  api:
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    container_name: parroquia-api
-    restart: unless-stopped
-    environment:
-      # Database connection using .bashrc variables
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: ${DB_NAME:-${POSTGRES_DB:-parroquia_db}}
-      DB_USER: ${DB_USER:-${POSTGRES_USER:-parroquia_user}}
-      DB_PASSWORD: ${DB_PASSWORD:-${POSTGRES_PASSWORD:-securepassword123}}
-      
-      # JWT Secrets from .bashrc
-      JWT_SECRET: ${JWT_SECRET:-default_jwt_secret_change_in_production}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-default_refresh_secret_change_in_production}
-      
-      # Environment
-      NODE_ENV: ${NODE_ENV:-production}
-      PORT: ${PORT:-3000}
-      
-      # SMTP Configuration from .bashrc
-      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
-      SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_USER: ${SMTP_USER:-}
-      SMTP_PASS: ${SMTP_PASS:-}
-      
-      # Other configurations
-      API_URL: ${API_URL:-http://localhost:3000}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
-    ports:
-      - "${PORT:-3000}:${PORT:-3000}"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - parroquia-network
-    volumes:
-      - ./logs:/app/logs
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:${PORT:-3000}/api/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+  # api:
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: parroquia-api
+  #   restart: unless-stopped
+  #   environment:
+  #     # Database connection using .bashrc variables
+  #     DB_HOST: postgres
+  #     DB_PORT: 5432
+  #     DB_NAME: ${DB_NAME:-${POSTGRES_DB:-parroquia_db}}
+  #     DB_USER: ${DB_USER:-${POSTGRES_USER:-parroquia_user}}
+  #     DB_PASSWORD: ${DB_PASSWORD:-${POSTGRES_PASSWORD:-securepassword123}}
+  #     
+  #     # JWT Secrets from .bashrc
+  #     JWT_SECRET: ${JWT_SECRET:-default_jwt_secret_change_in_production}
+  #     JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-default_refresh_secret_change_in_production}
+  #     
+  #     # Environment
+  #     NODE_ENV: ${NODE_ENV:-production}
+  #     PORT: ${PORT:-3000}
+  #     
+  #     # SMTP Configuration from .bashrc
+  #     SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+  #     SMTP_PORT: ${SMTP_PORT:-587}
+  #     SMTP_USER: ${SMTP_USER:-}
+  #     SMTP_PASS: ${SMTP_PASS:-}
+  #     
+  #     # Other configurations
+  #     API_URL: ${API_URL:-http://localhost:3000}
+  #     FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+  #   ports:
+  #     - "${PORT:-3000}:${PORT:-3000}"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   networks:
+  #     - parroquia-network
+  #   volumes:
+  #     - ./logs:/app/logs
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "curl -f http://localhost:${PORT:-3000}/api/health || exit 1"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
 
 volumes:
   postgres_data:
