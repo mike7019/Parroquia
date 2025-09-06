@@ -8,17 +8,17 @@ services:
     restart: unless-stopped
     environment:
       # Using exact variables from your .bashrc
-      POSTGRES_DB: $DB_NAME
-      POSTGRES_USER: $DB_USER
-      POSTGRES_PASSWORD: $DB_PASSWORD
+      POSTGRES_DB: parroquia_db
+      POSTGRES_USER: parroquia_user
+      POSTGRES_PASSWORD: ParroquiaSecure2025
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "${DB_PORT}:5432"
+      - "5432:5432"
     networks:
       - parroquia-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U parroquia_user -d parroquia_db"]
       interval: 10s
       timeout: 5s
       retries: 5
