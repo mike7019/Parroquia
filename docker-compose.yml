@@ -7,18 +7,18 @@ services:
     container_name: parroquia-postgres
     restart: unless-stopped
     environment:
-      # Use variables from .bashrc - fallback to defaults if not set
-      POSTGRES_DB: ${DB_NAME:-${POSTGRES_DB:-parroquia_db}}
-      POSTGRES_USER: ${DB_USER:-${POSTGRES_USER:-parroquia_user}}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-${POSTGRES_PASSWORD:-securepassword123}}
+      # Using exact variables from your .bashrc
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${DB_PORT}:5432"
     networks:
       - parroquia-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-${POSTGRES_USER:-parroquia_user}} -d ${DB_NAME:-${POSTGRES_DB:-parroquia_db}}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -31,32 +31,49 @@ services:
   #   container_name: parroquia-api
   #   restart: unless-stopped
   #   environment:
-  #     # Database connection using .bashrc variables
+  #     # Database connection using your .bashrc variables
   #     DB_HOST: postgres
   #     DB_PORT: 5432
-  #     DB_NAME: ${DB_NAME:-${POSTGRES_DB:-parroquia_db}}
-  #     DB_USER: ${DB_USER:-${POSTGRES_USER:-parroquia_user}}
-  #     DB_PASSWORD: ${DB_PASSWORD:-${POSTGRES_PASSWORD:-securepassword123}}
+  #     DB_NAME: ${DB_NAME}
+  #     DB_USER: ${DB_USER}
+  #     DB_PASSWORD: ${DB_PASSWORD}
   #     
-  #     # JWT Secrets from .bashrc
-  #     JWT_SECRET: ${JWT_SECRET:-default_jwt_secret_change_in_production}
-  #     JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-default_refresh_secret_change_in_production}
+  #     # JWT Secrets from your .bashrc
+  #     JWT_SECRET: ${JWT_SECRET}
+  #     JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+  #     JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+  #     JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN}
   #     
   #     # Environment
-  #     NODE_ENV: ${NODE_ENV:-production}
-  #     PORT: ${PORT:-3000}
+  #     NODE_ENV: ${NODE_ENV}
+  #     PORT: ${PORT}
   #     
-  #     # SMTP Configuration from .bashrc
-  #     SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
-  #     SMTP_PORT: ${SMTP_PORT:-587}
-  #     SMTP_USER: ${SMTP_USER:-}
-  #     SMTP_PASS: ${SMTP_PASS:-}
+  #     # Email Configuration from your .bashrc
+  #     EMAIL_HOST: ${EMAIL_HOST}
+  #     EMAIL_PORT: ${EMAIL_PORT}
+  #     EMAIL_USER: ${EMAIL_USER}
+  #     EMAIL_PASS: ${EMAIL_PASS}
+  #     EMAIL_FROM: ${EMAIL_FROM}
+  #     SEND_REAL_EMAILS: ${SEND_REAL_EMAILS}
+  #     SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL}
   #     
-  #     # Other configurations
-  #     API_URL: ${API_URL:-http://localhost:3000}
-  #     FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+  #     # Application Configuration from your .bashrc
+  #     APP_NAME: ${APP_NAME}
+  #     APP_URL: ${APP_URL}
+  #     
+  #     # Security Configuration from your .bashrc
+  #     CORS_ORIGIN: ${CORS_ORIGIN}
+  #     BCRYPT_ROUNDS: ${BCRYPT_ROUNDS}
+  #     
+  #     # Rate Limiting from your .bashrc
+  #     RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS}
+  #     RATE_LIMIT_MAX: ${RATE_LIMIT_MAX}
+  #     RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS}
+  #     
+  #     # Logging
+  #     LOG_LEVEL: ${LOG_LEVEL}
   #   ports:
-  #     - "${PORT:-3000}:${PORT:-3000}"
+  #     - "${PORT}:${PORT}"
   #   depends_on:
   #     postgres:
   #       condition: service_healthy
@@ -65,7 +82,7 @@ services:
   #   volumes:
   #     - ./logs:/app/logs
   #   healthcheck:
-  #     test: ["CMD-SHELL", "curl -f http://localhost:${PORT:-3000}/api/health || exit 1"]
+  #     test: ["CMD-SHELL", "curl -f http://localhost:${PORT}/api/health || exit 1"]
   #     interval: 30s
   #     timeout: 10s
   #     retries: 3
