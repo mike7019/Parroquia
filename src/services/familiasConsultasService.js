@@ -361,4 +361,4 @@ class FamiliasConsultasService {
   }
 }
 
-export default FamiliasConsultasService;
+export default new FamiliasConsultasService();
