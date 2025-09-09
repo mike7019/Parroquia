@@ -59,7 +59,11 @@ const swaggerConfig = {
       },
       {
         url: 'http://206.62.139.100:3000',
-        description: '🌐 Servidor de Producción'
+        description: '🌐 Servidor de Desarrollo'
+      },
+      {
+        url: 'http://206.62.139.100:3001',
+        description: '🌐 Servidor de Pruebas'
       }
     ],
     components: {
