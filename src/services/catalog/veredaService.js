@@ -1,9 +1,8 @@
-// import { Veredas } from '../../models/index.js'; // TEMPORALMENTE DESACTIVADO
-import sequelize from '../../../config/sequelize.js';
+import { Veredas, Municipios, Familias, sequelize } from '../../models/index.js';
 import { Op } from 'sequelize';
 
-// Obtener el modelo Veredas desde Sequelize una vez que se cargue
-const getVeredasModel = () => sequelize.models.Veredas;
+// Usar el modelo importado directamente
+const getVeredasModel = () => Veredas;
 
 class VeredaService {
   /**
@@ -65,7 +64,7 @@ class VeredaService {
     try {
       const veredas = await getVeredasModel().findAll({
         include: [{
-          model: sequelize.models.Municipios,
+          model: Municipios,
           as: 'municipio',
           attributes: [
             'id_municipio',
@@ -100,7 +99,7 @@ class VeredaService {
     try {
       const vereda = await getVeredasModel().findByPk(id, {
         include: [{
-          model: sequelize.models.Municipios,
+          model: Municipios,
           as: 'municipio',
           attributes: [
             'id_municipio',
@@ -160,7 +159,7 @@ class VeredaService {
       }
 
       // Check if vereda is being used in familias table
-      const familiaCount = await sequelize.models.Familia?.count({
+      const familiaCount = await Familias?.count({
         where: { id_vereda: id }
       }) || 0;
 
@@ -183,7 +182,7 @@ class VeredaService {
       const veredas = await getVeredasModel().findAll({
         where: { id_municipio_municipios: municipioId },
         include: [{
-          model: sequelize.models.Municipios,
+          model: Municipios,
           as: 'municipio',
           attributes: [
             'id_municipio',
@@ -254,7 +253,7 @@ class VeredaService {
       const veredas = await getVeredasModel().findAll({
         where,
         include: [{
-          model: sequelize.models.Municipios,
+          model: Municipios,
           as: 'municipio',
           attributes: [
             'id_municipio',
