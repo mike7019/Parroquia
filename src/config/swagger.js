@@ -1897,9 +1897,16 @@ const swaggerConfig = {
             parentesco: {
               type: 'object',
               properties: {
-                id: { type: 'string', example: 'PADRE' },
-                nombre: { type: 'string', example: 'Padre' }
-              }
+                id: { 
+                  oneOf: [
+                    { type: 'integer', example: 2, description: 'ID numérico del parentesco (recomendado): 2=Padre, 3=Madre' },
+                    { type: 'string', example: 'PADRE', description: 'String del parentesco (se convierte automáticamente): PADRE, MADRE' }
+                  ],
+                  description: 'ID del parentesco - acepta tanto número (2, 3) como string ("PADRE", "MADRE")'
+                },
+                nombre: { type: 'string', example: 'Padre', description: 'Nombre descriptivo del parentesco' }
+              },
+              description: 'Información del parentesco del difunto. El controlador acepta ambos formatos: id numérico (recomendado) o string que se convierte automáticamente.'
             },
             causaFallecimiento: {
               type: 'string',
@@ -2766,13 +2773,18 @@ const swaggerConfig = {
                       {
                         type: 'object',
                         properties: {
-                          id: { type: 'string', description: 'ID del parentesco', example: 'PADRE' },
+                          id: { 
+                            oneOf: [
+                              { type: 'integer', example: 2, description: 'ID numérico del parentesco (recomendado): 1=Jefe de Hogar, 2=Padre, 3=Madre, etc.' },
+                              { type: 'string', example: 'PADRE', description: 'String del parentesco (se convierte automáticamente)' }
+                            ]
+                          },
                           nombre: { type: 'string', description: 'Nombre del parentesco', example: 'Padre' }
                         }
                       }
                     ],
                     description: 'Parentesco con la familia (string o objeto)',
-                    example: { id: 'PADRE', nombre: 'Padre' }
+                    example: { id: 2, nombre: 'Padre' }
                   },
                   eraPadre: { 
                     type: 'boolean',

@@ -1,0 +1,139 @@
+{
+  "informacionGeneral": {
+    "municipio": {
+      "id": 1,
+      "nombre": "Abejorral"
+    },
+    "parroquia": {
+      "id": 1,
+      "nombre": "San José"
+    },
+    "sector": {
+      "id": 1,
+      "nombre": "Centro"
+    },
+    "vereda": {
+      "id": 1,
+      "nombre": "La Macarena"
+    },
+    "fecha": "2025-09-10",
+    "apellido_familiar": "García López",
+    "direccion": "Carrera 50 # 23-67",
+    "telefono": "3001234567",
+    "numero_contrato_epm": "87654321",
+    "comunionEnCasa": false
+  },
+  "vivienda": {
+    "tipo_vivienda": {
+      "id": 1,
+      "nombre": "Casa"
+    },
+    "disposicion_basuras": {
+      "recolector": true,
+      "quemada": false,
+      "enterrada": false,
+      "recicla": true,
+      "aire_libre": false,
+      "no_aplica": false
+    }
+  },
+  "servicios_agua": {
+    "sistema_acueducto": {
+      "id": 1,
+      "nombre": "Acueducto Público"
+    },
+    "aguas_residuales": {
+      "id": 1,
+      "nombre": "Alcantarillado"
+    },
+    "pozo_septico": false,
+    "letrina": false,
+    "campo_abierto": false
+  },
+  "observaciones": {
+    "sustento_familia": "Trabajo independiente en comercio",
+    "observaciones_encuestador": "Familia muy colaborativa, información completa",
+    "autorizacion_datos": true
+  },
+  "familyMembers": [
+    {
+      "nombres": "Ana María García López",
+      "numeroIdentificacion": "43123456",
+      "tipoIdentificacion": {
+        "id": 1,
+        "nombre": "Cédula de Ciudadanía"
+      },
+      "fechaNacimiento": "1988-08-20",
+      "sexo": {
+        "id": 2,
+        "nombre": "Femenino"
+      },
+      "telefono": "32011111111",
+      "situacionCivil": {
+        "id": 1,
+        "nombre": "Casado Civil"
+      },
+      "estudio": {
+        "id": 1,
+        "nombre": "Universitario"
+      },
+      "parentesco": {
+        "id": 1,
+        "nombre": "Jefe de Hogar"
+      },
+      "comunidadCultural": {
+        "id": 1,
+        "nombre": "Ninguna"
+      },
+      "enfermedad": {
+        "id": 1,
+        "nombre": "Ninguna"
+      },
+      "talla_camisa/blusa": "M",
+      "talla_pantalon": "28",
+      "talla_zapato": "37",
+      "profesion": {
+        "id": 1,
+        "nombre": "Comerciante"
+      },
+      "motivoFechaCelebrar": {
+        "motivo": "Cumpleaños",
+        "dia": "20",
+        "mes": "08"
+      }
+    }
+  ],
+  "deceasedMembers": [
+    {
+      "nombres": "José Antonio García Ruiz",
+      "fechaFallecimiento": "2019-12-03",
+      "sexo": {
+        "id": 1,
+        "nombre": "Masculino"
+      },
+      "parentesco": {
+        "id": 2,
+        "nombre": "Padre"
+      },
+      "causaFallecimiento": "Enfermedad respiratoria"
+    },
+    {
+      "nombres": "Elena Ruiz de García",
+      "fechaFallecimiento": "2021-06-15",
+      "sexo": {
+        "id": 2,
+        "nombre": "Femenino"
+      },
+      "parentesco": {
+        "id": 3,
+        "nombre": "Madre"
+      },
+      "causaFallecimiento": "Enfermedad cardiovascular"
+    }
+  ],
+  "metadata": {
+    "timestamp": "2025-09-10T15:30:00.000Z",
+    "completed": true,
+    "currentStage": 6
+  }
+}

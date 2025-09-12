@@ -243,7 +243,7 @@ const router = express.Router();
  *               - nombres: "Pedro Antonio Rodríguez"
  *                 fechaFallecimiento: "2020-05-15"
  *                 sexo: { id: 1, nombre: "Masculino" }
- *                 parentesco: { id: "PADRE", nombre: "Padre" }
+ *                 parentesco: { id: 2, nombre: "Padre" }
  *                 causaFallecimiento: "Enfermedad cardiovascular"
  *             metadata:
  *               timestamp: "2025-08-25T10:30:00.000Z"

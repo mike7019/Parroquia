@@ -33,6 +33,9 @@ const router = express.Router();
  *         municipio:
  *           type: string
  *           description: Municipio de residencia
+ *         parroquia:
+ *           type: string
+ *           description: Parroquia de residencia
  *         años_fallecido:
  *           type: integer
  *           description: Años transcurridos desde el fallecimiento
@@ -76,12 +79,6 @@ const router = express.Router();
  *           enum: [Madre, Padre]
  *         description: Filtrar por parentesco (Madre o Padre)
  *       - in: query
- *         name: fecha_aniversario
- *         schema:
- *           type: string
- *           format: date
- *         description: Fecha específica de aniversario (YYYY-MM-DD)
- *       - in: query
  *         name: fecha_inicio
  *         schema:
  *           type: string
@@ -94,13 +91,6 @@ const router = express.Router();
  *           format: date
  *         description: Fecha fin del rango de búsqueda
  *       - in: query
- *         name: mes_aniversario
- *         schema:
- *           type: integer
- *           minimum: 1
- *           maximum: 12
- *         description: Mes del aniversario (1-12)
- *       - in: query
  *         name: sector
  *         schema:
  *           type: string
@@ -111,11 +101,10 @@ const router = express.Router();
  *           type: string
  *         description: Filtrar por municipio
  *       - in: query
- *         name: limite
+ *         name: parroquia
  *         schema:
- *           type: integer
- *           default: 100
- *         description: Límite de resultados
+ *           type: string
+ *         description: Filtrar por parroquia
  *     responses:
  *       200:
  *         description: Consulta exitosa

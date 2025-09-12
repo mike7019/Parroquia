@@ -34,7 +34,7 @@ export const REPORTE_CONFIG = {
 
   // Configuración para reportes PDF
   pdf: {
-    maxFilas: 1000,               // Límite para PDFs (más restrictivo por performance)
+    maxFilas: 5000,               // ✅ MEJORA: Límite aumentado de 1K a 5K filas
     paginacion: 50,               // Filas por página
     calidad: 'alta',              // Calidad del output
     margenes: {                   // Márgenes estándar en puntos
@@ -57,11 +57,12 @@ export const REPORTE_CONFIG = {
     }
   },
 
-  // Configuración de cache
+  // Configuración de cache mejorada
   cache: {
     enabled: true,                // Cache de reportes frecuentes
     ttl: 300,                    // 5 minutos de vida útil
-    maxSize: 100                 // Máximo 100 reportes en cache
+    maxSize: 100,                // Máximo 100 reportes en cache
+    maxMemoryMB: 500             // ✅ NUEVO: Límite de memoria en MB
   },
 
   // Metadatos por defecto

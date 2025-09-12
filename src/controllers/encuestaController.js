@@ -1,9 +1,21 @@
 import sequelize from '../../config/sequelize.js';
 import { QueryTypes } from 'sequelize';
 import { Familias, Municipios, Parroquia, Sector, Veredas, Sexo, TipoIdentificacion, Persona } from '../models/index.js';
+import DifuntosFamilia from '../models/catalog/DifuntosFamilia.js';
 import crypto from 'crypto';
 import FamiliasConsultasService from '../services/familiasConsultasService.js';
 import { generarIdentificacionUnica } from '../middlewares/encuestaValidation.js';
+
+/**
+ * Helper function to format complete names properly
+ */
+const formatearNombreCompleto = (primerNombre, segundoNombre, primerApellido, segundoApellido) => {
+  const partes = [primerNombre, segundoNombre, primerApellido, segundoApellido]
+    .filter(parte => parte && parte.trim()) // Solo incluir partes no vacías
+    .map(parte => parte.trim()); // Limpiar espacios en blanco
+  
+  return partes.join(' ');
+};
 
 /**
  * Funciones auxiliares para reducir complejidad del controller principal
@@ -186,9 +198,41 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
   
   for (const miembro of familyMembers) {
     try {
-      const nombres = miembro.nombres.trim().split(' ');
-      const primerNombre = nombres[0] || '';
-      const segundoNombre = nombres.slice(1).join(' ') || null;
+      // Separar nombres y apellidos correctamente
+      const nombresCompletos = miembro.nombres.trim().split(' ');
+      let primerNombre = '';
+      let segundoNombre = '';
+      let primerApellido = '';
+      let segundoApellido = '';
+      
+      if (nombresCompletos.length >= 1) {
+        primerNombre = nombresCompletos[0];
+      }
+      if (nombresCompletos.length >= 2) {
+        segundoNombre = nombresCompletos[1];
+      }
+      if (nombresCompletos.length >= 3) {
+        primerApellido = nombresCompletos[2];
+      }
+      if (nombresCompletos.length >= 4) {
+        segundoApellido = nombresCompletos[3];
+      }
+      
+      // Si solo hay 2 palabras, asumir: nombre apellido
+      if (nombresCompletos.length === 2) {
+        primerNombre = nombresCompletos[0];
+        segundoNombre = '';
+        primerApellido = nombresCompletos[1];
+        segundoApellido = '';
+      }
+      
+      // Si hay más de 4 palabras, tomar las últimas 2 como apellidos
+      if (nombresCompletos.length > 4) {
+        primerNombre = nombresCompletos[0];
+        segundoNombre = nombresCompletos.slice(1, -2).join(' '); // Todo el medio como segundo nombre
+        primerApellido = nombresCompletos[nombresCompletos.length - 2];
+        segundoApellido = nombresCompletos[nombresCompletos.length - 1];
+      }
 
       // Mapear IDs de manera simplificada
       const sexoId = mapearSexo(miembro.sexo);
@@ -200,9 +244,9 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
       
       const personaData = {
         primer_nombre: primerNombre,
-        segundo_nombre: segundoNombre,
-        primer_apellido: informacionGeneral.apellido_familiar,
-        segundo_apellido: null,
+        segundo_nombre: segundoNombre || null,
+        primer_apellido: primerApellido || null,
+        segundo_apellido: segundoApellido || null,
         fecha_nacimiento: fechaNacimiento ? new Date(fechaNacimiento) : new Date('1900-01-01'),
         telefono: miembro.telefono || informacionGeneral.telefono,
         correo_electronico: `${primerNombre.toLowerCase()}.${Date.now()}.${personasCreadas}@temp.com`,
@@ -245,37 +289,102 @@ const procesarMiembrosFallecidos = async (familiaId, deceasedMembers, informacio
   
   for (const fallecido of deceasedMembers) {
     try {
-      const nombres = fallecido.nombres.trim().split(' ');
-      const primerNombre = nombres[0] || '';
-      const segundoNombre = nombres.slice(1).join(' ') || null;
+      // Separar nombres y apellidos correctamente para fallecidos
+      const nombresCompletos = fallecido.nombres.trim().split(' ');
+      let primerNombre = '';
+      let segundoNombre = '';
+      let primerApellido = '';
+      let segundoApellido = '';
+      
+      if (nombresCompletos.length >= 1) {
+        primerNombre = nombresCompletos[0];
+      }
+      if (nombresCompletos.length >= 2) {
+        segundoNombre = nombresCompletos[1];
+      }
+      if (nombresCompletos.length >= 3) {
+        primerApellido = nombresCompletos[2];
+      }
+      if (nombresCompletos.length >= 4) {
+        segundoApellido = nombresCompletos[3];
+      }
+      
+      // Si solo hay 2 palabras, asumir: nombre apellido
+      if (nombresCompletos.length === 2) {
+        primerNombre = nombresCompletos[0];
+        segundoNombre = '';
+        primerApellido = nombresCompletos[1];
+        segundoApellido = '';
+      }
+      
+      // Si hay más de 4 palabras, tomar las últimas 2 como apellidos
+      if (nombresCompletos.length > 4) {
+        primerNombre = nombresCompletos[0];
+        segundoNombre = nombresCompletos.slice(1, -2).join(' '); // Todo el medio como segundo nombre
+        primerApellido = nombresCompletos[nombresCompletos.length - 2];
+        segundoApellido = nombresCompletos[nombresCompletos.length - 1];
+      }
 
       const identificacionUnica = await generarIdentificacionUnica('FALLECIDO');
 
-      const personaFallecidaData = {
-        primer_nombre: primerNombre,
-        segundo_nombre: segundoNombre,
-        primer_apellido: informacionGeneral.apellido_familiar,
-        segundo_apellido: null,
-        fecha_nacimiento: '1900-01-01',
-        telefono: 'N/A',
-        correo_electronico: `fallecido.${Date.now()}.${personasFallecidas}@temp.com`,
-        identificacion: identificacionUnica,
-        direccion: informacionGeneral.direccion,
+      // Determinar parentesco: priorizar nuevo formato con objeto parentesco
+      let parentescoId = null;
+      let eraPadre = false;
+      let eraMadre = false;
+
+      if (fallecido.parentesco && fallecido.parentesco.id) {
+        // Nuevo formato: objeto parentesco con ID numérico
+        if (typeof fallecido.parentesco.id === 'string') {
+          // Si viene como string "PADRE" o "MADRE", convertir a ID numérico
+          if (fallecido.parentesco.id.toUpperCase() === 'PADRE') {
+            parentescoId = 2;
+            eraPadre = true;
+          } else if (fallecido.parentesco.id.toUpperCase() === 'MADRE') {
+            parentescoId = 3;
+            eraMadre = true;
+          } else {
+            // Si es otro tipo de parentesco string, intentar parsear como número
+            parentescoId = parseInt(fallecido.parentesco.id);
+          }
+        } else {
+          // Si ya viene como número
+          parentescoId = parseInt(fallecido.parentesco.id);
+        }
+        
+        // Inferir era_padre/era_madre basado en el nombre del parentesco si no se determinó arriba
+        if (!eraPadre && !eraMadre && fallecido.parentesco.nombre) {
+          const nombreParentesco = fallecido.parentesco.nombre.toLowerCase();
+          eraPadre = nombreParentesco === 'padre';
+          eraMadre = nombreParentesco === 'madre';
+        }
+      } else {
+        // Formato anterior: campos eraPadre/eraMadre boolean
+        eraPadre = fallecido.eraPadre || false;
+        eraMadre = fallecido.eraMadre || false;
+        
+        // Asignar ID de parentesco basado en boolean
+        if (eraPadre) {
+          parentescoId = 2; // ID de "Padre"
+        } else if (eraMadre) {
+          parentescoId = 3; // ID de "Madre"
+        }
+      }
+
+      // ✅ Crear registro SOLO en tabla difuntos_familia (no en personas)
+      const difuntoData = {
+        nombre_completo: fallecido.nombres,
+        fecha_fallecimiento: fallecido.fechaFallecimiento || fallecido.fechaAniversario || '1900-01-01',
+        observaciones: fallecido.causaFallecimiento || null,
         id_familia_familias: familiaId,
-        id_familia: familiaId,
-        id_parroquia: null,
-        estudios: JSON.stringify({
-          es_fallecido: true,
-          fecha_aniversario: fallecido.fechaFallecimiento || fallecido.fechaAniversario || null,
-          era_padre: fallecido.eraPadre || false,
-          era_madre: fallecido.eraMadre || false,
-          causa_fallecimiento: fallecido.causaFallecimiento || null
-        })
+        id_sexo: fallecido.sexo && fallecido.sexo.id ? parseInt(fallecido.sexo.id) : null,
+        id_parentesco: parentescoId,
+        causa_fallecimiento: fallecido.causaFallecimiento || null
       };
 
-      await Persona.create(personaFallecidaData, { transaction });
+      await DifuntosFamilia.create(difuntoData, { transaction });
+      
       personasFallecidas++;
-      console.log(`  ⚰️ Persona fallecida registrada: ${primerNombre}`);
+      console.log(`  ⚰️ Persona fallecida registrada: ${primerNombre} (solo en difuntos_familia)`);
       
     } catch (error) {
       console.error(`  ❌ Error registrando persona fallecida ${fallecido.nombres}:`, error.message);
@@ -440,20 +549,26 @@ export const obtenerEncuestas = async (req, res) => {
           type: QueryTypes.SELECT
         });
 
-        // Obtener personas FALLECIDAS por separado
-        const personasFallecidas = await sequelize.query(`
+        // Obtener difuntos desde la tabla difuntos_familia (en lugar de personas con FALLECIDO%)
+        const difuntos = await sequelize.query(`
           SELECT 
-            p.id_personas,
-            p.primer_nombre,
-            p.segundo_nombre,
-            p.primer_apellido,
-            p.segundo_apellido,
-            p.identificacion,
-            p.estudios,
-            p.fecha_nacimiento
-          FROM personas p
-          WHERE p.id_familia_familias = :familiaId 
-          AND p.identificacion LIKE 'FALLECIDO%'
+            df.id_difunto,
+            df.nombre_completo,
+            '' as primer_nombre,
+            '' as segundo_nombre, 
+            '' as primer_apellido,
+            '' as segundo_apellido,
+            df.id_sexo,
+            df.id_parentesco,
+            s.descripcion as sexo_descripcion,
+            par.nombre as parentesco_nombre,
+            df.fecha_fallecimiento,
+            df.causa_fallecimiento,
+            df.observaciones
+          FROM difuntos_familia df
+          LEFT JOIN sexos s ON df.id_sexo = s.id_sexo
+          LEFT JOIN parentescos par ON df.id_parentesco = par.id_parentesco
+          WHERE df.id_familia_familias = :familiaId
         `, {
           replacements: { familiaId: familiaData.id_familia },
           type: QueryTypes.SELECT
@@ -719,7 +834,7 @@ export const obtenerEncuestas = async (req, res) => {
 
           return {
             id: persona.id_personas,
-            nombre_completo: `${persona.primer_nombre || ''} ${persona.segundo_nombre || ''} ${persona.primer_apellido || ''} ${persona.segundo_apellido || ''}`.trim(),
+            nombre_completo: formatearNombreCompleto(persona.primer_nombre, persona.segundo_nombre, persona.primer_apellido, persona.segundo_apellido),
             identificacion: {
               numero: persona.identificacion,
               tipo: persona.tipo_id_id ? {
@@ -751,28 +866,27 @@ export const obtenerEncuestas = async (req, res) => {
           };
         }));
 
-        // Procesar personas FALLECIDAS por separado
-        const personasFallecidaFormateadas = personasFallecidas.map(fallecido => {
-          let infoFallecido = {};
-          try {
-            // Parsear el JSON del campo estudios para fallecidos
-            infoFallecido = JSON.parse(fallecido.estudios || '{}');
-          } catch (error) {
-            infoFallecido = {};
-          }
-
+        // Procesar difuntos desde la tabla difuntos_familia
+        const difuntosFormateados = difuntos.map(fallecido => {
+          // Los datos ya vienen directamente de la tabla difuntos_familia
           return {
-            id: fallecido.id_personas,
-            nombre_completo: `${fallecido.primer_nombre || ''} ${fallecido.segundo_nombre || ''} ${fallecido.primer_apellido || ''} ${fallecido.segundo_apellido || ''}`.trim(),
-            identificacion: {
-              numero: fallecido.identificacion,
-              tipo: null // Los fallecidos no tienen tipo de identificación válido
+            nombres: fallecido.nombre_completo,
+            fechaFallecimiento: fallecido.fecha_fallecimiento || null,
+            sexo: fallecido.id_sexo ? {
+              id: parseInt(fallecido.id_sexo),
+              nombre: fallecido.sexo_descripcion || null
+            } : {
+              id: null,
+              nombre: null
             },
-            fecha_fallecimiento: infoFallecido.fecha_aniversario || null,
-            era_padre: infoFallecido.era_padre || false,
-            era_madre: infoFallecido.era_madre || false,
-            causa_fallecimiento: infoFallecido.causa_fallecimiento || null,
-            es_fallecido: true
+            parentesco: fallecido.id_parentesco ? {
+              id: parseInt(fallecido.id_parentesco),
+              nombre: fallecido.parentesco_nombre || null
+            } : {
+              id: null,
+              nombre: null
+            },
+            causaFallecimiento: fallecido.causa_fallecimiento || fallecido.observaciones || null
           };
         });
 
@@ -828,11 +942,8 @@ export const obtenerEncuestas = async (req, res) => {
             personas: personasFormateadas
           },
           
-          // NUEVO: Personas fallecidas por separado
-          personas_fallecidas: {
-            total_fallecidos: personasFallecidaFormateadas.length,
-            fallecidos: personasFallecidaFormateadas
-          },
+          // NUEVO: Personas fallecidas en el mismo formato que el request body
+          deceasedMembers: difuntosFormateados,
           
           // Metadatos
           metadatos: {
@@ -972,20 +1083,26 @@ export const obtenerEncuestaPorId = async (req, res) => {
       type: QueryTypes.SELECT
     });
 
-    // Obtener personas FALLECIDAS por separado
-    const personasFallecidas = await sequelize.query(`
+    // Obtener difuntos desde la tabla difuntos_familia (en lugar de personas con FALLECIDO%)
+    const difuntos = await sequelize.query(`
       SELECT 
-        p.id_personas,
-        p.primer_nombre,
-        p.segundo_nombre,
-        p.primer_apellido,
-        p.segundo_apellido,
-        p.identificacion,
-        p.estudios,
-        p.fecha_nacimiento
-      FROM personas p
-      WHERE p.id_familia_familias = :familiaId 
-      AND p.identificacion LIKE 'FALLECIDO%'
+        df.id_difunto,
+        df.nombre_completo,
+        '' as primer_nombre,
+        '' as segundo_nombre, 
+        '' as primer_apellido,
+        '' as segundo_apellido,
+        df.id_sexo,
+        df.id_parentesco,
+        s.descripcion as sexo_descripcion,
+        par.nombre as parentesco_nombre,
+        df.fecha_fallecimiento,
+        df.causa_fallecimiento,
+        df.observaciones
+      FROM difuntos_familia df
+      LEFT JOIN sexos s ON df.id_sexo = s.id_sexo
+      LEFT JOIN parentescos par ON df.id_parentesco = par.id_parentesco
+      WHERE df.id_familia_familias = :familiaId
     `, {
       replacements: { familiaId: familiaData.id_familia },
       type: QueryTypes.SELECT
@@ -1251,7 +1368,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
 
       return {
         id: persona.id_personas,
-        nombre_completo: `${persona.primer_nombre || ''} ${persona.segundo_nombre || ''} ${persona.primer_apellido || ''} ${persona.segundo_apellido || ''}`.trim(),
+        nombre_completo: formatearNombreCompleto(persona.primer_nombre, persona.segundo_nombre, persona.primer_apellido, persona.segundo_apellido),
         identificacion: {
           numero: persona.identificacion,
           tipo: persona.tipo_id_id ? {
@@ -1283,28 +1400,27 @@ export const obtenerEncuestaPorId = async (req, res) => {
       };
     }));
 
-    // Procesar personas FALLECIDAS por separado (misma lógica que obtenerEncuestas)
-    const personasFallecidaFormateadas = personasFallecidas.map(fallecido => {
-      let infoFallecido = {};
-      try {
-        // Parsear el JSON del campo estudios para fallecidos
-        infoFallecido = JSON.parse(fallecido.estudios || '{}');
-      } catch (error) {
-        infoFallecido = {};
-      }
-
+    // Procesar difuntos desde la tabla difuntos_familia (misma lógica que obtenerEncuestas)
+    const difuntosFormateados = difuntos.map(fallecido => {
+      // Los datos ya vienen directamente de la tabla difuntos_familia
       return {
-        id: fallecido.id_personas,
-        nombre_completo: `${fallecido.primer_nombre || ''} ${fallecido.segundo_nombre || ''} ${fallecido.primer_apellido || ''} ${fallecido.segundo_apellido || ''}`.trim(),
-        identificacion: {
-          numero: fallecido.identificacion,
-          tipo: null // Los fallecidos no tienen tipo de identificación válido
+        nombres: fallecido.nombre_completo,
+        fechaFallecimiento: fallecido.fecha_fallecimiento || null,
+        sexo: fallecido.id_sexo ? {
+          id: parseInt(fallecido.id_sexo),
+          nombre: fallecido.sexo_descripcion || null
+        } : {
+          id: null,
+          nombre: null
         },
-        fecha_fallecimiento: infoFallecido.fecha_aniversario || null,
-        era_padre: infoFallecido.era_padre || false,
-        era_madre: infoFallecido.era_madre || false,
-        causa_fallecimiento: infoFallecido.causa_fallecimiento || null,
-        es_fallecido: true
+        parentesco: fallecido.id_parentesco ? {
+          id: parseInt(fallecido.id_parentesco),
+          nombre: fallecido.parentesco_nombre || null
+        } : {
+          id: null,
+          nombre: null
+        },
+        causaFallecimiento: fallecido.causa_fallecimiento || fallecido.observaciones || null
       };
     });
 
@@ -1360,11 +1476,8 @@ export const obtenerEncuestaPorId = async (req, res) => {
         personas: personasFormateadas
       },
       
-      // NUEVO: Personas fallecidas por separado
-      personas_fallecidas: {
-        total_fallecidos: personasFallecidaFormateadas.length,
-        fallecidos: personasFallecidaFormateadas
-      },
+      // NUEVO: Personas fallecidas en el mismo formato que el request body
+      deceasedMembers: difuntosFormateados,
       
       // Metadatos
       metadatos: {
@@ -1769,6 +1882,16 @@ export const eliminarEncuesta = async (req, res) => {
 
     console.log(`📊 Eliminando: ${totalPersonas} personas`);
 
+    // Eliminar registros de difuntos_familia relacionados
+    const difuntosEliminados = await sequelize.query(`
+      DELETE FROM difuntos_familia WHERE id_familia_familias = :familiaId
+    `, {
+      replacements: { familiaId: id },
+      transaction
+    });
+
+    console.log(`🪦 Difuntos eliminados: ${difuntosEliminados[1]} registros`);
+
     // Eliminar registros relacionados
     const personasEliminadas = await Persona.destroy({
       where: { id_familia_familias: id },
@@ -1810,6 +1933,7 @@ export const eliminarEncuesta = async (req, res) => {
         registros_afectados: {
           familia: 1,
           personas: personasEliminadas,
+          difuntos_eliminados: difuntosEliminados[1] || 0,
           disposicion_basuras: true,
           sistema_acueducto: true,
           aguas_residuales: true,

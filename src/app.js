@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import compression from 'compression';
 import https from 'https';
 // Force reload - estudios routes integration test
 import fs from 'fs';
@@ -86,6 +87,28 @@ const corsOptions = {
 
 // CORS configuration - Simplified and clean
 app.use(cors(corsOptions));
+
+// ✅ MEJORA: Compresión HTTP para archivos grandes (reportes)
+app.use(compression({
+  filter: (req, res) => {
+    // No comprimir si el cliente lo desactiva
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    
+    // Comprimir respuestas de reportes y archivos grandes
+    if (req.url.includes('/api/reportes/') || 
+        res.getHeader('content-type')?.includes('application/vnd.openxmlformats') ||
+        res.getHeader('content-type')?.includes('application/pdf')) {
+      return true;
+    }
+    
+    // Usar filtro por defecto para el resto
+    return compression.filter(req, res);
+  },
+  threshold: 1024, // Solo comprimir archivos > 1KB
+  level: 6 // Nivel de compresión balanceado (1-9)
+}));
 
 // Custom middleware to log request IPs
 app.use((req, res, next) => {
@@ -209,13 +232,13 @@ app.use('/api/users', userRoutes);
 app.use('/api/catalog', catalogRoutes);
 app.use('/api/parentescos', parentescoRoutes); // Direct access for compatibility
 app.use('/api/situaciones-civiles', situacionCivilRoutes); // Direct access for compatibility
-app.use('/api/difuntos', difuntosRoutes); // Rutas de difuntos
+app.use('/api/difuntos/legacy', difuntosRoutes); // Rutas originales (compatibilidad)
 app.use('/api/consultas', familiasConsultasRoutes); // Rutas de consultas de familias
 app.use('/api/reportes', reporteRoutes); // Rutas de reportes Excel y PDF
 app.use('/api/debug', debugRoutes); // Rutas de debug (solo desarrollo)
 
 // Consolidated API Routes - High Priority Phase 1
-app.use('/api/difuntos', difuntosConsolidadoRoutes); // Consolidated difuntos routes
+app.use('/api/difuntos', difuntosConsolidadoRoutes); // Consolidated difuntos routes (PRINCIPAL)
 app.use('/api/personas/salud', saludConsolidadoRoutes); // Consolidated health routes  
 app.use('/api/familias', familiasConsolidadoRoutes); // Consolidated families routes
 
@@ -565,12 +588,17 @@ const displayRoutes = () => {
       { method: 'PUT', path: '/api/catalog/comunidades-culturales/:id', group: 'Catalog', protected: true, description: 'Update comunidad cultural' },
       { method: 'DELETE', path: '/api/catalog/comunidades-culturales/:id', group: 'Catalog', protected: true, description: 'Delete comunidad cultural' },
       
-      // Difuntos routes
-      { method: 'GET', path: '/api/difuntos/consultas/madres', group: 'Difuntos', protected: true, description: 'Consultar madres fallecidas' },
-      { method: 'GET', path: '/api/difuntos/consultas/padres', group: 'Difuntos', protected: true, description: 'Consultar padres fallecidos' },
-      { method: 'GET', path: '/api/difuntos/consultas/todos', group: 'Difuntos', protected: true, description: 'Consultar todos los difuntos' },
-      { method: 'GET', path: '/api/difuntos/consultas/rango-fechas', group: 'Difuntos', protected: true, description: 'Consultar difuntos por rango de fechas' },
-      { method: 'GET', path: '/api/difuntos/estadisticas', group: 'Difuntos', protected: true, description: 'Estadísticas de difuntos' },
+      // Difuntos routes (LEGACY - para compatibilidad)
+      { method: 'GET', path: '/api/difuntos/legacy/consultas/madres', group: 'Difuntos Legacy', protected: true, description: 'Consultar madres fallecidas (legacy)' },
+      { method: 'GET', path: '/api/difuntos/legacy/consultas/padres', group: 'Difuntos Legacy', protected: true, description: 'Consultar padres fallecidos (legacy)' },
+      { method: 'GET', path: '/api/difuntos/legacy/consultas/todos', group: 'Difuntos Legacy', protected: true, description: 'Consultar todos los difuntos (legacy)' },
+      { method: 'GET', path: '/api/difuntos/legacy/consultas/rango-fechas', group: 'Difuntos Legacy', protected: true, description: 'Consultar difuntos por rango de fechas (legacy)' },
+      { method: 'GET', path: '/api/difuntos/legacy/estadisticas', group: 'Difuntos Legacy', protected: true, description: 'Estadísticas de difuntos (legacy)' },
+      
+      // Difuntos Consolidado routes (PRINCIPAL)
+      { method: 'GET', path: '/api/difuntos', group: 'Difuntos Consolidado', protected: true, description: 'Consulta consolidada de difuntos' },
+      { method: 'GET', path: '/api/difuntos/aniversarios', group: 'Difuntos Consolidado', protected: true, description: 'Aniversarios próximos' },
+      { method: 'GET', path: '/api/difuntos/estadisticas', group: 'Difuntos Consolidado', protected: true, description: 'Estadísticas consolidadas' },
       
       // Consultas Familias routes
       { method: 'GET', path: '/api/consultas/madres', group: 'Consultas Familias', protected: true, description: 'Consultar madres vivas' },

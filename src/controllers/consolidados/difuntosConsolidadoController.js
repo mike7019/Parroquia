@@ -9,13 +9,11 @@ class DifuntosConsolidadoController {
     try {
       const filtros = {
         parentesco: req.query.parentesco,
-        fecha_aniversario: req.query.fecha_aniversario,
         fecha_inicio: req.query.fecha_inicio,
         fecha_fin: req.query.fecha_fin,
-        mes_aniversario: req.query.mes_aniversario,
         sector: req.query.sector,
         municipio: req.query.municipio,
-        limite: req.query.limite ? parseInt(req.query.limite) : 100
+        parroquia: req.query.parroquia
       };
 
       // Remover filtros undefined

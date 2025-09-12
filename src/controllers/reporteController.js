@@ -6,12 +6,14 @@
 import ReporteService from '../services/reportes/reporteService.js';
 import familiasConsultasService from '../services/familiasConsultasService.js';
 import difuntosService from '../services/difuntosService.js';
+import reporteLogger from '../utils/reporteLogger.js';
 
 class ReporteController {
   constructor() {
     this.reporteService = new ReporteService();
     this.familiasService = familiasConsultasService; // Ya es una instancia
     this.difuntosService = difuntosService; // Ya es una instancia
+    this.logger = reporteLogger;
   }
 
   /**
@@ -19,16 +21,23 @@ class ReporteController {
    * GET /api/reportes/familias/excel
    */
   async generarFamiliasExcel(req, res) {
+    const userId = req.user?.id;
+    const operationId = this.logger.operacionIniciada('familias_excel', userId, {
+      method: req.method,
+      ip: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+
     try {
-      console.log('📊 Solicitud de reporte de familias Excel:', { 
-        method: req.method,
-        query: req.query, 
-        body: req.body 
-      });
-      
       // Extraer filtros de body (POST) o query (GET)
       const filtrosSource = req.method === 'POST' ? req.body.filtros || {} : req.query;
       const filtros = this.extraerFiltrosFamilias(filtrosSource);
+      
+      this.logger.debug('Filtros extraídos', { 
+        operationId, 
+        filtros, 
+        cantidadFiltros: Object.keys(filtros).length 
+      });
       
       // Obtener datos usando el servicio existente
       const resultado = await this.familiasService.consultarFamiliasConPadresMadres(filtros);
@@ -37,6 +46,9 @@ class ReporteController {
       const familias = resultado?.datos || resultado;
       
       if (!familias || !Array.isArray(familias) || familias.length === 0) {
+        this.logger.operacionFallida(operationId, 'familias_excel', userId, 
+          new Error('No data found'), { filtros, resultadoTipo: typeof resultado });
+        
         return res.status(404).json({
           exito: false,
           mensaje: 'No se encontraron familias con los filtros especificados',
@@ -69,10 +81,20 @@ class ReporteController {
       // Enviar archivo
       res.send(reporte.buffer);
       
-      console.log(`✅ Reporte Excel enviado: ${reporte.filename} (${reporte.registros} registros)`);
+      this.logger.operacionCompletada(operationId, 'familias_excel', userId, {
+        filename: reporte.filename,
+        registros: reporte.registros,
+        tamañoKB: Math.round(reporte.size / 1024),
+        filtros: Object.keys(filtros).length
+      });
       
     } catch (error) {
-      console.error('❌ Error en generarFamiliasExcel:', error);
+      this.logger.operacionFallida(operationId, 'familias_excel', userId, error, {
+        method: req.method,
+        hasBody: !!req.body,
+        hasQuery: !!req.query
+      });
+      
       res.status(500).json({
         exito: false,
         mensaje: 'Error interno generando reporte de familias',
@@ -502,13 +524,21 @@ class ReporteController {
   }
 
   /**
-   * Middleware de validación para reportes
+   * Middleware de validación mejorado para reportes
    */
   validarSolicitudReporte(req, res, next) {
+    const userId = req.user?.id;
+    
     try {
       // Validar que no se soliciten demasiados registros
-      const limite = parseInt(req.query.limite);
+      const limite = parseInt(req.query.limite || req.body?.filtros?.limite);
       if (limite && limite > 50000) {
+        this.logger.seguridadEvent('limite_excedido', userId, { 
+          limiteSOlicitado: limite, 
+          limiteMaximo: 50000,
+          ip: req.ip 
+        });
+        
         return res.status(400).json({
           exito: false,
           mensaje: 'El límite de registros no puede exceder 50,000',
@@ -516,27 +546,112 @@ class ReporteController {
         });
       }
       
-      // Validar formato de fechas si se proporcionan
-      if (req.query.fecha_desde && !this.validarFecha(req.query.fecha_desde)) {
-        return res.status(400).json({
-          exito: false,
-          mensaje: 'Formato de fecha_desde inválido. Use YYYY-MM-DD',
-          codigo: 'FECHA_INVALIDA'
-        });
+      // Validar formato de fechas de forma más robusta
+      const fechasParaValidar = [
+        req.query.fecha_desde || req.body?.filtros?.fecha_desde,
+        req.query.fecha_hasta || req.body?.filtros?.fecha_hasta,
+        req.query.fecha_aniversario || req.body?.filtros?.fecha_aniversario
+      ].filter(Boolean);
+      
+      for (const fecha of fechasParaValidar) {
+        if (!this.validarFecha(fecha)) {
+          this.logger.seguridadEvent('fecha_invalida', userId, { 
+            fechaInvalida: fecha,
+            ip: req.ip 
+          });
+          
+          return res.status(400).json({
+            exito: false,
+            mensaje: `Formato de fecha inválido: ${fecha}. Use YYYY-MM-DD`,
+            codigo: 'FECHA_INVALIDA'
+          });
+        }
       }
       
-      if (req.query.fecha_hasta && !this.validarFecha(req.query.fecha_hasta)) {
-        return res.status(400).json({
-          exito: false,
-          mensaje: 'Formato de fecha_hasta inválido. Use YYYY-MM-DD',
-          codigo: 'FECHA_INVALIDA'
-        });
+      // Validar rangos de fechas lógicos
+      const fechaDesde = req.query.fecha_desde || req.body?.filtros?.fecha_desde;
+      const fechaHasta = req.query.fecha_hasta || req.body?.filtros?.fecha_hasta;
+      
+      if (fechaDesde && fechaHasta) {
+        const desde = new Date(fechaDesde);
+        const hasta = new Date(fechaHasta);
+        
+        if (desde > hasta) {
+          return res.status(400).json({
+            exito: false,
+            mensaje: 'La fecha desde no puede ser mayor que la fecha hasta',
+            codigo: 'RANGO_FECHAS_INVALIDO'
+          });
+        }
+        
+        // Validar que el rango no sea excesivamente grande (más de 10 años)
+        const diffYears = (hasta - desde) / (1000 * 60 * 60 * 24 * 365);
+        if (diffYears > 10) {
+          this.logger.seguridadEvent('rango_fechas_excesivo', userId, { 
+            fechaDesde, 
+            fechaHasta, 
+            años: Math.round(diffYears),
+            ip: req.ip 
+          });
+          
+          return res.status(400).json({
+            exito: false,
+            mensaje: 'El rango de fechas no puede exceder 10 años',
+            codigo: 'RANGO_FECHAS_EXCESIVO'
+          });
+        }
       }
+      
+      // Sanitizar parámetros de texto para prevenir inyecciones
+      const parametrosTexto = [
+        req.query.apellido_familiar || req.body?.filtros?.apellido_familiar,
+        req.query.municipio || req.body?.filtros?.municipio,
+        req.query.sector || req.body?.filtros?.sector,
+        req.query.vereda || req.body?.filtros?.vereda
+      ].filter(Boolean);
+      
+      for (const parametro of parametrosTexto) {
+        // Validar que solo contenga caracteres seguros
+        if (!/^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ\s\-\.0-9]+$/.test(parametro)) {
+          this.logger.seguridadEvent('caracteres_sospechosos', userId, { 
+            parametro,
+            ip: req.ip 
+          });
+          
+          return res.status(400).json({
+            exito: false,
+            mensaje: 'Los parámetros de texto contienen caracteres no permitidos',
+            codigo: 'CARACTERES_INVALIDOS'
+          });
+        }
+        
+        // Validar longitud razonable
+        if (parametro.length > 100) {
+          return res.status(400).json({
+            exito: false,
+            mensaje: 'Los parámetros de texto no pueden exceder 100 caracteres',
+            codigo: 'PARAMETRO_DEMASIADO_LARGO'
+          });
+        }
+      }
+      
+      this.logger.debug('Validación de solicitud exitosa', {
+        userId,
+        parametrosValidados: parametrosTexto.length + fechasParaValidar.length,
+        limite: limite || 'no_especificado',
+        ip: req.ip
+      });
       
       next();
       
     } catch (error) {
-      console.error('❌ Error en validación:', error);
+      this.logger.error('Error en validación de solicitud', error, {
+        userId,
+        ip: req.ip,
+        method: req.method,
+        url: req.originalUrl
+      });
+      
       res.status(500).json({
         exito: false,
         mensaje: 'Error en validación de parámetros',
@@ -546,14 +661,36 @@ class ReporteController {
   }
 
   /**
-   * Valida formato de fecha YYYY-MM-DD
+   * Valida formato de fecha YYYY-MM-DD con validación robusta
    */
   validarFecha(fecha) {
+    // Regex más estricta
     const regex = /^\d{4}-\d{2}-\d{2}$/;
     if (!regex.test(fecha)) return false;
     
+    // Validar que la fecha sea real y no futura
     const date = new Date(fecha);
-    return date instanceof Date && !isNaN(date);
+    const now = new Date();
+    const minDate = new Date('1900-01-01');
+    
+    if (!(date instanceof Date) || isNaN(date)) return false;
+    if (date > now) return false; // No fechas futuras
+    if (date < minDate) return false; // No fechas muy antiguas
+    
+    // Validar que el día, mes y año sean válidos
+    const parts = fecha.split('-');
+    const year = parseInt(parts[0]);
+    const month = parseInt(parts[1]);
+    const day = parseInt(parts[2]);
+    
+    if (month < 1 || month > 12) return false;
+    if (day < 1 || day > 31) return false;
+    if (year < 1900 || year > now.getFullYear()) return false;
+    
+    // Verificar que la fecha coincide con los componentes
+    return date.getFullYear() === year && 
+           date.getMonth() === month - 1 && 
+           date.getDate() === day;
   }
 
   /**
@@ -638,11 +775,18 @@ class ReporteController {
       const fs = await import('fs');
       const path = await import('path');
       
-      // Validar nombre de archivo por seguridad
-      if (!filename || filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+      // ✅ SEGURIDAD MEJORADA: Validación robusta contra path traversal
+      const allowedExtensions = ['.xlsx', '.pdf'];
+      const sanitizedFilename = path.basename(filename);
+      const ext = path.extname(sanitizedFilename);
+      
+      // Validar extensión permitida, nombre limpio y caracteres seguros
+      if (!allowedExtensions.includes(ext) || 
+          sanitizedFilename !== filename ||
+          !/^[a-zA-Z0-9_\-\.]+$/.test(sanitizedFilename)) {
         return res.status(400).json({
           exito: false,
-          mensaje: 'Nombre de archivo inválido',
+          mensaje: 'Nombre de archivo inválido o extensión no permitida',
           codigo: 'INVALID_FILENAME'
         });
       }

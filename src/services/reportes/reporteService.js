@@ -6,13 +6,27 @@
 import ExcelService from './excelService.js';
 import PDFService from './pdfService.js';
 import { REPORTE_CONFIG } from '../../config/reportes.js';
+import { LRUCache } from 'lru-cache';
 
 class ReporteService {
   constructor() {
     this.excelService = new ExcelService();
     this.pdfService = new PDFService();
-    this.cache = new Map();
     this.config = REPORTE_CONFIG;
+    
+    // ✅ MEJORA: LRU Cache con límites de memoria
+    this.cache = new LRUCache({
+      max: this.config.cache.maxSize,
+      maxSize: 500 * 1024 * 1024, // 500MB límite total de memoria
+      ttl: this.config.cache.ttl * 1000, // TTL en milisegundos
+      sizeCalculation: (value) => {
+        // Calcular tamaño del buffer + metadatos
+        return value.buffer ? value.buffer.length + 1024 : 1024;
+      },
+      dispose: (value, key) => {
+        console.log(`🧹 Cache LRU: Eliminado ${key} (${Math.round((value.buffer?.length || 0) / 1024)}KB)`);
+      }
+    });
   }
 
   /**
@@ -226,27 +240,18 @@ class ReporteService {
   }
 
   /**
-   * Guarda reporte en cache
+   * Guarda reporte en cache con LRU y manejo de memoria
    */
   guardarEnCache(key, data) {
-    if (this.cache.size >= this.config.cache.maxSize) {
-      // Eliminar el más antiguo (FIFO)
-      const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
-    }
-    
-    // Guardar con timestamp para TTL
+    // ✅ MEJORA: El LRU cache maneja automáticamente la limpieza
+    // Agregar timestamp para debugging
     const cacheData = {
       ...data,
       cacheTimestamp: Date.now()
     };
     
     this.cache.set(key, cacheData);
-    
-    // Programar limpieza por TTL
-    setTimeout(() => {
-      this.cache.delete(key);
-    }, this.config.cache.ttl * 1000);
+    console.log(`💾 Cache: Guardado ${key} (${Math.round((data.buffer?.length || 0) / 1024)}KB) - Total items: ${this.cache.size}`);
   }
 
   /**
@@ -277,12 +282,18 @@ class ReporteService {
   }
 
   /**
-   * Obtiene estadísticas del cache
+   * Obtiene estadísticas del cache LRU
    */
   getEstadisticasCache() {
+    const memoriaUsadaMB = Math.round(this.cache.calculatedSize / (1024 * 1024));
+    const memoriaMaximaMB = Math.round(this.cache.maxSize / (1024 * 1024));
+    
     return {
       tamaño: this.cache.size,
       maximo: this.config.cache.maxSize,
+      memoriaUsada: `${memoriaUsadaMB}MB`,
+      memoriaMaxima: `${memoriaMaximaMB}MB`,
+      utilizacionMemoria: `${Math.round((memoriaUsadaMB / memoriaMaximaMB) * 100)}%`,
       ttl: this.config.cache.ttl,
       habilitado: this.config.cache.enabled
     };
