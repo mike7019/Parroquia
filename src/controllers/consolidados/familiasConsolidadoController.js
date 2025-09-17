@@ -206,6 +206,67 @@ class FamiliasConsolidadoController {
       });
     }
   }
+
+  /**
+   * Generar reporte Excel completo de familias
+   * GET /api/familias/excel-completo
+   */
+  async generarReporteExcelCompleto(req, res) {
+    try {
+      console.log('📊 Generando Excel completo con familias agrupadas...', req.query);
+
+      const filtros = {
+        parroquia: req.query.parroquia,
+        municipio: req.query.municipio,
+        sector: req.query.sector,
+        sexo: req.query.sexo,
+        parentesco: req.query.parentesco,
+        sinPadre: req.query.sinPadre,
+        sinMadre: req.query.sinMadre,
+        edad_min: req.query.edad_min,
+        edad_max: req.query.edad_max,
+        limite: req.query.limite ? parseInt(req.query.limite) : 100
+      };
+
+      // Remover filtros undefined
+      Object.keys(filtros).forEach(key => {
+        if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '') {
+          delete filtros[key];
+        }
+      });
+
+      // Verificar si el servicio tiene el método Excel
+      if (typeof familiasConsolidadoService.generarReporteExcelCompleto !== 'function') {
+        return res.status(501).json({
+          status: "error",
+          message: "Funcionalidad Excel completo no está disponible. Use el endpoint básico /api/familias",
+          code: "EXCEL_COMPLETO_NOT_IMPLEMENTED"
+        });
+      }
+
+      const archivoExcel = await familiasConsolidadoService.generarReporteExcelCompleto(filtros);
+
+      if (!archivoExcel || !archivoExcel.buffer) {
+        return res.status(404).json({
+          status: "error",
+          message: "No se pudo generar el archivo Excel o no hay datos",
+          code: "EXCEL_GENERATION_FAILED"
+        });
+      }
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${archivoExcel.filename}"`);
+      res.send(archivoExcel.buffer);
+
+    } catch (error) {
+      console.error('❌ Error generando Excel completo:', error);
+      res.status(500).json({
+        status: "error",
+        message: error.message,
+        code: "EXCEL_COMPLETO_ERROR"
+      });
+    }
+  }
 }
 
 export default new FamiliasConsolidadoController();

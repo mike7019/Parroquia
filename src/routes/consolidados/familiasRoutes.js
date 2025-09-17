@@ -407,4 +407,84 @@ router.get('/sin-padre', authMiddleware.authenticateToken, familiasConsolidadoCo
  */
 router.get('/sin-madre', authMiddleware.authenticateToken, familiasConsolidadoController.consultarFamiliasSinMadre);
 
+/**
+ * @swagger
+ * /api/familias/excel-completo:
+ *   get:
+ *     summary: Generar reporte Excel completo de familias
+ *     description: Genera un archivo Excel con información completa de familias agrupadas
+ *     tags: [Familias Consolidado]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: parroquia
+ *         schema:
+ *           type: string
+ *         description: Filtrar por parroquia específica
+ *       - in: query
+ *         name: municipio
+ *         schema:
+ *           type: string
+ *         description: Filtrar por municipio
+ *       - in: query
+ *         name: sector
+ *         schema:
+ *           type: string
+ *         description: Filtrar por sector o vereda
+ *       - in: query
+ *         name: sexo
+ *         schema:
+ *           type: string
+ *           enum: [M, F, Masculino, Femenino]
+ *         description: Filtrar por sexo
+ *       - in: query
+ *         name: parentesco
+ *         schema:
+ *           type: string
+ *           enum: [Madre, Padre]
+ *         description: Filtrar por parentesco
+ *       - in: query
+ *         name: sinPadre
+ *         schema:
+ *           type: boolean
+ *         description: Familias sin padre
+ *       - in: query
+ *         name: sinMadre
+ *         schema:
+ *           type: boolean
+ *         description: Familias sin madre
+ *       - in: query
+ *         name: edad_min
+ *         schema:
+ *           type: integer
+ *         description: Edad mínima
+ *       - in: query
+ *         name: edad_max
+ *         schema:
+ *           type: integer
+ *         description: Edad máxima
+ *       - in: query
+ *         name: limite
+ *         schema:
+ *           type: integer
+ *           default: 100
+ *         description: Límite de resultados
+ *     responses:
+ *       200:
+ *         description: Archivo Excel generado exitosamente
+ *         content:
+ *           application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: No hay datos para generar el Excel
+ *       501:
+ *         description: Funcionalidad no implementada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/excel-completo', authMiddleware.authenticateToken, familiasConsolidadoController.generarReporteExcelCompleto);
+
 export default router;
