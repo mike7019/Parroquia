@@ -236,27 +236,35 @@ class FamiliasConsolidadoController {
       });
 
       // Verificar si el servicio tiene el método Excel
-      if (typeof familiasConsolidadoService.generarReporteExcelCompleto !== 'function') {
+      if (typeof familiasConsolidadoService.generarReporteExcelFamiliar !== 'function') {
         return res.status(501).json({
           status: "error",
-          message: "Funcionalidad Excel completo no está disponible. Use el endpoint básico /api/familias",
-          code: "EXCEL_COMPLETO_NOT_IMPLEMENTED"
+          message: "Funcionalidad Excel familiar no está disponible. Use el endpoint básico /api/familias",
+          code: "EXCEL_FAMILIAR_NOT_IMPLEMENTED"
         });
       }
 
-      const archivoExcel = await familiasConsolidadoService.generarReporteExcelCompleto(filtros);
+      const workbook = await familiasConsolidadoService.generarReporteExcelFamiliar(filtros);
 
-      if (!archivoExcel || !archivoExcel.buffer) {
+      if (!workbook) {
         return res.status(404).json({
           status: "error",
-          message: "No se pudo generar el archivo Excel o no hay datos",
+          message: "No se pudo generar el archivo Excel",
           code: "EXCEL_GENERATION_FAILED"
         });
       }
 
+      // Generar nombre de archivo con timestamp
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+      const filename = `reporte-familias-${timestamp}.xlsx`;
+
+      // Configurar headers para descarga
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.setHeader('Content-Disposition', `attachment; filename="${archivoExcel.filename}"`);
-      res.send(archivoExcel.buffer);
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      
+      // Escribir workbook directamente a la respuesta
+      await workbook.xlsx.write(res);
+      res.end();
 
     } catch (error) {
       console.error('❌ Error generando Excel completo:', error);
