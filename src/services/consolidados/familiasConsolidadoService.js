@@ -9,244 +9,102 @@ class FamiliasConsolidadoService {
    */
   async consultarFamilias(filtros = {}) {
     try {
-      console.log('🔍 Iniciando consulta consolidada de familias...', filtros);
+      console.log('🔍 Iniciando consulta consolidada de familias (NUEVA VERSIÓN)...', filtros);
       
-      const whereClausePersona = {};
-      const whereClauseFamilia = {};
-      
-      // Obtener personas fallecidas para excluir
-      const personasFallecidas = await this.obtenerPersonasFallecidas();
+      // NUEVA IMPLEMENTACIÓN: Usar el método obtenerFamiliasAgrupadas para información completa
+      // Mapear los filtros del formato antiguo al nuevo formato
+      const filtrosNuevos = {
+        municipio: filtros.municipio,
+        parroquia: filtros.parroquia,
+        sector: filtros.sector,
+        limit: filtros.limite || 50,
+        offset: 0
+      };
 
-      // Excluir personas fallecidas
-      if (personasFallecidas.length > 0) {
-        whereClausePersona.identificacion = {
-          [Op.notIn]: personasFallecidas
-        };
-      }
+      // Obtener familias agrupadas completas
+      const familiasAgrupadas = await this.obtenerFamiliasAgrupadas(filtrosNuevos);
 
-      // Filtrar por parroquia
-      if (filtros.parroquia) {
-        const parroquia = await Parroquia.findOne({
-          where: { nombre: { [Op.iLike]: `%${filtros.parroquia}%` } }
-        });
-        if (parroquia) {
-          whereClausePersona.id_parroquia = parroquia.id_parroquia;
-        }
-      }
+      // Si hay filtros específicos de persona (sexo, parentesco, edad), aplicar filtrado adicional
+      let familiasFiltradas = familiasAgrupadas.familias;
 
-      // Filtrar por municipio
-      if (filtros.municipio) {
-        const municipio = await Municipios.findOne({
-          where: { nombre_municipio: { [Op.iLike]: `%${filtros.municipio}%` } }
-        });
-        if (municipio) {
-          whereClauseFamilia.id_municipio = municipio.id_municipio;
-        }
-      }
+      if (filtros.sexo || filtros.parentesco || filtros.edad_min || filtros.edad_max) {
+        familiasFiltradas = familiasAgrupadas.familias.filter(familia => {
+          // Obtener todos los miembros de la familia
+          const todosMiembros = [
+            ...(familia.miembros.padres || []),
+            ...(familia.miembros.madres || []),
+            ...(familia.miembros.hijos_vivos || []),
+            ...(familia.miembros.otros_miembros || [])
+          ];
 
-      // Filtrar por sector
-      if (filtros.sector) {
-        whereClauseFamilia[Op.or] = [
-          { sector: { [Op.iLike]: `%${filtros.sector}%` } },
-          { '$sector_info.nombre$': { [Op.iLike]: `%${filtros.sector}%` } }
-        ];
-      }
+          // Aplicar filtros de persona
+          return todosMiembros.some(miembro => {
+            let cumpleFiltros = true;
 
-      // Filtrar por sexo
-      if (filtros.sexo) {
-        const sexo = await Sexo.findOne({
-          where: { 
-            [Op.or]: [
-              { descripcion: { [Op.iLike]: `%${filtros.sexo}%` } },
-              { descripcion: { [Op.iLike]: filtros.sexo === 'M' ? '%masculino%' : '%femenino%' } }
-            ]
-          }
-        });
-        if (sexo) {
-          whereClausePersona.id_sexo = sexo.id_sexo;
-        }
-      }
-
-      // Filtrar por parentesco (inferido por sexo y edad temporalmente)
-      if (filtros.parentesco) {
-        if (filtros.parentesco.toLowerCase() === 'madre') {
-          const sexoFemenino = await Sexo.findOne({
-            where: { descripcion: { [Op.iLike]: '%femenino%' } }
-          });
-          if (sexoFemenino) {
-            whereClausePersona.id_sexo = sexoFemenino.id_sexo;
-            // Agregar filtro de edad mínima para madres (18+)
-            const fechaMaxima = new Date();
-            fechaMaxima.setFullYear(fechaMaxima.getFullYear() - 18);
-            whereClausePersona.fecha_nacimiento = {
-              [Op.lte]: fechaMaxima.toISOString().split('T')[0]
-            };
-          }
-        } else if (filtros.parentesco.toLowerCase() === 'padre') {
-          const sexoMasculino = await Sexo.findOne({
-            where: { descripcion: { [Op.iLike]: '%masculino%' } }
-          });
-          if (sexoMasculino) {
-            whereClausePersona.id_sexo = sexoMasculino.id_sexo;
-            // Agregar filtro de edad mínima para padres (18+)
-            const fechaMaxima = new Date();
-            fechaMaxima.setFullYear(fechaMaxima.getFullYear() - 18);
-            whereClausePersona.fecha_nacimiento = {
-              [Op.lte]: fechaMaxima.toISOString().split('T')[0]
-            };
-          }
-        }
-      }
-
-      // Filtrar por rango de edad
-      if (filtros.edad_min || filtros.edad_max) {
-        const fechaCondiciones = {};
-        
-        if (filtros.edad_min) {
-          const fechaMaxima = new Date();
-          fechaMaxima.setFullYear(fechaMaxima.getFullYear() - parseInt(filtros.edad_min));
-          fechaCondiciones[Op.lte] = fechaMaxima.toISOString().split('T')[0];
-        }
-        
-        if (filtros.edad_max) {
-          const fechaMinima = new Date();
-          fechaMinima.setFullYear(fechaMinima.getFullYear() - parseInt(filtros.edad_max) - 1);
-          fechaCondiciones[Op.gte] = fechaMinima.toISOString().split('T')[0];
-        }
-        
-        if (Object.keys(fechaCondiciones).length > 0) {
-          whereClausePersona.fecha_nacimiento = {
-            ...whereClausePersona.fecha_nacimiento,
-            ...fechaCondiciones
-          };
-        }
-      }
-
-      // Configurar includes
-      const includeClause = [
-        {
-          model: Familias,
-          as: 'familia',
-          where: Object.keys(whereClauseFamilia).length > 0 ? whereClauseFamilia : undefined,
-          required: Object.keys(whereClauseFamilia).length > 0,
-          include: [
-            {
-              model: Municipios,
-              as: 'municipio',
-              required: false,
-              attributes: ['nombre']
-            },
-            {
-              model: Veredas,
-              as: 'vereda',
-              required: false,
-              attributes: ['nombre']
-            },
-            {
-              model: Sector,
-              as: 'sector_info',
-              required: false,
-              attributes: ['nombre']
+            // Filtro por parentesco
+            if (filtros.parentesco) {
+              const tipo = filtros.parentesco.toLowerCase();
+              if (tipo === 'padre' && !familia.miembros.padres?.some(p => p.persona_id === miembro.persona_id)) {
+                cumpleFiltros = false;
+              }
+              if (tipo === 'madre' && !familia.miembros.madres?.some(p => p.persona_id === miembro.persona_id)) {
+                cumpleFiltros = false;
+              }
+              if (tipo === 'hijo' && !familia.miembros.hijos_vivos?.some(p => p.persona_id === miembro.persona_id)) {
+                cumpleFiltros = false;
+              }
             }
-          ]
-        },
-        {
-          model: Sexo,
-          as: 'sexo',
-          required: false,
-          attributes: ['nombre']
-        },
-        {
-          model: Parroquia,
-          as: 'parroquia',
-          required: false,
-          attributes: ['nombre']
-        }
-      ];
 
-      // Verificar si necesita buscar familias sin padre o madre
-      let filtroEspecial = null;
-      if (filtros.sinPadre === true || filtros.sinPadre === 'true') {
-        filtroEspecial = 'sinPadre';
-      } else if (filtros.sinMadre === true || filtros.sinMadre === 'true') {
-        filtroEspecial = 'sinMadre';
-      }
+            // Filtro por edad
+            if (filtros.edad_min && miembro.edad < parseInt(filtros.edad_min)) {
+              cumpleFiltros = false;
+            }
+            if (filtros.edad_max && miembro.edad > parseInt(filtros.edad_max)) {
+              cumpleFiltros = false;
+            }
 
-      let resultado = [];
-
-      if (filtroEspecial) {
-        // Consulta especial para familias sin padre o madre
-        resultado = await this.consultarFamiliasSinPadreMadre(filtroEspecial, filtros);
-      } else {
-        // Usar consulta SQL simple para evitar problemas de asociaciones
-        const limit = filtros.limite || 100;
-        let whereConditions = ['1=1'];
-        
-        if (filtros.sexo) {
-          whereConditions.push(`s.descripcion ILIKE '%${filtros.sexo}%'`);
-        }
-        if (filtros.municipio) {
-          whereConditions.push(`m.nombre_municipio ILIKE '%${filtros.municipio}%'`);
-        }
-        if (filtros.parroquia) {
-          whereConditions.push(`par.nombre ILIKE '%${filtros.parroquia}%'`);
-        }
-        if (filtros.nombre) {
-          const partes = filtros.nombre.split(' ');
-          partes.forEach(parte => {
-            whereConditions.push(`(p.primer_nombre ILIKE '%${parte}%' OR p.segundo_nombre ILIKE '%${parte}%' OR p.primer_apellido ILIKE '%${parte}%' OR p.segundo_apellido ILIKE '%${parte}%')`);
+            return cumpleFiltros;
           });
-        }
-
-        const query = `
-          SELECT 
-            p.id_personas,
-            p.primer_nombre,
-            p.segundo_nombre,
-            p.primer_apellido,
-            p.segundo_apellido,
-            p.identificacion,
-            p.telefono,
-            p.fecha_nacimiento,
-            p.direccion,
-            p.id_familia_familias,
-            p.id_sexo
-          FROM personas p
-          WHERE 1=1
-          ORDER BY p.primer_apellido, p.primer_nombre
-          LIMIT ${limit}
-        `;
-
-        console.log('🔍 Ejecutando consulta SQL:', query);
-        const [personas] = await sequelize.query(query);
-        
-        resultado = personas.map(persona => ({
-          id_personas: persona.id_personas,
-          nombre: `${persona.primer_nombre || ''} ${persona.segundo_nombre || ''}`.trim(),
-          apellidos: `${persona.primer_apellido || ''} ${persona.segundo_apellido || ''}`.trim(),
-          identificacion: persona.identificacion,
-          telefono: persona.telefono,
-          fecha_nacimiento: persona.fecha_nacimiento,
-          edad: persona.fecha_nacimiento ? new Date().getFullYear() - new Date(persona.fecha_nacimiento).getFullYear() : null,
-          direccion: persona.direccion,
-          id_familia: persona.id_familia_familias,
-          id_sexo: persona.id_sexo
-        }));
+        });
       }
 
-      // Generar estadísticas si se incluyen detalles
-      let estadisticas = {};
-      if (filtros.incluir_detalles === true || filtros.incluir_detalles === 'true') {
-        estadisticas = await this.generarEstadisticasFamilias(resultado);
+      // Manejar filtros especiales (sin padre/madre)
+      if (filtros.sinPadre === true || filtros.sinPadre === 'true') {
+        familiasFiltradas = familiasFiltradas.filter(familia => 
+          !familia.miembros.padres || familia.miembros.padres.length === 0
+        );
       }
+
+      if (filtros.sinMadre === true || filtros.sinMadre === 'true') {
+        familiasFiltradas = familiasFiltradas.filter(familia => 
+          !familia.miembros.madres || familia.miembros.madres.length === 0
+        );
+      }
+
+      // Generar estadísticas consolidadas
+      const estadisticasGenerales = {
+        total_familias: familiasFiltradas.length,
+        total_personas: familiasFiltradas.reduce((sum, f) => sum + f.estadisticas.total_miembros, 0),
+        total_vivos: familiasFiltradas.reduce((sum, f) => sum + f.estadisticas.total_vivos, 0),
+        total_difuntos: familiasFiltradas.reduce((sum, f) => sum + f.estadisticas.total_difuntos, 0),
+        total_menores: familiasFiltradas.reduce((sum, f) => sum + f.estadisticas.total_menores, 0),
+        total_adultos: familiasFiltradas.reduce((sum, f) => sum + f.estadisticas.total_adultos, 0),
+        familias_con_telefono: familiasFiltradas.filter(f => f.estadisticas.tiene_telefono).length,
+        familias_con_email: familiasFiltradas.filter(f => f.estadisticas.tiene_email).length
+      };
 
       return {
         exito: true,
-        mensaje: "Consulta de familias exitosa",
-        datos: resultado,
-        total: resultado.length,
-        estadisticas: Object.keys(estadisticas).length > 0 ? estadisticas : undefined,
-        filtros_aplicados: filtros
+        mensaje: "Consulta de familias exitosa (información completa)",
+        datos: familiasFiltradas,
+        total: familiasFiltradas.length,
+        estadisticas: estadisticasGenerales,
+        filtros_aplicados: filtros,
+        tipo_datos: "familias_agrupadas", // Indicador del nuevo formato
+        estructura: {
+          descripcion: "Cada elemento 'datos' representa una familia completa con todos sus miembros agrupados",
+          campos_principales: ["codigo_familia", "apellido_familiar", "ubicacion", "miembros", "estadisticas", "resumen_pastoral"]
+        }
       };
 
     } catch (error) {
