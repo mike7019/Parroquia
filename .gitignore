@@ -162,3 +162,15 @@ docs/generated/
 
 # Archivos archivados durante cleanup
 archive/
+
+# Archivos Excel de prueba generados durante testing
+*.xlsx
+reporte-*.xlsx
+test-*.xlsx
+test-servicio-*.xlsx
+reporte-familias-*.xlsx
+reporte-completo-*.xlsx
+
+# Archivos temporales de testing
+test-endpoint-response.*
+temp-*.*
