@@ -391,7 +391,7 @@ router.get('/stats', sexoController.getStatistics);
  *         schema:
  *           type: string
  *           default: "id_sexo"
- *           enum: ["id_sexo", "nombre", "codigo", "created_at", "updated_at"]
+ *           enum: ["id_sexo", "nombre", "created_at", "updated_at"]
  *         description: Campo por el cual ordenar los resultados
  *         example: "nombre"
  *       - in: query

@@ -91,12 +91,14 @@ module.exports = (sequelize, DataTypes) => {
 
     // Método para verificar si es masculino
     esMasculino() {
-      return this.sexoRelacion?.codigo === 'M';
+      const sexoNombre = this.sexoRelacion?.nombre?.toLowerCase();
+      return sexoNombre === 'masculino' || sexoNombre === 'hombre';
     }
 
     // Método para verificar si es femenino
     esFemenino() {
-      return this.sexoRelacion?.codigo === 'F';
+      const sexoNombre = this.sexoRelacion?.nombre?.toLowerCase();
+      return sexoNombre === 'femenino' || sexoNombre === 'mujer';
     }
 
     // Método para obtener el nombre del sexo
@@ -104,9 +106,13 @@ module.exports = (sequelize, DataTypes) => {
       return this.sexoRelacion?.nombre || null;
     }
 
-    // Método para obtener el código del sexo
+    // Método para obtener el código del sexo (DEPRECADO - ahora devuelve nombre)
     getSexoCodigo() {
-      return this.sexoRelacion?.codigo || null;
+      // Por compatibilidad, devolver una versión abreviada del nombre
+      const nombre = this.sexoRelacion?.nombre?.toLowerCase();
+      if (nombre === 'masculino' || nombre === 'hombre') return 'M';
+      if (nombre === 'femenino' || nombre === 'mujer') return 'F';
+      return nombre?.charAt(0)?.toUpperCase() || null;
     }
   }
 
