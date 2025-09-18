@@ -36,27 +36,7 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    codigo: {
-      type: DataTypes.STRING(1),
-      allowNull: false,
-      unique: true,
-      validate: {
-        notNull: {
-          msg: 'El código del sexo es requerido'
-        },
-        notEmpty: {
-          msg: 'El código del sexo no puede estar vacío'
-        },
-        len: {
-          args: [1, 1],
-          msg: 'El código debe tener exactamente 1 carácter'
-        },
-        isIn: {
-          args: [['M', 'F', 'O']],
-          msg: 'El código debe ser M (Masculino), F (Femenino) u O (Otro)'
-        }
-      }
-    },
+
     descripcion: {
       type: DataTypes.TEXT,
       allowNull: true
@@ -73,10 +53,6 @@ module.exports = (sequelize, DataTypes) => {
       {
         unique: true,
         fields: ['nombre']
-      },
-      {
-        unique: true,
-        fields: ['codigo']
       }
     ]
   });
