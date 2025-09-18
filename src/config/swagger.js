@@ -749,8 +749,8 @@ const swaggerConfig = {
               oneOf: [
                 {
                   type: 'string',
-                  enum: ['M', 'F', 'Hombre', 'Mujer', 'Masculino', 'Femenino', 'Otro'],
-                  description: 'Código o nombre del sexo'
+                  enum: ['Masculino', 'Femenino', 'Otro'],
+                  description: 'Nombre del sexo'
                 },
                 {
                   type: 'object',
@@ -925,12 +925,6 @@ const swaggerConfig = {
               description: 'Nombre de la vereda',
               example: 'El Alamo'
             },
-            codigo_vereda: {
-              type: 'string',
-              maxLength: 50,
-              description: 'Código único de la vereda (opcional)',
-              example: '001'
-            },
             id_municipio: {
               type: 'integer',
               description: 'ID del municipio al que pertenece la vereda (opcional)',
@@ -989,14 +983,19 @@ const swaggerConfig = {
         SexoInput: {
           type: 'object',
           properties: {
-            sexo: {
+            nombre: {
               type: 'string',
               maxLength: 100,
               description: 'Nombre del sexo/género',
               example: 'Masculino'
+            },
+            descripcion: {
+              type: 'string',
+              description: 'Descripción opcional del sexo',
+              example: 'Género masculino'
             }
           },
-          required: ['sexo']
+          required: ['nombre']
         },
         Parroquia: {
           type: 'object',
@@ -1123,14 +1122,20 @@ const swaggerConfig = {
               description: 'ID único del sexo',
               example: 1
             },
+            nombre: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Nombre del sexo/género',
+              example: 'Masculino'
+            },
             descripcion: {
               type: 'string',
               maxLength: 255,
-              description: 'Descripción del tipo de sexo',
-              example: 'Masculino'
+              description: 'Descripción opcional del sexo',
+              example: 'Género masculino'
             }
           },
-          required: ['descripcion']
+          required: ['nombre']
         },
         CreateMunicipioRequest: {
           type: 'object',
@@ -1638,9 +1643,9 @@ const swaggerConfig = {
             },
             sexo: {
               type: 'string',
-              enum: ['M', 'F', 'Otro'],
+              enum: ['Masculino', 'Femenino', 'Otro'],
               description: 'Sexo',
-              example: 'M'
+              example: 'Masculino'
             },
             situacionCivil: {
               type: 'string',
@@ -2718,8 +2723,8 @@ const swaggerConfig = {
                     oneOf: [
                       {
                         type: 'string',
-                        enum: ['M', 'F', 'Hombre', 'Mujer', 'Masculino', 'Femenino', 'Otro'],
-                        description: 'Código o nombre del sexo'
+                        enum: ['Masculino', 'Femenino', 'Otro'],
+                        description: 'Nombre del sexo'
                       },
                       {
                         type: 'object',

@@ -11,23 +11,20 @@ class SexoService {
    */
   async createSexo(sexoData) {
     try {
-      const { nombre, codigo, descripcion } = sexoData;
+      const { nombre, descripcion } = sexoData;
 
       // Check if sexo already exists
       const existingSexo = await getSexoModel().findOne({
         where: { 
-          [Op.or]: [
-            { nombre: { [Op.iLike]: nombre } },
-            { codigo: { [Op.iLike]: codigo } }
-          ]
+          nombre: { [Op.iLike]: nombre }
         }
       });
 
       if (existingSexo) {
-        throw new Error('Sexo with this name or code already exists');
+        throw new Error('Sexo with this name already exists');
       }
 
-      const sexo = await getSexoModel().create({ nombre, codigo, descripcion });
+      const sexo = await getSexoModel().create({ nombre, descripcion });
       return sexo;
     } catch (error) {
       throw new Error(`Error creating sexo: ${error.message}`);
@@ -56,45 +53,30 @@ class SexoService {
    */
   async updateSexo(id, sexoData) {
     try {
-      const { nombre, codigo, descripcion } = sexoData;
+      const { nombre, descripcion } = sexoData;
 
       const sexo = await getSexoModel().findByPk(id);
       if (!sexo) {
         throw new Error('Sexo not found');
       }
 
-      // Construir condiciones de búsqueda solo para campos que se están actualizando
-      const searchConditions = [];
+      // Solo verificar duplicados por nombre si se está actualizando
       if (nombre !== undefined && nombre !== sexo.nombre) {
-        searchConditions.push({ nombre: { [Op.iLike]: nombre } });
-      }
-      if (codigo !== undefined && codigo !== sexo.codigo) {
-        searchConditions.push({ codigo: { [Op.iLike]: codigo } });
-      }
-
-      // Solo verificar duplicados si hay condiciones de búsqueda
-      if (searchConditions.length > 0) {
         const existingSexo = await getSexoModel().findOne({
           where: { 
-            [Op.or]: searchConditions,
+            nombre: { [Op.iLike]: nombre },
             id_sexo: { [Op.ne]: id }
           }
         });
 
         if (existingSexo) {
-          if (existingSexo.nombre === nombre) {
-            throw new Error('Sexo with this name already exists');
-          }
-          if (existingSexo.codigo === codigo) {
-            throw new Error('Sexo with this code already exists');
-          }
+          throw new Error('Sexo with this name already exists');
         }
       }
 
       // Solo actualizar campos que están presentes en sexoData
       const updateData = {};
       if (nombre !== undefined) updateData.nombre = nombre;
-      if (codigo !== undefined) updateData.codigo = codigo;
       if (descripcion !== undefined) updateData.descripcion = descripcion;
 
       await sexo.update(updateData);
@@ -143,10 +125,7 @@ class SexoService {
 
       const sexos = await getSexoModel().findAll({
         where: {
-          [Op.or]: [
-            { nombre: { [Op.iLike]: `%${query}%` } },
-            { codigo: { [Op.iLike]: `%${query}%` } }
-          ]
+          nombre: { [Op.iLike]: `%${query}%` }
         },
         order: [['nombre', 'ASC']],
         limit: parseInt(limit)

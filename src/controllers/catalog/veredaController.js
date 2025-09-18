@@ -7,7 +7,7 @@ class VeredaController {
    */
   async createVereda(req, res) {
     try {
-      const { nombre, codigo_vereda, id_municipio } = req.body;
+      const { nombre, id_municipio } = req.body;
 
       if (!nombre) {
         return res.status(400).json(
@@ -33,7 +33,6 @@ class VeredaController {
 
       const result = await veredaService.findOrCreateVereda({
         nombre,
-        codigo_vereda,
         id_municipio
       });
 

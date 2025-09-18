@@ -7,7 +7,7 @@ class SexoController {
    */
   async createSexo(req, res) {
     try {
-      const { nombre, codigo, descripcion } = req.body;
+      const { nombre, descripcion } = req.body;
 
       // Validar campos requeridos
       if (!nombre || nombre.trim() === '') {
@@ -16,27 +16,8 @@ class SexoController {
         );
       }
 
-      if (!codigo || codigo.trim() === '') {
-        return res.status(400).json(
-          createErrorResponse('El código es requerido', null, 'VALIDATION_ERROR')
-        );
-      }
-
-      // Validar que el código sea válido
-      const validCodes = ['M', 'F', 'O'];
-      if (!validCodes.includes(codigo.toUpperCase())) {
-        return res.status(400).json(
-          createErrorResponse(
-            'El código debe ser M (Masculino), F (Femenino) u O (Otro)', 
-            null, 
-            'VALIDATION_ERROR'
-          )
-        );
-      }
-
       const sexoData = {
         nombre: nombre.trim(),
-        codigo: codigo.toUpperCase(),
         descripcion: descripcion ? descripcion.trim() : null
       };
 
@@ -117,7 +98,7 @@ class SexoController {
   async updateSexo(req, res) {
     try {
       const { id } = req.params;
-      const { nombre, codigo, descripcion } = req.body;
+      const { nombre, descripcion } = req.body;
 
       if (!id || isNaN(parseInt(id))) {
         return res.status(400).json(
@@ -126,34 +107,14 @@ class SexoController {
       }
 
       // Validar que al menos un campo esté presente
-      if (!nombre && !codigo && !descripcion) {
+      if (!nombre && !descripcion) {
         return res.status(400).json(
           createErrorResponse(
-            'Al menos un campo (nombre, codigo, descripcion) es requerido para actualizar', 
+            'Al menos un campo (nombre, descripcion) es requerido para actualizar', 
             null, 
             'VALIDATION_ERROR'
           )
         );
-      }
-
-      // Validar código si se proporciona
-      if (codigo !== undefined) {
-        if (!codigo || codigo.trim() === '') {
-          return res.status(400).json(
-            createErrorResponse('El código no puede estar vacío', null, 'VALIDATION_ERROR')
-          );
-        }
-
-        const validCodes = ['M', 'F', 'O'];
-        if (!validCodes.includes(codigo.toUpperCase())) {
-          return res.status(400).json(
-            createErrorResponse(
-              'El código debe ser M (Masculino), F (Femenino) u O (Otro)', 
-              null, 
-              'VALIDATION_ERROR'
-            )
-          );
-        }
       }
 
       // Validar nombre si se proporciona
@@ -165,7 +126,6 @@ class SexoController {
 
       const sexoData = {};
       if (nombre !== undefined) sexoData.nombre = nombre.trim();
-      if (codigo !== undefined) sexoData.codigo = codigo.toUpperCase();
       if (descripcion !== undefined) sexoData.descripcion = descripcion ? descripcion.trim() : null;
 
       const sexo = await sexoService.updateSexo(parseInt(id), sexoData);

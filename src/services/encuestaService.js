@@ -263,7 +263,8 @@ class EncuestaService {
 
     const query = `
       SELECT 
-        COUNT(*) as total_familias,
+        COUNT(DISTINCT f.id_familia) as total_encuestas,
+        COUNT(DISTINCT f.id_familia) as total_familias,
         COUNT(DISTINCT CASE WHEN f.estado_encuesta = 'completada' THEN f.id_familia END) as familias_completadas,
         COUNT(DISTINCT p.id_personas) as total_personas,
         COUNT(DISTINCT df.id_difunto) as total_difuntos,

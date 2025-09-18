@@ -10,23 +10,12 @@ class VeredaService {
    */
   async findOrCreateVereda(veredaData) {
     try {
-      // Build where conditions dynamically
-      const whereConditions = [
-        { nombre: veredaData.nombre }
-      ];
-      
-      // Only add codigo_vereda condition if it's provided
-      if (veredaData.codigo_vereda) {
-        whereConditions.push({ codigo_vereda: veredaData.codigo_vereda });
-      }
-      
       const [vereda, created] = await getVeredasModel().findOrCreate({
         where: {
-          [Op.or]: whereConditions
+          nombre: veredaData.nombre
         },
         defaults: {
           nombre: veredaData.nombre,
-          codigo_vereda: veredaData.codigo_vereda || null,
           id_municipio_municipios: veredaData.id_municipio || null
         }
       });
@@ -47,7 +36,6 @@ class VeredaService {
     try {
       const vereda = await getVeredasModel().create({
         nombre: veredaData.nombre,
-        codigo_vereda: veredaData.codigo_vereda || null,
         id_municipio_municipios: veredaData.id_municipio || null
       });
 
