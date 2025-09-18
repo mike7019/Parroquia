@@ -431,12 +431,18 @@ const mapearEstadoCivil = (estadoCivil) => {
 };
 export const obtenerEncuestas = async (req, res) => {
   try {
-    console.log('📋 Obteniendo lista de encuestas...');
+    const { logger } = await import('../middlewares/loggingMiddleware.js');
+    const EncuestaService = (await import('../services/encuestaService.js')).default;
     
-    // Parámetros de paginación
+    logger.info('Obteniendo lista de encuestas', {
+      query: req.query,
+      user_id: req.user?.id
+    });
+    
+    // Parámetros de paginación con cursor-based support
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
+    const limit = Math.min(parseInt(req.query.limit) || 10, 100); // Máximo 100
+    const cursor = req.query.cursor;
 
     // Parámetros de filtros opcionales
     const { sector, municipio, apellido_familiar } = req.query;

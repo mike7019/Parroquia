@@ -29,7 +29,14 @@
     "docker:dev": "docker-compose up --build",
     "docker:db": "docker-compose up postgres -d",
     "docker:down": "docker-compose down",
-    "docs:generate": "node generate-copilot-instructions.js"
+    "docs:generate": "node generate-copilot-instructions.js",
+    "encuestas:install": "node scripts/install-encuestas-optimized.js",
+    "encuestas:monitor": "node scripts/monitoreo-encuestas.js",
+    "encuestas:test": "npm test -- --testPathPattern=encuesta",
+    "encuestas:indexes": "psql $DATABASE_URL -f database/migrations/create-encuestas-indexes.sql",
+    "encuestas:refresh-views": "psql $DATABASE_URL -c 'SELECT refresh_encuestas_materialized_views()'",
+    "encuestas:backup": "node scripts/backup-encuestas.js",
+    "encuestas:stats": "node -e \"import('./src/services/encuestaService.js').then(s => s.default.obtenerEstadisticas().then(console.log))\""
   },
   "keywords": [
     "node",

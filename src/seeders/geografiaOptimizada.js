@@ -391,14 +391,11 @@ export async function seedDatosBasicos() {
     console.log(`📍 Creando datos básicos para ${municipios.length} municipios principales`);
 
     // Crear parroquias básicas (una por municipio)
-    // COMENTADO: Ya no se crean parroquias automáticamente - se gestionan manualmente via API
-    /*
     const parroquiasData = municipios.map((municipio, index) => ({
       id_parroquia: index + 1,
       nombre: `Parroquia Central ${municipio.nombre_municipio}`,
       id_municipio: municipio.id_municipio
     }));
-    */
 
     // Crear sectores básicos (2 por municipio)
     const sectoresData = [];
@@ -426,10 +423,8 @@ export async function seedDatosBasicos() {
     }));
 
     // Insertar datos secuencialmente
-    // console.log('📝 Insertando parroquias...');
-    // const resultParroquias = await safeInsertWithIds('parroquias', parroquiasData, 'Parroquias básicas');
-    console.log('⏭️  Saltando inserción automática de parroquias (se gestionan manualmente)');
-    const resultParroquias = { insertedIds: [], totalInserted: 0 }; // Mock result para evitar errores
+    console.log('📝 Insertando parroquias...');
+    const resultParroquias = await safeInsertWithIds('parroquias', parroquiasData, 'Parroquias básicas');
     
     console.log('📝 Insertando sectores...');
     const resultSectores = await safeInsertWithIds('sectores', sectoresData, 'Sectores básicos');
@@ -444,7 +439,7 @@ export async function seedDatosBasicos() {
     };
 
     console.log('✅ Datos básicos de geografía completa creados exitosamente');
-    console.log(`   - 0 parroquias (deshabilitado - gestión manual)`);
+    console.log(`   - ${parroquiasData.length} parroquias`);
     console.log(`   - ${sectoresData.length} sectores`);
     console.log(`   - ${veredasData.length} veredas`);
     

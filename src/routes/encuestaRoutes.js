@@ -3,6 +3,9 @@ import { crearEncuesta, obtenerEncuestas, obtenerEncuestaPorId, eliminarEncuesta
 import authMiddleware from '../middlewares/auth.js';
 import { validarEncuesta } from '../validators/encuestaValidator.js';
 import EncuestaValidationMiddleware from '../middlewares/encuestaValidation.js';
+import { EncuestaLoggingMiddleware } from '../middlewares/loggingMiddleware.js';
+import { encuestasQueryLimit, encuestasCreateLimit, encuestasDeleteLimit, adaptiveRateLimit } from '../middlewares/rateLimitMiddleware.js';
+import BackupMiddleware from '../middlewares/backupMiddleware.js';
 
 const router = express.Router();
 
@@ -471,23 +474,31 @@ const router = express.Router();
 
 // Ruta GET para obtener todas las encuestas
 router.get('/', 
+  adaptiveRateLimit,                 // Rate limiting adaptativo
   authMiddleware.authenticateToken,  // Middleware de autenticación
+  EncuestaLoggingMiddleware.logOperacion('OBTENER_ENCUESTAS'), // Logging
   obtenerEncuestas
 );
 
 // Ruta GET para obtener encuesta por ID
 router.get('/:id', 
+  encuestasQueryLimit,               // Rate limiting para consultas
   authMiddleware.authenticateToken,  // Middleware de autenticación
+  EncuestaLoggingMiddleware.logOperacion('OBTENER_ENCUESTA_POR_ID'), // Logging
   obtenerEncuestaPorId
 );
 router.get('/encuesta/:id', 
+  encuestasQueryLimit,               // Rate limiting para consultas
   authMiddleware.authenticateToken,  // Middleware de autenticación
+  EncuestaLoggingMiddleware.logOperacion('OBTENER_ENCUESTA_POR_ID'), // Logging
   obtenerEncuestaPorId
 );
 
 // Ruta POST para crear encuesta
 router.post('/', 
+  encuestasCreateLimit,              // Rate limiting estricto para creación
   authMiddleware.authenticateToken,  // Middleware de autenticación
+  EncuestaLoggingMiddleware.logOperacion('CREAR_ENCUESTA'), // Logging
   EncuestaValidationMiddleware.validarEstructuraBasica,  // Validar estructura
   EncuestaValidationMiddleware.validarIdentificacionesUnicas,  // Validar IDs únicos en familia
   EncuestaValidationMiddleware.validarMiembrosUnicos,  // Validar miembros únicos en BD
@@ -497,9 +508,12 @@ router.post('/',
 
 // Ruta DELETE para eliminar encuesta por ID
 router.delete('/:id', 
+  encuestasDeleteLimit,              // Rate limiting muy restrictivo para eliminación
   authMiddleware.authenticateToken,  // Middleware de autenticación
+  EncuestaLoggingMiddleware.logOperacion('ELIMINAR_ENCUESTA'), // Logging
   EncuestaValidationMiddleware.validarIdEncuesta,  // Validar ID
   EncuestaValidationMiddleware.validarEncuestaExiste,  // Verificar que existe
+  BackupMiddleware.backupBeforeDelete, // Backup automático antes de eliminar
   eliminarEncuesta                   // Controlador
 );
 
@@ -827,6 +841,174 @@ router.put('/:id',
   EncuestaValidationMiddleware.validarEncuestaExiste,  // Verificar que existe
   EncuestaValidationMiddleware.validarActualizacionCompleta,  // Validar campos requeridos
   actualizarEncuestaCompleta        // Controlador
+);
+
+// Ruta PUT para actualizar encuesta completa
+router.put('/:id', 
+  encuestasQueryLimit,               // Rate limiting para actualizaciones
+  authMiddleware.authenticateToken,  // Middleware de autenticación
+  EncuestaLoggingMiddleware.logOperacion('ACTUALIZAR_ENCUESTA_COMPLETA'), // Logging
+  EncuestaValidationMiddleware.validarIdEncuesta,  // Validar ID
+  EncuestaValidationMiddleware.validarEncuestaExiste,  // Verificar que existe
+  EncuestaValidationMiddleware.validarActualizacionCompleta,  // Validar campos requeridos
+  actualizarEncuestaCompleta         // Controlador
+);
+
+/**
+ * @swagger
+ * /api/encuesta/estadisticas:
+ *   get:
+ *     summary: Obtener estadísticas generales de encuestas
+ *     description: Obtiene estadísticas agregadas del sistema de encuestas
+ *     tags: [Encuestas]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Estadísticas obtenidas exitosamente
+ */
+router.get('/estadisticas', 
+  encuestasQueryLimit,
+  authMiddleware.authenticateToken,
+  EncuestaLoggingMiddleware.logOperacion('OBTENER_ESTADISTICAS'),
+  async (req, res) => {
+    try {
+      const EncuestaService = (await import('../services/encuestaService.js')).default;
+      const estadisticas = await EncuestaService.obtenerEstadisticas();
+      
+      res.json({
+        status: 'success',
+        message: 'Estadísticas obtenidas exitosamente',
+        data: estadisticas
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        message: 'Error obteniendo estadísticas',
+        error_code: 'STATS_ERROR'
+      });
+    }
+  }
+);
+
+/**
+ * @swagger
+ * /api/encuesta/buscar:
+ *   get:
+ *     summary: Buscar encuestas con texto completo
+ *     description: Busca encuestas usando búsqueda de texto completo
+ *     tags: [Encuestas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Término de búsqueda
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Límite de resultados
+ *     responses:
+ *       200:
+ *         description: Búsqueda completada exitosamente
+ */
+router.get('/buscar', 
+  encuestasQueryLimit,
+  authMiddleware.authenticateToken,
+  EncuestaLoggingMiddleware.logOperacion('BUSCAR_ENCUESTAS'),
+  async (req, res) => {
+    try {
+      const { q: termino, limit = 20, incluir_personas = false } = req.query;
+      
+      if (!termino || termino.trim().length < 2) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'El término de búsqueda debe tener al menos 2 caracteres',
+          code: 'INVALID_SEARCH_TERM'
+        });
+      }
+
+      const EncuestaService = (await import('../services/encuestaService.js')).default;
+      const resultados = await EncuestaService.buscarEncuestas(termino.trim(), {
+        limit: Math.min(parseInt(limit), 50),
+        incluirPersonas: incluir_personas === 'true'
+      });
+      
+      res.json({
+        status: 'success',
+        message: `Se encontraron ${resultados.length} resultados`,
+        data: resultados,
+        termino_busqueda: termino.trim()
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        message: 'Error en la búsqueda',
+        error_code: 'SEARCH_ERROR'
+      });
+    }
+  }
+);
+
+/**
+ * @swagger
+ * /api/encuesta/cursor:
+ *   get:
+ *     summary: Obtener encuestas con paginación cursor-based
+ *     description: Obtiene encuestas usando paginación cursor-based para mejor rendimiento
+ *     tags: [Encuestas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: cursor
+ *         schema:
+ *           type: string
+ *         description: Cursor para paginación
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Límite de resultados
+ *     responses:
+ *       200:
+ *         description: Encuestas obtenidas con cursor exitosamente
+ */
+router.get('/cursor', 
+  encuestasQueryLimit,
+  authMiddleware.authenticateToken,
+  EncuestaLoggingMiddleware.logOperacion('OBTENER_ENCUESTAS_CURSOR'),
+  async (req, res) => {
+    try {
+      const { cursor, limit = 20, ...filtros } = req.query;
+      
+      const EncuestaService = (await import('../services/encuestaService.js')).default;
+      const resultado = await EncuestaService.obtenerEncuestasOptimizado(filtros, {
+        cursor,
+        limit: Math.min(parseInt(limit), 100),
+        useCursor: true
+      });
+      
+      res.json({
+        status: 'success',
+        message: `Se obtuvieron ${resultado.data.length} encuestas`,
+        data: resultado.data,
+        pagination: resultado.pagination
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        message: 'Error obteniendo encuestas con cursor',
+        error_code: 'CURSOR_PAGINATION_ERROR'
+      });
+    }
+  }
 );
 
 export default router;

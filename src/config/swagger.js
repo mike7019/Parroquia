@@ -10,7 +10,39 @@ const swaggerConfig = {
     info: {
       title: 'Parroquia API',
       version: '2.0.0',
-      description: 'API REST para la gestión de parroquias, familias y encuestas pastorales. Incluye autenticación JWT, gestión de catálogos geográficos y generación de reportes.',
+      description: `
+        # Sistema de Gestión Parroquial - API REST
+        
+        ## 🎯 Características Principales
+        - **Gestión de Encuestas Familiares**: Sistema completo de registro y consulta de familias
+        - **Autenticación JWT**: Sistema seguro de usuarios con roles (Administrador/Encuestador)
+        - **Datos Geográficos Optimizados**: 1,123 municipios colombianos con IDs secuenciales
+        - **Sistema de Catálogos**: Gestión completa de datos maestros
+        - **Reportes**: Generación de reportes en Excel y PDF
+        
+        ## 🌍 Datos Geográficos
+        - **33 Departamentos** con IDs secuenciales (1-33)
+        - **1,123 Municipios** con IDs secuenciales (1-1123)
+        - **Parroquias, Sectores y Veredas** organizados jerárquicamente
+        - **API externa de respaldo** con persistencia local
+        
+        ## 🔐 Autenticación
+        Todas las rutas protegidas requieren un token JWT válido.
+        
+        ### Proceso de Login:
+        1. **POST** \`/api/auth/login\` con credenciales
+        2. Obtener \`accessToken\` de la respuesta
+        3. Incluir en headers: \`Authorization: Bearer {token}\`
+        
+        ## 📊 Endpoints Principales
+        - \`/api/encuesta\` - Gestión de encuestas familiares
+        - \`/api/auth\` - Autenticación y gestión de usuarios
+        - \`/api/catalog\` - Catálogos maestros (municipios, parroquias, etc.)
+        - \`/api/consultas\` - Consultas avanzadas de familias
+        - \`/api/reportes\` - Generación de reportes
+        
+        **Última actualización**: Septiembre 2025
+      `,
       contact: {
         name: 'API Support',
         email: 'support@parroquia.com'
