@@ -404,7 +404,7 @@ class FamiliasConsolidadoService {
             sec.nombre as sector_nombre,
             ver.nombre as vereda_nombre
           FROM familias f
-          LEFT JOIN parroquias p ON f.id_parroquia = p.id_parroquia  
+          LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia  
           LEFT JOIN municipios mun ON f.id_municipio = mun.id_municipio
           LEFT JOIN departamentos dep ON mun.id_departamento = dep.id_departamento
           LEFT JOIN sectores sec ON f.id_sector = sec.id_sector

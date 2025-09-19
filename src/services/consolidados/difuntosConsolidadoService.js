@@ -37,7 +37,7 @@ class DifuntosConsolidadoService {
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores s ON f.id_sector = s.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
-        LEFT JOIN parroquias p ON f.id_parroquia = p.id_parroquia
+        LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
       `, { type: QueryTypes.SELECT });
 
       console.log(`📊 Difuntos en tabla difuntos_familia: ${difuntosFamilia.length}`);
@@ -68,7 +68,7 @@ class DifuntosConsolidadoService {
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores s ON f.id_sector = s.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
-        LEFT JOIN parroquias p ON f.id_parroquia = p.id_parroquia
+        LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
         WHERE pe.estudios IS NOT NULL 
           AND pe.estudios LIKE '%es_fallecido%'
           AND pe.estudios::json->>'es_fallecido' = 'true'
@@ -210,7 +210,7 @@ class DifuntosConsolidadoService {
           LEFT JOIN familias f ON df.id_familia_familias = f.id_familia
           LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
           LEFT JOIN sectores s ON f.id_sector = s.id_sector
-          LEFT JOIN parroquias p ON f.id_parroquia = p.id_parroquia
+          LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
           WHERE df.fecha_fallecimiento IS NOT NULL
           
           UNION ALL
@@ -232,7 +232,7 @@ class DifuntosConsolidadoService {
           LEFT JOIN familias f ON pe.id_familia_familias = f.id_familia
           LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
           LEFT JOIN sectores s ON f.id_sector = s.id_sector
-          LEFT JOIN parroquias p ON f.id_parroquia = p.id_parroquia
+          LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
           WHERE pe.estudios IS NOT NULL 
             AND pe.estudios::json->>'es_fallecido' = 'true'
             AND pe.estudios::json->>'fecha_aniversario' IS NOT NULL
@@ -294,7 +294,7 @@ class DifuntosConsolidadoService {
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores s ON f.id_sector = s.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
-        LEFT JOIN parroquias p ON f.id_parroquia = p.id_parroquia
+        LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
         WHERE df.nombre_completo ILIKE :nombreBusqueda
       `, {
         replacements: { nombreBusqueda: `%${nombreBusqueda}%` },
@@ -321,7 +321,7 @@ class DifuntosConsolidadoService {
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores s ON f.id_sector = s.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
-        LEFT JOIN parroquias p ON f.id_parroquia = p.id_parroquia
+        LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
         WHERE pe.estudios IS NOT NULL 
           AND pe.estudios LIKE '%es_fallecido%'
           AND pe.estudios::json->>'es_fallecido' = 'true'

@@ -102,7 +102,7 @@ class EncuestaService {
       LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
       LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
       LEFT JOIN sectores s ON f.id_sector = s.id_sector
-      LEFT JOIN parroquias p ON f.id_parroquia = p.id_parroquia
+      LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
       LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
       LEFT JOIN personas per ON f.id_familia = per.id_familia_familias 
         AND per.identificacion NOT LIKE 'FALLECIDO%'
@@ -226,7 +226,7 @@ class EncuestaService {
       LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
       LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
       LEFT JOIN sectores s ON f.id_sector = s.id_sector
-      LEFT JOIN parroquias p ON f.id_parroquia = p.id_parroquia
+      LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
       LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
       LEFT JOIN personas per ON f.id_familia = per.id_familia_familias 
         AND per.identificacion NOT LIKE 'FALLECIDO%'
