@@ -1,6 +1,8 @@
 import { DifuntosFamilia, Familias, Municipios, Veredas, Sector } from '../../models/index.js';
 import { Op, QueryTypes } from 'sequelize';
 import sequelize from '../../../config/sequelize.js';
+import ExcelJS from 'exceljs';
+import PDFDocument from 'pdfkit';
 
 class DifuntosConsolidadoService {
   /**
@@ -490,6 +492,379 @@ class DifuntosConsolidadoService {
     } catch (error) {
       console.error('❌ Error obteniendo resumen por sector:', error);
       throw error;
+    }
+  }
+
+  /**
+   * NUEVO MÉTODO: Generar reporte Excel completo de difuntos
+   * Con múltiples hojas profesionales
+   */
+  async generarReporteExcelDifuntos(filtros = {}) {
+    const workbook = new ExcelJS.Workbook();
+    
+    // Configuración del workbook
+    workbook.creator = 'Sistema Parroquial - Difuntos';
+    workbook.created = new Date();
+    workbook.modified = new Date();
+    workbook.subject = 'Reporte Consolidado de Difuntos';
+    
+    try {
+      console.log('📊 Generando reporte Excel de difuntos con filtros:', filtros);
+      
+      // 1. Obtener datos consolidados
+      const datosDifuntos = await this.consultarDifuntos(filtros);
+      const difuntos = datosDifuntos.datos || [];
+      
+      console.log(`📋 Procesando ${difuntos.length} difuntos para Excel`);
+      
+      // 2. HOJA 1: RESUMEN GENERAL
+      await this.crearHojaResumenDifuntos(workbook, difuntos, datosDifuntos.estadisticas);
+      
+      // 3. HOJA 2: DETALLE COMPLETO
+      await this.crearHojaDetalleDifuntos(workbook, difuntos);
+      
+      // 4. HOJA 3: ESTADÍSTICAS POR FUENTE
+      await this.crearHojaEstadisticasFuente(workbook, difuntos);
+      
+      // 5. HOJA 4: ANÁLISIS POR PERÍODO
+      await this.crearHojaAnalisisPeriodo(workbook, difuntos);
+      
+      // 6. HOJA 5: ANÁLISIS GEOGRÁFICO
+      await this.crearHojaAnalisisGeografico(workbook, difuntos);
+      
+      console.log('✅ Excel de difuntos generado exitosamente');
+      return workbook;
+      
+    } catch (error) {
+      console.error('❌ Error generando Excel de difuntos:', error);
+      throw new Error(`Error en generación de Excel: ${error.message}`);
+    }
+  }
+
+  /**
+   * HOJA 1: RESUMEN GENERAL DE DIFUNTOS
+   */
+  async crearHojaResumenDifuntos(workbook, difuntos, estadisticas) {
+    const hoja = workbook.addWorksheet('Resumen General');
+    
+    // Configurar columnas
+    hoja.columns = [
+      { header: 'Fuente', key: 'fuente', width: 18 },
+      { header: 'ID Difunto', key: 'id_difunto', width: 12 },
+      { header: 'Nombre Completo', key: 'nombre_completo', width: 30 },
+      { header: 'Parentesco', key: 'parentesco', width: 12 },
+      { header: 'Fecha Aniversario', key: 'fecha_aniversario', width: 18 },
+      { header: 'Apellido Familiar', key: 'apellido_familiar', width: 25 },
+      { header: 'Parroquia', key: 'parroquia', width: 20 },
+      { header: 'Municipio', key: 'municipio', width: 20 },
+      { header: 'Sector', key: 'sector', width: 18 },
+      { header: 'Vereda', key: 'vereda', width: 18 },
+      { header: 'Teléfono', key: 'telefono', width: 15 },
+      { header: 'Dirección', key: 'direccion', width: 35 },
+      { header: 'Observaciones', key: 'observaciones', width: 40 }
+    ];
+    
+    // Agregar datos
+    difuntos.forEach(difunto => {
+      hoja.addRow({
+        fuente: difunto.fuente === 'difuntos_familia' ? 'Registro Difuntos' : 'Registro Personas',
+        id_difunto: difunto.id_difunto,
+        nombre_completo: difunto.nombre_completo,
+        parentesco: difunto.parentesco_inferido,
+        fecha_aniversario: difunto.fecha_aniversario ? new Date(difunto.fecha_aniversario).toLocaleDateString() : 'No especificada',
+        apellido_familiar: difunto.apellido_familiar,
+        parroquia: difunto.nombre_parroquia,
+        municipio: difunto.nombre_municipio,
+        sector: difunto.nombre_sector,
+        vereda: difunto.nombre_vereda,
+        telefono: difunto.telefono,
+        direccion: difunto.direccion_familia,
+        observaciones: difunto.observaciones
+      });
+    });
+    
+    this.aplicarFormatoTablaDifuntos(hoja);
+  }
+
+  /**
+   * HOJA 2: DETALLE COMPLETO POR DIFUNTO
+   */
+  async crearHojaDetalleDifuntos(workbook, difuntos) {
+    const hoja = workbook.addWorksheet('Detalle Completo');
+    
+    hoja.columns = [
+      { header: 'Tipo Registro', key: 'tipo_registro', width: 18 },
+      { header: 'ID Sistema', key: 'id_sistema', width: 12 },
+      { header: 'Nombre Completo', key: 'nombre', width: 35 },
+      { header: 'Parentesco Inferido', key: 'parentesco', width: 18 },
+      { header: 'Fecha Fallecimiento', key: 'fecha', width: 18 },
+      { header: 'Año Fallecimiento', key: 'año', width: 15 },
+      { header: 'Mes Fallecimiento', key: 'mes', width: 15 },
+      { header: 'Familia', key: 'familia', width: 25 },
+      { header: 'Ubicación Completa', key: 'ubicacion', width: 50 },
+      { header: 'Contacto', key: 'contacto', width: 15 },
+      { header: 'Observaciones Completas', key: 'observaciones_completas', width: 50 }
+    ];
+    
+    // Agregar datos enriquecidos
+    difuntos.forEach(difunto => {
+      const fecha = difunto.fecha_aniversario ? new Date(difunto.fecha_aniversario) : null;
+      const ubicacion = [
+        difunto.nombre_parroquia,
+        difunto.nombre_municipio,
+        difunto.nombre_sector,
+        difunto.nombre_vereda
+      ].filter(Boolean).join(' - ');
+      
+      hoja.addRow({
+        tipo_registro: difunto.fuente === 'difuntos_familia' ? 'Tabla Difuntos' : 'Personas Fallecidas',
+        id_sistema: difunto.id_difunto,
+        nombre: difunto.nombre_completo,
+        parentesco: difunto.parentesco_inferido,
+        fecha: fecha ? fecha.toLocaleDateString() : 'No especificada',
+        año: fecha ? fecha.getFullYear() : 'N/A',
+        mes: fecha ? fecha.toLocaleDateString('es-ES', { month: 'long' }) : 'N/A',
+        familia: difunto.apellido_familiar,
+        ubicacion: ubicacion,
+        contacto: difunto.telefono,
+        observaciones_completas: difunto.observaciones
+      });
+    });
+    
+    this.aplicarFormatoTablaDifuntos(hoja);
+  }
+
+  /**
+   * HOJA 3: ESTADÍSTICAS POR FUENTE DE DATOS
+   */
+  async crearHojaEstadisticasFuente(workbook, difuntos) {
+    const hoja = workbook.addWorksheet('Estadísticas por Fuente');
+    
+    // Calcular estadísticas por fuente
+    const estadisticasFuente = {
+      difuntos_familia: difuntos.filter(d => d.fuente === 'difuntos_familia'),
+      personas: difuntos.filter(d => d.fuente === 'personas')
+    };
+    
+    // Estadísticas por parentesco y fuente
+    const estadisticasParentesco = {};
+    Object.keys(estadisticasFuente).forEach(fuente => {
+      estadisticasParentesco[fuente] = {};
+      estadisticasFuente[fuente].forEach(difunto => {
+        const parentesco = difunto.parentesco_inferido;
+        estadisticasParentesco[fuente][parentesco] = (estadisticasParentesco[fuente][parentesco] || 0) + 1;
+      });
+    });
+    
+    // Crear tabla de resumen
+    hoja.addRow(['RESUMEN POR FUENTE DE DATOS']);
+    hoja.addRow([]);
+    hoja.addRow(['Fuente', 'Total Difuntos', 'Porcentaje']);
+    
+    Object.keys(estadisticasFuente).forEach(fuente => {
+      const total = estadisticasFuente[fuente].length;
+      const porcentaje = ((total / difuntos.length) * 100).toFixed(1);
+      hoja.addRow([
+        fuente === 'difuntos_familia' ? 'Tabla Difuntos Familia' : 'Personas Fallecidas',
+        total,
+        `${porcentaje}%`
+      ]);
+    });
+    
+    hoja.addRow([]);
+    hoja.addRow(['DISTRIBUCIÓN POR PARENTESCO Y FUENTE']);
+    hoja.addRow([]);
+    hoja.addRow(['Parentesco', 'Tabla Difuntos', 'Personas Fallecidas', 'Total']);
+    
+    // Obtener todos los parentescos únicos
+    const todosParentescos = [...new Set(difuntos.map(d => d.parentesco_inferido))];
+    
+    todosParentescos.forEach(parentesco => {
+      const difuntosFamilia = estadisticasParentesco.difuntos_familia[parentesco] || 0;
+      const personas = estadisticasParentesco.personas[parentesco] || 0;
+      const total = difuntosFamilia + personas;
+      
+      hoja.addRow([parentesco, difuntosFamilia, personas, total]);
+    });
+    
+    // Formato
+    hoja.getRow(1).font = { bold: true, size: 14 };
+    hoja.getRow(3).font = { bold: true };
+    hoja.getRow(7).font = { bold: true, size: 14 };
+    hoja.getRow(9).font = { bold: true };
+    
+    hoja.getColumn(1).width = 25;
+    hoja.getColumn(2).width = 15;
+    hoja.getColumn(3).width = 20;
+    hoja.getColumn(4).width = 15;
+  }
+
+  /**
+   * HOJA 4: ANÁLISIS POR PERÍODO
+   */
+  async crearHojaAnalisisPeriodo(workbook, difuntos) {
+    const hoja = workbook.addWorksheet('Análisis por Período');
+    
+    // Agrupar por año y mes
+    const analisisPeriodo = {};
+    const analisisMes = {};
+    
+    difuntos.forEach(difunto => {
+      if (difunto.fecha_aniversario) {
+        const fecha = new Date(difunto.fecha_aniversario);
+        const año = fecha.getFullYear();
+        const mes = fecha.getMonth() + 1;
+        const nombreMes = fecha.toLocaleDateString('es-ES', { month: 'long' });
+        
+        // Por año
+        analisisPeriodo[año] = (analisisPeriodo[año] || 0) + 1;
+        
+        // Por mes (global)
+        analisisMes[nombreMes] = (analisisMes[nombreMes] || 0) + 1;
+      }
+    });
+    
+    // Tabla por años
+    hoja.addRow(['DISTRIBUCIÓN POR AÑO']);
+    hoja.addRow([]);
+    hoja.addRow(['Año', 'Total Difuntos', 'Porcentaje']);
+    
+    Object.keys(analisisPeriodo)
+      .sort((a, b) => b - a) // Ordenar años descendente
+      .forEach(año => {
+        const total = analisisPeriodo[año];
+        const porcentaje = ((total / difuntos.length) * 100).toFixed(1);
+        hoja.addRow([año, total, `${porcentaje}%`]);
+      });
+    
+    hoja.addRow([]);
+    hoja.addRow(['DISTRIBUCIÓN POR MES (GLOBAL)']);
+    hoja.addRow([]);
+    hoja.addRow(['Mes', 'Total Difuntos', 'Porcentaje']);
+    
+    // Ordenar meses correctamente
+    const mesesOrdenados = [
+      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    ];
+    
+    mesesOrdenados.forEach(mes => {
+      if (analisisMes[mes]) {
+        const total = analisisMes[mes];
+        const porcentaje = ((total / difuntos.length) * 100).toFixed(1);
+        hoja.addRow([mes.charAt(0).toUpperCase() + mes.slice(1), total, `${porcentaje}%`]);
+      }
+    });
+    
+    // Formato
+    hoja.getRow(1).font = { bold: true, size: 14 };
+    hoja.getRow(3).font = { bold: true };
+    hoja.getRow(6 + Object.keys(analisisPeriodo).length).font = { bold: true, size: 14 };
+    
+    hoja.getColumn(1).width = 20;
+    hoja.getColumn(2).width = 15;
+    hoja.getColumn(3).width = 15;
+  }
+
+  /**
+   * HOJA 5: ANÁLISIS GEOGRÁFICO
+   */
+  async crearHojaAnalisisGeografico(workbook, difuntos) {
+    const hoja = workbook.addWorksheet('Análisis Geográfico');
+    
+    // Análisis por ubicación
+    const porParroquia = {};
+    const porMunicipio = {};
+    const porSector = {};
+    
+    difuntos.forEach(difunto => {
+      // Por parroquia
+      const parroquia = difunto.nombre_parroquia || 'Sin parroquia';
+      porParroquia[parroquia] = (porParroquia[parroquia] || 0) + 1;
+      
+      // Por municipio
+      const municipio = difunto.nombre_municipio || 'Sin municipio';
+      porMunicipio[municipio] = (porMunicipio[municipio] || 0) + 1;
+      
+      // Por sector
+      const sector = difunto.nombre_sector || 'Sin sector';
+      porSector[sector] = (porSector[sector] || 0) + 1;
+    });
+    
+    // Tabla por parroquias
+    hoja.addRow(['DISTRIBUCIÓN POR PARROQUIA']);
+    hoja.addRow([]);
+    hoja.addRow(['Parroquia', 'Total Difuntos', 'Porcentaje']);
+    
+    Object.entries(porParroquia)
+      .sort(([,a], [,b]) => b - a) // Ordenar por cantidad descendente
+      .forEach(([parroquia, total]) => {
+        const porcentaje = ((total / difuntos.length) * 100).toFixed(1);
+        hoja.addRow([parroquia, total, `${porcentaje}%`]);
+      });
+    
+    hoja.addRow([]);
+    hoja.addRow(['DISTRIBUCIÓN POR MUNICIPIO']);
+    hoja.addRow([]);
+    hoja.addRow(['Municipio', 'Total Difuntos', 'Porcentaje']);
+    
+    Object.entries(porMunicipio)
+      .sort(([,a], [,b]) => b - a)
+      .forEach(([municipio, total]) => {
+        const porcentaje = ((total / difuntos.length) * 100).toFixed(1);
+        hoja.addRow([municipio, total, `${porcentaje}%`]);
+      });
+    
+    hoja.addRow([]);
+    hoja.addRow(['DISTRIBUCIÓN POR SECTOR']);
+    hoja.addRow([]);
+    hoja.addRow(['Sector', 'Total Difuntos', 'Porcentaje']);
+    
+    Object.entries(porSector)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 15) // Solo top 15 sectores
+      .forEach(([sector, total]) => {
+        const porcentaje = ((total / difuntos.length) * 100).toFixed(1);
+        hoja.addRow([sector, total, `${porcentaje}%`]);
+      });
+    
+    // Formato
+    hoja.getRow(1).font = { bold: true, size: 14 };
+    hoja.getRow(3).font = { bold: true };
+    
+    hoja.getColumn(1).width = 30;
+    hoja.getColumn(2).width = 15;
+    hoja.getColumn(3).width = 15;
+  }
+
+  /**
+   * FUNCIÓN AUXILIAR: Aplicar formato profesional a tablas de difuntos
+   */
+  aplicarFormatoTablaDifuntos(hoja) {
+    // Formatear encabezados
+    hoja.getRow(1).eachCell(cell => {
+      cell.font = { bold: true, color: { argb: 'FFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '8B4513' } }; // Color marrón para difuntos
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = {
+        top: { style: 'thin' },
+        bottom: { style: 'thin' },
+        left: { style: 'thin' },
+        right: { style: 'thin' }
+      };
+    });
+    
+    // Auto-ajustar altura de filas
+    hoja.eachRow((row, rowNumber) => {
+      row.height = rowNumber === 1 ? 25 : 20;
+    });
+    
+    // Aplicar filtros automáticos si hay datos
+    if (hoja.rowCount > 1) {
+      hoja.autoFilter = {
+        from: 'A1',
+        to: hoja.lastColumn.letter + '1'
+      };
     }
   }
 }

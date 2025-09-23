@@ -67,44 +67,59 @@ const router = express.Router();
  * /api/difuntos:
  *   get:
  *     summary: Consulta consolidada de difuntos
- *     description: Obtiene registros de difuntos con filtros múltiples
+ *     description: Obtiene registros de difuntos con filtros múltiples incluyendo IDs específicos
  *     tags: [Difuntos Consolidado]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
+ *         name: id_parroquia
+ *         schema:
+ *           type: integer
+ *         description: ID específico de la parroquia
+ *       - in: query
+ *         name: id_municipio
+ *         schema:
+ *           type: integer
+ *         description: ID específico del municipio
+ *       - in: query
+ *         name: id_sector
+ *         schema:
+ *           type: integer
+ *         description: ID específico del sector
+ *       - in: query
  *         name: parentesco
  *         schema:
  *           type: string
- *           enum: [Madre, Padre]
- *         description: Filtrar por parentesco (Madre o Padre)
+ *           enum: [Madre, Padre, Hijo, Hija, Esposo, Esposa, Hermano, Hermana, Otro]
+ *         description: Filtrar por parentesco específico
  *       - in: query
  *         name: fecha_inicio
  *         schema:
  *           type: string
  *           format: date
- *         description: Fecha inicio del rango de búsqueda
+ *         description: Fecha inicio del rango de búsqueda (YYYY-MM-DD)
  *       - in: query
  *         name: fecha_fin
  *         schema:
  *           type: string
  *           format: date
- *         description: Fecha fin del rango de búsqueda
+ *         description: Fecha fin del rango de búsqueda (YYYY-MM-DD)
  *       - in: query
  *         name: sector
  *         schema:
  *           type: string
- *         description: Filtrar por sector o vereda
+ *         description: Filtrar por nombre del sector o vereda
  *       - in: query
  *         name: municipio
  *         schema:
  *           type: string
- *         description: Filtrar por municipio
+ *         description: Filtrar por nombre del municipio
  *       - in: query
  *         name: parroquia
  *         schema:
  *           type: string
- *         description: Filtrar por parroquia
+ *         description: Filtrar por nombre de la parroquia
  *     responses:
  *       200:
  *         description: Consulta exitosa
@@ -204,5 +219,131 @@ router.get('/aniversarios', authMiddleware.authenticateToken, difuntosConsolidad
  *                   type: integer
  */
 router.get('/estadisticas', authMiddleware.authenticateToken, difuntosConsolidadoController.obtenerEstadisticas);
+
+/**
+ * @swagger
+ * /api/difuntos/reporte/excel:
+ *   get:
+ *     summary: Generar reporte Excel de difuntos
+ *     description: Genera un archivo Excel con datos consolidados de difuntos, incluye múltiples hojas con análisis detallado
+ *     tags: [Difuntos Consolidado]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id_parroquia
+ *         schema:
+ *           type: integer
+ *         description: ID específico de la parroquia para filtrar
+ *       - in: query
+ *         name: id_municipio
+ *         schema:
+ *           type: integer
+ *         description: ID específico del municipio para filtrar
+ *       - in: query
+ *         name: id_sector
+ *         schema:
+ *           type: integer
+ *         description: ID específico del sector para filtrar
+ *       - in: query
+ *         name: parentesco
+ *         schema:
+ *           type: string
+ *           enum: [Madre, Padre, Hijo, Hija, Esposo, Esposa, Hermano, Hermana, Otro]
+ *         description: Filtrar por parentesco específico
+ *       - in: query
+ *         name: fecha_inicio
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Fecha inicio del rango de análisis (YYYY-MM-DD)
+ *       - in: query
+ *         name: fecha_fin
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Fecha fin del rango de análisis (YYYY-MM-DD)
+ *     responses:
+ *       200:
+ *         description: Archivo Excel generado exitosamente
+ *         content:
+ *           application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *         headers:
+ *           Content-Disposition:
+ *             schema:
+ *               type: string
+ *               example: attachment; filename=reporte_difuntos_consolidado.xlsx
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error interno del servidor al generar el reporte
+ */
+router.get('/reporte/excel', authMiddleware.authenticateToken, difuntosConsolidadoController.generarReporteExcelCompleto);
+
+/**
+ * @swagger
+ * /api/difuntos/reporte/pdf:
+ *   get:
+ *     summary: Generar reporte PDF de difuntos
+ *     description: Genera un archivo PDF con datos consolidados de difuntos, incluye resumen estadístico y análisis detallado
+ *     tags: [Difuntos Consolidado]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id_parroquia
+ *         schema:
+ *           type: integer
+ *         description: ID específico de la parroquia para filtrar
+ *       - in: query
+ *         name: id_municipio
+ *         schema:
+ *           type: integer
+ *         description: ID específico del municipio para filtrar
+ *       - in: query
+ *         name: id_sector
+ *         schema:
+ *           type: integer
+ *         description: ID específico del sector para filtrar
+ *       - in: query
+ *         name: parentesco
+ *         schema:
+ *           type: string
+ *           enum: [Madre, Padre, Hijo, Hija, Esposo, Esposa, Hermano, Hermana, Otro]
+ *         description: Filtrar por parentesco específico
+ *       - in: query
+ *         name: fecha_inicio
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Fecha inicio del rango de análisis (YYYY-MM-DD)
+ *       - in: query
+ *         name: fecha_fin
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Fecha fin del rango de análisis (YYYY-MM-DD)
+ *     responses:
+ *       200:
+ *         description: Archivo PDF generado exitosamente
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *         headers:
+ *           Content-Disposition:
+ *             schema:
+ *               type: string
+ *               example: attachment; filename=reporte_difuntos_consolidado.pdf
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error interno del servidor al generar el reporte
+ */
+router.get('/reporte/pdf', authMiddleware.authenticateToken, difuntosConsolidadoController.generarReportePDFCompleto);
 
 export default router;
