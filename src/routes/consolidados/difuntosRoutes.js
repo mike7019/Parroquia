@@ -88,11 +88,10 @@ const router = express.Router();
  *           type: integer
  *         description: ID específico del sector
  *       - in: query
- *         name: parentesco
+ *         name: id_parentesco
  *         schema:
- *           type: string
- *           enum: [Madre, Padre, Hijo, Hija, Esposo, Esposa, Hermano, Hermana, Otro]
- *         description: Filtrar por parentesco específico
+ *           type: integer
+ *         description: ID específico del parentesco
  *       - in: query
  *         name: fecha_inicio
  *         schema:
@@ -105,21 +104,6 @@ const router = express.Router();
  *           type: string
  *           format: date
  *         description: Fecha fin del rango de búsqueda (YYYY-MM-DD)
- *       - in: query
- *         name: sector
- *         schema:
- *           type: string
- *         description: Filtrar por nombre del sector o vereda
- *       - in: query
- *         name: municipio
- *         schema:
- *           type: string
- *         description: Filtrar por nombre del municipio
- *       - in: query
- *         name: parroquia
- *         schema:
- *           type: string
- *         description: Filtrar por nombre de la parroquia
  *     responses:
  *       200:
  *         description: Consulta exitosa

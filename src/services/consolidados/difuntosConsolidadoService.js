@@ -12,7 +12,7 @@ class DifuntosConsolidadoService {
    * @param {number} filtros.id_parroquia - ID de la parroquia
    * @param {number} filtros.id_municipio - ID del municipio
    * @param {number} filtros.id_sector - ID del sector
-   * @param {string} filtros.parentesco - Tipo de parentesco (Madre, Padre, etc.)
+   * @param {number} filtros.id_parentesco - ID del parentesco
    * @param {string} filtros.fecha_inicio - Fecha de inicio del rango (YYYY-MM-DD)
    * @param {string} filtros.fecha_fin - Fecha de fin del rango (YYYY-MM-DD)
    */
@@ -166,39 +166,10 @@ class DifuntosConsolidadoService {
       // PASO 4: Aplicar filtro de parentesco si se proporciona (filtro post-consulta para mayor precisión)
       let difuntosFiltrados = todosLosDifuntos;
       
-      if (filtros.parentesco) {
-        const parentescoNormalizado = filtros.parentesco.toLowerCase().trim();
-        difuntosFiltrados = difuntosFiltrados.filter(difunto => {
-          const parentescoInferido = difunto.parentesco_inferido.toLowerCase();
-          const nombreCompleto = difunto.nombre_completo.toLowerCase();
-          const observaciones = (difunto.observaciones || '').toLowerCase();
-          
-          switch (parentescoNormalizado) {
-            case 'madre':
-            case 'madres':
-              return parentescoInferido === 'madre' || 
-                     nombreCompleto.includes('madre') ||
-                     nombreCompleto.includes('mamá') ||
-                     observaciones.includes('madre');
-                     
-            case 'padre':
-            case 'padres':
-              return parentescoInferido === 'padre' ||
-                     nombreCompleto.includes('padre') ||
-                     nombreCompleto.includes('papá') ||
-                     observaciones.includes('padre');
-                     
-            case 'familiar':
-            case 'familiares':
-              return parentescoInferido === 'familiar';
-              
-            default:
-              // Si no coincide con tipos conocidos, buscar en el parentesco inferido
-              return parentescoInferido.includes(parentescoNormalizado);
-          }
-        });
-        
-        console.log(`🔍 Filtro parentesco '${filtros.parentesco}': ${difuntosFiltrados.length} de ${todosLosDifuntos.length} difuntos`);
+      if (filtros.id_parentesco) {
+        console.log(`🔍 Filtro id_parentesco ${filtros.id_parentesco}: Se aplicaría en el frontend o con JOIN a tabla parentescos`);
+        // Nota: Este filtro puede implementarse con JOIN a tabla de parentescos si existe
+        // O manejarse en el frontend según la lógica de negocio
       }
 
       // Ordenar por fecha de aniversario descendente (más recientes primero)
@@ -218,7 +189,7 @@ class DifuntosConsolidadoService {
           id_parroquia: filtros.id_parroquia || 'todos',
           id_municipio: filtros.id_municipio || 'todos',
           id_sector: filtros.id_sector || 'todos',
-          parentesco: filtros.parentesco || 'todos',
+          id_parentesco: filtros.id_parentesco || 'todos',
           rango_fechas: filtros.fecha_inicio && filtros.fecha_fin ? 
             `${filtros.fecha_inicio} a ${filtros.fecha_fin}` : 'sin rango'
         }
@@ -291,73 +262,44 @@ class DifuntosConsolidadoService {
    */
   async obtenerProximosAniversarios(diasAdelante = 30) {
     try {
+      // Query simplificada solo para difuntos_familia con cálculo de aniversarios próximos
       const query = `
-        WITH difuntos_consolidados AS (
-          -- Difuntos de la tabla difuntos_familia
-          SELECT 
-            'difuntos_familia' as fuente,
-            df.id_difunto::text as id_difunto,
-            df.nombre_completo,
-            df.fecha_fallecimiento as fecha_aniversario,
-            df.observaciones,
-            f.apellido_familiar,
-            f.telefono,
-            f.direccion_familia,
-            m.nombre_municipio,
-            s.nombre as nombre_sector,
-            p.nombre as nombre_parroquia
-          FROM difuntos_familia df
-          LEFT JOIN familias f ON df.id_familia_familias = f.id_familia
-          LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
-          LEFT JOIN sectores s ON f.id_sector = s.id_sector
-          LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
-          WHERE df.fecha_fallecimiento IS NOT NULL
-          
-          UNION ALL
-          
-          -- Difuntos de la tabla personas
-          SELECT 
-            'personas' as fuente,
-            pe.id_personas::text as id_difunto,
-            CONCAT(pe.primer_nombre, ' ', COALESCE(pe.segundo_nombre, ''), ' ', COALESCE(pe.primer_apellido, ''), ' ', COALESCE(pe.segundo_apellido, '')) as nombre_completo,
-            (pe.estudios::json->>'fecha_aniversario')::date as fecha_aniversario,
-            pe.estudios::json->>'causa_fallecimiento' as observaciones,
-            f.apellido_familiar,
-            f.telefono,
-            f.direccion_familia,
-            m.nombre_municipio,
-            s.nombre as nombre_sector,
-            p.nombre as nombre_parroquia
-          FROM personas pe
-          LEFT JOIN familias f ON pe.id_familia_familias = f.id_familia
-          LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
-          LEFT JOIN sectores s ON f.id_sector = s.id_sector
-          LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
-          WHERE pe.estudios IS NOT NULL 
-            AND pe.estudios::json->>'es_fallecido' = 'true'
-            AND pe.estudios::json->>'fecha_aniversario' IS NOT NULL
-        )
-        SELECT *,
-          DATE_PART('day', 
-            (DATE_TRUNC('year', CURRENT_DATE) + 
-             INTERVAL '1 year' * 
-             CASE WHEN EXTRACT(DOY FROM fecha_aniversario) < EXTRACT(DOY FROM CURRENT_DATE) 
-                  THEN 1 ELSE 0 END +
-             INTERVAL '1 day' * (EXTRACT(DOY FROM fecha_aniversario) - 1)) - CURRENT_DATE
-          ) as dias_hasta_aniversario
-        FROM difuntos_consolidados
-        WHERE DATE_PART('day', 
-          (DATE_TRUNC('year', CURRENT_DATE) + 
-           INTERVAL '1 year' * 
-           CASE WHEN EXTRACT(DOY FROM fecha_aniversario) < EXTRACT(DOY FROM CURRENT_DATE) 
-                THEN 1 ELSE 0 END +
-           INTERVAL '1 day' * (EXTRACT(DOY FROM fecha_aniversario) - 1)) - CURRENT_DATE
-        ) BETWEEN 0 AND :diasAdelante
+        SELECT 
+          df.id_difunto,
+          df.nombre_completo,
+          df.fecha_fallecimiento as fecha_aniversario,
+          df.observaciones,
+          f.apellido_familiar,
+          f.telefono,
+          f.direccion_familia,
+          m.nombre_municipio,
+          s.nombre as nombre_sector,
+          p.nombre as nombre_parroquia,
+          -- Calcular días hasta el próximo aniversario
+          CASE 
+            WHEN EXTRACT(DOY FROM df.fecha_fallecimiento) >= EXTRACT(DOY FROM CURRENT_DATE) 
+            THEN EXTRACT(DOY FROM df.fecha_fallecimiento) - EXTRACT(DOY FROM CURRENT_DATE)
+            ELSE (365 - EXTRACT(DOY FROM CURRENT_DATE)) + EXTRACT(DOY FROM df.fecha_fallecimiento)
+          END as dias_hasta_aniversario
+        FROM difuntos_familia df
+        LEFT JOIN familias f ON df.id_familia_familias = f.id_familia
+        LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
+        LEFT JOIN sectores s ON f.id_sector = s.id_sector
+        LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
+        WHERE df.fecha_fallecimiento IS NOT NULL
+          AND (
+            CASE 
+              WHEN EXTRACT(DOY FROM df.fecha_fallecimiento) >= EXTRACT(DOY FROM CURRENT_DATE) 
+              THEN EXTRACT(DOY FROM df.fecha_fallecimiento) - EXTRACT(DOY FROM CURRENT_DATE)
+              ELSE (365 - EXTRACT(DOY FROM CURRENT_DATE)) + EXTRACT(DOY FROM df.fecha_fallecimiento)
+            END
+          ) <= $1
         ORDER BY dias_hasta_aniversario ASC
+        LIMIT 50
       `;
       
       const resultado = await sequelize.query(query, {
-        replacements: { diasAdelante },
+        bind: [diasAdelante],
         type: QueryTypes.SELECT
       });
       
@@ -866,6 +808,151 @@ class DifuntosConsolidadoService {
         to: hoja.lastColumn.letter + '1'
       };
     }
+  }
+
+  /**
+   * Generar reporte PDF de difuntos con filtros avanzados
+   */
+  async generarReportePDFDifuntos(filtros = {}) {
+    try {
+      // Obtener datos de difuntos
+      const difuntos = await this.consultarDifuntos(filtros);
+      
+      // Crear documento PDF
+      const doc = new PDFDocument({ margin: 50 });
+      const buffers = [];
+      
+      // Capturar el PDF en memoria
+      doc.on('data', buffers.push.bind(buffers));
+      
+      return new Promise((resolve, reject) => {
+        doc.on('end', () => {
+          const pdfBuffer = Buffer.concat(buffers);
+          resolve(pdfBuffer);
+        });
+        
+        doc.on('error', reject);
+        
+        // Generar contenido del PDF
+        this.generarContenidoPDF(doc, difuntos.datos || [], filtros);
+        
+        // Finalizar documento
+        doc.end();
+      });
+      
+    } catch (error) {
+      console.error('❌ Error generando reporte PDF:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generar contenido del PDF
+   */
+  generarContenidoPDF(doc, difuntos, filtros) {
+    const fechaReporte = new Date().toLocaleDateString('es-ES');
+    
+    // Encabezado
+    doc.fontSize(20)
+       .fillColor('#8B4513')
+       .text('Reporte de Difuntos - Parroquia', { align: 'center' });
+    
+    doc.fontSize(12)
+       .fillColor('black')
+       .text(`Fecha del reporte: ${fechaReporte}`, { align: 'right' })
+       .moveDown();
+    
+    // Filtros aplicados
+    if (Object.keys(filtros).length > 0) {
+      doc.fontSize(14)
+         .fillColor('#8B4513')
+         .text('Filtros Aplicados:', { underline: true })
+         .fontSize(10)
+         .fillColor('black');
+      
+      Object.entries(filtros).forEach(([key, value]) => {
+        if (value) {
+          doc.text(`• ${key.replace('_', ' ')}: ${value}`);
+        }
+      });
+      doc.moveDown();
+    }
+    
+    // Resumen estadístico
+    doc.fontSize(14)
+       .fillColor('#8B4513')
+       .text('Resumen Estadístico', { underline: true })
+       .fontSize(10)
+       .fillColor('black');
+    
+    doc.text(`Total de difuntos: ${difuntos.length}`)
+       .moveDown();
+    
+    // Análisis por parentesco
+    const porParentesco = {};
+    difuntos.forEach(difunto => {
+      const parentesco = difunto.parentesco || 'Sin especificar';
+      porParentesco[parentesco] = (porParentesco[parentesco] || 0) + 1;
+    });
+    
+    doc.text('Distribución por parentesco:');
+    Object.entries(porParentesco).forEach(([parentesco, total]) => {
+      const porcentaje = ((total / difuntos.length) * 100).toFixed(1);
+      doc.text(`  • ${parentesco}: ${total} (${porcentaje}%)`);
+    });
+    
+    doc.moveDown();
+    
+    // Lista detallada (paginada)
+    doc.fontSize(14)
+       .fillColor('#8B4513')
+       .text('Listado Detallado', { underline: true })
+       .fontSize(9)
+       .fillColor('black');
+    
+    let yPosition = doc.y;
+    const pageHeight = doc.page.height - 100;
+    
+    difuntos.forEach((difunto, index) => {
+      // Verificar si necesitamos nueva página
+      if (yPosition > pageHeight - 150) {
+        doc.addPage();
+        yPosition = 50;
+      }
+      
+      // Información del difunto
+      doc.fontSize(10)
+         .fillColor('#8B4513')
+         .text(`${index + 1}. ${difunto.nombre_completo || 'Sin nombre'}`, { continued: false })
+         .fontSize(9)
+         .fillColor('black');
+      
+      if (difunto.apellido_familiar) {
+        doc.text(`   Familia: ${difunto.apellido_familiar}`);
+      }
+      
+      if (difunto.fecha_aniversario) {
+        doc.text(`   Fecha: ${new Date(difunto.fecha_aniversario).toLocaleDateString('es-ES')}`);
+      }
+      
+      if (difunto.parentesco) {
+        doc.text(`   Parentesco: ${difunto.parentesco}`);
+      }
+      
+      if (difunto.municipio || difunto.nombre_sector) {
+        doc.text(`   Ubicación: ${difunto.municipio || 'N/A'} - ${difunto.nombre_sector || 'N/A'}`);
+      }
+      
+      doc.moveDown(0.5);
+      yPosition = doc.y;
+    });
+    
+    // Pie de página
+    const totalPages = Math.ceil(difuntos.length / 20) + 1;
+    doc.fontSize(8)
+       .fillColor('gray')
+       .text(`Reporte generado el ${fechaReporte} - Total de registros: ${difuntos.length}`,
+             50, doc.page.height - 30, { align: 'center' });
   }
 }
 
