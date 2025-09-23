@@ -6,10 +6,51 @@ class DifuntosConsolidadoService {
   /**
    * Consulta consolidada de difuntos con filtros múltiples
    * Consulta tanto difuntos_familia como personas fallecidas
+   * @param {Object} filtros - Filtros de búsqueda
+   * @param {number} filtros.id_parroquia - ID de la parroquia
+   * @param {number} filtros.id_municipio - ID del municipio
+   * @param {number} filtros.id_sector - ID del sector
+   * @param {string} filtros.parentesco - Tipo de parentesco (Madre, Padre, etc.)
+   * @param {string} filtros.fecha_inicio - Fecha de inicio del rango (YYYY-MM-DD)
+   * @param {string} filtros.fecha_fin - Fecha de fin del rango (YYYY-MM-DD)
    */
   async consultarDifuntos(filtros = {}) {
     try {
       console.log('🔍 Iniciando consulta consolidada de difuntos...', filtros);
+      
+      // Construir condiciones WHERE para filtros por ID
+      const whereConditions = [];
+      const replacements = {};
+      
+      if (filtros.id_parroquia) {
+        whereConditions.push('p.id_parroquia = :id_parroquia');
+        replacements.id_parroquia = filtros.id_parroquia;
+      }
+      
+      if (filtros.id_municipio) {
+        whereConditions.push('m.id_municipio = :id_municipio');
+        replacements.id_municipio = filtros.id_municipio;
+      }
+      
+      if (filtros.id_sector) {
+        whereConditions.push('s.id_sector = :id_sector');
+        replacements.id_sector = filtros.id_sector;
+      }
+      
+      // Filtro de rango de fechas
+      if (filtros.fecha_inicio && filtros.fecha_fin) {
+        whereConditions.push('df.fecha_fallecimiento BETWEEN :fecha_inicio AND :fecha_fin');
+        replacements.fecha_inicio = filtros.fecha_inicio;
+        replacements.fecha_fin = filtros.fecha_fin;
+      } else if (filtros.fecha_inicio) {
+        whereConditions.push('df.fecha_fallecimiento >= :fecha_inicio');
+        replacements.fecha_inicio = filtros.fecha_inicio;
+      } else if (filtros.fecha_fin) {
+        whereConditions.push('df.fecha_fallecimiento <= :fecha_fin');
+        replacements.fecha_fin = filtros.fecha_fin;
+      }
+      
+      const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
       
       // PASO 1: Consultar difuntos de la tabla difuntos_familia
       const difuntosFamilia = await sequelize.query(`
@@ -23,9 +64,13 @@ class DifuntosConsolidadoService {
           f.sector,
           f.telefono,
           f.direccion_familia,
+          m.id_municipio,
           m.nombre_municipio,
+          s.id_sector,
           s.nombre as nombre_sector,
+          v.id_vereda,
           v.nombre as nombre_vereda,
+          p.id_parroquia,
           p.nombre as nombre_parroquia,
           CASE 
             WHEN df.nombre_completo ILIKE '%madre%' OR df.nombre_completo ILIKE '%mamá%' OR df.observaciones ILIKE '%madre%' THEN 'Madre'
@@ -38,9 +83,41 @@ class DifuntosConsolidadoService {
         LEFT JOIN sectores s ON f.id_sector = s.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
         LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
-      `, { type: QueryTypes.SELECT });
+        ${whereClause}
+      `, { 
+        type: QueryTypes.SELECT,
+        replacements 
+      });
 
       console.log(`📊 Difuntos en tabla difuntos_familia: ${difuntosFamilia.length}`);
+
+      // Construir condiciones WHERE para personas fallecidas (mismos filtros)
+      const whereConditionsPersonas = ['pe.estudios IS NOT NULL', 
+                                      'pe.estudios LIKE \'%es_fallecido%\'',
+                                      'pe.estudios::json->>\'es_fallecido\' = \'true\''];
+      
+      if (filtros.id_parroquia) {
+        whereConditionsPersonas.push('p.id_parroquia = :id_parroquia');
+      }
+      
+      if (filtros.id_municipio) {
+        whereConditionsPersonas.push('m.id_municipio = :id_municipio');
+      }
+      
+      if (filtros.id_sector) {
+        whereConditionsPersonas.push('s.id_sector = :id_sector');
+      }
+      
+      // Filtro de rango de fechas para personas
+      if (filtros.fecha_inicio && filtros.fecha_fin) {
+        whereConditionsPersonas.push('(pe.estudios::json->>\'fecha_aniversario\')::date BETWEEN :fecha_inicio AND :fecha_fin');
+      } else if (filtros.fecha_inicio) {
+        whereConditionsPersonas.push('(pe.estudios::json->>\'fecha_aniversario\')::date >= :fecha_inicio');
+      } else if (filtros.fecha_fin) {
+        whereConditionsPersonas.push('(pe.estudios::json->>\'fecha_aniversario\')::date <= :fecha_fin');
+      }
+      
+      const whereClausePersonas = `WHERE ${whereConditionsPersonas.join(' AND ')}`;
 
       // PASO 2: Consultar personas fallecidas
       const personasFallecidas = await sequelize.query(`
@@ -54,9 +131,13 @@ class DifuntosConsolidadoService {
           f.sector,
           f.telefono,
           f.direccion_familia,
+          m.id_municipio,
           m.nombre_municipio,
+          s.id_sector,
           s.nombre as nombre_sector,
+          v.id_vereda,
           v.nombre as nombre_vereda,
+          p.id_parroquia,
           p.nombre as nombre_parroquia,
           CASE 
             WHEN (pe.estudios::json->>'era_madre')::boolean = true THEN 'Madre'
@@ -69,54 +150,56 @@ class DifuntosConsolidadoService {
         LEFT JOIN sectores s ON f.id_sector = s.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
         LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
-        WHERE pe.estudios IS NOT NULL 
-          AND pe.estudios LIKE '%es_fallecido%'
-          AND pe.estudios::json->>'es_fallecido' = 'true'
-      `, { type: QueryTypes.SELECT });
+        ${whereClausePersonas}
+      `, { 
+        type: QueryTypes.SELECT,
+        replacements 
+      });
 
       console.log(`� Personas fallecidas en tabla personas: ${personasFallecidas.length}`);
 
       // PASO 3: Combinar resultados
       const todosLosDifuntos = [...difuntosFamilia, ...personasFallecidas];
       
-      // PASO 4: Aplicar filtros si los hay
+      // PASO 4: Aplicar filtro de parentesco si se proporciona (filtro post-consulta para mayor precisión)
       let difuntosFiltrados = todosLosDifuntos;
       
       if (filtros.parentesco) {
-        const parentescoLower = filtros.parentesco.toLowerCase();
+        const parentescoNormalizado = filtros.parentesco.toLowerCase().trim();
         difuntosFiltrados = difuntosFiltrados.filter(difunto => {
-          if (parentescoLower === 'madre') {
-            return difunto.parentesco_inferido === 'Madre' || 
-                   difunto.nombre_completo.toLowerCase().includes('madre') ||
-                   difunto.nombre_completo.toLowerCase().includes('mamá');
-          } else if (parentescoLower === 'padre') {
-            return difunto.parentesco_inferido === 'Padre' ||
-                   difunto.nombre_completo.toLowerCase().includes('padre') ||
-                   difunto.nombre_completo.toLowerCase().includes('papá');
+          const parentescoInferido = difunto.parentesco_inferido.toLowerCase();
+          const nombreCompleto = difunto.nombre_completo.toLowerCase();
+          const observaciones = (difunto.observaciones || '').toLowerCase();
+          
+          switch (parentescoNormalizado) {
+            case 'madre':
+            case 'madres':
+              return parentescoInferido === 'madre' || 
+                     nombreCompleto.includes('madre') ||
+                     nombreCompleto.includes('mamá') ||
+                     observaciones.includes('madre');
+                     
+            case 'padre':
+            case 'padres':
+              return parentescoInferido === 'padre' ||
+                     nombreCompleto.includes('padre') ||
+                     nombreCompleto.includes('papá') ||
+                     observaciones.includes('padre');
+                     
+            case 'familiar':
+            case 'familiares':
+              return parentescoInferido === 'familiar';
+              
+            default:
+              // Si no coincide con tipos conocidos, buscar en el parentesco inferido
+              return parentescoInferido.includes(parentescoNormalizado);
           }
-          return true;
         });
+        
+        console.log(`🔍 Filtro parentesco '${filtros.parentesco}': ${difuntosFiltrados.length} de ${todosLosDifuntos.length} difuntos`);
       }
 
-      if (filtros.mes_aniversario) {
-        difuntosFiltrados = difuntosFiltrados.filter(difunto => {
-          if (!difunto.fecha_aniversario) return false;
-          const fecha = new Date(difunto.fecha_aniversario);
-          return fecha.getMonth() + 1 === parseInt(filtros.mes_aniversario);
-        });
-      }
-
-      if (filtros.fecha_inicio && filtros.fecha_fin) {
-        difuntosFiltrados = difuntosFiltrados.filter(difunto => {
-          if (!difunto.fecha_aniversario) return false;
-          const fecha = new Date(difunto.fecha_aniversario);
-          const inicio = new Date(filtros.fecha_inicio);
-          const fin = new Date(filtros.fecha_fin);
-          return fecha >= inicio && fecha <= fin;
-        });
-      }
-
-      // Ordenar por fecha de aniversario descendente
+      // Ordenar por fecha de aniversario descendente (más recientes primero)
       difuntosFiltrados.sort((a, b) => {
         if (!a.fecha_aniversario && !b.fecha_aniversario) return 0;
         if (!a.fecha_aniversario) return 1;
@@ -124,17 +207,32 @@ class DifuntosConsolidadoService {
         return new Date(b.fecha_aniversario) - new Date(a.fecha_aniversario);
       });
       
-      console.log('✅ Consulta consolidada exitosa:', {
+      console.log('✅ Consulta consolidada de difuntos exitosa:', {
         difuntos_familia: difuntosFamilia.length,
         personas_fallecidas: personasFallecidas.length,
         total_encontrados: todosLosDifuntos.length,
-        despues_filtros: difuntosFiltrados.length
+        despues_filtros: difuntosFiltrados.length,
+        filtros_aplicados: {
+          id_parroquia: filtros.id_parroquia || 'todos',
+          id_municipio: filtros.id_municipio || 'todos',
+          id_sector: filtros.id_sector || 'todos',
+          parentesco: filtros.parentesco || 'todos',
+          rango_fechas: filtros.fecha_inicio && filtros.fecha_fin ? 
+            `${filtros.fecha_inicio} a ${filtros.fecha_fin}` : 'sin rango'
+        }
       });
       
       return {
-        difuntos: difuntosFiltrados,
-        total: todosLosDifuntos.length,
-        filtros_aplicados: filtros
+        exito: true,
+        mensaje: `Consulta de difuntos completada exitosamente. ${difuntosFiltrados.length} registros encontrados.`,
+        datos: difuntosFiltrados,
+        total: difuntosFiltrados.length,
+        total_sin_filtros: todosLosDifuntos.length,
+        estadisticas: {
+          difuntos_familia: difuntosFamilia.length,
+          personas_fallecidas: personasFallecidas.length,
+          filtros_aplicados: filtros
+        }
       };
       
     } catch (error) {
