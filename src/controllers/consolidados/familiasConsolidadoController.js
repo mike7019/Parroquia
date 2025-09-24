@@ -2,33 +2,38 @@ import familiasConsolidadoService from '../../services/consolidados/familiasCons
 
 class FamiliasConsolidadoController {
   /**
-   * Consulta consolidada de familias
+   * Consulta consolidada de familias - NUEVA VERSIÓN CON FILTROS POR ID
    * GET /api/familias
+   * @param {number} req.query.id_parroquia - ID de la parroquia
+   * @param {number} req.query.id_municipio - ID del municipio
+   * @param {number} req.query.id_sector - ID del sector
+   * @param {number} req.query.id_vereda - ID de la vereda
+   * @param {number} req.query.limite - Límite de resultados
+   * @param {number} req.query.offset - Offset para paginación
    */
   async consultarFamilias(req, res) {
     try {
       const filtros = {
-        parroquia: req.query.parroquia,
-        municipio: req.query.municipio,
-        sector: req.query.sector,
-        sexo: req.query.sexo,
-        parentesco: req.query.parentesco,
-        sinPadre: req.query.sinPadre,
-        sinMadre: req.query.sinMadre,
-        edad_min: req.query.edad_min,
-        edad_max: req.query.edad_max,
-        incluir_detalles: req.query.incluir_detalles,
-        limite: req.query.limite ? parseInt(req.query.limite) : 100
+        // Filtros por ID (nuevos)
+        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
+        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
+        
+        // Paginación
+        limite: req.query.limite ? parseInt(req.query.limite) : 100,
+        offset: req.query.offset ? parseInt(req.query.offset) : 0
       };
 
-      // Remover filtros undefined
+      // Remover filtros undefined, null o vacíos
       Object.keys(filtros).forEach(key => {
-        if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '') {
+        if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '' || 
+            (typeof filtros[key] === 'number' && isNaN(filtros[key]))) {
           delete filtros[key];
         }
       });
 
-      console.log('🔍 Consultando familias con filtros:', filtros);
+      console.log('🔍 Consultando familias consolidadas con filtros:', filtros);
 
       const resultado = await familiasConsolidadoService.consultarFamilias(filtros);
 
@@ -40,6 +45,57 @@ class FamiliasConsolidadoController {
         status: "error",
         message: error.message,
         code: "CONSULTA_FAMILIAS_ERROR"
+      });
+    }
+  }
+
+  /**
+   * Generar reporte Excel de familias consolidadas
+   * GET /api/familias/reporte/excel
+   */
+  async generarReporteExcelCompleto(req, res) {
+    try {
+      const filtros = {
+        // Filtros por ID
+        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
+        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
+        
+        // Sin límite para reporte completo
+        limite: 10000
+      };
+
+      // Limpiar filtros vacíos
+      Object.keys(filtros).forEach(key => {
+        if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '' || 
+            (typeof filtros[key] === 'number' && isNaN(filtros[key]))) {
+          delete filtros[key];
+        }
+      });
+
+      console.log('📊 Generando Excel de familias con filtros:', filtros);
+
+      const workbook = await familiasConsolidadoService.generarReporteExcelFamilias(filtros);
+
+      // Configurar headers para descarga
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+      const filename = `familias_consolidado_${timestamp}.xlsx`;
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+
+      // Escribir el archivo al response
+      await workbook.xlsx.write(res);
+      res.end();
+
+    } catch (error) {
+      console.error('❌ Error generando Excel de familias:', error);
+      res.status(500).json({
+        status: "error",
+        message: error.message,
+        code: "EXCEL_FAMILIAS_ERROR"
       });
     }
   }
@@ -207,74 +263,7 @@ class FamiliasConsolidadoController {
     }
   }
 
-  /**
-   * Generar reporte Excel completo de familias
-   * GET /api/familias/excel-completo
-   */
-  async generarReporteExcelCompleto(req, res) {
-    try {
-      console.log('📊 Generando Excel completo con familias agrupadas...', req.query);
 
-      const filtros = {
-        parroquia: req.query.parroquia,
-        municipio: req.query.municipio,
-        sector: req.query.sector,
-        sexo: req.query.sexo,
-        parentesco: req.query.parentesco,
-        sinPadre: req.query.sinPadre,
-        sinMadre: req.query.sinMadre,
-        edad_min: req.query.edad_min,
-        edad_max: req.query.edad_max,
-        limite: req.query.limite ? parseInt(req.query.limite) : 100
-      };
-
-      // Remover filtros undefined
-      Object.keys(filtros).forEach(key => {
-        if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '') {
-          delete filtros[key];
-        }
-      });
-
-      // Verificar si el servicio tiene el método Excel
-      if (typeof familiasConsolidadoService.generarReporteExcelFamiliar !== 'function') {
-        return res.status(501).json({
-          status: "error",
-          message: "Funcionalidad Excel familiar no está disponible. Use el endpoint básico /api/familias",
-          code: "EXCEL_FAMILIAR_NOT_IMPLEMENTED"
-        });
-      }
-
-      const workbook = await familiasConsolidadoService.generarReporteExcelFamiliar(filtros);
-
-      if (!workbook) {
-        return res.status(404).json({
-          status: "error",
-          message: "No se pudo generar el archivo Excel",
-          code: "EXCEL_GENERATION_FAILED"
-        });
-      }
-
-      // Generar nombre de archivo con timestamp
-      const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
-      const filename = `reporte-familias-${timestamp}.xlsx`;
-
-      // Configurar headers para descarga
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      
-      // Escribir workbook directamente a la respuesta
-      await workbook.xlsx.write(res);
-      res.end();
-
-    } catch (error) {
-      console.error('❌ Error generando Excel completo:', error);
-      res.status(500).json({
-        status: "error",
-        message: error.message,
-        code: "EXCEL_COMPLETO_ERROR"
-      });
-    }
-  }
 }
 
 export default new FamiliasConsolidadoController();

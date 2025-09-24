@@ -1,882 +1,386 @@
-import { Persona, Familias, Sexo, Municipios, Veredas, Sector, Parroquia, DifuntosFamilia } from '../../models/index.js';
-import { Op, QueryTypes } from 'sequelize';
+import { QueryTypes } from 'sequelize';
 import sequelize from '../../../config/sequelize.js';
-import ExcelJS from 'exceljs';
 
 class FamiliasConsolidadoService {
-  /**
-   * Consulta consolidada de familias y personas
-   */
+  
   async consultarFamilias(filtros = {}) {
     try {
-      console.log('🔍 Iniciando consulta consolidada de familias (NUEVA VERSIÓN)...', filtros);
+      console.log('🔍 Consultando familias consolidadas...', filtros);
       
-      // NUEVA IMPLEMENTACIÓN: Usar el método obtenerFamiliasAgrupadas para información completa
-      // Mapear los filtros del formato antiguo al nuevo formato
-      const filtrosNuevos = {
-        municipio: filtros.municipio,
-        parroquia: filtros.parroquia,
-        sector: filtros.sector,
-        limit: filtros.limite || 50,
-        offset: 0
-      };
-
-      // Obtener familias agrupadas completas
-      const familiasAgrupadas = await this.obtenerFamiliasAgrupadas(filtrosNuevos);
-
-      // Si hay filtros específicos de persona (sexo, parentesco, edad), aplicar filtrado adicional
-      let familiasFiltradas = familiasAgrupadas.familias;
-
-      if (filtros.sexo || filtros.parentesco || filtros.edad_min || filtros.edad_max) {
-        familiasFiltradas = familiasAgrupadas.familias.filter(familia => {
-          // Obtener todos los miembros de la familia
-          const todosMiembros = [
-            ...(familia.miembros.padres || []),
-            ...(familia.miembros.madres || []),
-            ...(familia.miembros.hijos_vivos || []),
-            ...(familia.miembros.otros_miembros || [])
-          ];
-
-          // Aplicar filtros de persona
-          return todosMiembros.some(miembro => {
-            let cumpleFiltros = true;
-
-            // Filtro por parentesco
-            if (filtros.parentesco) {
-              const tipo = filtros.parentesco.toLowerCase();
-              if (tipo === 'padre' && !familia.miembros.padres?.some(p => p.persona_id === miembro.persona_id)) {
-                cumpleFiltros = false;
-              }
-              if (tipo === 'madre' && !familia.miembros.madres?.some(p => p.persona_id === miembro.persona_id)) {
-                cumpleFiltros = false;
-              }
-              if (tipo === 'hijo' && !familia.miembros.hijos_vivos?.some(p => p.persona_id === miembro.persona_id)) {
-                cumpleFiltros = false;
-              }
-            }
-
-            // Filtro por edad
-            if (filtros.edad_min && miembro.edad < parseInt(filtros.edad_min)) {
-              cumpleFiltros = false;
-            }
-            if (filtros.edad_max && miembro.edad > parseInt(filtros.edad_max)) {
-              cumpleFiltros = false;
-            }
-
-            return cumpleFiltros;
-          });
-        });
-      }
-
-      // Manejar filtros especiales (sin padre/madre)
-      if (filtros.sinPadre === true || filtros.sinPadre === 'true') {
-        familiasFiltradas = familiasFiltradas.filter(familia => 
-          !familia.miembros.padres || familia.miembros.padres.length === 0
-        );
-      }
-
-      if (filtros.sinMadre === true || filtros.sinMadre === 'true') {
-        familiasFiltradas = familiasFiltradas.filter(familia => 
-          !familia.miembros.madres || familia.miembros.madres.length === 0
-        );
-      }
-
-      // Generar estadísticas consolidadas
-      const estadisticasGenerales = {
-        total_familias: familiasFiltradas.length,
-        total_personas: familiasFiltradas.reduce((sum, f) => sum + f.estadisticas.total_miembros, 0),
-        total_vivos: familiasFiltradas.reduce((sum, f) => sum + f.estadisticas.total_vivos, 0),
-        total_difuntos: familiasFiltradas.reduce((sum, f) => sum + f.estadisticas.total_difuntos, 0),
-        total_menores: familiasFiltradas.reduce((sum, f) => sum + f.estadisticas.total_menores, 0),
-        total_adultos: familiasFiltradas.reduce((sum, f) => sum + f.estadisticas.total_adultos, 0),
-        familias_con_telefono: familiasFiltradas.filter(f => f.estadisticas.tiene_telefono).length,
-        familias_con_email: familiasFiltradas.filter(f => f.estadisticas.tiene_email).length
-      };
-
-      return {
-        exito: true,
-        mensaje: "Consulta de familias exitosa (información completa)",
-        datos: familiasFiltradas,
-        total: familiasFiltradas.length,
-        estadisticas: estadisticasGenerales,
-        filtros_aplicados: filtros,
-        tipo_datos: "familias_agrupadas", // Indicador del nuevo formato
-        estructura: {
-          descripcion: "Cada elemento 'datos' representa una familia completa con todos sus miembros agrupados",
-          campos_principales: ["codigo_familia", "apellido_familiar", "ubicacion", "miembros", "estadisticas", "resumen_pastoral"]
-        }
-      };
-
-    } catch (error) {
-      console.error('❌ Error en consulta de familias:', error);
-      throw new Error(`Error al consultar familias: ${error.message}`);
-    }
-  }
-
-  /**
-   * Consultar familias sin padre o madre usando SQL directo simplificado
-   */
-  async consultarFamiliasSinPadreMadre(tipo, filtrosFamilia = {}) {
-    try {
-      console.log(`🔍 Consultando familias sin ${tipo} usando SQL directo...`);
+      const limite = filtros.limite || 5;
+      const offset = filtros.offset || 0;
       
-      const sexoBuscado = tipo === 'sinPadre' ? 'masculino' : 'femenino';
+      // Build WHERE conditions dynamically
+      const whereConditions = ['f.id_familia IS NOT NULL'];
+      const bindParams = [];
+      let paramIndex = 1;
       
-      // Consulta SQL directa simplificada
+      if (filtros.id_parroquia) {
+        whereConditions.push(`f.id_parroquia = $${paramIndex}`);
+        bindParams.push(filtros.id_parroquia);
+        paramIndex++;
+      }
+      
+      if (filtros.id_municipio) {
+        whereConditions.push(`f.id_municipio = $${paramIndex}`);
+        bindParams.push(filtros.id_municipio);
+        paramIndex++;
+      }
+      
+      if (filtros.id_sector) {
+        whereConditions.push(`f.id_sector = $${paramIndex}`);
+        bindParams.push(filtros.id_sector);
+        paramIndex++;
+      }
+      
+      if (filtros.id_vereda) {
+        whereConditions.push(`f.id_vereda = $${paramIndex}`);
+        bindParams.push(filtros.id_vereda);
+        paramIndex++;
+      }
+      
+      // Add limite and offset to bind params
+      bindParams.push(limite, offset);
+      
+      // Enhanced query with geographic data and filters
       const query = `
         SELECT 
           f.id_familia,
+          f.codigo_familia,
           f.apellido_familiar,
           f.direccion_familia,
           f.telefono,
-          f.sector,
-          f.tamaño_familia,
-          m.nombre_municipio as municipio,
-          v.nombre as vereda,
-          s.nombre as sector_nombre,
-          '${tipo === 'sinPadre' ? 'Padre' : 'Madre'}' as falta
+          p.nombre as parroquia_nombre,
+          mun.nombre_municipio as municipio_nombre,
+          dep.nombre as departamento_nombre,
+          sec.nombre as sector_nombre,
+          ver.nombre as vereda_nombre
         FROM familias f
-        LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
-        LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
-        LEFT JOIN sectores s ON f.id_sector = s.id_sector
-        GROUP BY f.id_familia, f.apellido_familiar, f.direccion_familia, f.telefono, f.sector, 
-                 f.tamaño_familia, m.nombre_municipio, v.nombre, s.nombre
-        HAVING COUNT(
-          CASE WHEN EXISTS (
-            SELECT 1 FROM personas p 
-            LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
-            WHERE p.id_familia_familias = f.id_familia 
-              AND sx.descripcion ILIKE '%${sexoBuscado}%'
-              AND EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) >= 18
-          ) THEN 1 END
-        ) = 0
+        LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia  
+        LEFT JOIN municipios mun ON f.id_municipio = mun.id_municipio
+        LEFT JOIN departamentos dep ON mun.id_departamento = dep.id_departamento
+        LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
+        LEFT JOIN veredas ver ON f.id_vereda = ver.id_vereda
+        WHERE ${whereConditions.join(' AND ')}
         ORDER BY f.apellido_familiar
-        LIMIT 20
+        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
       `;
-
-      const familiasSinPadreMadre = await sequelize.query(query, {
+      
+      const familias = await sequelize.query(query, {
+        bind: bindParams,
         type: QueryTypes.SELECT
       });
-
-      // Obtener integrantes para cada familia
-      const familiasConIntegrantes = await Promise.all(
-        familiasSinPadreMadre.map(async (familia) => {
-          const integrantesQuery = `
-            SELECT 
-              p.id_personas,
-              p.primer_nombre,
-              p.primer_apellido,
-              p.identificacion,
-              p.fecha_nacimiento,
-              sx.descripcion as sexo,
-              EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad
-            FROM personas p
-            LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
-            WHERE p.id_familia_familias = $1
-            ORDER BY p.fecha_nacimiento
-          `;
-
-          const integrantes = await sequelize.query(integrantesQuery, {
-            type: QueryTypes.SELECT,
-            bind: [familia.id_familia]
-          });
-
-          return {
-            ...familia,
-            integrantes: integrantes.map(persona => ({
-              nombre: `${persona.primer_nombre} ${persona.primer_apellido}`,
-              sexo: persona.sexo || 'No especificado',
-              edad: parseInt(persona.edad),
-              documento: persona.identificacion
-            }))
-          };
-        })
-      );
-
-      console.log(`✅ Encontradas ${familiasConIntegrantes.length} familias sin ${tipo === 'sinPadre' ? 'padre' : 'madre'}`);
-
-      return familiasConIntegrantes;
-
+      
+      // Formatear respuesta básica
+      const datosFormateados = familias.map(familia => ({
+        id_familia: familia.id_familia.toString(),
+        codigo_familia: familia.codigo_familia || '',
+        apellido_familiar: familia.apellido_familiar,
+        direccion_familia: familia.direccion_familia,
+        telefono: familia.telefono,
+        parroquia_nombre: familia.parroquia_nombre,
+        municipio_nombre: familia.municipio_nombre,
+        departamento_nombre: familia.departamento_nombre,
+        sector_nombre: familia.sector_nombre,
+        vereda_nombre: familia.vereda_nombre,
+        tipo_vivienda: 'No especificado',
+        dispocision_basura: 'No especificado',
+        tipos_agua_residuales: 'No especificado',
+        sistema_acueducto: 'No especificado',
+        miembros_familia: [],
+        difuntos_familia: []
+      }));
+      
+      // Now enhance each family with member and housing data
+      const familiasCompletas = [];
+      for (const familia of datosFormateados) {
+        const miembros = await this.obtenerMiembrosFamilia(familia.id_familia);
+        const difuntos = await this.obtenerDifuntosFamilia(familia.id_familia);
+        const infoVivienda = await this.obtenerInfoVivienda(familia.id_familia);
+        
+        familiasCompletas.push({
+          ...familia,
+          ...infoVivienda,
+          miembros_familia: miembros,
+          difuntos_familia: difuntos
+        });
+      }
+      
+      return {
+        exito: true,
+        mensaje: 'Consulta consolidada de familias exitosa',
+        datos: familiasCompletas
+      };
+      
     } catch (error) {
-      console.error(`❌ Error consultando familias sin ${tipo}:`, error);
-      throw new Error(`Error al consultar familias sin ${tipo}: ${error.message}`);
+      console.error('❌ Error en consultarFamilias:', error);
+      throw new Error(`Error al consultar familias consolidadas: ${error.message}`);
     }
   }
 
-  /**
-   * Formatear resultado de personas en formato estándar
-   */
-  formatearResultadoPersonas(personas) {
-    return personas.map(persona => {
-      const edad = this.calcularEdad(persona.fecha_nacimiento);
-      const parentesco = this.inferirParentesco(persona.sexo?.nombre, edad);
-      
-      return {
-        id_persona: persona.id_personas,
-        documento: persona.identificacion,
-        nombre: `${persona.primer_nombre} ${persona.segundo_nombre || ''} ${persona.primer_apellido} ${persona.segundo_apellido || ''}`.trim(),
-        sexo: persona.sexo?.nombre || 'No especificado',
-        edad: edad,
-        fecha_nacimiento: persona.fecha_nacimiento,
-        telefono: persona.telefono || persona.familia?.telefono || 'No especificado',
-        parentesco: parentesco,
-        apellido_familiar: persona.familia?.apellido_familiar || 'No especificado',
-        direccion: persona.direccion || persona.familia?.direccion_familia || 'No especificado',
-        parroquia: persona.parroquia?.nombre || 'No especificado',
-        municipio: persona.familia?.municipio?.nombre || 'No especificado',
-        sector: persona.familia?.sector || persona.familia?.sector_info?.nombre || 'No especificado',
-        vereda: persona.familia?.vereda?.nombre || 'No especificado',
-        familia: {
-          id_familia: persona.familia?.id_familia,
-          apellido_familiar: persona.familia?.apellido_familiar,
-          tipo_vivienda: persona.familia?.tipo_vivienda,
-          tamaño_familia: persona.familia?.tamaño_familia
-        }
-      };
-    });
-  }
-
-  /**
-   * Obtener lista de identificaciones de personas fallecidas
-   */
-  async obtenerPersonasFallecidas() {
+  async obtenerMiembrosFamilia(idFamilia) {
     try {
-      const difuntos = await DifuntosFamilia.findAll({
-        attributes: ['nombre_completo'],
-        raw: true
-      });
-
-      if (difuntos.length === 0) return [];
-
-      const nombresDifuntos = difuntos.map(d => d.nombre_completo);
+        const query = `
+        SELECT
+          -- ID para consultar destrezas
+          p.id_personas,
+          
+          -- Identificación
+          COALESCE(ti.descripcion, 'Cédula') as tipo_identificacion,
+          p.identificacion as numero_identificacion,
+          
+          -- Información personal
+          TRIM(CONCAT(
+            COALESCE(p.primer_nombre, ''), ' ',
+            COALESCE(p.segundo_nombre, ''), ' ', 
+            COALESCE(p.primer_apellido, ''), ' ',
+            COALESCE(p.segundo_apellido, '')
+          )) as nombre_completo,
+          p.telefono as telefono_personal,
+          p.correo_electronico as email_personal,
+          TO_CHAR(p.fecha_nacimiento, 'YYYY-MM-DD') as fecha_nacimiento,
+          EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.fecha_nacimiento))::INTEGER as edad,
+          
+          -- Información demográfica
+          COALESCE(s.nombre, 'No especificado') as sexo,
+          COALESCE(par.nombre, 'Familiar') as parentesco,
+          COALESCE(ec.descripcion, 'No especificado') as situacion_civil,
+          
+          -- Información educativa y laboral
+          COALESCE(p.estudios, '') as estudios,
+          COALESCE(prof.nombre, 'No especificado') as profesion,
+          COALESCE(cc.nombre, 'No especificado') as comunidad_cultural,
+          COALESCE(p.necesidad_enfermo, '') as enfermedades,
+          COALESCE(p.en_que_eres_lider, '') as liderazgo,
+          
+          -- Tallas
+          COALESCE(p.talla_camisa, '') as talla_camisa,
+          COALESCE(p.talla_pantalon, '') as talla_pantalon,
+          COALESCE(p.talla_zapato, '') as talla_zapato,
+          
+          -- Celebraciones
+          COALESCE(p.motivo_celebrar, '') as motivo_celebrar,
+          p.dia_celebrar,
+          p.mes_celebrar
+          
+        FROM personas p
+        LEFT JOIN tipo_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
+        LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
+        LEFT JOIN parentescos par ON p.id_parentesco = par.id_parentesco
+        LEFT JOIN estados_civiles ec ON p.id_estado_civil_estado_civil = ec.id_estado
+        LEFT JOIN profesiones prof ON p.id_profesion = prof.id_profesion
+        LEFT JOIN comunidades_culturales cc ON p.id_comunidad_cultural = cc.id_comunidad_cultural
+        WHERE p.id_familia_familias = $1
+        ORDER BY 
+          CASE 
+            WHEN COALESCE(par.nombre, 'Familiar') LIKE '%Padre%' THEN 1
+            WHEN COALESCE(par.nombre, 'Familiar') LIKE '%Madre%' THEN 2
+            ELSE 3
+          END,
+          p.fecha_nacimiento DESC
+      `;
       
-      const personasConNombresSimilares = await Persona.findAll({
-        attributes: ['identificacion'],
-        where: {
-          [Op.or]: nombresDifuntos.map(nombre => {
-            const partesNombre = nombre.split(' ');
-            return {
-              [Op.and]: partesNombre.map(parte => ({
-                [Op.or]: [
-                  { primer_nombre: { [Op.iLike]: `%${parte}%` } },
-                  { segundo_nombre: { [Op.iLike]: `%${parte}%` } },
-                  { primer_apellido: { [Op.iLike]: `%${parte}%` } },
-                  { segundo_apellido: { [Op.iLike]: `%${parte}%` } }
-                ]
-              }))
-            };
-          })
-        },
-        raw: true
+      const miembros = await sequelize.query(query, {
+        bind: [idFamilia],
+        type: QueryTypes.SELECT
       });
-
-      return personasConNombresSimilares.map(p => p.identificacion);
-
+      
+      const miembrosConDestrezas = await Promise.all(
+        miembros.map(async (miembro) => {
+          const destrezas = await this.obtenerDestrezasPersona(miembro.id_personas);
+          
+          return {
+            tipo_identificacio: miembro.tipo_identificacion,
+            numero_identificacion: miembro.numero_identificacion || '',
+            nombre_completo: miembro.nombre_completo,
+            telefono_personal: miembro.telefono_personal || '',
+            email_personal: miembro.email_personal || '',
+            fecha_nacimiento: miembro.fecha_nacimiento,
+            edad: miembro.edad,
+            sexo: miembro.sexo,
+            parentesco: miembro.parentesco,
+            situacion_civil: miembro.situacion_civil,
+            estudios: miembro.estudios,
+            profesion: miembro.profesion,
+            comunidad_cultural: miembro.comunidad_cultural,
+            enfermedades: miembro.enfermedades,
+            liderazgo: miembro.liderazgo,
+            destrezas: destrezas.length > 0 ? destrezas.join(', ') : '',
+            necesidades_enfermo: miembro.enfermedades, // mismo que enfermedades
+            comunion_casa: true,
+            tallas: {
+              camisa_blusa: miembro.talla_camisa,
+              pantalon: miembro.talla_pantalon,
+              calzado: miembro.talla_zapato
+            },
+            celebracion: {
+              motivo: miembro.motivo_celebrar,
+              dia: miembro.dia_celebrar ? miembro.dia_celebrar.toString() : '',
+              mes: this.obtenerNombreMes(miembro.mes_celebrar) || ''
+            }
+          };
+        })
+      );
+      
+      return miembrosConDestrezas;
+      
     } catch (error) {
-      console.error('Error obteniendo personas fallecidas:', error);
+      console.error('❌ Error en obtenerMiembrosFamilia:', error);
       return [];
     }
   }
 
-  /**
-   * Inferir parentesco basado en sexo y edad
-   */
-  inferirParentesco(sexo, edad) {
-    if (!sexo || !edad) return 'No especificado';
-    
-    const sexoLower = sexo.toLowerCase();
-    
-    if (edad >= 18) {
-      if (sexoLower.includes('femenino') || sexoLower.includes('mujer')) {
-        return edad >= 40 ? 'Madre' : 'Adulta';
-      } else if (sexoLower.includes('masculino') || sexoLower.includes('hombre')) {
-        return edad >= 40 ? 'Padre' : 'Adulto';
-      }
-    } else {
-      return sexoLower.includes('femenino') ? 'Hija' : 'Hijo';
-    }
-    
-    return 'Familiar';
-  }
-
-  /**
-   * Calcular edad a partir de fecha de nacimiento
-   */
-  calcularEdad(fechaNacimiento) {
-    if (!fechaNacimiento) return 'No especificada';
-    
-    const hoy = new Date();
-    const nacimiento = new Date(fechaNacimiento);
-    let edad = hoy.getFullYear() - nacimiento.getFullYear();
-    const mesActual = hoy.getMonth();
-    const mesNacimiento = nacimiento.getMonth();
-    
-    if (mesActual < mesNacimiento || (mesActual === mesNacimiento && hoy.getDate() < nacimiento.getDate())) {
-      edad--;
-    }
-    
-    return edad;
-  }
-
-  /**
-   * Generar estadísticas de familias
-   */
-  async generarEstadisticasFamilias(datos) {
+  async obtenerDestrezasPersona(idPersona) {
     try {
-      const estadisticas = {
-        total_personas: datos.length,
-        por_sexo: {},
-        por_parentesco: {},
-        por_municipio: {},
-        por_sector: {},
-        distribucion_edades: {
-          '0-18': 0,
-          '19-35': 0,
-          '36-60': 0,
-          '60+': 0
-        }
-      };
-
-      datos.forEach(persona => {
-        // Por sexo
-        const sexo = persona.sexo;
-        estadisticas.por_sexo[sexo] = (estadisticas.por_sexo[sexo] || 0) + 1;
-
-        // Por parentesco
-        const parentesco = persona.parentesco;
-        estadisticas.por_parentesco[parentesco] = (estadisticas.por_parentesco[parentesco] || 0) + 1;
-
-        // Por municipio
-        const municipio = persona.municipio;
-        if (municipio !== 'No especificado') {
-          estadisticas.por_municipio[municipio] = (estadisticas.por_municipio[municipio] || 0) + 1;
-        }
-
-        // Por sector
-        const sector = persona.sector;
-        if (sector !== 'No especificado') {
-          estadisticas.por_sector[sector] = (estadisticas.por_sector[sector] || 0) + 1;
-        }
-
-        // Distribución por edades
-        const edad = persona.edad;
-        if (typeof edad === 'number') {
-          if (edad <= 18) {
-            estadisticas.distribucion_edades['0-18']++;
-          } else if (edad <= 35) {
-            estadisticas.distribucion_edades['19-35']++;
-          } else if (edad <= 60) {
-            estadisticas.distribucion_edades['36-60']++;
-          } else {
-            estadisticas.distribucion_edades['60+']++;
-          }
-        }
-      });
-
-      return estadisticas;
-
-    } catch (error) {
-      console.error('Error generando estadísticas:', error);
-      return {};
-    }
-  }
-
-  /**
-   * NUEVO MÉTODO: Obtener familias agrupadas para reportes completos
-   * Implementado según diseño del notebook: diseño-opcion-b-familias-completas.ipynb
-   */
-  async obtenerFamiliasAgrupadas(filtros = {}) {
-    try {
-      console.log('🏠 Obteniendo familias agrupadas con filtros:', filtros);
-      
-      // Query SQL optimizada basada en la estructura real de la BD
-      const sqlQuery = `
-        WITH familias_base AS (
-          -- Paso 1: Obtener familias únicas con su ubicación geográfica
-          SELECT DISTINCT 
-            f.id_familia,
-            f.codigo_familia,
-            f.apellido_familiar,
-            -- Información geográfica directa de la familia
-            p.nombre as parroquia_nombre,
-            mun.nombre_municipio as municipio_nombre,
-            dep.nombre as departamento_nombre,
-            sec.nombre as sector_nombre,
-            ver.nombre as vereda_nombre
-          FROM familias f
-          LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia  
-          LEFT JOIN municipios mun ON f.id_municipio = mun.id_municipio
-          LEFT JOIN departamentos dep ON mun.id_departamento = dep.id_departamento
-          LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
-          LEFT JOIN veredas ver ON f.id_vereda = ver.id_vereda
-          WHERE f.id_familia IS NOT NULL
-          ${filtros.parroquia ? 'AND p.nombre ILIKE :parroquia' : ''}
-          ${filtros.municipio ? 'AND mun.nombre_municipio ILIKE :municipio' : ''}
-          ${filtros.sector ? 'AND sec.nombre ILIKE :sector' : ''}
-          ORDER BY f.codigo_familia
-          LIMIT :limite OFFSET :offset
-        ),
-
-        miembros_completos AS (
-          -- Paso 2: Obtener todos los miembros con sus datos completos
-          SELECT 
-            p.id_familia_familias as familia_id,
-            p.id_personas as persona_id,
-            p.primer_nombre,
-            p.segundo_nombre,
-            p.primer_apellido,
-            p.segundo_apellido,
-            CONCAT(
-              COALESCE(p.primer_nombre, ''), ' ',
-              COALESCE(p.segundo_nombre, ''), ' ', 
-              COALESCE(p.primer_apellido, ''), ' ',
-              COALESCE(p.segundo_apellido, '')
-            ) as nombre_completo,
-            p.identificacion as cedula,
-            p.telefono,
-            p.correo_electronico as email,
-            p.fecha_nacimiento,
-            EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
-            p.estudios,
-            p.en_que_eres_lider as destrezas,
-            p.necesidad_enfermo as salud,
-            
-            -- Determinar si es difunto
-            CASE WHEN df.id_difunto IS NOT NULL THEN true ELSE false END as es_difunto,
-            df.fecha_fallecimiento as fecha_defuncion,
-            df.causa_fallecimiento as causa_muerte,
-            df.observaciones as observaciones_difunto,
-            
-            -- Clasificar tipo de miembro (por ahora todos como 'miembro' hasta tener más datos)
-            CASE 
-              WHEN p.id_parentesco = 1 THEN 'padre'
-              WHEN p.id_parentesco = 2 THEN 'madre' 
-              WHEN p.id_parentesco = 3 THEN 'hijo'
-              ELSE 'miembro'  -- Cambiar a 'miembro' para incluir en estadísticas
-            END as tipo_miembro,
-            
-            -- Calcular si es menor
-            CASE 
-              WHEN EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) < 18 THEN true
-              ELSE false
-            END as es_menor
-            
-          FROM personas p
-          LEFT JOIN difuntos_familia df ON p.id_personas = df.id_difunto 
-          WHERE p.id_familia_familias IS NOT NULL
-        )
-
-        -- Consulta final: Combinar familias con sus miembros
-        SELECT 
-          fb.*,
-          json_agg(
-            json_build_object(
-              'persona_id', mc.persona_id,
-              'nombre_completo', TRIM(mc.nombre_completo),
-              'cedula', mc.cedula,
-              'telefono', mc.telefono,
-              'email', mc.email,
-              'edad', mc.edad,
-              'salud', mc.salud,
-              'destrezas', mc.destrezas,
-              'tipo_miembro', mc.tipo_miembro,
-              'es_difunto', mc.es_difunto,
-              'es_menor', mc.es_menor,
-              'fecha_defuncion', mc.fecha_defuncion,
-              'causa_muerte', mc.causa_muerte,
-              'observaciones_difunto', mc.observaciones_difunto
-            )
-          ) as miembros
-        FROM familias_base fb
-        LEFT JOIN miembros_completos mc ON fb.id_familia = mc.familia_id
-        GROUP BY 
-          fb.id_familia, fb.codigo_familia, fb.apellido_familiar,
-          fb.parroquia_nombre, fb.municipio_nombre, fb.departamento_nombre, 
-          fb.sector_nombre, fb.vereda_nombre
-        ORDER BY fb.codigo_familia;
+      const query = `
+        SELECT d.nombre
+        FROM persona_destreza pd
+        JOIN destrezas d ON pd.id_destrezas_destrezas = d.id_destreza
+        WHERE pd.id_personas_personas = $1
       `;
+      
+      const destrezas = await sequelize.query(query, {
+        bind: [idPersona],
+        type: QueryTypes.SELECT
+      });
+      
+      return destrezas.map(d => d.nombre);
+      
+    } catch (error) {
+      console.error('❌ Error en obtenerDestrezasPersona:', error);
+      return [];
+    }
+  }
 
-      const familiasBrutos = await sequelize.query(sqlQuery, {
-        type: QueryTypes.SELECT,
-        replacements: {
-          parroquia: filtros.parroquia ? `%${filtros.parroquia}%` : null,
-          municipio: filtros.municipio ? `%${filtros.municipio}%` : null, 
-          sector: filtros.sector ? `%${filtros.sector}%` : null,
-          limite: filtros.limite || 50,
-          offset: filtros.offset || 0
-        }
+  async obtenerDifuntosFamilia(idFamilia) {
+    try {
+      const query = `
+        SELECT 
+          df.nombre_completo as nombre_difunto,
+          TO_CHAR(df.fecha_fallecimiento, 'YYYY-MM-DD') as fecha_fallecimiento,
+          COALESCE(s.nombre, 'No especificado') as sexo,
+          COALESCE(par.nombre, 'No especificado') as parentesco,
+          df.causa_fallecimiento
+        FROM difuntos_familia df
+        LEFT JOIN sexos s ON df.id_sexo = s.id_sexo
+        LEFT JOIN parentescos par ON df.id_parentesco = par.id_parentesco
+        WHERE df.id_familia_familias = $1
+        ORDER BY df.fecha_fallecimiento DESC
+      `;
+      
+      const difuntos = await sequelize.query(query, {
+        bind: [idFamilia],
+        type: QueryTypes.SELECT
       });
       
-      // Procesar y estructurar los datos
-      const familiasEstructuradas = familiasBrutos.map(familia => {
-        return this.estructurarFamiliaCompleta(familia);
-      });
+      return difuntos.map(difunto => ({
+        nombre_difunto: difunto.nombre_difunto,
+        fecha_fallecimiento: difunto.fecha_fallecimiento,
+        sexo: difunto.sexo,
+        parentesco: difunto.parentesco,
+        causa_fallecimiento: difunto.causa_fallecimiento || 'natural'
+      }));
       
-      console.log(`✅ Procesadas ${familiasEstructuradas.length} familias agrupadas`);
+    } catch (error) {
+      console.error('❌ Error en obtenerDifuntosFamilia:', error);
+      return [];
+    }
+  }
+
+  async obtenerInfoVivienda(idFamilia) {
+    try {
+      // 1. Obtener tipo de vivienda
+      const queryVivienda = `
+        SELECT 
+          COALESCE(
+            tv1.nombre, 
+            tv2.nombre, 
+            CASE 
+              WHEN f.tipo_vivienda IS NOT NULL THEN f.tipo_vivienda
+              ELSE 'No especificado'
+            END
+          ) as tipo_vivienda
+        FROM familias f
+        LEFT JOIN tipos_vivienda tv1 ON f.id_tipo_vivienda = tv1.id_tipo_vivienda
+        LEFT JOIN tipos_vivienda tv2 ON f.tipo_vivienda::text = tv2.id_tipo_vivienda::text
+        WHERE f.id_familia = $1
+      `;
+      
+      const [infoVivienda] = await sequelize.query(queryVivienda, {
+        bind: [idFamilia],
+        type: QueryTypes.SELECT
+      });
+
+      // 2. Obtener disposición de basura (puede ser múltiple)
+      const queryBasura = `
+        SELECT tdb.nombre
+        FROM familia_disposicion_basura fdb
+        JOIN tipos_disposicion_basura tdb ON fdb.id_tipo_disposicion_basura = tdb.id_tipo_disposicion_basura
+        WHERE fdb.id_familia = $1
+      `;
+      
+      const disposicionBasura = await sequelize.query(queryBasura, {
+        bind: [idFamilia],
+        type: QueryTypes.SELECT
+      });
+
+      // 3. Obtener sistema de aguas residuales
+      const queryAguasResiduales = `
+        SELECT tar.nombre
+        FROM familia_sistema_aguas_residuales fsar
+        JOIN tipos_aguas_residuales tar ON fsar.id_tipo_aguas_residuales = tar.id_tipo_aguas_residuales
+        WHERE fsar.id_familia = $1
+      `;
+      
+      const aguasResiduales = await sequelize.query(queryAguasResiduales, {
+        bind: [idFamilia],
+        type: QueryTypes.SELECT
+      });
+
+      // 4. Obtener sistema de acueducto
+      const queryAcueducto = `
+        SELECT sa.nombre
+        FROM familia_sistema_acueducto fsa
+        JOIN sistemas_acueducto sa ON fsa.id_sistema_acueducto = sa.id_sistema_acueducto
+        WHERE fsa.id_familia = $1
+      `;
+      
+      const sistemaAcueducto = await sequelize.query(queryAcueducto, {
+        bind: [idFamilia],
+        type: QueryTypes.SELECT
+      });
       
       return {
-        familias: familiasEstructuradas,
-        total: familiasEstructuradas.length,
-        filtros_aplicados: filtros
+        tipo_vivienda: infoVivienda?.tipo_vivienda || 'No especificado',
+        dispocision_basura: disposicionBasura.length > 0 
+          ? disposicionBasura.map(d => d.nombre).join(', ') 
+          : 'No especificado',
+        tipos_agua_residuales: aguasResiduales.length > 0 
+          ? aguasResiduales.map(a => a.nombre).join(', ') 
+          : 'No especificado',
+        sistema_acueducto: sistemaAcueducto.length > 0 
+          ? sistemaAcueducto.map(s => s.nombre).join(', ') 
+          : 'No especificado'
       };
       
     } catch (error) {
-      console.error('Error en obtenerFamiliasAgrupadas:', error);
-      throw new Error(`Error al obtener familias agrupadas: ${error.message}`);
-    }
-  }
-
-  /**
-   * FUNCIÓN AUXILIAR: Estructurar familia completa según diseño del notebook
-   */
-  estructurarFamiliaCompleta(familiaRaw) {
-    const miembros = familiaRaw.miembros || [];
-    
-    // Separar miembros por categorías
-    const padres = miembros.filter(m => m.tipo_miembro === 'padre' && !m.es_difunto);
-    const madres = miembros.filter(m => m.tipo_miembro === 'madre' && !m.es_difunto);
-    const hijos_vivos = miembros.filter(m => m.tipo_miembro === 'hijo' && !m.es_difunto);
-    const otros_miembros = miembros.filter(m => m.tipo_miembro === 'miembro' && !m.es_difunto);
-    const difuntos = miembros.filter(m => m.es_difunto);
-    
-    // Calcular estadísticas
-    const estadisticas = {
-      total_miembros: miembros.length,
-      total_vivos: miembros.filter(m => !m.es_difunto).length,
-      total_difuntos: difuntos.length,
-      total_menores: miembros.filter(m => !m.es_difunto && m.es_menor).length,
-      total_adultos: miembros.filter(m => !m.es_difunto && !m.es_menor).length,
-      tiene_telefono: miembros.some(m => m.telefono && m.telefono.trim() !== ''),
-      tiene_email: miembros.some(m => m.email && m.email.trim() !== '')
-    };
-    
-    // Generar resumen pastoral
-    const resumen_pastoral = {
-      necesidades_salud: miembros
-        .filter(m => m.salud && m.salud.trim() !== '' && !m.es_difunto)
-        .map(m => m.salud),
-      destrezas_disponibles: miembros
-        .filter(m => m.destrezas && m.destrezas.trim() !== '' && !m.es_difunto)
-        .map(m => m.destrezas),
-      observaciones_generales: miembros
-        .filter(m => m.observaciones_difunto && m.observaciones_difunto.trim() !== '')
-        .map(m => m.observaciones_difunto).join('; ')
-    };
-    
-    return {
-      familia_id: familiaRaw.id_familia,
-      codigo_familia: familiaRaw.codigo_familia || `FAM-${familiaRaw.id_familia}`,
-      apellido_familiar: familiaRaw.apellido_familiar,
-      ubicacion: {
-        parroquia: familiaRaw.parroquia_nombre,
-        municipio: familiaRaw.municipio_nombre,
-        departamento: familiaRaw.departamento_nombre,
-        sector: familiaRaw.sector_nombre,
-        vereda: familiaRaw.vereda_nombre
-      },
-      miembros: {
-        padres,
-        madres, 
-        hijos_vivos,
-        otros_miembros,
-        difuntos
-      },
-      estadisticas,
-      resumen_pastoral
-    };
-  }
-
-  /**
-   * NUEVO MÉTODO: Generar reporte Excel familiar completo
-   * Implementado según diseño del notebook con 5 hojas profesionales
-   */
-  async generarReporteExcelFamiliar(filtros = {}) {
-    const workbook = new ExcelJS.Workbook();
-    
-    // Configuración general del workbook
-    workbook.creator = 'Sistema Parroquial';
-    workbook.created = new Date();
-    workbook.modified = new Date();
-    workbook.subject = 'Reporte Familiar Consolidado';
-    
-    try {
-      console.log('📊 Generando reporte Excel familiar con filtros:', filtros);
-      
-      // 1. Obtener datos agrupados por familias
-      const datosFamiliares = await this.obtenerFamiliasAgrupadas(filtros);
-      console.log(`📋 Procesando ${datosFamiliares.familias.length} familias para Excel`);
-      
-      // 2. HOJA 1: RESUMEN FAMILIAR
-      await this.crearHojaResumenFamiliar(workbook, datosFamiliares.familias);
-      
-      // 3. HOJA 2: DETALLE POR FAMILIA  
-      await this.crearHojaDetalleFamiliar(workbook, datosFamiliares.familias);
-      
-      // 4. HOJA 3: ESTADÍSTICAS GENERALES
-      await this.crearHojaEstadisticas(workbook, datosFamiliares.familias);
-      
-      // 5. HOJA 4: DIFUNTOS POR FAMILIA
-      await this.crearHojaDifuntos(workbook, datosFamiliares.familias);
-      
-      // 6. HOJA 5: NECESIDADES PASTORALES
-      await this.crearHojaNecesidadesPastorales(workbook, datosFamiliares.familias);
-      
-      console.log('✅ Excel familiar generado exitosamente');
-      return workbook;
-      
-    } catch (error) {
-      console.error('Error generando Excel familiar:', error);
-      throw new Error(`Error en generación de Excel: ${error.message}`);
-    }
-  }
-
-  /**
-   * HOJA 1: RESUMEN FAMILIAR
-   */
-  async crearHojaResumenFamiliar(workbook, familias) {
-    const hoja = workbook.addWorksheet('Resumen Familiar');
-    
-    // Configurar columnas
-    hoja.columns = [
-      { header: 'Código Familia', key: 'codigo', width: 20 },
-      { header: 'Apellido Familiar', key: 'apellido', width: 25 },
-      { header: 'Parroquia', key: 'parroquia', width: 20 },
-      { header: 'Municipio', key: 'municipio', width: 20 },
-      { header: 'Sector', key: 'sector', width: 15 },
-      { header: 'Vereda', key: 'vereda', width: 15 },
-      { header: 'Total Miembros', key: 'total_miembros', width: 15 },
-      { header: 'Vivos', key: 'vivos', width: 10 },
-      { header: 'Difuntos', key: 'difuntos', width: 10 },
-      { header: 'Menores', key: 'menores', width: 10 },
-      { header: 'Adultos', key: 'adultos', width: 10 },
-      { header: 'Padres', key: 'padres', width: 10 },
-      { header: 'Madres', key: 'madres', width: 10 },
-      { header: 'Hijos', key: 'hijos', width: 10 },
-      { header: 'Otros', key: 'otros', width: 10 },
-      { header: 'Tiene Teléfono', key: 'telefono', width: 12 },
-      { header: 'Tiene Email', key: 'email', width: 12 }
-    ];
-    
-    // Agregar datos
-    familias.forEach(familia => {
-      hoja.addRow({
-        codigo: familia.codigo_familia,
-        apellido: familia.apellido_familiar,
-        parroquia: familia.ubicacion.parroquia,
-        municipio: familia.ubicacion.municipio,
-        sector: familia.ubicacion.sector,
-        vereda: familia.ubicacion.vereda,
-        total_miembros: familia.estadisticas.total_miembros,
-        vivos: familia.estadisticas.total_vivos,
-        difuntos: familia.estadisticas.total_difuntos,
-        menores: familia.estadisticas.total_menores,
-        adultos: familia.estadisticas.total_adultos,
-        padres: familia.miembros.padres.length,
-        madres: familia.miembros.madres.length,
-        hijos: familia.miembros.hijos_vivos.length,
-        otros: familia.miembros.otros_miembros ? familia.miembros.otros_miembros.length : 0,
-        telefono: familia.estadisticas.tiene_telefono ? 'SÍ' : 'NO',
-        email: familia.estadisticas.tiene_email ? 'SÍ' : 'NO'
-      });
-    });
-    
-    this.aplicarFormatoTabla(hoja);
-  }
-
-  /**
-   * HOJA 2: DETALLE COMPLETO POR FAMILIA
-   */
-  async crearHojaDetalleFamiliar(workbook, familias) {
-    const hoja = workbook.addWorksheet('Detalle Familiar');
-    
-    hoja.columns = [
-      { header: 'Código Familia', key: 'codigo_familia', width: 20 },
-      { header: 'Apellido Familiar', key: 'apellido_familia', width: 25 },
-      { header: 'Tipo Miembro', key: 'tipo', width: 12 },
-      { header: 'Nombre Completo', key: 'nombre', width: 25 },
-      { header: 'Cédula', key: 'cedula', width: 12 },
-      { header: 'Edad', key: 'edad', width: 8 },
-      { header: 'Es Menor', key: 'es_menor', width: 10 },
-      { header: 'Teléfono', key: 'telefono', width: 15 },
-      { header: 'Email', key: 'email', width: 25 },
-      { header: 'Salud', key: 'salud', width: 20 },
-      { header: 'Destrezas', key: 'destrezas', width: 20 },
-      { header: 'Es Difunto', key: 'difunto', width: 10 },
-      { header: 'Fecha Defunción', key: 'fecha_defuncion', width: 15 },
-      { header: 'Causa Muerte', key: 'causa_muerte', width: 20 }
-    ];
-    
-    // Agregar todos los miembros de todas las familias
-    familias.forEach(familia => {
-      // Función auxiliar para agregar miembros
-      const agregarMiembros = (miembros, tipoLabel) => {
-        miembros.forEach(miembro => {
-          hoja.addRow({
-            codigo_familia: familia.codigo_familia,
-            apellido_familia: familia.apellido_familiar,
-            tipo: tipoLabel,
-            nombre: miembro.nombre_completo,
-            cedula: miembro.cedula,
-            edad: miembro.edad,
-            es_menor: miembro.es_menor ? 'SÍ' : 'NO',
-            telefono: miembro.telefono,
-            email: miembro.email,
-            salud: miembro.salud,
-            destrezas: miembro.destrezas,
-            difunto: miembro.es_difunto ? 'SÍ' : 'NO',
-            fecha_defuncion: miembro.fecha_defuncion,
-            causa_muerte: miembro.causa_muerte
-          });
-        });
-      };
-      
-      // Agregar cada tipo de miembro
-      agregarMiembros(familia.miembros.padres, 'PADRE');
-      agregarMiembros(familia.miembros.madres, 'MADRE');
-      agregarMiembros(familia.miembros.hijos_vivos, 'HIJO');
-      agregarMiembros(familia.miembros.otros_miembros || [], 'MIEMBRO');
-      agregarMiembros(familia.miembros.difuntos, 'DIFUNTO');
-    });
-    
-    this.aplicarFormatoTabla(hoja);
-  }
-
-  /**
-   * HOJA 3: ESTADÍSTICAS GENERALES
-   */
-  async crearHojaEstadisticas(workbook, familias) {
-    const hoja = workbook.addWorksheet('Estadísticas');
-    
-    // Calcular estadísticas generales
-    const stats = {
-      total_familias: familias.length,
-      total_personas: familias.reduce((sum, f) => sum + f.estadisticas.total_miembros, 0),
-      total_vivos: familias.reduce((sum, f) => sum + f.estadisticas.total_vivos, 0),
-      total_difuntos: familias.reduce((sum, f) => sum + f.estadisticas.total_difuntos, 0),
-      total_menores: familias.reduce((sum, f) => sum + f.estadisticas.total_menores, 0),
-      total_adultos: familias.reduce((sum, f) => sum + f.estadisticas.total_adultos, 0),
-      familias_con_telefono: familias.filter(f => f.estadisticas.tiene_telefono).length,
-      familias_con_email: familias.filter(f => f.estadisticas.tiene_email).length
-    };
-    
-    // Agregar estadísticas como filas
-    hoja.addRow(['ESTADÍSTICAS GENERALES DEL REPORTE']);
-    hoja.addRow(['=================================']);
-    hoja.addRow([]);
-    hoja.addRow(['Métrica', 'Valor']);
-    hoja.addRow(['Total de Familias', stats.total_familias]);
-    hoja.addRow(['Total de Personas', stats.total_personas]);
-    hoja.addRow(['Personas Vivas', stats.total_vivos]);
-    hoja.addRow(['Personas Difuntas', stats.total_difuntos]);
-    hoja.addRow(['Menores de Edad', stats.total_menores]);
-    hoja.addRow(['Adultos', stats.total_adultos]);
-    hoja.addRow(['Familias con Teléfono', stats.familias_con_telefono]);
-    hoja.addRow(['Familias con Email', stats.familias_con_email]);
-    
-    // Formato especial para estadísticas
-    hoja.getRow(1).font = { bold: true, size: 14 };
-    hoja.getRow(4).font = { bold: true };
-    hoja.getColumn(1).width = 25;
-    hoja.getColumn(2).width = 15;
-  }
-
-  /**
-   * HOJA 4: DIFUNTOS POR FAMILIA
-   */
-  async crearHojaDifuntos(workbook, familias) {
-    const hoja = workbook.addWorksheet('Difuntos');
-    
-    hoja.columns = [
-      { header: 'Código Familia', key: 'codigo_familia', width: 20 },
-      { header: 'Apellido Familiar', key: 'apellido_familia', width: 25 },
-      { header: 'Nombre Difunto', key: 'nombre', width: 25 },
-      { header: 'Cédula', key: 'cedula', width: 12 },
-      { header: 'Fecha Defunción', key: 'fecha_defuncion', width: 15 },
-      { header: 'Causa Muerte', key: 'causa_muerte', width: 30 },
-      { header: 'Observaciones', key: 'observaciones', width: 30 }
-    ];
-    
-    // Agregar solo los difuntos
-    familias.forEach(familia => {
-      familia.miembros.difuntos.forEach(difunto => {
-        hoja.addRow({
-          codigo_familia: familia.codigo_familia,
-          apellido_familia: familia.apellido_familiar,
-          nombre: difunto.nombre_completo,
-          cedula: difunto.cedula,
-          fecha_defuncion: difunto.fecha_defuncion,
-          causa_muerte: difunto.causa_muerte,
-          observaciones: difunto.observaciones_difunto
-        });
-      });
-    });
-    
-    this.aplicarFormatoTabla(hoja);
-  }
-
-  /**
-   * HOJA 5: NECESIDADES PASTORALES
-   */
-  async crearHojaNecesidadesPastorales(workbook, familias) {
-    const hoja = workbook.addWorksheet('Necesidades Pastorales');
-    
-    hoja.columns = [
-      { header: 'Código Familia', key: 'codigo_familia', width: 20 },
-      { header: 'Apellido Familiar', key: 'apellido_familia', width: 25 },
-      { header: 'Necesidades Salud', key: 'salud', width: 30 },
-      { header: 'Destrezas Disponibles', key: 'destrezas', width: 30 },
-      { header: 'Observaciones', key: 'observaciones', width: 30 }
-    ];
-    
-    // Agregar solo familias con necesidades o destrezas
-    familias.forEach(familia => {
-      const tieneNecesidades = familia.resumen_pastoral.necesidades_salud.length > 0;
-      const tieneDestrezas = familia.resumen_pastoral.destrezas_disponibles.length > 0;
-      const tieneObservaciones = familia.resumen_pastoral.observaciones_generales;
-      
-      if (tieneNecesidades || tieneDestrezas || tieneObservaciones) {
-        hoja.addRow({
-          codigo_familia: familia.codigo_familia,
-          apellido_familia: familia.apellido_familiar,
-          salud: familia.resumen_pastoral.necesidades_salud.join('; '),
-          destrezas: familia.resumen_pastoral.destrezas_disponibles.join('; '),
-          observaciones: familia.resumen_pastoral.observaciones_generales
-        });
-      }
-    });
-    
-    this.aplicarFormatoTabla(hoja);
-  }
-
-  /**
-   * FUNCIÓN AUXILIAR: Aplicar formato profesional a tablas
-   */
-  aplicarFormatoTabla(hoja) {
-    // Formatear encabezados
-    hoja.getRow(1).eachCell(cell => {
-      cell.font = { bold: true, color: { argb: 'FFFFFF' } };
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '4472C4' } };
-      cell.alignment = { horizontal: 'center', vertical: 'middle' };
-      cell.border = {
-        top: { style: 'thin' },
-        bottom: { style: 'thin' },
-        left: { style: 'thin' },
-        right: { style: 'thin' }
-      };
-    });
-    
-    // Auto-ajustar altura de filas
-    hoja.eachRow((row, rowNumber) => {
-      row.height = rowNumber === 1 ? 25 : 20;
-    });
-    
-    // Aplicar filtros automáticos si hay datos
-    if (hoja.rowCount > 1) {
-      hoja.autoFilter = {
-        from: 'A1',
-        to: hoja.lastColumn.letter + '1'
+      console.error('❌ Error en obtenerInfoVivienda:', error);
+      return {
+        tipo_vivienda: 'No especificado',
+        dispocision_basura: 'No especificado',
+        tipos_agua_residuales: 'No especificado',
+        sistema_acueducto: 'No especificado'
       };
     }
+  }
+
+  obtenerNombreMes(numeroMes) {
+    const meses = {
+      1: 'enero', 2: 'febrero', 3: 'marzo', 4: 'abril',
+      5: 'mayo', 6: 'junio', 7: 'julio', 8: 'agosto', 
+      9: 'septiembre', 10: 'octubre', 11: 'noviembre', 12: 'diciembre'
+    };
+    return meses[numeroMes] || '';
   }
 }
 

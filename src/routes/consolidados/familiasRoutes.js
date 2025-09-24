@@ -87,69 +87,43 @@ const router = express.Router();
  * /api/familias:
  *   get:
  *     summary: Consulta consolidada de familias y personas
- *     description: Obtiene información de familias y sus integrantes con filtros múltiples
+ *     description: Obtiene información completa de familias y sus integrantes con filtros por ID
  *     tags: [Familias Consolidado]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: parroquia
- *         schema:
- *           type: string
- *         description: Filtrar por parroquia específica
- *       - in: query
- *         name: municipio
- *         schema:
- *           type: string
- *         description: Filtrar por municipio
- *       - in: query
- *         name: sector
- *         schema:
- *           type: string
- *         description: Filtrar por sector o vereda
- *       - in: query
- *         name: sexo
- *         schema:
- *           type: string
- *           enum: [M, F, Masculino, Femenino]
- *         description: Filtrar por sexo
- *       - in: query
- *         name: parentesco
- *         schema:
- *           type: string
- *           enum: [Madre, Padre]
- *         description: Filtrar por parentesco
- *       - in: query
- *         name: sinPadre
- *         schema:
- *           type: boolean
- *         description: Familias sin padre
- *       - in: query
- *         name: sinMadre
- *         schema:
- *           type: boolean
- *         description: Familias sin madre
- *       - in: query
- *         name: edad_min
+ *         name: id_parroquia
  *         schema:
  *           type: integer
- *         description: Edad mínima
+ *         description: ID específico de la parroquia
  *       - in: query
- *         name: edad_max
+ *         name: id_municipio
  *         schema:
  *           type: integer
- *         description: Edad máxima
+ *         description: ID específico del municipio
  *       - in: query
- *         name: incluir_detalles
+ *         name: id_sector
  *         schema:
- *           type: boolean
- *         description: Incluir estadísticas detalladas
+ *           type: integer
+ *         description: ID específico del sector
+ *       - in: query
+ *         name: id_vereda
+ *         schema:
+ *           type: integer
+ *         description: ID específico de la vereda
  *       - in: query
  *         name: limite
  *         schema:
  *           type: integer
  *           default: 100
- *         description: Límite de resultados
+ *         description: Límite de resultados por página
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Offset para paginación
  *     responses:
  *       200:
  *         description: Consulta exitosa
@@ -214,31 +188,37 @@ router.get('/estadisticas', authMiddleware.authenticateToken, familiasConsolidad
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: parroquia
+ *         name: id_parroquia
  *         schema:
- *           type: string
- *         description: Filtrar por parroquia
+ *           type: integer
+ *         description: ID específico de la parroquia
  *       - in: query
- *         name: municipio
+ *         name: id_municipio
  *         schema:
- *           type: string
- *         description: Filtrar por municipio
+ *           type: integer
+ *         description: ID específico del municipio
  *       - in: query
- *         name: sector
+ *         name: id_sector
  *         schema:
- *           type: string
- *         description: Filtrar por sector
+ *           type: integer
+ *         description: ID específico del sector
  *       - in: query
- *         name: incluir_detalles
+ *         name: id_vereda
  *         schema:
- *           type: boolean
- *         description: Incluir estadísticas
+ *           type: integer
+ *         description: ID específico de la vereda
  *       - in: query
  *         name: limite
  *         schema:
  *           type: integer
- *           default: 50
- *         description: Límite de resultados
+ *           default: 100
+ *         description: Límite de resultados por página
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Offset para paginación
  *     responses:
  *       200:
  *         description: Madres encontradas
@@ -271,31 +251,37 @@ router.get('/madres', authMiddleware.authenticateToken, familiasConsolidadoContr
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: parroquia
+ *         name: id_parroquia
  *         schema:
- *           type: string
- *         description: Filtrar por parroquia
+ *           type: integer
+ *         description: ID específico de la parroquia
  *       - in: query
- *         name: municipio
+ *         name: id_municipio
  *         schema:
- *           type: string
- *         description: Filtrar por municipio
+ *           type: integer
+ *         description: ID específico del municipio
  *       - in: query
- *         name: sector
+ *         name: id_sector
  *         schema:
- *           type: string
- *         description: Filtrar por sector
+ *           type: integer
+ *         description: ID específico del sector
  *       - in: query
- *         name: incluir_detalles
+ *         name: id_vereda
  *         schema:
- *           type: boolean
- *         description: Incluir estadísticas
+ *           type: integer
+ *         description: ID específico de la vereda
  *       - in: query
  *         name: limite
  *         schema:
  *           type: integer
- *           default: 50
- *         description: Límite de resultados
+ *           default: 100
+ *         description: Límite de resultados por página
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Offset para paginación
  *     responses:
  *       200:
  *         description: Padres encontrados
@@ -328,21 +314,31 @@ router.get('/padres', authMiddleware.authenticateToken, familiasConsolidadoContr
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: municipio
+ *         name: id_parroquia
  *         schema:
- *           type: string
- *         description: Filtrar por municipio
+ *           type: integer
+ *         description: ID específico de la parroquia
  *       - in: query
- *         name: sector
+ *         name: id_municipio
  *         schema:
- *           type: string
- *         description: Filtrar por sector
+ *           type: integer
+ *         description: ID específico del municipio
+ *       - in: query
+ *         name: id_sector
+ *         schema:
+ *           type: integer
+ *         description: ID específico del sector
+ *       - in: query
+ *         name: id_vereda
+ *         schema:
+ *           type: integer
+ *         description: ID específico de la vereda
  *       - in: query
  *         name: limite
  *         schema:
  *           type: integer
- *           default: 50
- *         description: Límite de resultados
+ *           default: 100
+ *         description: Límite de resultados por página
  *     responses:
  *       200:
  *         description: Familias sin padre encontradas
@@ -373,21 +369,31 @@ router.get('/sin-padre', authMiddleware.authenticateToken, familiasConsolidadoCo
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: municipio
+ *         name: id_parroquia
  *         schema:
- *           type: string
- *         description: Filtrar por municipio
+ *           type: integer
+ *         description: ID específico de la parroquia
  *       - in: query
- *         name: sector
+ *         name: id_municipio
  *         schema:
- *           type: string
- *         description: Filtrar por sector
+ *           type: integer
+ *         description: ID específico del municipio
+ *       - in: query
+ *         name: id_sector
+ *         schema:
+ *           type: integer
+ *         description: ID específico del sector
+ *       - in: query
+ *         name: id_vereda
+ *         schema:
+ *           type: integer
+ *         description: ID específico de la vereda
  *       - in: query
  *         name: limite
  *         schema:
  *           type: integer
- *           default: 50
- *         description: Límite de resultados
+ *           default: 100
+ *         description: Límite de resultados por página
  *     responses:
  *       200:
  *         description: Familias sin madre encontradas
@@ -418,58 +424,31 @@ router.get('/sin-madre', authMiddleware.authenticateToken, familiasConsolidadoCo
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: parroquia
- *         schema:
- *           type: string
- *         description: Filtrar por parroquia específica
- *       - in: query
- *         name: municipio
- *         schema:
- *           type: string
- *         description: Filtrar por municipio
- *       - in: query
- *         name: sector
- *         schema:
- *           type: string
- *         description: Filtrar por sector o vereda
- *       - in: query
- *         name: sexo
- *         schema:
- *           type: string
- *           enum: [M, F, Masculino, Femenino]
- *         description: Filtrar por sexo
- *       - in: query
- *         name: parentesco
- *         schema:
- *           type: string
- *           enum: [Madre, Padre]
- *         description: Filtrar por parentesco
- *       - in: query
- *         name: sinPadre
- *         schema:
- *           type: boolean
- *         description: Familias sin padre
- *       - in: query
- *         name: sinMadre
- *         schema:
- *           type: boolean
- *         description: Familias sin madre
- *       - in: query
- *         name: edad_min
+ *         name: id_parroquia
  *         schema:
  *           type: integer
- *         description: Edad mínima
+ *         description: ID específico de la parroquia
  *       - in: query
- *         name: edad_max
+ *         name: id_municipio
  *         schema:
  *           type: integer
- *         description: Edad máxima
+ *         description: ID específico del municipio
+ *       - in: query
+ *         name: id_sector
+ *         schema:
+ *           type: integer
+ *         description: ID específico del sector
+ *       - in: query
+ *         name: id_vereda
+ *         schema:
+ *           type: integer
+ *         description: ID específico de la vereda
  *       - in: query
  *         name: limite
  *         schema:
  *           type: integer
  *           default: 100
- *         description: Límite de resultados
+ *         description: Límite de resultados por página
  *     responses:
  *       200:
  *         description: Archivo Excel generado exitosamente
@@ -486,5 +465,6 @@ router.get('/sin-madre', authMiddleware.authenticateToken, familiasConsolidadoCo
  *         description: Error interno del servidor
  */
 router.get('/excel-completo', authMiddleware.authenticateToken, familiasConsolidadoController.generarReporteExcelCompleto);
+router.get('/reporte/excel', authMiddleware.authenticateToken, familiasConsolidadoController.generarReporteExcelCompleto);
 
 export default router;
