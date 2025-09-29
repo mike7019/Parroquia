@@ -77,12 +77,21 @@ class ParroquiaController {
         id_municipio: id_municipio ? parseInt(id_municipio) : null
       });
 
-      res.json(
-        createSuccessResponse(
-          'Parroquias retrieved successfully',
-          parroquias
-        )
-      );
+      // Agregar created_at y updated_at a cada parroquia en los datos
+      if (parroquias.data && Array.isArray(parroquias.data)) {
+        parroquias.data = parroquias.data.map(parroquia => ({
+          ...parroquia.toJSON ? parroquia.toJSON() : parroquia,
+          created_at: parroquia.created_at || parroquia.createdAt,
+          updated_at: parroquia.updated_at || parroquia.updatedAt
+        }));
+      }
+
+      res.json({
+        success: true,
+        message: 'Parroquias retrieved successfully',
+        data: parroquias.data,
+        total: parroquias.total
+      });
     } catch (error) {
       res.status(500).json(
         createErrorResponse(
@@ -103,12 +112,18 @@ class ParroquiaController {
 
       const parroquia = await parroquiaService.getParroquiaById(id);
 
-      res.json(
-        createSuccessResponse(
-          'Parroquia retrieved successfully',
-          parroquia
-        )
-      );
+      // Estructura personalizada de respuesta para incluir created_at y updated_at
+      const responseData = {
+        ...parroquia.toJSON ? parroquia.toJSON() : parroquia,
+        created_at: parroquia.created_at || parroquia.createdAt,
+        updated_at: parroquia.updated_at || parroquia.updatedAt
+      };
+
+      res.json({
+        success: true,
+        message: 'Parroquia retrieved successfully',
+        data: responseData
+      });
     } catch (error) {
       const statusCode = error.message.includes('not found') ? 404 : 500;
       res.status(statusCode).json(
@@ -131,12 +146,18 @@ class ParroquiaController {
 
       const parroquia = await parroquiaService.updateParroquia(id, updateData);
 
-      res.json(
-        createSuccessResponse(
-          'Parroquia updated successfully',
-          parroquia
-        )
-      );
+      // Estructura personalizada de respuesta para incluir created_at y updated_at
+      const responseData = {
+        ...parroquia.toJSON ? parroquia.toJSON() : parroquia,
+        created_at: parroquia.created_at || parroquia.createdAt,
+        updated_at: parroquia.updated_at || parroquia.updatedAt
+      };
+
+      res.json({
+        success: true,
+        message: 'Parroquia updated successfully',
+        data: responseData
+      });
     } catch (error) {
       const statusCode = error.message.includes('not found') ? 404 : 500;
       res.status(statusCode).json(
