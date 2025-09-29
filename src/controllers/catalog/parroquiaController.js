@@ -7,7 +7,7 @@ class ParroquiaController {
    */
   async createParroquia(req, res) {
     try {
-      const { nombre, id_municipio } = req.body;
+      const { nombre, id_municipio, direccion, telefono, email } = req.body;
 
       if (!nombre) {
         return res.status(400).json(
@@ -23,7 +23,10 @@ class ParroquiaController {
 
       const parroquia = await parroquiaService.createParroquia({ 
         nombre, 
-        id_municipio
+        id_municipio,
+        direccion,
+        telefono,
+        email
       });
 
       res.status(201).json(
