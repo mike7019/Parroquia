@@ -51,7 +51,9 @@ const Parroquia = sequelize.define('Parroquia', {
   sequelize,
   modelName: 'Parroquia',
   tableName: 'parroquia', // Corregido: tabla singular
-  timestamps: false, // Desactivar timestamps
+  timestamps: true, // Activar timestamps
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
   indexes: [
     {
       name: 'idx_parroquia_municipio',

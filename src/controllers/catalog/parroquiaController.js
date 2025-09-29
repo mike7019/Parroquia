@@ -29,12 +29,23 @@ class ParroquiaController {
         email
       });
 
-      res.status(201).json(
-        createSuccessResponse(
-          'Parroquia creada exitosamente',
-          parroquia
-        )
-      );
+      // Formatear la respuesta personalizada
+      const responseData = {
+        id_parroquia: parroquia.id_parroquia,
+        nombre: parroquia.nombre,
+        direccion: parroquia.direccion,
+        telefono: parroquia.telefono,
+        email: parroquia.email,
+        created_at: parroquia.created_at,
+        updated_at: parroquia.updated_at,
+        municipio: parroquia.municipio
+      };
+
+      res.status(201).json({
+        success: true,
+        message: 'Parroquia creada exitosamente',
+        data: responseData
+      });
     } catch (error) {
       const statusCode = error.message.includes('does not exist') ? 404 : 500;
       res.status(statusCode).json(
