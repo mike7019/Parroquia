@@ -54,7 +54,7 @@ class ParroquiasConsolidadoService {
 
       // Filtros geográficos
       if (municipio) {
-        whereConditions.push("m.nombre_municipio ILIKE :municipio");
+        whereConditions.push("m.nombre ILIKE :municipio");
         params.municipio = `%${municipio}%`;
       }
 
@@ -110,18 +110,18 @@ class ParroquiasConsolidadoService {
         SELECT DISTINCT
           p.id_parroquia,
           p.nombre as nombre_parroquia,
-          m.nombre_municipio,
+          m.nombre as nombre_municipio,
           d.nombre as nombre_departamento,
           COUNT(DISTINCT f.id_familia) as total_familias,
-          COUNT(DISTINCT per.id_personas) as total_personas
+          COUNT(DISTINCT per.id_persona) as total_personas
         FROM parroquia p
         INNER JOIN municipios m ON p.id_municipio = m.id_municipio
         INNER JOIN departamentos d ON m.id_departamento = d.id_departamento
         LEFT JOIN familias f ON f.id_municipio = m.id_municipio
-        LEFT JOIN personas per ON per.id_familia_familias = f.id_familia
+        LEFT JOIN personas per ON per.id_familia = f.id_familia
         ${joinsClause}
         ${whereClause}
-        GROUP BY p.id_parroquia, p.nombre, m.nombre_municipio, d.nombre
+        GROUP BY p.id_parroquia, p.nombre, m.nombre, d.nombre
         ORDER BY p.nombre
         LIMIT :limite OFFSET :offset
       `;
@@ -331,7 +331,7 @@ class ParroquiasConsolidadoService {
           p.id_parroquia,
           p.nombre as nombre_parroquia,
           m.id_municipio,
-          m.nombre_municipio,
+          m.nombre as nombre_municipio,
           d.id_departamento,
           d.nombre as nombre_departamento
         FROM parroquia p
@@ -390,12 +390,12 @@ class ParroquiasConsolidadoService {
       const topParroquias = await sequelize.query(`
         SELECT 
           p.nombre as parroquia,
-          m.nombre_municipio as municipio,
+          m.nombre as municipio,
           COUNT(DISTINCT f.id_familia) as total_familias
         FROM parroquia p
         INNER JOIN municipios m ON p.id_municipio = m.id_municipio
         LEFT JOIN familias f ON f.id_municipio = m.id_municipio
-        GROUP BY p.id_parroquia, p.nombre, m.nombre_municipio
+        GROUP BY p.id_parroquia, p.nombre, m.nombre
         ORDER BY total_familias DESC
         LIMIT 10
       `, { type: QueryTypes.SELECT });
@@ -464,7 +464,7 @@ class ParroquiasConsolidadoService {
       // Parroquias disponibles
       const parroquias = await sequelize.query(`
         SELECT p.id_parroquia, p.nombre as nombre_parroquia,
-               m.nombre_municipio, d.nombre as nombre_departamento
+               m.nombre as nombre_municipio, d.nombre as nombre_departamento
         FROM parroquia p
         INNER JOIN municipios m ON p.id_municipio = m.id_municipio
         INNER JOIN departamentos d ON m.id_departamento = d.id_departamento
@@ -473,11 +473,11 @@ class ParroquiasConsolidadoService {
 
       // Municipios disponibles
       const municipios = await sequelize.query(`
-        SELECT m.id_municipio, m.nombre_municipio,
+        SELECT m.id_municipio, m.nombre as nombre_municipio,
                d.nombre as nombre_departamento
         FROM municipios m
         INNER JOIN departamentos d ON m.id_departamento = d.id_departamento
-        ORDER BY m.nombre_municipio
+        ORDER BY m.nombre
       `, { type: QueryTypes.SELECT });
 
       return {

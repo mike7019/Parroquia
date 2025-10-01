@@ -16,6 +16,28 @@ const Parroquia = sequelize.define('Parroquia', {
       len: [2, 255]
     }
   },
+  direccion: {
+    type: DataTypes.STRING(500),
+    allowNull: true,
+    comment: 'Dirección física de la parroquia'
+  },
+  telefono: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    validate: {
+      len: [7, 20]
+    },
+    comment: 'Número de teléfono de contacto'
+  },
+  email: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    validate: {
+      isEmail: true,
+      len: [5, 100]
+    },
+    comment: 'Correo electrónico de contacto'
+  },
   id_municipio: {
     type: DataTypes.BIGINT,
     allowNull: false,
@@ -29,7 +51,9 @@ const Parroquia = sequelize.define('Parroquia', {
   sequelize,
   modelName: 'Parroquia',
   tableName: 'parroquia', // Corregido: tabla singular
-  timestamps: false, // Desactivar timestamps
+  timestamps: true, // Activar timestamps
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
   indexes: [
     {
       name: 'idx_parroquia_municipio',
