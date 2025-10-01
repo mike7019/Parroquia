@@ -40,15 +40,15 @@ const User = Usuario;
 try {
   Usuario.belongsToMany(Role, {
     through: UsuarioRole,
-    foreignKey: 'usuario_id',
-    otherKey: 'rol_id',
+    foreignKey: 'id_usuarios',
+    otherKey: 'id_roles',
     as: 'roles'
   });
 
   Role.belongsToMany(Usuario, {
     through: UsuarioRole,
-    foreignKey: 'rol_id',
-    otherKey: 'usuario_id',
+    foreignKey: 'id_roles',
+    otherKey: 'id_usuarios',
     as: 'usuarios'
   });
   

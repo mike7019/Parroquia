@@ -2,17 +2,17 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../../config/sequelize.js';
 
 const UsuarioRole = sequelize.define('UsuarioRole', {
-  usuario_id: {
+  id_usuarios: {
     type: DataTypes.UUID,
     allowNull: false,
     primaryKey: true,
-    field: 'usuario_id'
+    field: 'id_usuarios'
   },
-  rol_id: {
-    type: DataTypes.INTEGER,
+  id_roles: {
+    type: DataTypes.UUID,
     allowNull: false,
     primaryKey: true,
-    field: 'rol_id'
+    field: 'id_roles'
   }
 }, {
   tableName: 'usuarios_roles',
