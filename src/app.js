@@ -10,7 +10,6 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import sequelize from '../config/sequelize.js';
-import { loadAllModels } from '../syncDatabaseComplete.js';
 
 // Import routes
 import authRoutes from './routes/authRoutes.js';
@@ -285,8 +284,8 @@ const startServer = async () => {
     // Load all models from subcarpetas
     console.log('📦 Loading all models...');
     try {
-      console.log('🔄 Calling loadAllModels()...');
-      await loadAllModels();
+      // console.log('🔄 Calling loadAllModels()...');
+      // await loadAllModels();
       console.log('✅ All models loaded successfully');
       
       // Verificar modelos críticos
