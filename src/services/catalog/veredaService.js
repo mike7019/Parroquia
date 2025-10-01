@@ -6,16 +6,72 @@ const getVeredasModel = () => Veredas;
 
 class VeredaService {
   /**
+   * Generate next vereda code
+   */
+  async generateNextVeredaCode() {
+    try {
+      // Encontrar el último código usado
+      const lastVereda = await getVeredasModel().findOne({
+        where: {
+          codigo_vereda: {
+            [Op.not]: null,
+            [Op.like]: 'V%'
+          }
+        },
+        order: [
+          [sequelize.literal(`CAST(SUBSTRING(codigo_vereda FROM 2) AS INTEGER)`), 'DESC']
+        ],
+        limit: 1
+      });
+
+      let nextNumber = 1;
+      if (lastVereda && lastVereda.codigo_vereda) {
+        const currentNumber = parseInt(lastVereda.codigo_vereda.substring(1));
+        nextNumber = currentNumber + 1;
+      }
+
+      // Formatear como V001, V002, etc.
+      return `V${nextNumber.toString().padStart(3, '0')}`;
+    } catch (error) {
+      // Si hay error, buscar manualmente
+      const allVeredas = await getVeredasModel().findAll({
+        where: {
+          codigo_vereda: {
+            [Op.not]: null
+          }
+        },
+        attributes: ['codigo_vereda']
+      });
+
+      const numbers = allVeredas
+        .map(v => v.codigo_vereda)
+        .filter(code => code && code.startsWith('V'))
+        .map(code => parseInt(code.substring(1)))
+        .filter(num => !isNaN(num))
+        .sort((a, b) => b - a);
+
+      const nextNumber = numbers.length > 0 ? numbers[0] + 1 : 1;
+      return `V${nextNumber.toString().padStart(3, '0')}`;
+    }
+  }
+
+  /**
    * Find or create a vereda (prevents duplicates)
    */
   async findOrCreateVereda(veredaData) {
     try {
+      // Generar código automáticamente si no se proporciona
+      if (!veredaData.codigo_vereda) {
+        veredaData.codigo_vereda = await this.generateNextVeredaCode();
+      }
+
       const [vereda, created] = await getVeredasModel().findOrCreate({
         where: {
           nombre: veredaData.nombre
         },
         defaults: {
           nombre: veredaData.nombre,
+          codigo_vereda: veredaData.codigo_vereda,
           id_municipio_municipios: veredaData.id_municipio || null
         }
       });
@@ -34,8 +90,14 @@ class VeredaService {
    */
   async createVereda(veredaData) {
     try {
+      // Generar código automáticamente si no se proporciona
+      if (!veredaData.codigo_vereda) {
+        veredaData.codigo_vereda = await this.generateNextVeredaCode();
+      }
+
       const vereda = await getVeredasModel().create({
         nombre: veredaData.nombre,
+        codigo_vereda: veredaData.codigo_vereda,
         id_municipio_municipios: veredaData.id_municipio || null
       });
 
