@@ -5,7 +5,7 @@ const TipoVivienda = sequelize.define('TipoVivienda', {
   id_tipo_vivienda: {
     type: DataTypes.BIGINT,
     primaryKey: true,
-    autoIncrement: true,
+    autoIncrement: false, // Disabled to allow manual ID assignment for reusing deleted IDs
     field: 'id_tipo_vivienda'
   },
   nombre: {

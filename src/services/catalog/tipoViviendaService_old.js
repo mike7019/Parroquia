@@ -130,7 +130,7 @@ class TipoViviendaService {
    */
   async updateTipo(id, tipoData) {
     try {
-      const tipo = await TipoVivienda.findByPk(id);
+      const tipo = await getTipoViviendaModel().findByPk(id);
       
       if (!tipo) {
         const error = new Error('Tipo de vivienda no encontrado');
@@ -141,7 +141,7 @@ class TipoViviendaService {
 
       // Verificar si ya existe otro tipo con el mismo nombre (si se está actualizando el nombre)
       if (tipoData.nombre && tipoData.nombre !== tipo.nombre) {
-        const existingTipo = await TipoVivienda.findOne({
+        const existingTipo = await getTipoViviendaModel().findOne({
           where: { 
             nombre: tipoData.nombre,
             id_tipo_vivienda: { [Op.ne]: id }
@@ -175,7 +175,7 @@ class TipoViviendaService {
    */
   async deleteTipo(id) {
     try {
-      const tipo = await TipoVivienda.findByPk(id);
+      const tipo = await getTipoViviendaModel().findByPk(id);
       
       if (!tipo) {
         const error = new Error('Tipo de vivienda no encontrado');
@@ -205,7 +205,7 @@ class TipoViviendaService {
    */
   async getTiposActivos() {
     try {
-      const tipos = await TipoVivienda.findAll({
+      const tipos = await getTipoViviendaModel().findAll({
         where: { activo: true },
         order: [['nombre', 'ASC']]
       });
@@ -222,7 +222,7 @@ class TipoViviendaService {
    */
   async toggleEstado(id) {
     try {
-      const tipo = await TipoVivienda.findByPk(id);
+      const tipo = await getTipoViviendaModel().findByPk(id);
       
       if (!tipo) {
         const error = new Error('Tipo de vivienda no encontrado');
@@ -250,9 +250,9 @@ class TipoViviendaService {
    */
   async getEstadisticas() {
     try {
-      const totalTipos = await TipoVivienda.count();
-      const tiposActivos = await TipoVivienda.count({ where: { activo: true } });
-      const tiposInactivos = await TipoVivienda.count({ where: { activo: false } });
+      const totalTipos = await getTipoViviendaModel().count();
+      const tiposActivos = await getTipoViviendaModel().count({ where: { activo: true } });
+      const tiposInactivos = await getTipoViviendaModel().count({ where: { activo: false } });
 
       return {
         totalTipos,
