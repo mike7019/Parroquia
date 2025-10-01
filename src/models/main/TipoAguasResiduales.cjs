@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     id_tipo_aguas_residuales: {
       type: DataTypes.BIGINT,
       primaryKey: true,
-      autoIncrement: true,
+      autoIncrement: false, // Disabled to allow manual ID assignment for reusing deleted IDs
       allowNull: false
     },
     nombre: {

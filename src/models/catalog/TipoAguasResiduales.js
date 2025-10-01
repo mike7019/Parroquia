@@ -6,7 +6,7 @@ const TipoAguasResiduales = sequelize.define('TipoAguasResiduales', {
     type: DataTypes.BIGINT,
     primaryKey: true,
     allowNull: false,
-    autoIncrement: true
+    autoIncrement: false // Disabled to allow manual ID assignment for reusing deleted IDs
   },
   nombre: {
     type: DataTypes.STRING(255),

@@ -3,6 +3,38 @@ import { Op } from 'sequelize';
 
 class AguasResidualesService {
   /**
+   * Find the next available ID by checking for gaps in the sequence
+   */
+  async findNextAvailableId() {
+    try {
+      // Get all existing IDs ordered
+      const existingRecords = await TipoAguasResiduales.findAll({
+        attributes: ['id_tipo_aguas_residuales'],
+        order: [['id_tipo_aguas_residuales', 'ASC']],
+        raw: true
+      });
+
+      if (existingRecords.length === 0) {
+        return 1; // Start with 1 if no records exist
+      }
+
+      const existingIds = existingRecords.map(record => parseInt(record.id_tipo_aguas_residuales));
+      
+      // Find the first gap in the sequence
+      for (let i = 1; i <= existingIds.length + 1; i++) {
+        if (!existingIds.includes(i)) {
+          return i;
+        }
+      }
+
+      // If no gaps found, return the next sequential number
+      return Math.max(...existingIds) + 1;
+    } catch (error) {
+      throw new Error(`Error finding next available ID: ${error.message}`);
+    }
+  }
+
+  /**
    * Create a new tipo de aguas residuales
    */
   async createTipoAguasResiduales(data) {
@@ -18,7 +50,11 @@ class AguasResidualesService {
         throw new Error('Tipo de aguas residuales already exists');
       }
 
+      // Find the next available ID
+      const nextId = await this.findNextAvailableId();
+
       const tipoAguasResiduales = await TipoAguasResiduales.create({
+        id_tipo_aguas_residuales: nextId,
         nombre: nombre.trim(),
         descripcion: descripcion?.trim() || null
       });
