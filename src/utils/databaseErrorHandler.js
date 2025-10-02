@@ -105,7 +105,8 @@ class DatabaseErrorHandler {
       'usuarios_correo_electronico_unique': 'Este email ya está registrado',
       'personas_identificacion_unique': 'Esta identificación ya está registrada',
       'personas_correo_electronico_unique': 'Este email ya está asociado a otra persona',
-      'familias_uuid_familia_unique': 'Este UUID de familia ya existe'
+      'familias_uuid_familia_unique': 'Este UUID de familia ya existe',
+      'tipos_disposicion_basura_nombre_unique': 'Ya existe un tipo de disposición de basura con ese nombre'
     };
 
     const friendlyMessage = constraintMessages[constraintName] || 

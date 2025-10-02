@@ -92,18 +92,6 @@ class DisposicionBasuraService {
    */
   async createTipo(tipoData) {
     try {
-      // Verificar si ya existe un tipo con el mismo nombre
-      const existingTipo = await TipoDisposicionBasura.findOne({
-        where: { nombre: tipoData.nombre }
-      });
-
-      if (existingTipo) {
-        const error = new Error('Ya existe un tipo de disposición de basura con ese nombre');
-        error.statusCode = 409;
-        error.code = 'DUPLICATE_NAME';
-        throw error;
-      }
-
       // Find the next available ID
       const nextId = await this.findNextAvailableId();
 
