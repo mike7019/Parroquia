@@ -181,17 +181,86 @@ class SituacionCivilService {
       await transaction.rollback();
       
       if (error instanceof ValidationError) {
-        throw new CustomValidationError('Datos de situación civil inválidos', error.errors);
+        // Procesar errores de Sequelize para hacerlos más claros
+        const erroresDetallados = error.errors.map(err => {
+          let mensajeClaro = '';
+          
+          switch (err.path) {
+            case 'nombre':
+              if (err.type === 'notEmpty') {
+                mensajeClaro = 'El nombre de la situación civil no puede estar vacío';
+              } else if (err.type === 'len') {
+                mensajeClaro = 'El nombre debe tener entre 2 y 100 caracteres';
+              } else if (err.type === 'unique violation') {
+                mensajeClaro = `Ya existe una situación civil con el nombre "${err.value}"`;
+              } else {
+                mensajeClaro = err.message;
+              }
+              break;
+              
+            case 'codigo':
+              if (err.type === 'unique violation') {
+                mensajeClaro = `Ya existe una situación civil con el código "${err.value}"`;
+              } else if (err.type === 'len') {
+                mensajeClaro = 'El código no puede tener más de 10 caracteres';
+              } else {
+                mensajeClaro = err.message;
+              }
+              break;
+              
+            case 'descripcion':
+              if (err.type === 'len') {
+                mensajeClaro = 'La descripción no puede tener más de 500 caracteres';
+              } else {
+                mensajeClaro = err.message;
+              }
+              break;
+              
+            case 'orden':
+              if (err.type === 'min') {
+                mensajeClaro = 'El orden debe ser un número positivo (mayor o igual a 0)';
+              } else {
+                mensajeClaro = err.message;
+              }
+              break;
+              
+            default:
+              mensajeClaro = err.message;
+          }
+          
+          return {
+            field: err.path,
+            message: mensajeClaro,
+            value: err.value,
+            type: err.type
+          };
+        });
+        
+        throw new CustomValidationError(
+          `Error de validación: ${erroresDetallados.map(e => e.message).join(', ')}`, 
+          erroresDetallados
+        );
       }
       
       if (error instanceof UniqueConstraintError) {
         const field = error.errors[0]?.path;
         const value = error.errors[0]?.value;
-        throw new ConflictError(`Ya existe una situación civil con ${field}: ${value}`);
+        const fieldNames = {
+          'nombre': 'nombre',
+          'codigo': 'código',
+          'id_situacion_civil': 'ID'
+        };
+        const fieldName = fieldNames[field] || field;
+        throw new ConflictError(`Ya existe una situación civil con ${fieldName}: "${value}"`);
+      }
+
+      // Error personalizado de validación del servicio
+      if (error instanceof CustomValidationError) {
+        throw error;
       }
 
       console.error('Error en createSituacionCivil:', error);
-      throw error;
+      throw new Error(`Error interno al crear situación civil: ${error.message}`);
     }
   }
 
@@ -364,44 +433,92 @@ class SituacionCivilService {
 
     // Validar nombre único (requerido solo en creación, opcional en actualización)
     if (data.nombre) {
-      const whereClause = { nombre: data.nombre.trim() };
-      if (excludeId) {
-        whereClause.id_situacion_civil = { [Op.ne]: excludeId };
-      }
-
-      const existingByNombre = await getSituacionCivilModel().findOne({ where: whereClause });
-      if (existingByNombre) {
+      // Validar longitud del nombre
+      if (data.nombre.trim().length < 2) {
         errors.push({
           field: 'nombre',
-          message: 'Ya existe una situación civil con este nombre'
+          message: 'El nombre debe tener al menos 2 caracteres'
         });
+      } else if (data.nombre.trim().length > 100) {
+        errors.push({
+          field: 'nombre',
+          message: 'El nombre no puede tener más de 100 caracteres'
+        });
+      } else {
+        // Validar unicidad
+        const whereClause = { nombre: data.nombre.trim() };
+        if (excludeId) {
+          whereClause.id_situacion_civil = { [Op.ne]: excludeId };
+        }
+
+        const existingByNombre = await getSituacionCivilModel().findOne({ where: whereClause });
+        if (existingByNombre) {
+          errors.push({
+            field: 'nombre',
+            message: `Ya existe una situación civil con el nombre "${data.nombre.trim()}"`
+          });
+        }
       }
     } else if (!isUpdate) {
       // Solo requerir nombre en creación, no en actualización
       errors.push({
         field: 'nombre',
-        message: 'El nombre es requerido'
+        message: 'El nombre de la situación civil es obligatorio'
+      });
+    }
+
+    // Validar descripción si se proporciona
+    if (data.descripcion && data.descripcion.trim().length > 500) {
+      errors.push({
+        field: 'descripcion',
+        message: 'La descripción no puede tener más de 500 caracteres'
       });
     }
 
     // Validar código único solo si se proporciona
     if (data.codigo !== undefined && data.codigo !== null && data.codigo.trim() !== '') {
-      const whereClause = { codigo: data.codigo.trim().toUpperCase() };
-      if (excludeId) {
-        whereClause.id_situacion_civil = { [Op.ne]: excludeId };
-      }
-
-      const existingByCodigo = await getSituacionCivilModel().findOne({ where: whereClause });
-      if (existingByCodigo) {
+      // Validar longitud del código
+      if (data.codigo.trim().length > 10) {
         errors.push({
           field: 'codigo',
-          message: 'Ya existe una situación civil con este código'
+          message: 'El código no puede tener más de 10 caracteres'
+        });
+      } else {
+        // Validar unicidad
+        const whereClause = { codigo: data.codigo.trim().toUpperCase() };
+        if (excludeId) {
+          whereClause.id_situacion_civil = { [Op.ne]: excludeId };
+        }
+
+        const existingByCodigo = await getSituacionCivilModel().findOne({ where: whereClause });
+        if (existingByCodigo) {
+          errors.push({
+            field: 'codigo',
+            message: `Ya existe una situación civil con el código "${data.codigo.trim().toUpperCase()}"`
+          });
+        }
+      }
+    }
+
+    // Validar orden si se proporciona
+    if (data.orden !== undefined && data.orden !== null) {
+      const ordenNum = Number(data.orden);
+      if (isNaN(ordenNum)) {
+        errors.push({
+          field: 'orden',
+          message: 'El orden debe ser un número válido'
+        });
+      } else if (ordenNum < 0) {
+        errors.push({
+          field: 'orden',
+          message: 'El orden debe ser un número positivo (mayor o igual a 0)'
         });
       }
     }
 
     if (errors.length > 0) {
-      throw new CustomValidationError('Errores de validación', errors);
+      const mensajeGeneral = `Se encontraron ${errors.length} error(es) de validación: ${errors.map(e => e.message).join(', ')}`;
+      throw new CustomValidationError(mensajeGeneral, errors);
     }
   }
 }

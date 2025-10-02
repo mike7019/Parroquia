@@ -73,13 +73,87 @@ class SituacionCivilController {
     try {
       const { nombre, descripcion, codigo, orden, activo = true } = req.body;
 
-      // Validaciones básicas
+      // Validaciones básicas mejoradas
       if (!nombre || nombre.trim().length === 0) {
         return res.status(400).json({
           status: 'error',
-          message: 'El nombre de la situación civil es requerido',
-          errors: [{ field: 'nombre', message: 'Campo requerido' }]
+          message: 'El nombre de la situación civil es obligatorio',
+          errors: [{ 
+            field: 'nombre', 
+            message: 'El nombre de la situación civil es obligatorio y no puede estar vacío' 
+          }]
         });
+      }
+
+      if (nombre.trim().length < 2) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'El nombre es demasiado corto',
+          errors: [{ 
+            field: 'nombre', 
+            message: 'El nombre debe tener al menos 2 caracteres' 
+          }]
+        });
+      }
+
+      if (nombre.trim().length > 100) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'El nombre es demasiado largo',
+          errors: [{ 
+            field: 'nombre', 
+            message: 'El nombre no puede tener más de 100 caracteres' 
+          }]
+        });
+      }
+
+      // Validar código si se proporciona
+      if (codigo && codigo.trim().length > 10) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'El código es demasiado largo',
+          errors: [{ 
+            field: 'codigo', 
+            message: 'El código no puede tener más de 10 caracteres' 
+          }]
+        });
+      }
+
+      // Validar descripción si se proporciona
+      if (descripcion && descripcion.trim().length > 500) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'La descripción es demasiado larga',
+          errors: [{ 
+            field: 'descripcion', 
+            message: 'La descripción no puede tener más de 500 caracteres' 
+          }]
+        });
+      }
+
+      // Validar orden si se proporciona
+      if (orden !== undefined && orden !== null) {
+        const ordenNum = Number(orden);
+        if (isNaN(ordenNum)) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'El orden debe ser un número válido',
+            errors: [{ 
+              field: 'orden', 
+              message: 'El orden debe ser un número válido' 
+            }]
+          });
+        }
+        if (ordenNum < 0) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'El orden debe ser positivo',
+            errors: [{ 
+              field: 'orden', 
+              message: 'El orden debe ser un número positivo (mayor o igual a 0)' 
+            }]
+          });
+        }
       }
 
       const situacionCivilData = {
@@ -102,17 +176,29 @@ class SituacionCivilController {
       if (error instanceof ValidationError) {
         return res.status(400).json({
           status: 'error',
-          message: error.message,
-          errors: error.errors
+          message: error.message || 'Error de validación en los datos proporcionados',
+          errors: error.errors || [],
+          details: 'Revise los campos marcados y corrija los errores indicados'
         });
       }
 
       if (error instanceof ConflictError) {
         return res.status(409).json({
           status: 'error',
-          message: error.message
+          message: error.message || 'Conflicto: ya existe un registro con esos datos',
+          type: 'conflict',
+          details: 'Intente con valores diferentes para los campos únicos'
         });
       }
+
+      // Error genérico mejorado
+      console.error('Error no manejado en create situación civil:', error);
+      return res.status(500).json({
+        status: 'error',
+        message: 'Error interno del servidor al crear la situación civil',
+        details: 'Por favor intente nuevamente o contacte al administrador',
+        errorCode: 'INTERNAL_SERVER_ERROR'
+      });
 
       next(error);
     }
