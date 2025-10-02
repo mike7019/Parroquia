@@ -6,6 +6,41 @@ import logger from '../../utils/logger.js';
 class DisposicionBasuraService {
   
   /**
+   * Función para encontrar el próximo ID disponible reutilizando gaps
+   */
+  async findNextAvailableId() {
+    try {
+      // Obtener todos los IDs existentes ordenados
+      const existingIds = await TipoDisposicionBasura.findAll({
+        attributes: ['id_tipo_disposicion_basura'],
+        order: [['id_tipo_disposicion_basura', 'ASC']],
+        raw: true
+      });
+
+      // Si no hay registros, empezar desde 1
+      if (existingIds.length === 0) {
+        return 1;
+      }
+
+      // Buscar el primer gap en la secuencia
+      for (let i = 0; i < existingIds.length; i++) {
+        const expectedId = i + 1;
+        const actualId = existingIds[i].id_tipo_disposicion_basura;
+        
+        if (actualId !== expectedId) {
+          return expectedId;
+        }
+      }
+
+      // Si no hay gaps, usar el siguiente ID después del último
+      return existingIds.length + 1;
+    } catch (error) {
+      logger.error('Error finding next available ID for tipo disposicion basura:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Obtener todos los tipos de disposición de basura
    */
   async getAllTipos() {
@@ -69,7 +104,13 @@ class DisposicionBasuraService {
         throw error;
       }
 
-      const nuevoTipo = await TipoDisposicionBasura.create(tipoData);
+      // Find the next available ID
+      const nextId = await this.findNextAvailableId();
+
+      const nuevoTipo = await TipoDisposicionBasura.create({
+        id_tipo_disposicion_basura: nextId,
+        ...tipoData
+      });
       
       logger.info('Tipo de disposición de basura creado exitosamente', {
         id: nuevoTipo.id_tipo_disposicion_basura,

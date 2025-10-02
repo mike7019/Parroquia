@@ -8,6 +8,41 @@ const getParentescoModel = () => sequelize.models.Parentesco;
 class ParentescoService {
   
   /**
+   * Función para encontrar el próximo ID disponible reutilizando gaps
+   */
+  async findNextAvailableId() {
+    try {
+      // Obtener todos los IDs existentes ordenados
+      const existingIds = await getParentescoModel().findAll({
+        attributes: ['id_parentesco'],
+        order: [['id_parentesco', 'ASC']],
+        raw: true
+      });
+
+      // Si no hay registros, empezar desde 1
+      if (existingIds.length === 0) {
+        return 1;
+      }
+
+      // Buscar el primer gap en la secuencia
+      for (let i = 0; i < existingIds.length; i++) {
+        const expectedId = i + 1;
+        const actualId = existingIds[i].id_parentesco;
+        
+        if (actualId !== expectedId) {
+          return expectedId;
+        }
+      }
+
+      // Si no hay gaps, usar el siguiente ID después del último
+      return existingIds.length + 1;
+    } catch (error) {
+      logger.error('Error finding next available ID for parentesco:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Obtener todos los parentescos
    */
   async getAllParentescos() {
@@ -71,7 +106,13 @@ class ParentescoService {
         throw error;
       }
 
-      const nuevoParentesco = await getParentescoModel().create(parentescoData);
+      // Find the next available ID
+      const nextId = await this.findNextAvailableId();
+
+      const nuevoParentesco = await getParentescoModel().create({
+        id_parentesco: nextId,
+        ...parentescoData
+      });
       
       logger.info('Parentesco creado exitosamente', {
         id: nuevoParentesco.id_parentesco,
