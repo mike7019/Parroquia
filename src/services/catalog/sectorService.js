@@ -1,12 +1,49 @@
 import sequelize from '../../../config/sequelize.js';
 import { Op } from 'sequelize';
 import { Sector, Municipios } from '../../models/index.js';
+import logger from '../../utils/logger.js';
 
 // Helper functions to get models
 const getSectorModel = () => Sector;
 const getMunicipiosModel = () => Municipios;
 
 class SectorService {
+  
+  /**
+   * Función para encontrar el próximo ID disponible reutilizando gaps
+   */
+  async findNextAvailableId() {
+    try {
+      // Obtener todos los IDs existentes ordenados
+      const existingIds = await getSectorModel().findAll({
+        attributes: ['id_sector'],
+        order: [['id_sector', 'ASC']],
+        raw: true
+      });
+
+      // Si no hay registros, empezar desde 1
+      if (existingIds.length === 0) {
+        return 1;
+      }
+
+      // Buscar el primer gap en la secuencia
+      for (let i = 0; i < existingIds.length; i++) {
+        const expectedId = i + 1;
+        const actualId = existingIds[i].id_sector;
+        
+        if (actualId !== expectedId) {
+          return expectedId;
+        }
+      }
+
+      // Si no hay gaps, usar el siguiente ID después del último
+      return existingIds.length + 1;
+    } catch (error) {
+      logger.error('Error finding next available ID for sector:', error);
+      throw error;
+    }
+  }
+
   /**
    * Create a new sector
    */
@@ -32,7 +69,13 @@ class SectorService {
         throw new Error('Ya existe un sector con ese nombre en este municipio');
       }
 
-      const sector = await getSectorModel().create(sectorData);
+      // Find the next available ID
+      const nextId = await this.findNextAvailableId();
+
+      const sector = await getSectorModel().create({
+        id_sector: nextId,
+        ...sectorData
+      });
       
       // Return created sector with municipio info
       const sectorWithMunicipio = await getSectorModel().findByPk(sector.id_sector, {

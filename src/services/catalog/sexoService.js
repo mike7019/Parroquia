@@ -1,11 +1,48 @@
 // import { Sexo } from '../../models/index.js'; // TEMPORALMENTE DESACTIVADO
 import sequelize from '../../../config/sequelize.js';
 import { Op } from 'sequelize';
+import logger from '../../utils/logger.js';
 
 // Obtener el modelo Sexo desde Sequelize una vez que se cargue
 const getSexoModel = () => sequelize.models.Sexo;
 
 class SexoService {
+  
+  /**
+   * Función para encontrar el próximo ID disponible reutilizando gaps
+   */
+  async findNextAvailableId() {
+    try {
+      // Obtener todos los IDs existentes ordenados
+      const existingIds = await getSexoModel().findAll({
+        attributes: ['id_sexo'],
+        order: [['id_sexo', 'ASC']],
+        raw: true
+      });
+
+      // Si no hay registros, empezar desde 1
+      if (existingIds.length === 0) {
+        return 1;
+      }
+
+      // Buscar el primer gap en la secuencia
+      for (let i = 0; i < existingIds.length; i++) {
+        const expectedId = i + 1;
+        const actualId = existingIds[i].id_sexo;
+        
+        if (actualId !== expectedId) {
+          return expectedId;
+        }
+      }
+
+      // Si no hay gaps, usar el siguiente ID después del último
+      return existingIds.length + 1;
+    } catch (error) {
+      logger.error('Error finding next available ID for sexo:', error);
+      throw error;
+    }
+  }
+
   /**
    * Create a new sexo
    */
@@ -24,7 +61,15 @@ class SexoService {
         throw new Error('Sexo with this name already exists');
       }
 
-      const sexo = await getSexoModel().create({ nombre, descripcion });
+      // Find the next available ID
+      const nextId = await this.findNextAvailableId();
+
+      const sexo = await getSexoModel().create({ 
+        id_sexo: nextId,
+        nombre, 
+        descripcion 
+      });
+      
       return sexo;
     } catch (error) {
       throw new Error(`Error creating sexo: ${error.message}`);

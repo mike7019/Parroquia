@@ -1,10 +1,47 @@
 import { Veredas, Municipios, Familias, sequelize } from '../../models/index.js';
 import { Op } from 'sequelize';
+import logger from '../../utils/logger.js';
 
 // Usar el modelo importado directamente
 const getVeredasModel = () => Veredas;
 
 class VeredaService {
+  
+  /**
+   * Función para encontrar el próximo ID disponible reutilizando gaps
+   */
+  async findNextAvailableId() {
+    try {
+      // Obtener todos los IDs existentes ordenados
+      const existingIds = await getVeredasModel().findAll({
+        attributes: ['id_vereda'],
+        order: [['id_vereda', 'ASC']],
+        raw: true
+      });
+
+      // Si no hay registros, empezar desde 1
+      if (existingIds.length === 0) {
+        return 1;
+      }
+
+      // Buscar el primer gap en la secuencia
+      for (let i = 0; i < existingIds.length; i++) {
+        const expectedId = i + 1;
+        const actualId = existingIds[i].id_vereda;
+        
+        if (actualId !== expectedId) {
+          return expectedId;
+        }
+      }
+
+      // Si no hay gaps, usar el siguiente ID después del último
+      return existingIds.length + 1;
+    } catch (error) {
+      logger.error('Error finding next available ID for vereda:', error);
+      throw error;
+    }
+  }
+
   /**
    * Generate next vereda code
    */
@@ -95,7 +132,11 @@ class VeredaService {
         veredaData.codigo_vereda = await this.generateNextVeredaCode();
       }
 
+      // Find the next available ID
+      const nextId = await this.findNextAvailableId();
+
       const vereda = await getVeredasModel().create({
+        id_vereda: nextId,
         nombre: veredaData.nombre,
         codigo_vereda: veredaData.codigo_vereda,
         id_municipio_municipios: veredaData.id_municipio || null

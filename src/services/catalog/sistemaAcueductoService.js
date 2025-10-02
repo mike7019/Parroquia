@@ -2,6 +2,7 @@
  * Sistema de Acueducto Service
  */
 import sequelize from '../../../config/sequelize.js';
+import logger from '../../utils/logger.js';
 
 class SistemaAcueductoService {
   constructor() {
@@ -19,10 +20,52 @@ class SistemaAcueductoService {
     return this.model;
   }
 
+  /**
+   * Función para encontrar el próximo ID disponible reutilizando gaps
+   */
+  async findNextAvailableId() {
+    try {
+      const SistemaAcueducto = this.getModel();
+      
+      // Obtener todos los IDs existentes ordenados
+      const existingIds = await SistemaAcueducto.findAll({
+        attributes: ['id_sistema_acueducto'],
+        order: [['id_sistema_acueducto', 'ASC']],
+        raw: true
+      });
+
+      // Si no hay registros, empezar desde 1
+      if (existingIds.length === 0) {
+        return 1;
+      }
+
+      // Buscar el primer gap en la secuencia
+      for (let i = 0; i < existingIds.length; i++) {
+        const expectedId = i + 1;
+        const actualId = existingIds[i].id_sistema_acueducto;
+        
+        if (actualId !== expectedId) {
+          return expectedId;
+        }
+      }
+
+      // Si no hay gaps, usar el siguiente ID después del último
+      return existingIds.length + 1;
+    } catch (error) {
+      logger.error('Error finding next available ID for sistema acueducto:', error);
+      throw error;
+    }
+  }
+
   async createSistemaAcueducto(data) {
     try {
       const SistemaAcueducto = this.getModel();
+      
+      // Find the next available ID
+      const nextId = await this.findNextAvailableId();
+      
       const nuevoSistema = await SistemaAcueducto.create({
+        id_sistema_acueducto: nextId,
         nombre: data.nombre,
         descripcion: data.descripcion
       });
