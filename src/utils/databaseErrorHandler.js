@@ -106,11 +106,45 @@ class DatabaseErrorHandler {
       'personas_identificacion_unique': 'Esta identificación ya está registrada',
       'personas_correo_electronico_unique': 'Este email ya está asociado a otra persona',
       'familias_uuid_familia_unique': 'Este UUID de familia ya existe',
-      'tipos_disposicion_basura_nombre_unique': 'Ya existe un tipo de disposición de basura con ese nombre'
+      // Servicios de catálogo
+      'tipos_disposicion_basura_nombre_unique': 'Ya existe un tipo de disposición de basura con ese nombre',
+      'tipos_vivienda_nombre_unique': 'Ya existe un tipo de vivienda con ese nombre',
+      'profesiones_nombre_unique': 'Ya existe una profesión con ese nombre',
+      'sexos_nombre_unique': 'Ya existe un sexo con ese nombre',
+      'parentescos_nombre_unique': 'Ya existe un parentesco con ese nombre',
+      'estudios_nivel_unique': 'Ya existe un nivel de estudio con esa descripción',
+      'destrezas_nombre_unique': 'Ya existe una destreza con ese nombre',
+      'tallas_nombre_unique': 'Ya existe una talla con ese nombre',
+      'sectores_nombre_unique': 'Ya existe un sector con ese nombre',
+      'sistemas_acueducto_nombre_unique': 'Ya existe un sistema de acueducto con ese nombre',
+      'tipos_identificacion_codigo_unique': 'Ya existe un tipo de identificación con ese código',
+      'veredas_nombre_unique': 'Ya existe una vereda con ese nombre',
+      'parroquias_nombre_unique': 'Ya existe una parroquia con ese nombre'
     };
 
-    const friendlyMessage = constraintMessages[constraintName] || 
-      `Ya existe un registro con estos datos en ${tableName}`;
+    let friendlyMessage = constraintMessages[constraintName];
+    
+    // Si no encontramos un mensaje específico, generar uno basado en el nombre de la tabla
+    if (!friendlyMessage) {
+      const tableMessages = {
+        'tipos_disposicion_basura': 'Ya existe un tipo de disposición de basura',
+        'tipos_vivienda': 'Ya existe un tipo de vivienda',
+        'profesiones': 'Ya existe una profesión',
+        'sexos': 'Ya existe un sexo',
+        'parentescos': 'Ya existe un parentesco',
+        'estudios': 'Ya existe un nivel de estudio',
+        'destrezas': 'Ya existe una destreza',
+        'tallas': 'Ya existe una talla',
+        'sectores': 'Ya existe un sector',
+        'sistemas_acueducto': 'Ya existe un sistema de acueducto',
+        'tipos_identificacion': 'Ya existe un tipo de identificación',
+        'veredas': 'Ya existe una vereda',
+        'parroquias': 'Ya existe una parroquia'
+      };
+      
+      friendlyMessage = tableMessages[tableName] || 
+        `Ya existe un registro con estos datos en ${tableName}`;
+    }
 
     const conflictDetails = error.errors?.map(err => ({
       field: err.path,
