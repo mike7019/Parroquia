@@ -242,8 +242,15 @@ class SituacionCivilService {
       // TODO: Verificar si tiene relaciones activas (si existen)
       // Por ahora hacemos eliminación física para permitir reutilización de IDs
 
-      // Eliminación física directa
-      await situacionCivil.destroy({ force: true, transaction });
+      // Eliminación física directa usando SQL para garantizar eliminación completa
+      await sequelize.query(
+        'DELETE FROM situaciones_civiles WHERE id_situacion_civil = :id',
+        {
+          replacements: { id },
+          type: sequelize.QueryTypes.DELETE,
+          transaction
+        }
+      );
 
       await transaction.commit();
       console.log(`🗑️ Eliminación física del ID ${id} completada (ID reutilizable)`);
