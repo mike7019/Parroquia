@@ -21,6 +21,40 @@ class TallaService {
     return this.model;
   }
 
+  /**
+   * Find the next available ID by checking for gaps in the sequence
+   */
+  async findNextAvailableId() {
+    try {
+      const Talla = this.getModel();
+      
+      // Get all existing IDs ordered
+      const existingRecords = await Talla.findAll({
+        attributes: ['id_talla'],
+        order: [['id_talla', 'ASC']],
+        raw: true
+      });
+
+      if (existingRecords.length === 0) {
+        return 1; // Start with 1 if no records exist
+      }
+
+      const existingIds = existingRecords.map(record => parseInt(record.id_talla));
+      
+      // Find the first gap in the sequence
+      for (let i = 1; i <= existingIds.length + 1; i++) {
+        if (!existingIds.includes(i)) {
+          return i;
+        }
+      }
+
+      // If no gaps found, return the next sequential number
+      return Math.max(...existingIds) + 1;
+    } catch (error) {
+      throw new Error(`Error finding next available ID: ${error.message}`);
+    }
+  }
+
   async getAllTallas() {
     try {
       const Talla = this.getModel();
@@ -89,7 +123,11 @@ class TallaService {
         throw new Error('Ya existe una talla con esas características');
       }
 
+      // Find the next available ID
+      const nextId = await this.findNextAvailableId();
+
       const nuevaTalla = await Talla.create({
+        id_talla: nextId,
         tipo_prenda: tallaData.tipo_prenda,
         talla: tallaData.talla,
         descripcion: tallaData.descripcion || null,
