@@ -16,7 +16,6 @@ import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userManagementRoutes.js';
 import systemRoutes from './routes/systemRoutes.js';
 import catalogRoutes from './routes/catalog/index.js';
-import parentescoRoutes from './routes/catalog/parentescoRoutes.js';
 import situacionCivilRoutes from './routes/catalog/situacionCivilRoutes.js';
 import encuestaRoutes from './routes/encuestaRoutes.js';
 import difuntosRoutes from './routes/difuntosRoutes.js';
@@ -229,7 +228,6 @@ app.use('/api/encuesta', encuestaRoutes); // Rutas de encuestas corregidas
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/catalog', catalogRoutes);
-app.use('/api/parentescos', parentescoRoutes); // Direct access for compatibility
 app.use('/api/situaciones-civiles', situacionCivilRoutes); // Direct access for compatibility
 app.use('/api/difuntos/legacy', difuntosRoutes); // Rutas originales (compatibilidad)
 app.use('/api/consultas', familiasConsultasRoutes); // Rutas de consultas de familias
@@ -570,13 +568,11 @@ const displayRoutes = () => {
       { method: 'GET', path: '/api/catalog/tipos-identificacion', group: 'Catalog', protected: false, description: 'List identification types' },
       
       // Parentescos routes
-      { method: 'GET', path: '/api/catalog/parentescos/stats', group: 'Catalog', protected: true, description: 'Get parentesco statistics' },
       { method: 'GET', path: '/api/catalog/parentescos', group: 'Catalog', protected: true, description: 'List parentescos' },
       { method: 'POST', path: '/api/catalog/parentescos', group: 'Catalog', protected: true, description: 'Create parentesco' },
       { method: 'GET', path: '/api/catalog/parentescos/:id', group: 'Catalog', protected: true, description: 'Get parentesco by ID' },
       { method: 'PUT', path: '/api/catalog/parentescos/:id', group: 'Catalog', protected: true, description: 'Update parentesco' },
       { method: 'DELETE', path: '/api/catalog/parentescos/:id', group: 'Catalog', protected: true, description: 'Delete parentesco' },
-      { method: 'PATCH', path: '/api/catalog/parentescos/:id/restore', group: 'Catalog', protected: true, description: 'Restore parentesco' },
       
       // Comunidades Culturales routes
       { method: 'POST', path: '/api/catalog/comunidades-culturales', group: 'Catalog', protected: true, description: 'Create comunidad cultural' },
