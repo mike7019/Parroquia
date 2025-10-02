@@ -39,6 +39,11 @@ class DifuntosConsolidadoService {
         replacements.id_sector = filtros.id_sector;
       }
       
+      if (filtros.id_parentesco) {
+        whereConditions.push('df.id_parentesco = :id_parentesco');
+        replacements.id_parentesco = filtros.id_parentesco;
+      }
+      
       // Filtro de rango de fechas
       if (filtros.fecha_inicio && filtros.fecha_fin) {
         whereConditions.push('df.fecha_fallecimiento BETWEEN :fecha_inicio AND :fecha_fin');
@@ -74,17 +79,16 @@ class DifuntosConsolidadoService {
           v.nombre as nombre_vereda,
           p.id_parroquia,
           p.nombre as nombre_parroquia,
-          CASE 
-            WHEN df.nombre_completo ILIKE '%madre%' OR df.nombre_completo ILIKE '%mamá%' OR df.observaciones ILIKE '%madre%' THEN 'Madre'
-            WHEN df.nombre_completo ILIKE '%padre%' OR df.nombre_completo ILIKE '%papá%' OR df.observaciones ILIKE '%padre%' THEN 'Padre'
-            ELSE 'Familiar'
-          END as parentesco_inferido
+          -- Usar el parentesco real de la tabla parentescos
+          COALESCE(par.nombre, 'Familiar') as parentesco_real,
+          df.id_parentesco
         FROM difuntos_familia df
         LEFT JOIN familias f ON df.id_familia_familias = f.id_familia
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores s ON f.id_sector = s.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
         LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
+        LEFT JOIN parentescos par ON df.id_parentesco = par.id_parentesco
         ${whereClause}
       `, { 
         type: QueryTypes.SELECT,
@@ -108,6 +112,10 @@ class DifuntosConsolidadoService {
       
       if (filtros.id_sector) {
         whereConditionsPersonas.push('s.id_sector = :id_sector');
+      }
+      
+      if (filtros.id_parentesco) {
+        whereConditionsPersonas.push('pe.id_parentesco = :id_parentesco');
       }
       
       // Filtro de rango de fechas para personas
@@ -141,17 +149,16 @@ class DifuntosConsolidadoService {
           v.nombre as nombre_vereda,
           p.id_parroquia,
           p.nombre as nombre_parroquia,
-          CASE 
-            WHEN (pe.estudios::json->>'era_madre')::boolean = true THEN 'Madre'
-            WHEN (pe.estudios::json->>'era_padre')::boolean = true THEN 'Padre'
-            ELSE 'Familiar'
-          END as parentesco_inferido
+          -- Usar el parentesco real de la tabla parentescos para personas
+          COALESCE(par.nombre, 'Familiar') as parentesco_real,
+          pe.id_parentesco
         FROM personas pe
         LEFT JOIN familias f ON pe.id_familia_familias = f.id_familia
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores s ON f.id_sector = s.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
         LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
+        LEFT JOIN parentescos par ON pe.id_parentesco = par.id_parentesco
         ${whereClausePersonas}
       `, { 
         type: QueryTypes.SELECT,
@@ -163,17 +170,8 @@ class DifuntosConsolidadoService {
       // PASO 3: Combinar resultados
       const todosLosDifuntos = [...difuntosFamilia, ...personasFallecidas];
       
-      // PASO 4: Aplicar filtro de parentesco si se proporciona (filtro post-consulta para mayor precisión)
-      let difuntosFiltrados = todosLosDifuntos;
-      
-      if (filtros.id_parentesco) {
-        console.log(`🔍 Filtro id_parentesco ${filtros.id_parentesco}: Se aplicaría en el frontend o con JOIN a tabla parentescos`);
-        // Nota: Este filtro puede implementarse con JOIN a tabla de parentescos si existe
-        // O manejarse en el frontend según la lógica de negocio
-      }
-
       // Ordenar por fecha de aniversario descendente (más recientes primero)
-      difuntosFiltrados.sort((a, b) => {
+      todosLosDifuntos.sort((a, b) => {
         if (!a.fecha_aniversario && !b.fecha_aniversario) return 0;
         if (!a.fecha_aniversario) return 1;
         if (!b.fecha_aniversario) return -1;
@@ -184,7 +182,6 @@ class DifuntosConsolidadoService {
         difuntos_familia: difuntosFamilia.length,
         personas_fallecidas: personasFallecidas.length,
         total_encontrados: todosLosDifuntos.length,
-        despues_filtros: difuntosFiltrados.length,
         filtros_aplicados: {
           id_parroquia: filtros.id_parroquia || 'todos',
           id_municipio: filtros.id_municipio || 'todos',
@@ -197,10 +194,9 @@ class DifuntosConsolidadoService {
       
       return {
         exito: true,
-        mensaje: `Consulta de difuntos completada exitosamente. ${difuntosFiltrados.length} registros encontrados.`,
-        datos: difuntosFiltrados,
-        total: difuntosFiltrados.length,
-        total_sin_filtros: todosLosDifuntos.length,
+        mensaje: `Consulta de difuntos completada exitosamente. ${todosLosDifuntos.length} registros encontrados.`,
+        datos: todosLosDifuntos,
+        total: todosLosDifuntos.length,
         estadisticas: {
           difuntos_familia: difuntosFamilia.length,
           personas_fallecidas: personasFallecidas.length,
@@ -330,13 +326,15 @@ class DifuntosConsolidadoService {
           m.nombre_municipio,
           s.nombre as nombre_sector,
           v.nombre as nombre_vereda,
-          p.nombre as nombre_parroquia
+          p.nombre as nombre_parroquia,
+          COALESCE(par.nombre, 'Familiar') as parentesco_real
         FROM difuntos_familia df
         LEFT JOIN familias f ON df.id_familia_familias = f.id_familia
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores s ON f.id_sector = s.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
         LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
+        LEFT JOIN parentescos par ON df.id_parentesco = par.id_parentesco
         WHERE df.nombre_completo ILIKE :nombreBusqueda
       `, {
         replacements: { nombreBusqueda: `%${nombreBusqueda}%` },
@@ -357,13 +355,15 @@ class DifuntosConsolidadoService {
           m.nombre_municipio,
           s.nombre as nombre_sector,
           v.nombre as nombre_vereda,
-          p.nombre as nombre_parroquia
+          p.nombre as nombre_parroquia,
+          COALESCE(par.nombre, 'Familiar') as parentesco_real
         FROM personas pe
         LEFT JOIN familias f ON pe.id_familia_familias = f.id_familia
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores s ON f.id_sector = s.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
         LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
+        LEFT JOIN parentescos par ON pe.id_parentesco = par.id_parentesco
         WHERE pe.estudios IS NOT NULL 
           AND pe.estudios LIKE '%es_fallecido%'
           AND pe.estudios::json->>'es_fallecido' = 'true'
@@ -512,7 +512,7 @@ class DifuntosConsolidadoService {
         fuente: difunto.fuente === 'difuntos_familia' ? 'Registro Difuntos' : 'Registro Personas',
         id_difunto: difunto.id_difunto,
         nombre_completo: difunto.nombre_completo,
-        parentesco: difunto.parentesco_inferido,
+        parentesco: difunto.parentesco_real,
         fecha_aniversario: difunto.fecha_aniversario ? new Date(difunto.fecha_aniversario).toLocaleDateString() : 'No especificada',
         apellido_familiar: difunto.apellido_familiar,
         parroquia: difunto.nombre_parroquia,
@@ -562,7 +562,7 @@ class DifuntosConsolidadoService {
         tipo_registro: difunto.fuente === 'difuntos_familia' ? 'Tabla Difuntos' : 'Personas Fallecidas',
         id_sistema: difunto.id_difunto,
         nombre: difunto.nombre_completo,
-        parentesco: difunto.parentesco_inferido,
+        parentesco: difunto.parentesco_real,
         fecha: fecha ? fecha.toLocaleDateString() : 'No especificada',
         año: fecha ? fecha.getFullYear() : 'N/A',
         mes: fecha ? fecha.toLocaleDateString('es-ES', { month: 'long' }) : 'N/A',
@@ -593,7 +593,7 @@ class DifuntosConsolidadoService {
     Object.keys(estadisticasFuente).forEach(fuente => {
       estadisticasParentesco[fuente] = {};
       estadisticasFuente[fuente].forEach(difunto => {
-        const parentesco = difunto.parentesco_inferido;
+        const parentesco = difunto.parentesco_real;
         estadisticasParentesco[fuente][parentesco] = (estadisticasParentesco[fuente][parentesco] || 0) + 1;
       });
     });
@@ -619,7 +619,7 @@ class DifuntosConsolidadoService {
     hoja.addRow(['Parentesco', 'Tabla Difuntos', 'Personas Fallecidas', 'Total']);
     
     // Obtener todos los parentescos únicos
-    const todosParentescos = [...new Set(difuntos.map(d => d.parentesco_inferido))];
+    const todosParentescos = [...new Set(difuntos.map(d => d.parentesco_real))];
     
     todosParentescos.forEach(parentesco => {
       const difuntosFamilia = estadisticasParentesco.difuntos_familia[parentesco] || 0;
@@ -891,7 +891,7 @@ class DifuntosConsolidadoService {
     // Análisis por parentesco
     const porParentesco = {};
     difuntos.forEach(difunto => {
-      const parentesco = difunto.parentesco || 'Sin especificar';
+      const parentesco = difunto.parentesco_real || 'Sin especificar';
       porParentesco[parentesco] = (porParentesco[parentesco] || 0) + 1;
     });
     
@@ -935,8 +935,8 @@ class DifuntosConsolidadoService {
         doc.text(`   Fecha: ${new Date(difunto.fecha_aniversario).toLocaleDateString('es-ES')}`);
       }
       
-      if (difunto.parentesco) {
-        doc.text(`   Parentesco: ${difunto.parentesco}`);
+      if (difunto.parentesco_real) {
+        doc.text(`   Parentesco: ${difunto.parentesco_real}`);
       }
       
       if (difunto.municipio || difunto.nombre_sector) {
