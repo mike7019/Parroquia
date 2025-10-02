@@ -21,31 +21,35 @@ class SituacionCivilService {
    */
   static async findNextAvailableId() {
     try {
-      // Obtener todos los IDs existentes ordenados
-      const existingIds = await getSituacionCivilModel().findAll({
+      // Obtener todos los IDs existentes físicamente (incluyendo soft deleted)
+      const allIds = await getSituacionCivilModel().findAll({
         attributes: ['id_situacion_civil'],
         order: [['id_situacion_civil', 'ASC']],
         raw: true,
-        paranoid: false // Incluir eliminados para contar todos los IDs usados
+        paranoid: false // Incluir todos los registros físicos
       });
 
-      // Si no hay registros, empezar desde 1
-      if (existingIds.length === 0) {
+      // Si no hay registros físicos, empezar desde 1
+      if (allIds.length === 0) {
+        console.log(`🆕 Primer registro - Usando ID 1`);
         return 1;
       }
 
-      // Buscar el primer gap en la secuencia
-      for (let i = 0; i < existingIds.length; i++) {
-        const expectedId = i + 1;
-        const actualId = existingIds[i].id_situacion_civil;
-        
-        if (actualId !== expectedId) {
-          return expectedId;
+      // Extraer solo los números de ID físicamente existentes
+      const usedIds = allIds.map(item => item.id_situacion_civil).sort((a, b) => a - b);
+      
+      // Buscar el primer gap en la secuencia (ID físicamente eliminado que se puede reutilizar)
+      for (let i = 1; i <= usedIds[usedIds.length - 1]; i++) {
+        if (!usedIds.includes(i)) {
+          console.log(`🔄 Reutilizando ID ${i} (gap de registro físicamente eliminado)`);
+          return i;
         }
       }
 
-      // Si no hay gaps, usar el siguiente ID después del último
-      return existingIds.length + 1;
+      // Si no hay gaps, usar el siguiente ID después del último físico
+      const nextId = usedIds[usedIds.length - 1] + 1;
+      console.log(`➕ Usando nuevo ID ${nextId} (secuencial)`);
+      return nextId;
     } catch (error) {
       console.error('Error finding next available ID for situacion civil:', error);
       throw error;
@@ -227,7 +231,7 @@ class SituacionCivilService {
   }
 
   /**
-   * Elimina una situación civil (soft delete)
+   * Elimina una situación civil (físicamente para permitir reutilización de ID)
    */
   static async deleteSituacionCivil(id) {
     const transaction = await sequelize.transaction();
@@ -235,13 +239,14 @@ class SituacionCivilService {
     try {
       const situacionCivil = await this.getSituacionCivilById(id);
 
-      // Verificar si tiene relaciones activas (si existen)
-      // TODO: Implementar verificación de relaciones cuando se definan
+      // TODO: Verificar si tiene relaciones activas (si existen)
+      // Por ahora hacemos eliminación física para permitir reutilización de IDs
 
-      await situacionCivil.update({ activo: false }, { transaction });
-      await situacionCivil.destroy({ transaction });
+      // Eliminación física directa
+      await situacionCivil.destroy({ force: true, transaction });
 
       await transaction.commit();
+      console.log(`🗑️ Eliminación física del ID ${id} completada (ID reutilizable)`);
       return { message: 'Situación civil eliminada exitosamente' };
 
     } catch (error) {
