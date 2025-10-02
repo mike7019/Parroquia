@@ -191,18 +191,6 @@ router.get('/', AuthMiddleware.authenticateToken, SituacionCivilController.getAl
  * /api/catalog/situaciones-civiles:
  *   post:
  *     summary: Crear situación civil
- *     description: |
- *       Crea una nueva situación civil en el sistema.
- *       
- *       **CAMPOS REQUERIDOS:** Solo `nombre`
- *       
- *       **CAMPOS OPCIONALES:** `descripcion`, `codigo`, `orden`, `activo`
- *       
- *       - Si no se proporciona `codigo`, se omite (puede ser null)
- *       - Si no se proporciona `orden`, se auto-genera automáticamente
- *       - Si no se proporciona `activo`, se establece como true por defecto
- *       
- *       **Modo Simple:** Solo envía `nombre` y opcionalmente `descripcion`
  *     tags: [Situaciones Civiles]
  *     security:
  *       - bearerAuth: []
@@ -214,25 +202,14 @@ router.get('/', AuthMiddleware.authenticateToken, SituacionCivilController.getAl
  *             $ref: '#/components/schemas/SituacionCivilInput'
  *           examples:
  *             simple:
- *               summary: "Crear situación civil - Modo Simple (Solo campos requeridos)"
- *               description: "Solo requiere nombre, todos los demás campos son opcionales"
+ *               summary: "Modo Simple"
  *               value:
  *                 nombre: "Soltero(a)"
  *                 descripcion: "Persona que no ha contraído matrimonio"
  *             minimal:
- *               summary: "Crear situación civil - Mínimo (Solo nombre)"
- *               description: "Versión ultra simple con solo el campo obligatorio"
+ *               summary: "Solo nombre"
  *               value:
  *                 nombre: "Divorciado(a)"
- *             completo:
- *               summary: "Crear situación civil - Modo Completo (Todos los campos)"
- *               description: "Incluye todos los campos opcionales para control total"
- *               value:
- *                 nombre: "Casado(a)"
- *                 descripcion: "Persona unida en matrimonio civil o religioso"
- *                 codigo: "CAS"
- *                 orden: 2
- *                 activo: true
  *     responses:
  *       201:
  *         description: Situación civil creada exitosamente

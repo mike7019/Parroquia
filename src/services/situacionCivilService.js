@@ -11,7 +11,8 @@ import {
   ConflictError 
 } from '../utils/errors.js';
 
-const { SituacionCivil } = sequelize.models;
+// Obtener el modelo SituacionCivil desde Sequelize una vez que se cargue
+const getSituacionCivilModel = () => sequelize.models.SituacionCivil;
 
 class SituacionCivilService {
   
@@ -21,7 +22,7 @@ class SituacionCivilService {
   static async findNextAvailableId() {
     try {
       // Obtener todos los IDs existentes ordenados
-      const existingIds = await SituacionCivil.findAll({
+      const existingIds = await getSituacionCivilModel().findAll({
         attributes: ['id_situacion_civil'],
         order: [['id_situacion_civil', 'ASC']],
         raw: true,
@@ -84,7 +85,7 @@ class SituacionCivilService {
       const orderField = validOrderFields.includes(orderBy) ? orderBy : 'orden';
       const direction = orderDirection.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
 
-      const situacionesCiviles = await SituacionCivil.findAll({
+      const situacionesCiviles = await getSituacionCivilModel().findAll({
         where: whereClause,
         order: [
           [orderField, direction],
@@ -106,7 +107,7 @@ class SituacionCivilService {
    */
   static async getSituacionCivilById(id, includeInactive = false) {
     try {
-      const situacionCivil = await SituacionCivil.findByPk(id, {
+      const situacionCivil = await getSituacionCivilModel().findByPk(id, {
         paranoid: !includeInactive
       });
 
@@ -153,16 +154,24 @@ class SituacionCivilService {
       }
 
       // Validaciones adicionales solo para los campos que se proporcionan
-      await this._validateSituacionCivilData(simplifiedData);
+      await this._validateSituacionCivilData(simplifiedData, null, false); // false = isCreate
 
       // Find the next available ID
       const nextId = await this.findNextAvailableId();
       simplifiedData.id_situacion_civil = nextId;
 
-      const situacionCivil = await SituacionCivil.create(simplifiedData, { transaction });
+      const situacionCivil = await getSituacionCivilModel().create(simplifiedData, { transaction });
 
       await transaction.commit();
-      return situacionCivil;
+      
+      // Devolver solo los campos requeridos para la respuesta de creación
+      return {
+        id: situacionCivil.id_situacion_civil,
+        nombre: situacionCivil.nombre,
+        descripcion: situacionCivil.descripcion,
+        createdAt: situacionCivil.createdAt,
+        updatedAt: situacionCivil.updatedAt
+      };
 
     } catch (error) {
       await transaction.rollback();
@@ -192,7 +201,7 @@ class SituacionCivilService {
       const situacionCivil = await this.getSituacionCivilById(id);
       
       // Validaciones adicionales
-      await this._validateSituacionCivilData(data, id);
+      await this._validateSituacionCivilData(data, id, true); // true = isUpdate
 
       await situacionCivil.update(data, { transaction });
       await transaction.commit();
@@ -249,7 +258,7 @@ class SituacionCivilService {
     const transaction = await sequelize.transaction();
 
     try {
-      const situacionCivil = await SituacionCivil.findByPk(id, {
+      const situacionCivil = await getSituacionCivilModel().findByPk(id, {
         paranoid: false,
         transaction
       });
@@ -258,7 +267,7 @@ class SituacionCivilService {
         throw new NotFoundError(`Situación civil con ID ${id} no encontrada`);
       }
 
-      if (!situacionCivil.deletedAt) {
+      if (!situacionCivil.fechaEliminacion) {
         throw new ConflictError('La situación civil no está eliminada');
       }
 
@@ -281,10 +290,10 @@ class SituacionCivilService {
   static async getSituacionCivilStats() {
     try {
       const [total, activos, inactivos, eliminados] = await Promise.all([
-        SituacionCivil.count({ paranoid: false }),
-        SituacionCivil.count({ where: { activo: true } }),
-        SituacionCivil.count({ where: { activo: false } }),
-        SituacionCivil.count({ paranoid: false, where: { deletedAt: { [Op.ne]: null } } })
+        getSituacionCivilModel().count({ paranoid: false }),
+        getSituacionCivilModel().count({ where: { activo: true } }),
+        getSituacionCivilModel().count({ where: { activo: false } }),
+        getSituacionCivilModel().count({ paranoid: false, where: { fechaEliminacion: { [Op.ne]: null } } })
       ]);
 
       return {
@@ -320,7 +329,7 @@ class SituacionCivilService {
         whereClause.activo = true;
       }
 
-      const situacionesCiviles = await SituacionCivil.findAll({
+      const situacionesCiviles = await getSituacionCivilModel().findAll({
         where: whereClause,
         order: [['orden', 'ASC'], ['nombre', 'ASC']],
         limit: parseInt(limit),
@@ -338,24 +347,25 @@ class SituacionCivilService {
   /**
    * Validaciones adicionales de datos
    */
-  static async _validateSituacionCivilData(data, excludeId = null) {
+  static async _validateSituacionCivilData(data, excludeId = null, isUpdate = false) {
     const errors = [];
 
-    // Validar nombre único (siempre requerido)
+    // Validar nombre único (requerido solo en creación, opcional en actualización)
     if (data.nombre) {
       const whereClause = { nombre: data.nombre.trim() };
       if (excludeId) {
         whereClause.id_situacion_civil = { [Op.ne]: excludeId };
       }
 
-      const existingByNombre = await SituacionCivil.findOne({ where: whereClause });
+      const existingByNombre = await getSituacionCivilModel().findOne({ where: whereClause });
       if (existingByNombre) {
         errors.push({
           field: 'nombre',
           message: 'Ya existe una situación civil con este nombre'
         });
       }
-    } else {
+    } else if (!isUpdate) {
+      // Solo requerir nombre en creación, no en actualización
       errors.push({
         field: 'nombre',
         message: 'El nombre es requerido'
@@ -369,7 +379,7 @@ class SituacionCivilService {
         whereClause.id_situacion_civil = { [Op.ne]: excludeId };
       }
 
-      const existingByCodigo = await SituacionCivil.findOne({ where: whereClause });
+      const existingByCodigo = await getSituacionCivilModel().findOne({ where: whereClause });
       if (existingByCodigo) {
         errors.push({
           field: 'codigo',
@@ -385,3 +395,4 @@ class SituacionCivilService {
 }
 
 export default SituacionCivilService;
+
