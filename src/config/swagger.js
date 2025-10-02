@@ -1278,31 +1278,6 @@ const swaggerConfig = {
                 }
               }
             },
-            descripcion: {
-              type: 'string',
-              maxLength: 500,
-              description: 'Descripción detallada del sector',
-              example: 'Sector ubicado en la zona central de la parroquia'
-            },
-            codigo: {
-              type: 'string',
-              maxLength: 20,
-              description: 'Código único del sector',
-              example: 'SEC001'
-            },
-            estado: {
-              type: 'string',
-              enum: ['activo', 'inactivo'],
-              description: 'Estado del sector',
-              example: 'activo'
-            },
-            veredas: {
-              type: 'array',
-              description: 'Lista de veredas que pertenecen a este sector',
-              items: {
-                $ref: '#/components/schemas/VeredaSimple'
-              }
-            },
             created_at: {
               type: 'string',
               format: 'date-time',
@@ -1363,45 +1338,14 @@ const swaggerConfig = {
             id_municipio: {
               type: 'integer',
               minimum: 1,
-              description: 'ID del municipio al que pertenece el sector (obligatorio). Use GET /api/catalog/sectors/municipios para obtener IDs válidos.',
+              description: 'ID del municipio al que pertenece el sector (obligatorio)',
               example: 1
-            },
-            descripcion: {
-              type: 'string',
-              maxLength: 500,
-              description: 'Descripción detallada del sector (opcional)',
-              example: 'Sector ubicado en la zona central de la parroquia, incluye las principales calles comerciales'
-            },
-            codigo: {
-              type: 'string',
-              maxLength: 20,
-              description: 'Código único del sector (opcional)',
-              example: 'SEC001'
-            },
-            estado: {
-              type: 'string',
-              enum: ['activo', 'inactivo'],
-              description: 'Estado del sector (opcional, por defecto: activo)',
-              example: 'activo',
-              default: 'activo'
-            },
-            veredas_ids: {
-              type: 'array',
-              description: 'Array de IDs de veredas que pertenecerán a este sector (opcional)',
-              items: {
-                type: 'integer'
-              },
-              example: [1, 2, 3]
             }
           },
           required: ['nombre', 'id_municipio'],
           example: {
             nombre: 'Sector San José',
-            id_municipio: 1,
-            descripcion: 'Sector ubicado en la zona central',
-            codigo: 'SEC001',
-            estado: 'activo',
-            veredas_ids: [1, 2]
+            id_municipio: 1
           }
         },
         UpdateSectorRequest: {
@@ -1416,43 +1360,13 @@ const swaggerConfig = {
             id_municipio: {
               type: 'integer',
               minimum: 1,
-              description: 'ID del municipio al que pertenece el sector (opcional para actualización). Use GET /api/catalog/sectors/municipios para obtener IDs válidos.',
+              description: 'ID del municipio al que pertenece el sector (opcional para actualización)',
               example: 2
-            },
-            descripcion: {
-              type: 'string',
-              maxLength: 500,
-              description: 'Descripción detallada del sector',
-              example: 'Sector ubicado en la zona central, actualizado con nuevas características'
-            },
-            codigo: {
-              type: 'string',
-              maxLength: 20,
-              description: 'Código único del sector',
-              example: 'SEC001-UPD'
-            },
-            estado: {
-              type: 'string',
-              enum: ['activo', 'inactivo'],
-              description: 'Estado del sector',
-              example: 'activo'
-            },
-            veredas_ids: {
-              type: 'array',
-              description: 'Array de IDs de veredas que pertenecerán a este sector',
-              items: {
-                type: 'integer'
-              },
-              example: [1, 2, 4]
             }
           },
           example: {
             nombre: 'Sector San José Actualizado',
-            id_municipio: 2,
-            descripcion: 'Descripción actualizada del sector',
-            codigo: 'SEC001-UPD',
-            estado: 'activo',
-            veredas_ids: [1, 2, 4]
+            id_municipio: 2
           }
         },
         SectorsListResponse: {

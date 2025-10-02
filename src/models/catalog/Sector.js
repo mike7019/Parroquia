@@ -5,8 +5,7 @@ const Sector = sequelize.define('Sector', {
   id_sector: {
     type: DataTypes.BIGINT,
     primaryKey: true,
-    allowNull: false,
-    autoIncrement: true
+    allowNull: false
   },
   nombre: {
     type: DataTypes.STRING(255),

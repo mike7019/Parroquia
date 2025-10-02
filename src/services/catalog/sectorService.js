@@ -29,7 +29,7 @@ class SectorService {
       // Buscar el primer gap en la secuencia
       for (let i = 0; i < existingIds.length; i++) {
         const expectedId = i + 1;
-        const actualId = existingIds[i].id_sector;
+        const actualId = parseInt(existingIds[i].id_sector);
         
         if (actualId !== expectedId) {
           return expectedId;
@@ -37,7 +37,8 @@ class SectorService {
       }
 
       // Si no hay gaps, usar el siguiente ID después del último
-      return existingIds.length + 1;
+      const lastId = parseInt(existingIds[existingIds.length - 1].id_sector);
+      return lastId + 1;
     } catch (error) {
       logger.error('Error finding next available ID for sector:', error);
       throw error;
@@ -114,6 +115,11 @@ class SectorService {
   async getAllSectors() {
     try {
       const sectors = await getSectorModel().findAll({
+        include: [{
+          model: getMunicipiosModel(),
+          as: 'municipio',
+          attributes: ['id_municipio', 'nombre_municipio']
+        }],
         order: [['nombre', 'ASC']]
       });
 

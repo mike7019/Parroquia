@@ -26,9 +26,6 @@ router.use(authenticateToken);
  *           example:
  *             nombre: "Sector San José"
  *             id_municipio: 1
- *             descripcion: "Sector ubicado en la zona central de la parroquia"
- *             codigo: "SEC001"
- *             estado: "activo"
  *     responses:
  *       201:
  *         description: Sector created successfully
