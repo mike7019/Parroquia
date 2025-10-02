@@ -81,13 +81,16 @@ const router = express.Router();
  *           type: string
  *           maxLength: 10
  *           example: "CAS"
+ *           description: "Campo opcional - se puede omitir"
  *         orden:
  *           type: integer
  *           minimum: 0
  *           example: 2
+ *           description: "Campo opcional - se auto-genera si no se proporciona"
  *         activo:
  *           type: boolean
  *           example: true
+ *           description: "Campo opcional - por defecto es true"
  * 
  *     SituacionCivilStats:
  *       type: object
@@ -188,7 +191,18 @@ router.get('/', AuthMiddleware.authenticateToken, SituacionCivilController.getAl
  * /api/catalog/situaciones-civiles:
  *   post:
  *     summary: Crear situación civil
- *     description: Crea una nueva situación civil en el sistema
+ *     description: |
+ *       Crea una nueva situación civil en el sistema.
+ *       
+ *       **CAMPOS REQUERIDOS:** Solo `nombre`
+ *       
+ *       **CAMPOS OPCIONALES:** `descripcion`, `codigo`, `orden`, `activo`
+ *       
+ *       - Si no se proporciona `codigo`, se omite (puede ser null)
+ *       - Si no se proporciona `orden`, se auto-genera automáticamente
+ *       - Si no se proporciona `activo`, se establece como true por defecto
+ *       
+ *       **Modo Simple:** Solo envía `nombre` y opcionalmente `descripcion`
  *     tags: [Situaciones Civiles]
  *     security:
  *       - bearerAuth: []
@@ -199,16 +213,20 @@ router.get('/', AuthMiddleware.authenticateToken, SituacionCivilController.getAl
  *           schema:
  *             $ref: '#/components/schemas/SituacionCivilInput'
  *           examples:
- *             soltero:
- *               summary: Crear situación civil "Soltero(a)"
+ *             simple:
+ *               summary: "Crear situación civil - Modo Simple (Solo campos requeridos)"
+ *               description: "Solo requiere nombre, todos los demás campos son opcionales"
  *               value:
  *                 nombre: "Soltero(a)"
  *                 descripcion: "Persona que no ha contraído matrimonio"
- *                 codigo: "SOL"
- *                 orden: 1
- *                 activo: true
- *             casado:
- *               summary: Crear situación civil "Casado(a)"
+ *             minimal:
+ *               summary: "Crear situación civil - Mínimo (Solo nombre)"
+ *               description: "Versión ultra simple con solo el campo obligatorio"
+ *               value:
+ *                 nombre: "Divorciado(a)"
+ *             completo:
+ *               summary: "Crear situación civil - Modo Completo (Todos los campos)"
+ *               description: "Incluye todos los campos opcionales para control total"
  *               value:
  *                 nombre: "Casado(a)"
  *                 descripcion: "Persona unida en matrimonio civil o religioso"
