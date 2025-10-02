@@ -119,7 +119,9 @@ class DatabaseErrorHandler {
       'sistemas_acueducto_nombre_unique': 'Ya existe un sistema de acueducto con ese nombre',
       'tipos_identificacion_codigo_unique': 'Ya existe un tipo de identificación con ese código',
       'veredas_nombre_unique': 'Ya existe una vereda con ese nombre',
-      'parroquias_nombre_unique': 'Ya existe una parroquia con ese nombre'
+      'parroquias_nombre_unique': 'Ya existe una parroquia con ese nombre',
+      'situacion_civil_nombre_unique': 'Ya existe una situación civil con ese nombre',
+      'situacion_civil_codigo_unique': 'Ya existe una situación civil con ese código'
     };
 
     let friendlyMessage = constraintMessages[constraintName];
@@ -139,7 +141,8 @@ class DatabaseErrorHandler {
         'sistemas_acueducto': 'Ya existe un sistema de acueducto',
         'tipos_identificacion': 'Ya existe un tipo de identificación',
         'veredas': 'Ya existe una vereda',
-        'parroquias': 'Ya existe una parroquia'
+        'parroquias': 'Ya existe una parroquia',
+        'situaciones_civiles': 'Ya existe una situación civil'
       };
       
       friendlyMessage = tableMessages[tableName] || 

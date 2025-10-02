@@ -16,6 +16,42 @@ const { SituacionCivil } = sequelize.models;
 class SituacionCivilService {
   
   /**
+   * Función para encontrar el próximo ID disponible reutilizando gaps
+   */
+  static async findNextAvailableId() {
+    try {
+      // Obtener todos los IDs existentes ordenados
+      const existingIds = await SituacionCivil.findAll({
+        attributes: ['id_situacion_civil'],
+        order: [['id_situacion_civil', 'ASC']],
+        raw: true,
+        paranoid: false // Incluir eliminados para contar todos los IDs usados
+      });
+
+      // Si no hay registros, empezar desde 1
+      if (existingIds.length === 0) {
+        return 1;
+      }
+
+      // Buscar el primer gap en la secuencia
+      for (let i = 0; i < existingIds.length; i++) {
+        const expectedId = i + 1;
+        const actualId = existingIds[i].id_situacion_civil;
+        
+        if (actualId !== expectedId) {
+          return expectedId;
+        }
+      }
+
+      // Si no hay gaps, usar el siguiente ID después del último
+      return existingIds.length + 1;
+    } catch (error) {
+      console.error('Error finding next available ID for situacion civil:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Obtiene todas las situaciones civiles con filtros
    */
   static async getAllSituacionesCiviles(options = {}) {
@@ -96,10 +132,34 @@ class SituacionCivilService {
     const transaction = await sequelize.transaction();
 
     try {
-      // Validaciones adicionales
-      await this._validateSituacionCivilData(data);
+      // Simplificar datos - solo requerir nombre y descripción opcional
+      const simplifiedData = {
+        nombre: data.nombre,
+        descripcion: data.descripcion || null
+      };
 
-      const situacionCivil = await SituacionCivil.create(data, { transaction });
+      // Los campos codigo, orden y activo son completamente opcionales
+      // Si no se proporcionan, el modelo manejará los valores por defecto
+      if (data.codigo !== undefined && data.codigo !== null && data.codigo.trim() !== '') {
+        simplifiedData.codigo = data.codigo;
+      }
+      
+      if (data.orden !== undefined && data.orden !== null) {
+        simplifiedData.orden = data.orden;
+      }
+      
+      if (data.activo !== undefined && data.activo !== null) {
+        simplifiedData.activo = data.activo;
+      }
+
+      // Validaciones adicionales solo para los campos que se proporcionan
+      await this._validateSituacionCivilData(simplifiedData);
+
+      // Find the next available ID
+      const nextId = await this.findNextAvailableId();
+      simplifiedData.id_situacion_civil = nextId;
+
+      const situacionCivil = await SituacionCivil.create(simplifiedData, { transaction });
 
       await transaction.commit();
       return situacionCivil;
@@ -281,7 +341,7 @@ class SituacionCivilService {
   static async _validateSituacionCivilData(data, excludeId = null) {
     const errors = [];
 
-    // Validar nombre único
+    // Validar nombre único (siempre requerido)
     if (data.nombre) {
       const whereClause = { nombre: data.nombre.trim() };
       if (excludeId) {
@@ -295,10 +355,15 @@ class SituacionCivilService {
           message: 'Ya existe una situación civil con este nombre'
         });
       }
+    } else {
+      errors.push({
+        field: 'nombre',
+        message: 'El nombre es requerido'
+      });
     }
 
-    // Validar código único si se proporciona
-    if (data.codigo) {
+    // Validar código único solo si se proporciona
+    if (data.codigo !== undefined && data.codigo !== null && data.codigo.trim() !== '') {
       const whereClause = { codigo: data.codigo.trim().toUpperCase() };
       if (excludeId) {
         whereClause.id_situacion_civil = { [Op.ne]: excludeId };
