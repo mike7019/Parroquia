@@ -2318,27 +2318,22 @@ const swaggerConfig = {
               example: 'Padre biológico o adoptivo',
               maxLength: 500
             },
-            activo: {
-              type: 'boolean',
-              description: 'Estado del parentesco (activo/inactivo)',
-              example: true
-            },
-            createdAt: {
+            created_at: {
               type: 'string',
               format: 'date-time',
               description: 'Fecha de creación',
               example: '2025-08-10T10:30:00.000Z'
             },
-            updatedAt: {
+            updated_at: {
               type: 'string',
               format: 'date-time',
               description: 'Fecha de última actualización',
               example: '2025-08-10T10:30:00.000Z'
             }
           },
-          required: ['id_parentesco', 'nombre', 'activo']
+          required: ['id_parentesco', 'nombre']
         },
-        ParentescoInput: {
+        CreateParentescoRequest: {
           type: 'object',
           properties: {
             nombre: {
@@ -2374,11 +2369,6 @@ const swaggerConfig = {
               description: 'Descripción opcional del parentesco',
               example: 'Hijo biológico o adoptivo',
               maxLength: 500
-            },
-            activo: {
-              type: 'boolean',
-              description: 'Estado del parentesco',
-              example: true
             }
           }
         },

@@ -5,8 +5,7 @@ const Parentesco = sequelize.define('Parentesco', {
   id_parentesco: {
     type: DataTypes.BIGINT,
     primaryKey: true,
-    allowNull: false,
-    autoIncrement: true
+    allowNull: false
   },
   nombre: {
     type: DataTypes.STRING(255),
@@ -43,40 +42,7 @@ const Parentesco = sequelize.define('Parentesco', {
   tableName: 'parentescos',
   timestamps: true,
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  indexes: [
-    {
-      name: 'idx_parentesco_nombre',
-      fields: ['nombre']
-    },
-    {
-      name: 'idx_parentesco_activo',
-      fields: ['activo']
-    }
-  ],
-  scopes: {
-    active: {
-      where: {
-        activo: true
-      }
-    },
-    inactive: {
-      where: {
-        activo: false
-      }
-    }
-  }
+  updatedAt: 'updatedAt'
 });
-
-// Define associations
-Parentesco.associate = function(models) {
-  // Si tienes modelo de Personas, puedes definir la relación aquí
-  if (models.Persona) {
-    Parentesco.hasMany(models.Persona, {
-      foreignKey: 'id_parentesco',
-      as: 'personas'
-    });
-  }
-};
 
 export default Parentesco;

@@ -1,6 +1,5 @@
 import parentescoService from '../../services/catalog/parentescoService.js';
 import { createSuccessResponse, createErrorResponse } from '../../utils/responses.js';
-import logger from '../../utils/logger.js';
 
 class ParentescoController {
   
@@ -9,24 +8,17 @@ class ParentescoController {
    */
   async getAllParentescos(req, res) {
     try {
-      const { search, sortBy, sortOrder } = req.query;
-      
-      const parentescos = await parentescoService.getAllParentescos(search, sortBy, sortOrder);
+      const result = await parentescoService.getAllParentescos();
       
       res.json(createSuccessResponse(
-        parentescos,
         'Parentescos obtenidos exitosamente',
-        {
-          total: parentescos.length,
-          hasSearch: !!search
-        }
+        result.data
       ));
     } catch (error) {
-      logger.error('Error in getAllParentescos controller:', error);
-      const statusCode = error.statusCode || 500;
-      res.status(statusCode).json(createErrorResponse(
+      res.status(500).json(createErrorResponse(
+        'Error al obtener parentescos',
         error.message,
-        error.code || 'INTERNAL_ERROR'
+        'FETCH_ERROR'
       ));
     }
   }
@@ -38,18 +30,26 @@ class ParentescoController {
     try {
       const { id } = req.params;
       
+      if (!id || isNaN(id)) {
+        return res.status(400).json(createErrorResponse(
+          'ID de parentesco válido es requerido',
+          null,
+          'VALIDATION_ERROR'
+        ));
+      }
+
       const parentesco = await parentescoService.getParentescoById(parseInt(id));
       
       res.json(createSuccessResponse(
-        parentesco,
-        'Parentesco obtenido exitosamente'
+        'Parentesco obtenido exitosamente',
+        parentesco
       ));
     } catch (error) {
-      logger.error('Error in getParentescoById controller:', error);
-      const statusCode = error.statusCode || 500;
+      const statusCode = error.message.includes('not found') || error.message.includes('no encontrado') ? 404 : 500;
       res.status(statusCode).json(createErrorResponse(
+        error.message.includes('not found') || error.message.includes('no encontrado') ? 'Parentesco no encontrado' : 'Error al obtener parentesco',
         error.message,
-        error.code || 'INTERNAL_ERROR'
+        error.message.includes('not found') || error.message.includes('no encontrado') ? 'NOT_FOUND' : 'FETCH_ERROR'
       ));
     }
   }
@@ -59,28 +59,36 @@ class ParentescoController {
    */
   async createParentesco(req, res) {
     try {
-      const parentescoData = req.body;
+      const { nombre, descripcion } = req.body;
       
       // Validación básica
-      if (!parentescoData.nombre) {
+      if (!nombre) {
         return res.status(400).json(createErrorResponse(
           'El nombre del parentesco es obligatorio',
-          'MISSING_REQUIRED_FIELD'
+          null,
+          'VALIDATION_ERROR'
         ));
       }
 
-      const nuevoParentesco = await parentescoService.createParentesco(parentescoData);
+      const nuevoParentesco = await parentescoService.createParentesco({ nombre, descripcion });
       
       res.status(201).json(createSuccessResponse(
-        nuevoParentesco,
-        'Parentesco creado exitosamente'
+        'Parentesco creado exitosamente',
+        nuevoParentesco
       ));
     } catch (error) {
-      logger.error('Error in createParentesco controller:', error);
-      const statusCode = error.statusCode || 500;
-      res.status(statusCode).json(createErrorResponse(
+      if (error.message.includes('ya existe') || error.message.includes('already exists')) {
+        return res.status(409).json(createErrorResponse(
+          'Ya existe un parentesco con ese nombre',
+          error.message,
+          'DUPLICATE_ERROR'
+        ));
+      }
+
+      res.status(500).json(createErrorResponse(
+        'Error al crear el parentesco',
         error.message,
-        error.code || 'INTERNAL_ERROR'
+        'CREATE_ERROR'
       ));
     }
   }
@@ -91,20 +99,43 @@ class ParentescoController {
   async updateParentesco(req, res) {
     try {
       const { id } = req.params;
-      const parentescoData = req.body;
+      const { nombre, descripcion } = req.body;
       
-      const parentescoActualizado = await parentescoService.updateParentesco(parseInt(id), parentescoData);
+      if (!id || isNaN(id)) {
+        return res.status(400).json(createErrorResponse(
+          'ID de parentesco válido es requerido',
+          null,
+          'VALIDATION_ERROR'
+        ));
+      }
+
+      const parentescoActualizado = await parentescoService.updateParentesco(parseInt(id), { nombre, descripcion });
       
       res.json(createSuccessResponse(
-        parentescoActualizado,
-        'Parentesco actualizado exitosamente'
+        'Parentesco actualizado exitosamente',
+        parentescoActualizado
       ));
     } catch (error) {
-      logger.error('Error in updateParentesco controller:', error);
-      const statusCode = error.statusCode || 500;
-      res.status(statusCode).json(createErrorResponse(
+      if (error.message.includes('not found') || error.message.includes('no encontrado')) {
+        return res.status(404).json(createErrorResponse(
+          'Parentesco no encontrado',
+          error.message,
+          'NOT_FOUND'
+        ));
+      }
+
+      if (error.message.includes('ya existe') || error.message.includes('already exists')) {
+        return res.status(409).json(createErrorResponse(
+          'Ya existe un parentesco con ese nombre',
+          error.message,
+          'DUPLICATE_ERROR'
+        ));
+      }
+
+      res.status(500).json(createErrorResponse(
+        'Error al actualizar el parentesco',
         error.message,
-        error.code || 'INTERNAL_ERROR'
+        'UPDATE_ERROR'
       ));
     }
   }
@@ -116,39 +147,26 @@ class ParentescoController {
     try {
       const { id } = req.params;
       
-      const resultado = await parentescoService.deleteParentesco(parseInt(id));
-      
-      res.json(createSuccessResponse(
-        resultado,
-        'Parentesco eliminado exitosamente'
-      ));
-    } catch (error) {
-      logger.error('Error in deleteParentesco controller:', error);
-      const statusCode = error.statusCode || 500;
-      res.status(statusCode).json(createErrorResponse(
-        error.message,
-        error.code || 'INTERNAL_ERROR'
-      ));
-    }
-  }
+      if (!id || isNaN(id)) {
+        return res.status(400).json(createErrorResponse(
+          'ID de parentesco válido es requerido',
+          null,
+          'VALIDATION_ERROR'
+        ));
+      }
 
-  /**
-   * Obtener parentescos más utilizados
-   */
-  async getParentescosMasUtilizados(req, res) {
-    try {
-      const parentescos = await parentescoService.getParentescosMasUtilizados();
+      await parentescoService.deleteParentesco(parseInt(id));
       
       res.json(createSuccessResponse(
-        parentescos,
-        'Parentescos más utilizados obtenidos exitosamente'
+        'Parentesco eliminado exitosamente',
+        null
       ));
     } catch (error) {
-      logger.error('Error in getParentescosMasUtilizados controller:', error);
-      const statusCode = error.statusCode || 500;
+      const statusCode = error.message.includes('not found') || error.message.includes('no encontrado') ? 404 : 500;
       res.status(statusCode).json(createErrorResponse(
+        error.message.includes('not found') || error.message.includes('no encontrado') ? 'Parentesco no encontrado' : 'Error al eliminar parentesco',
         error.message,
-        error.code || 'INTERNAL_ERROR'
+        error.message.includes('not found') || error.message.includes('no encontrado') ? 'NOT_FOUND' : 'DELETE_ERROR'
       ));
     }
   }

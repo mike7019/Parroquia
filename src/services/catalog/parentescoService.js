@@ -1,9 +1,6 @@
 import { Op } from 'sequelize';
-import sequelize from '../../../config/sequelize.js';
+import { Parentesco } from '../../models/index.js';
 import logger from '../../utils/logger.js';
-
-// Obtener el modelo Parentesco desde Sequelize una vez que se cargue
-const getParentescoModel = () => sequelize.models.Parentesco;
 
 class ParentescoService {
   
@@ -13,7 +10,7 @@ class ParentescoService {
   async findNextAvailableId() {
     try {
       // Obtener todos los IDs existentes ordenados
-      const existingIds = await getParentescoModel().findAll({
+      const existingIds = await Parentesco.findAll({
         attributes: ['id_parentesco'],
         order: [['id_parentesco', 'ASC']],
         raw: true
@@ -27,7 +24,7 @@ class ParentescoService {
       // Buscar el primer gap en la secuencia
       for (let i = 0; i < existingIds.length; i++) {
         const expectedId = i + 1;
-        const actualId = existingIds[i].id_parentesco;
+        const actualId = parseInt(existingIds[i].id_parentesco);
         
         if (actualId !== expectedId) {
           return expectedId;
@@ -35,7 +32,8 @@ class ParentescoService {
       }
 
       // Si no hay gaps, usar el siguiente ID después del último
-      return existingIds.length + 1;
+      const lastId = parseInt(existingIds[existingIds.length - 1].id_parentesco);
+      return lastId + 1;
     } catch (error) {
       logger.error('Error finding next available ID for parentesco:', error);
       throw error;
@@ -47,7 +45,7 @@ class ParentescoService {
    */
   async getAllParentescos() {
     try {
-      const parentescos = await getParentescoModel().findAll({
+      const parentescos = await Parentesco.findAll({
         order: [['nombre', 'ASC']]
       });
 
@@ -73,19 +71,15 @@ class ParentescoService {
    */
   async getParentescoById(id) {
     try {
-      const parentesco = await getParentescoModel().findByPk(id);
+      const parentesco = await Parentesco.findByPk(id);
       
       if (!parentesco) {
-        const error = new Error('Parentesco no encontrado');
-        error.statusCode = 404;
-        error.code = 'NOT_FOUND';
-        throw error;
+        throw new Error('Parentesco no encontrado');
       }
 
       return parentesco;
     } catch (error) {
-      logger.error(`Error getting parentesco by ID ${id}:`, error);
-      throw error;
+      throw new Error(`Error fetching parentesco: ${error.message}`);
     }
   }
 
@@ -95,34 +89,25 @@ class ParentescoService {
   async createParentesco(parentescoData) {
     try {
       // Verificar si ya existe un parentesco con el mismo nombre
-      const existingParentesco = await getParentescoModel().findOne({
+      const existingParentesco = await Parentesco.findOne({
         where: { nombre: parentescoData.nombre }
       });
 
       if (existingParentesco) {
-        const error = new Error('Ya existe un parentesco con ese nombre');
-        error.statusCode = 409;
-        error.code = 'DUPLICATE_NAME';
-        throw error;
+        throw new Error('Ya existe un parentesco con ese nombre');
       }
 
       // Find the next available ID
       const nextId = await this.findNextAvailableId();
 
-      const nuevoParentesco = await getParentescoModel().create({
+      const nuevoParentesco = await Parentesco.create({
         id_parentesco: nextId,
         ...parentescoData
-      });
-      
-      logger.info('Parentesco creado exitosamente', {
-        id: nuevoParentesco.id_parentesco,
-        nombre: nuevoParentesco.nombre
       });
 
       return nuevoParentesco;
     } catch (error) {
-      logger.error('Error creating parentesco:', error);
-      throw error;
+      throw new Error(`Error creating parentesco: ${error.message}`);
     }
   }
 
@@ -131,18 +116,15 @@ class ParentescoService {
    */
   async updateParentesco(id, parentescoData) {
     try {
-      const parentesco = await getParentescoModel().findByPk(id);
+      const parentesco = await Parentesco.findByPk(id);
       
       if (!parentesco) {
-        const error = new Error('Parentesco no encontrado');
-        error.statusCode = 404;
-        error.code = 'NOT_FOUND';
-        throw error;
+        throw new Error('Parentesco no encontrado');
       }
 
       // Verificar si hay otro parentesco con el mismo nombre (excluyendo el actual)
       if (parentescoData.nombre && parentescoData.nombre !== parentesco.nombre) {
-        const existingParentesco = await getParentescoModel().findOne({
+        const existingParentesco = await Parentesco.findOne({
           where: { 
             nombre: parentescoData.nombre,
             id_parentesco: { [Op.ne]: id }
@@ -150,24 +132,14 @@ class ParentescoService {
         });
 
         if (existingParentesco) {
-          const error = new Error('Ya existe un parentesco con ese nombre');
-          error.statusCode = 409;
-          error.code = 'DUPLICATE_NAME';
-          throw error;
+          throw new Error('Ya existe un parentesco con ese nombre');
         }
       }
 
       await parentesco.update(parentescoData);
-      
-      logger.info('Parentesco actualizado exitosamente', {
-        id: parentesco.id_parentesco,
-        nombre: parentesco.nombre
-      });
-
       return parentesco;
     } catch (error) {
-      logger.error(`Error updating parentesco ${id}:`, error);
-      throw error;
+      throw new Error(`Error updating parentesco: ${error.message}`);
     }
   }
 
@@ -176,74 +148,16 @@ class ParentescoService {
    */
   async deleteParentesco(id) {
     try {
-      const parentesco = await getParentescoModel().findByPk(id);
+      const parentesco = await Parentesco.findByPk(id);
       
       if (!parentesco) {
-        const error = new Error('Parentesco no encontrado');
-        error.statusCode = 404;
-        error.code = 'NOT_FOUND';
-        throw error;
+        throw new Error('Parentesco no encontrado');
       }
-
-      // Verificar si hay personas usando este parentesco
-      // Esta verificación se puede implementar cuando se establezcan las relaciones
-      /*
-      const personasUsando = await sequelize.models.Persona.count({
-        where: { id_parentesco: id }
-      });
-
-      if (personasUsando > 0) {
-        const error = new Error(`No se puede eliminar el parentesco porque ${personasUsando} persona(s) lo están usando`);
-        error.statusCode = 409;
-        error.code = 'PARENTESCO_IN_USE';
-        throw error;
-      }
-      */
 
       await parentesco.destroy();
-      
-      logger.info('Parentesco eliminado exitosamente', {
-        id: id,
-        nombre: parentesco.nombre
-      });
-
-      return { message: 'Parentesco eliminado exitosamente' };
+      return true;
     } catch (error) {
-      logger.error(`Error deleting parentesco ${id}:`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Obtener parentescos más utilizados
-   */
-  async getParentescosMasUtilizados() {
-    try {
-      // Esta consulta se puede implementar cuando se establezcan las relaciones con personas
-      const parentescos = await getParentescoModel().findAll({
-        order: [['nombre', 'ASC']]
-      });
-
-      return parentescos;
-    } catch (error) {
-      logger.error('Error getting parentescos más utilizados:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Buscar parentescos por nombre exacto
-   */
-  async findByNombre(nombre) {
-    try {
-      const parentesco = await getParentescoModel().findOne({
-        where: { nombre: { [Op.iLike]: nombre } }
-      });
-
-      return parentesco;
-    } catch (error) {
-      logger.error(`Error finding parentesco by nombre ${nombre}:`, error);
-      throw error;
+      throw new Error(`Error deleting parentesco: ${error.message}`);
     }
   }
 }
