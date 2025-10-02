@@ -21,32 +21,32 @@ class SituacionCivilService {
    */
   static async findNextAvailableId() {
     try {
-      // Obtener todos los IDs existentes físicamente (incluyendo soft deleted)
-      const allIds = await getSituacionCivilModel().findAll({
+      // Obtener todos los IDs de registros ACTIVOS (no eliminados lógicamente)
+      const activeIds = await getSituacionCivilModel().findAll({
         attributes: ['id_situacion_civil'],
         order: [['id_situacion_civil', 'ASC']],
         raw: true,
-        paranoid: false // Incluir todos los registros físicos
+        paranoid: true // Solo registros activos (no soft deleted)
       });
 
-      // Si no hay registros físicos, empezar desde 1
-      if (allIds.length === 0) {
+      // Si no hay registros activos, empezar desde 1
+      if (activeIds.length === 0) {
         console.log(`🆕 Primer registro - Usando ID 1`);
         return 1;
       }
 
-      // Extraer solo los números de ID físicamente existentes
-      const usedIds = allIds.map(item => item.id_situacion_civil).sort((a, b) => a - b);
+      // Extraer solo los números de ID de registros activos
+      const usedIds = activeIds.map(item => item.id_situacion_civil).sort((a, b) => a - b);
       
-      // Buscar el primer gap en la secuencia (ID físicamente eliminado que se puede reutilizar)
+      // Buscar el primer gap en la secuencia (ID libre para reutilizar)
       for (let i = 1; i <= usedIds[usedIds.length - 1]; i++) {
         if (!usedIds.includes(i)) {
-          console.log(`🔄 Reutilizando ID ${i} (gap de registro físicamente eliminado)`);
+          console.log(`🔄 Reutilizando ID ${i} (gap de registro eliminado)`);
           return i;
         }
       }
 
-      // Si no hay gaps, usar el siguiente ID después del último físico
+      // Si no hay gaps, usar el siguiente ID después del último activo
       const nextId = usedIds[usedIds.length - 1] + 1;
       console.log(`➕ Usando nuevo ID ${nextId} (secuencial)`);
       return nextId;
