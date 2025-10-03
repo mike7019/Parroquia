@@ -11,7 +11,6 @@ const Municipios = sequelize.define('Municipios', {
   nombre_municipio: {
     type: DataTypes.STRING(255),
     allowNull: false,
-    field: 'nombre_municipio',
     validate: {
       notEmpty: true,
       len: [2, 255]
@@ -20,7 +19,6 @@ const Municipios = sequelize.define('Municipios', {
   codigo_dane: {
     type: DataTypes.STRING(5),
     allowNull: false,
-    field: 'codigo_dane',
     validate: {
       notEmpty: true,
       len: [5, 5],
