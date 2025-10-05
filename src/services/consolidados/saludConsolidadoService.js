@@ -263,16 +263,34 @@ class SaludConsolidadoService {
    */
   async obtenerResumenPorParroquia(idParroquia) {
     try {
+      // Primero verificar que la parroquia existe
+      const parroquiaQuery = `
+        SELECT nombre FROM parroquia WHERE id_parroquia = :idParroquia
+      `;
+      
+      const [parroquia] = await sequelize.query(parroquiaQuery, {
+        replacements: { idParroquia },
+        type: QueryTypes.SELECT
+      });
+      
+      if (!parroquia) {
+        return {
+          total_personas: 0,
+          con_enfermedades: 0,
+          edad_promedio: 0,
+          nombre_parroquia: null,
+          mensaje: `No existe parroquia con ID ${idParroquia}`
+        };
+      }
+      
+      // Luego obtener las estadísticas de salud
       const query = `
         SELECT 
           COUNT(*) as total_personas,
           COUNT(CASE WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN 1 END) as con_enfermedades,
-          ROUND(AVG(EXTRACT(YEAR FROM AGE(p.fecha_nacimiento))), 2) as edad_promedio,
-          pr.nombre as nombre_parroquia
+          ROUND(AVG(EXTRACT(YEAR FROM AGE(p.fecha_nacimiento))), 2) as edad_promedio
         FROM personas p
-        LEFT JOIN parroquia pr ON p.id_parroquia = pr.id_parroquia
         WHERE p.id_parroquia = :idParroquia
-        GROUP BY pr.nombre
       `;
       
       const [resultado] = await sequelize.query(query, {
@@ -280,12 +298,14 @@ class SaludConsolidadoService {
         type: QueryTypes.SELECT
       });
       
-      return resultado || {
-        total_personas: 0,
-        con_enfermedades: 0,
-        edad_promedio: 0,
-        nombre_parroquia: 'Parroquia no encontrada'
+      return {
+        total_personas: parseInt(resultado.total_personas) || 0,
+        con_enfermedades: parseInt(resultado.con_enfermedades) || 0,
+        edad_promedio: parseFloat(resultado.edad_promedio) || 0,
+        nombre_parroquia: parroquia.nombre,
+        id_parroquia: parseInt(idParroquia)
       };
+      
     } catch (error) {
       console.error('❌ Error obteniendo resumen por parroquia:', error);
       throw error;
