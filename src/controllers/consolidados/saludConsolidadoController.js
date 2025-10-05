@@ -74,9 +74,13 @@ class SaludConsolidadoController {
     try {
       const idParroquia = req.params.id;
       
-      const resultado = await saludConsolidadoService.obtenerResumenSaludPorParroquia(idParroquia);
+      const resultado = await saludConsolidadoService.obtenerResumenPorParroquia(idParroquia);
       
-      res.json(resultado);
+      res.json({
+        exito: true,
+        mensaje: "Resumen de salud por parroquia obtenido",
+        datos: resultado
+      });
 
     } catch (error) {
       console.error('❌ Error en obtenerResumenPorParroquia:', error);
