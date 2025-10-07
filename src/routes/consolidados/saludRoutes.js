@@ -83,11 +83,11 @@ const router = express.Router();
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: enfermedad
+ *         name: id_enfermedad
  *         schema:
- *           type: string
- *         description: Filtrar por enfermedad específica
- *         example: diabetes
+ *           type: integer
+ *         description: Filtrar por ID de enfermedad
+ *         example: 1
  *       - in: query
  *         name: rango_edad
  *         schema:
@@ -105,26 +105,29 @@ const router = express.Router();
  *           type: integer
  *         description: Edad máxima
  *       - in: query
- *         name: sexo
+ *         name: id_sexo
  *         schema:
- *           type: string
- *           enum: [M, F, Masculino, Femenino]
- *         description: Filtrar por sexo
+ *           type: integer
+ *         description: Filtrar por ID de sexo (1=Masculino, 2=Femenino)
+ *         example: 1
  *       - in: query
- *         name: parroquia
+ *         name: id_parroquia
  *         schema:
- *           type: string
- *         description: Filtrar por parroquia
+ *           type: integer
+ *         description: Filtrar por ID de parroquia
+ *         example: 1
  *       - in: query
- *         name: municipio
+ *         name: id_municipio
  *         schema:
- *           type: string
- *         description: Filtrar por municipio
+ *           type: integer
+ *         description: Filtrar por ID de municipio
+ *         example: 1
  *       - in: query
- *         name: sector
+ *         name: id_sector
  *         schema:
- *           type: string
- *         description: Filtrar por sector o vereda
+ *           type: integer
+ *         description: Filtrar por ID de sector
+ *         example: 1
  *       - in: query
  *         name: limite
  *         schema:
