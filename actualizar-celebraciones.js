@@ -201,7 +201,7 @@ class ActualizadorCelebraciones {
           p.dia_celebrar,
           p.mes_celebrar,
           f.id_familia,
-          f.apellido_familia
+          f.apellido_familiar
         FROM personas p
         LEFT JOIN familias f ON p.id_familia_familias = f.id_familia
         WHERE (p.motivo_celebrar IS NULL OR p.motivo_celebrar = '')
@@ -219,7 +219,7 @@ class ActualizadorCelebraciones {
       personas.forEach((p, idx) => {
         console.log(`${idx + 1}. ${p.nombre_completo}`);
         console.log(`   ID Persona: ${p.id_personas} | Identificación: ${p.identificacion || 'N/A'}`);
-        console.log(`   Familia: ${p.apellido_familia || 'N/A'} (ID: ${p.id_familia || 'N/A'})`);
+        console.log(`   Familia: ${p.apellido_familiar || 'N/A'} (ID: ${p.id_familia || 'N/A'})`);
         console.log(`   Teléfono: ${p.telefono || 'N/A'}`);
         console.log('');
       });
