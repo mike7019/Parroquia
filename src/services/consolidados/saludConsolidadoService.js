@@ -87,19 +87,14 @@ class SaludConsolidadoService {
             WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN true
             ELSE false
           END as tiene_enfermedades,
-          s.descripcion as sexo,
-          f.apellido_familiar,
+          s.nombre as sexo,
           f.sector as sector_familia,
           f.telefono as telefono_familia,
           f.direccion_familia,
           m.nombre_municipio,
           sec.nombre as nombre_sector,
           v.nombre as nombre_vereda,
-          pr.nombre as nombre_parroquia,
-          CASE 
-            WHEN p.id_familia_familias IS NOT NULL THEN 'Miembro de familia'
-            ELSE 'Individual'
-          END as tipo_registro
+          pr.nombre as nombre_parroquia
         FROM personas p
         LEFT JOIN familias f ON p.id_familia_familias = f.id_familia
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
@@ -139,18 +134,7 @@ class SaludConsolidadoService {
       });
       
       // Procesar los datos para estructurar mejor la información de salud
-      const personasConSalud = await Promise.all(personas.map(async (persona) => {
-        // Obtener enfermedades registradas de la persona
-        const enfermedadesRegistradas = await sequelize.query(`
-          SELECT e.id_enfermedad, e.nombre, e.descripcion
-          FROM persona_enfermedad pe
-          INNER JOIN enfermedades e ON pe.id_enfermedad = e.id_enfermedad
-          WHERE pe.id_persona = :id_persona
-        `, {
-          replacements: { id_persona: persona.id_personas },
-          type: QueryTypes.SELECT
-        });
-        
+      const personasConSalud = personas.map((persona) => {
         return {
           id: persona.id_personas,
           documento: persona.documento,
@@ -159,24 +143,20 @@ class SaludConsolidadoService {
           sexo: persona.sexo,
           telefono: persona.telefono,
           fecha_nacimiento: persona.fecha_nacimiento,
-          apellido_familiar: persona.apellido_familiar,
           municipio: persona.nombre_municipio,
           sector: persona.nombre_sector || persona.sector_familia,
           vereda: persona.nombre_vereda,
           parroquia: persona.nombre_parroquia,
           direccion: persona.direccion_familia,
           telefono_familia: persona.telefono_familia,
-          tipo_registro: persona.tipo_registro,
           salud: {
-            enfermedades_registradas: enfermedadesRegistradas,
-            total_enfermedades: enfermedadesRegistradas.length,
-            enfermedades_texto: persona.necesidad_enfermo ? 
+            enfermedades: persona.necesidad_enfermo ? 
               persona.necesidad_enfermo.split(',').map(e => e.trim()) : [],
             necesidades_medicas: persona.necesidad_enfermo,
-            tiene_enfermedades: persona.tiene_enfermedades || enfermedadesRegistradas.length > 0
+            tiene_enfermedades: persona.tiene_enfermedades
           }
         };
-      }));
+      });
       
       console.log('✅ Consulta de salud exitosa:', {
         personas_encontradas: personasConSalud.length,
@@ -245,8 +225,7 @@ class SaludConsolidadoService {
           p.telefono,
           EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
           p.necesidad_enfermo,
-          s.descripcion as sexo,
-          f.apellido_familiar,
+          s.nombre as sexo,
           m.nombre_municipio,
           sec.nombre as nombre_sector
         FROM personas p
@@ -340,8 +319,7 @@ class SaludConsolidadoService {
             WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN true
             ELSE false
           END as tiene_enfermedades,
-          s.descripcion as sexo,
-          f.apellido_familiar,
+          s.nombre as sexo,
           f.sector as sector_familia,
           f.telefono as telefono_familia,
           f.direccion_familia,
@@ -375,7 +353,6 @@ class SaludConsolidadoService {
         telefono: persona.telefono,
         fecha_nacimiento: persona.fecha_nacimiento,
         familia: {
-          apellido: persona.apellido_familiar,
           telefono: persona.telefono_familia,
           direccion: persona.direccion_familia,
           sector: persona.nombre_sector || persona.sector_familia
