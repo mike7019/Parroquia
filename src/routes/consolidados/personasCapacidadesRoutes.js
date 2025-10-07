@@ -313,30 +313,29 @@ const router = express.Router();
  *         description: ID específico de la destreza a filtrar
  *         example: 1
  *       - in: query
- *         name: municipio
+ *         name: id_municipio
  *         schema:
- *           type: string
- *         description: Nombre del municipio (búsqueda parcial)
- *         example: "Barbacoas"
+ *           type: integer
+ *         description: ID del municipio
+ *         example: 1
  *       - in: query
- *         name: sector
+ *         name: id_sector
  *         schema:
- *           type: string
- *         description: Nombre del sector (búsqueda parcial)
- *         example: "Centro"
+ *           type: integer
+ *         description: ID del sector
+ *         example: 1
  *       - in: query
- *         name: vereda
+ *         name: id_vereda
  *         schema:
- *           type: string
- *         description: Nombre de la vereda (búsqueda parcial)
- *         example: "El Carmen"
+ *           type: integer
+ *         description: ID de la vereda
+ *         example: 1
  *       - in: query
- *         name: sexo
+ *         name: id_sexo
  *         schema:
- *           type: string
- *           enum: [Masculino, Femenino]
- *         description: Sexo de la persona
- *         example: "Masculino"
+ *           type: integer
+ *         description: ID del sexo (1=Masculino, 2=Femenino)
+ *         example: 1
  *       - in: query
  *         name: edad_min
  *         schema:

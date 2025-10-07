@@ -89,12 +89,6 @@ const router = express.Router();
  *         description: Filtrar por ID de enfermedad
  *         example: 1
  *       - in: query
- *         name: rango_edad
- *         schema:
- *           type: string
- *         description: Rango de edades (formato "min-max")
- *         example: "18-65"
- *       - in: query
  *         name: edad_min
  *         schema:
  *           type: integer
