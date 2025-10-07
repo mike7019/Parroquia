@@ -83,11 +83,11 @@ const router = express.Router();
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: id_enfermedad
+ *         name: enfermedad
  *         schema:
- *           type: integer
- *         description: Filtrar por ID de enfermedad
- *         example: 1
+ *           type: string
+ *         description: Filtrar por enfermedad (búsqueda parcial)
+ *         example: "diabetes"
  *       - in: query
  *         name: edad_min
  *         schema:

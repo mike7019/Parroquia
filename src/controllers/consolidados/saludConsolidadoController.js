@@ -8,7 +8,7 @@ class SaludConsolidadoController {
   async consultarSalud(req, res) {
     try {
       const filtros = {
-        id_enfermedad: req.query.id_enfermedad ? parseInt(req.query.id_enfermedad) : undefined,
+        enfermedad: req.query.enfermedad,
         edad_min: req.query.edad_min,
         edad_max: req.query.edad_max,
         id_sexo: req.query.id_sexo ? parseInt(req.query.id_sexo) : undefined,

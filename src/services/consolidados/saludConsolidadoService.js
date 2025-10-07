@@ -14,10 +14,10 @@ class SaludConsolidadoService {
       let params = {};
       
       // Construir condiciones WHERE
-      // Filtrar por enfermedad (ahora por ID)
-      if (filtros.id_enfermedad) {
-        whereConditions.push(`p.id_enfermedad = :id_enfermedad`);
-        params.id_enfermedad = filtros.id_enfermedad;
+      // Filtrar por enfermedad (búsqueda de texto en necesidad_enfermo)
+      if (filtros.enfermedad) {
+        whereConditions.push(`p.necesidad_enfermo ILIKE :enfermedad`);
+        params.enfermedad = `%${filtros.enfermedad}%`;
       }
       
       // Filtros de edad individuales
