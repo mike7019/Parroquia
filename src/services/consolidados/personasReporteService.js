@@ -262,7 +262,7 @@ class PersonasReporteService {
   }
 
   /**
-   * Generar reporte en formato Excel
+   * Generar reporte en formato Excel - UNA SOLA HOJA CON TODA LA INFORMACIÓN
    */
   async generarReporteExcel(filtros = {}) {
     try {
@@ -276,10 +276,12 @@ class PersonasReporteService {
       workbook.creator = 'Sistema Parroquial';
       workbook.created = new Date();
       
-      // Hoja 1: Información Personal
-      const sheetPersonal = workbook.addWorksheet('Información Personal');
+      // ÚNICA HOJA: Reporte Completo de Personas
+      const sheet = workbook.addWorksheet('Reporte Completo Personas');
       
-      sheetPersonal.columns = [
+      // Definir todas las columnas en una sola hoja
+      sheet.columns = [
+        // Información Personal
         { header: 'ID', key: 'id_personas', width: 10 },
         { header: 'Identificación', key: 'identificacion', width: 15 },
         { header: 'Tipo ID', key: 'tipo_identificacion', width: 15 },
@@ -290,115 +292,84 @@ class PersonasReporteService {
         { header: 'Estado Civil', key: 'estado_civil', width: 15 },
         { header: 'Teléfono', key: 'telefono', width: 15 },
         { header: 'Email', key: 'email', width: 30 },
-        { header: 'Dirección', key: 'direccion', width: 40 }
+        { header: 'Dirección', key: 'direccion', width: 40 },
+        
+        // Información Geográfica
+        { header: 'Municipio', key: 'municipio', width: 25 },
+        { header: 'Sector', key: 'sector', width: 25 },
+        { header: 'Vereda', key: 'vereda', width: 25 },
+        { header: 'Parroquia', key: 'parroquia', width: 30 },
+        { header: 'Familia', key: 'familia_apellido', width: 30 },
+        
+        // Capacidades y Profesión
+        { header: 'Profesión', key: 'profesion', width: 30 },
+        { header: 'Estudios', key: 'estudios', width: 30 },
+        { header: 'Liderazgo', key: 'liderazgo', width: 30 },
+        
+        // Tallas
+        { header: 'Talla Camisa', key: 'talla_camisa', width: 12 },
+        { header: 'Talla Pantalón', key: 'talla_pantalon', width: 12 },
+        { header: 'Talla Zapato', key: 'talla_zapatos', width: 12 },
+        
+        // Salud
+        { header: 'Necesidades de Salud', key: 'necesidad_enfermo', width: 40 },
+        
+        // Destrezas (como texto)
+        { header: 'Cantidad Destrezas', key: 'total_destrezas', width: 15 }
       ];
       
-      // Estilo del encabezado
-      sheetPersonal.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-      sheetPersonal.getRow(1).fill = {
+      // Estilo del encabezado - Azul profesional
+      sheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+      sheet.getRow(1).fill = {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: 'FF4472C4' }
       };
+      sheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+      sheet.getRow(1).height = 20;
       
+      // Agregar los datos
       reporte.datos.forEach(persona => {
-        sheetPersonal.addRow(persona);
+        sheet.addRow(persona);
       });
       
-      // Hoja 2: Información Geográfica
-      const sheetGeo = workbook.addWorksheet('Ubicación Geográfica');
-      
-      sheetGeo.columns = [
-        { header: 'ID Persona', key: 'id_personas', width: 10 },
-        { header: 'Nombre', key: 'nombre_completo', width: 40 },
-        { header: 'Municipio', key: 'nombre_municipio', width: 25 },
-        { header: 'Sector', key: 'nombre_sector', width: 25 },
-        { header: 'Vereda', key: 'nombre_vereda', width: 25 },
-        { header: 'Parroquia', key: 'nombre_parroquia', width: 30 },
-        { header: 'Familia', key: 'apellido_familiar', width: 30 },
-        { header: 'Dirección Familia', key: 'direccion_familia', width: 40 }
-      ];
-      
-      sheetGeo.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-      sheetGeo.getRow(1).fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF70AD47' }
-      };
-      
-      reporte.datos.forEach(persona => {
-        sheetGeo.addRow(persona);
+      // Aplicar formato alternado a las filas (zebra striping)
+      sheet.eachRow((row, rowNumber) => {
+        if (rowNumber > 1) { // Saltar el encabezado
+          if (rowNumber % 2 === 0) {
+            row.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFF2F2F2' }
+            };
+          }
+        }
       });
       
-      // Hoja 3: Capacidades y Profesión
-      const sheetCapacidades = workbook.addWorksheet('Capacidades y Profesión');
-      
-      sheetCapacidades.columns = [
-        { header: 'ID Persona', key: 'id_personas', width: 10 },
-        { header: 'Nombre', key: 'nombre_completo', width: 40 },
-        { header: 'Profesión', key: 'profesion', width: 30 },
-        { header: 'Estudios', key: 'estudios', width: 30 },
-        { header: 'Destrezas', key: 'destrezas_texto', width: 50 },
-        { header: 'Total Destrezas', key: 'total_destrezas', width: 15 },
-        { header: 'Liderazgo', key: 'en_que_eres_lider', width: 40 }
-      ];
-      
-      sheetCapacidades.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-      sheetCapacidades.getRow(1).fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFFFC000' }
-      };
-      
-      reporte.datos.forEach(persona => {
-        sheetCapacidades.addRow({
-          ...persona,
-          destrezas_texto: persona.destrezas.map(d => d.nombre).join(', ')
+      // Aplicar bordes a todas las celdas
+      sheet.eachRow((row, rowNumber) => {
+        row.eachCell((cell) => {
+          cell.border = {
+            top: { style: 'thin', color: { argb: 'FFD3D3D3' } },
+            left: { style: 'thin', color: { argb: 'FFD3D3D3' } },
+            bottom: { style: 'thin', color: { argb: 'FFD3D3D3' } },
+            right: { style: 'thin', color: { argb: 'FFD3D3D3' } }
+          };
         });
       });
       
-      // Hoja 4: Tallas
-      const sheetTallas = workbook.addWorksheet('Tallas');
-      
-      sheetTallas.columns = [
-        { header: 'ID Persona', key: 'id_personas', width: 10 },
-        { header: 'Nombre', key: 'nombre_completo', width: 40 },
-        { header: 'Talla Camisa', key: 'talla_camisa', width: 15 },
-        { header: 'Talla Pantalón', key: 'talla_pantalon', width: 15 },
-        { header: 'Talla Zapatos', key: 'talla_zapatos', width: 15 }
-      ];
-      
-      sheetTallas.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-      sheetTallas.getRow(1).fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF5B9BD5' }
+      // Aplicar autofiltro
+      sheet.autoFilter = {
+        from: 'A1',
+        to: `Y1` // Hasta la columna Y (25 columnas)
       };
       
-      reporte.datos.forEach(persona => {
-        sheetTallas.addRow(persona);
-      });
-      
-      // Hoja 5: Salud
-      const sheetSalud = workbook.addWorksheet('Información de Salud');
-      
-      sheetSalud.columns = [
-        { header: 'ID Persona', key: 'id_personas', width: 10 },
-        { header: 'Nombre', key: 'nombre_completo', width: 40 },
-        { header: 'Edad', key: 'edad', width: 10 },
-        { header: 'Enfermedades', key: 'necesidad_enfermo', width: 60 }
+      // Congelar primera fila
+      sheet.views = [
+        { state: 'frozen', xSplit: 0, ySplit: 1 }
       ];
       
-      sheetSalud.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-      sheetSalud.getRow(1).fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFE74C3C' }
-      };
-      
-      reporte.datos.forEach(persona => {
-        sheetSalud.addRow(persona);
-      });
+      console.log(`✅ Excel generado con ${reporte.datos.length} personas en una sola hoja`);
       
       // Generar buffer
       const buffer = await workbook.xlsx.writeBuffer();

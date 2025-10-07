@@ -166,7 +166,7 @@ router.get('/', authMiddleware.authenticateToken, personasReporteController.gene
  * /api/personas/capacidades/reporte/excel:
  *   get:
  *     summary: Generar reporte de personas en formato Excel
- *     description: Genera un archivo Excel con 5 hojas (Personal, Geográfica, Capacidades, Tallas, Salud) con información detallada de personas
+ *     description: Genera un archivo Excel con UNA SOLA HOJA con toda la información detallada de personas (Personal, Geográfica, Capacidades, Tallas, Salud)
  *     tags: [Personas y Capacidades]
  *     security:
  *       - bearerAuth: []
