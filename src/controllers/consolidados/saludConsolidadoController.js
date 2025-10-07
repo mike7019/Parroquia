@@ -9,7 +9,6 @@ class SaludConsolidadoController {
     try {
       const filtros = {
         id_enfermedad: req.query.id_enfermedad ? parseInt(req.query.id_enfermedad) : undefined,
-        rango_edad: req.query.rango_edad,
         edad_min: req.query.edad_min,
         edad_max: req.query.edad_max,
         id_sexo: req.query.id_sexo ? parseInt(req.query.id_sexo) : undefined,

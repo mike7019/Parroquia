@@ -23,10 +23,10 @@ class PersonasCapacidadesService {
     try {
       const {
         destreza_id,
-        municipio,
-        sector,
-        vereda,
-        sexo,
+        id_municipio,
+        id_sector,
+        id_vereda,
+        id_sexo,
         edad_min,
         edad_max,
         incluir_estadisticas = true,
@@ -46,24 +46,24 @@ class PersonasCapacidadesService {
         params.destreza_id = destreza_id;
       }
 
-      if (municipio) {
-        whereConditions.push('m.nombre_municipio ILIKE :municipio');
-        params.municipio = `%${municipio}%`;
+      if (id_municipio) {
+        whereConditions.push('m.id_municipio = :id_municipio');
+        params.id_municipio = id_municipio;
       }
 
-      if (sector) {
-        whereConditions.push('s.nombre ILIKE :sector');
-        params.sector = `%${sector}%`;
+      if (id_sector) {
+        whereConditions.push('s.id_sector = :id_sector');
+        params.id_sector = id_sector;
       }
 
-      if (vereda) {
-        whereConditions.push('v.nombre ILIKE :vereda');
-        params.vereda = `%${vereda}%`;
+      if (id_vereda) {
+        whereConditions.push('v.id_vereda = :id_vereda');
+        params.id_vereda = id_vereda;
       }
 
-      if (sexo) {
-        whereConditions.push('sx.descripcion = :sexo');
-        params.sexo = sexo;
+      if (id_sexo) {
+        whereConditions.push('sx.id_sexo = :id_sexo');
+        params.id_sexo = id_sexo;
       }
 
       if (edad_min) {
@@ -258,8 +258,8 @@ class PersonasCapacidadesService {
       const {
         profesion_id,
         profesion_nombre,
-        municipio,
-        sexo,
+        id_municipio,
+        id_sexo,
         pagina = 1,
         limite = 50
       } = filtros;
@@ -280,14 +280,14 @@ class PersonasCapacidadesService {
         params.profesion_nombre = `%${profesion_nombre}%`;
       }
 
-      if (municipio) {
-        whereConditions.push('m.nombre_municipio ILIKE :municipio');
-        params.municipio = `%${municipio}%`;
+      if (id_municipio) {
+        whereConditions.push('m.id_municipio = :id_municipio');
+        params.id_municipio = id_municipio;
       }
 
-      if (sexo) {
-        whereConditions.push('sx.descripcion = :sexo');
-        params.sexo = sexo;
+      if (id_sexo) {
+        whereConditions.push('sx.id_sexo = :id_sexo');
+        params.id_sexo = id_sexo;
       }
 
       const whereClause = whereConditions.length > 0 

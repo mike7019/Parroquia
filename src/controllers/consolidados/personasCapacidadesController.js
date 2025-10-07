@@ -16,10 +16,10 @@ class PersonasCapacidadesController {
       
       const filtros = {
         destreza_id: req.query.destreza_id ? parseInt(req.query.destreza_id) : undefined,
-        municipio: req.query.municipio,
-        sector: req.query.sector,
-        vereda: req.query.vereda,
-        sexo: req.query.sexo,
+        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
+        id_sexo: req.query.id_sexo ? parseInt(req.query.id_sexo) : undefined,
         edad_min: req.query.edad_min ? parseInt(req.query.edad_min) : undefined,
         edad_max: req.query.edad_max ? parseInt(req.query.edad_max) : undefined,
         incluir_estadisticas: req.query.incluir_estadisticas !== 'false',
@@ -95,8 +95,8 @@ class PersonasCapacidadesController {
       const filtros = {
         profesion_id: req.query.profesion_id ? parseInt(req.query.profesion_id) : undefined,
         profesion_nombre: req.query.profesion_nombre,
-        municipio: req.query.municipio,
-        sexo: req.query.sexo,
+        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_sexo: req.query.id_sexo ? parseInt(req.query.id_sexo) : undefined,
         pagina: req.query.pagina ? parseInt(req.query.pagina) : 1,
         limite: req.query.limite ? parseInt(req.query.limite) : 50
       };

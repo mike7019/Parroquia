@@ -20,16 +20,7 @@ class SaludConsolidadoService {
         params.id_enfermedad = filtros.id_enfermedad;
       }
       
-      // Filtrar por rango de edad
-      if (filtros.rango_edad) {
-        const [edadMin, edadMax] = filtros.rango_edad.split('-').map(e => parseInt(e.trim()));
-        if (edadMin && edadMax) {
-          whereConditions.push(`EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) BETWEEN :edad_min AND :edad_max`);
-          params.edad_min = edadMin;
-          params.edad_max = edadMax;
-        }
-      }
-      
+      // Filtros de edad individuales
       if (filtros.edad_min) {
         whereConditions.push(`EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) >= :edad_min_individual`);
         params.edad_min_individual = filtros.edad_min;
