@@ -14,9 +14,10 @@ class SaludConsolidadoService {
       let params = {};
       
       // Construir condiciones WHERE
-      if (filtros.enfermedad) {
-        whereConditions.push(`p.necesidad_enfermo ILIKE :enfermedad`);
-        params.enfermedad = `%${filtros.enfermedad}%`;
+      // Filtrar por enfermedad (ahora por ID)
+      if (filtros.id_enfermedad) {
+        whereConditions.push(`p.id_enfermedad = :id_enfermedad`);
+        params.id_enfermedad = filtros.id_enfermedad;
       }
       
       // Filtrar por rango de edad
@@ -39,29 +40,28 @@ class SaludConsolidadoService {
         params.edad_max_individual = filtros.edad_max;
       }
       
-      // Filtrar por sexo
-      if (filtros.sexo) {
-        const sexoUpper = filtros.sexo.toUpperCase();
-        if (sexoUpper === 'M' || sexoUpper === 'MASCULINO') {
-          whereConditions.push(`s.descripcion ILIKE '%masculino%'`);
-        } else if (sexoUpper === 'F' || sexoUpper === 'FEMENINO') {
-          whereConditions.push(`s.descripcion ILIKE '%femenino%'`);
-        }
+      // Filtrar por sexo (ahora por ID)
+      if (filtros.id_sexo) {
+        whereConditions.push(`p.id_sexo = :id_sexo`);
+        params.id_sexo = filtros.id_sexo;
       }
       
-      if (filtros.parroquia) {
-        whereConditions.push(`pr.nombre ILIKE :parroquia`);
-        params.parroquia = `%${filtros.parroquia}%`;
+      // Filtrar por parroquia (ahora por ID)
+      if (filtros.id_parroquia) {
+        whereConditions.push(`p.id_parroquia = :id_parroquia`);
+        params.id_parroquia = filtros.id_parroquia;
       }
       
-      if (filtros.municipio) {
-        whereConditions.push(`m.nombre_municipio ILIKE :municipio`);
-        params.municipio = `%${filtros.municipio}%`;
+      // Filtrar por municipio (ahora por ID)
+      if (filtros.id_municipio) {
+        whereConditions.push(`f.id_municipio = :id_municipio`);
+        params.id_municipio = filtros.id_municipio;
       }
       
-      if (filtros.sector) {
-        whereConditions.push(`(sec.nombre ILIKE :sector OR f.sector ILIKE :sector)`);
-        params.sector = `%${filtros.sector}%`;
+      // Filtrar por sector (ahora por ID)
+      if (filtros.id_sector) {
+        whereConditions.push(`f.id_sector = :id_sector`);
+        params.id_sector = filtros.id_sector;
       }
       
       const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
