@@ -1,0 +1,52 @@
+{
+  "miembros": [
+    {
+      "numeroIdentificacion": "12345678",
+      "primerNombre": "Juan",
+      "segundoNombre": "Carlos",
+      "primerApellido": "García",
+      "segundoApellido": "Pérez",
+      "motivoFechaCelebrar": {
+        "motivo": "Cumpleaños",
+        "dia": "15",
+        "mes": "6"
+      }
+    },
+    {
+      "numeroIdentificacion": "87654321",
+      "primerNombre": "María",
+      "segundoNombre": "Teresa",
+      "primerApellido": "López",
+      "segundoApellido": "Martínez",
+      "motivoFechaCelebrar": {
+        "motivo": "Santo",
+        "dia": "10",
+        "mes": "12"
+      }
+    },
+    {
+      "numeroIdentificacion": "11223344",
+      "primerNombre": "Pedro",
+      "segundoNombre": "José",
+      "primerApellido": "Rodríguez",
+      "segundoApellido": "Gómez",
+      "motivoFechaCelebrar": {
+        "motivo": "Aniversario",
+        "dia": "25",
+        "mes": "8"
+      }
+    },
+    {
+      "numeroIdentificacion": "99887766",
+      "primerNombre": "Ana",
+      "segundoNombre": "María",
+      "primerApellido": "Fernández",
+      "segundoApellido": "Ruiz",
+      "motivoFechaCelebrar": {
+        "motivo": "Cumpleaños",
+        "dia": "3",
+        "mes": "5"
+      }
+    }
+  ]
+}
