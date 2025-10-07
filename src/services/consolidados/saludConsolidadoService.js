@@ -263,29 +263,138 @@ class SaludConsolidadoService {
    */
   async obtenerResumenPorParroquia(idParroquia) {
     try {
-      const query = `
-        SELECT 
-          COUNT(*) as total_personas,
-          COUNT(CASE WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN 1 END) as con_enfermedades,
-          ROUND(AVG(EXTRACT(YEAR FROM AGE(p.fecha_nacimiento))), 2) as edad_promedio,
-          pr.nombre as nombre_parroquia
-        FROM personas p
-        LEFT JOIN parroquia pr ON p.id_parroquia = pr.id_parroquia
-        WHERE p.id_parroquia = :idParroquia
-        GROUP BY pr.nombre
+      console.log('🔍 Consultando salud por parroquia:', idParroquia);
+      
+      // Primero verificar que la parroquia existe
+      const parroquiaQuery = `
+        SELECT nombre FROM parroquia WHERE id_parroquia = :idParroquia
       `;
       
-      const [resultado] = await sequelize.query(query, {
+      const [parroquia] = await sequelize.query(parroquiaQuery, {
         replacements: { idParroquia },
         type: QueryTypes.SELECT
       });
       
-      return resultado || {
-        total_personas: 0,
-        con_enfermedades: 0,
-        edad_promedio: 0,
-        nombre_parroquia: 'Parroquia no encontrada'
+      if (!parroquia) {
+        return {
+          resumen: {
+            total_personas: 0,
+            con_enfermedades: 0,
+            sin_enfermedades: 0,
+            edad_promedio: 0,
+            nombre_parroquia: null,
+            id_parroquia: parseInt(idParroquia),
+            mensaje: `No existe parroquia con ID ${idParroquia}`
+          },
+          personas: []
+        };
+      }
+      
+      // Obtener estadísticas de salud
+      const estadisticasQuery = `
+        SELECT 
+          COUNT(*) as total_personas,
+          COUNT(CASE WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN 1 END) as con_enfermedades,
+          COUNT(CASE WHEN p.necesidad_enfermo IS NULL OR p.necesidad_enfermo = '' THEN 1 END) as sin_enfermedades,
+          ROUND(AVG(EXTRACT(YEAR FROM AGE(p.fecha_nacimiento))), 2) as edad_promedio
+        FROM personas p
+        WHERE p.id_parroquia = :idParroquia
+      `;
+      
+      const [estadisticas] = await sequelize.query(estadisticasQuery, {
+        replacements: { idParroquia },
+        type: QueryTypes.SELECT
+      });
+      
+      // Obtener detalle de cada persona con su información de salud
+      const personasQuery = `
+        SELECT 
+          p.id_personas,
+          CONCAT(p.primer_nombre, 
+                 CASE WHEN p.segundo_nombre IS NOT NULL THEN ' ' || p.segundo_nombre ELSE '' END,
+                 ' ', p.primer_apellido,
+                 CASE WHEN p.segundo_apellido IS NOT NULL THEN ' ' || p.segundo_apellido ELSE '' END
+          ) as nombre_completo,
+          p.identificacion as documento,
+          p.telefono,
+          p.fecha_nacimiento,
+          EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
+          p.necesidad_enfermo,
+          CASE 
+            WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN true
+            ELSE false
+          END as tiene_enfermedades,
+          s.descripcion as sexo,
+          f.apellido_familiar,
+          f.sector as sector_familia,
+          f.telefono as telefono_familia,
+          f.direccion_familia,
+          m.nombre_municipio,
+          sec.nombre as nombre_sector,
+          v.nombre as nombre_vereda,
+          pr.nombre as nombre_parroquia
+        FROM personas p
+        LEFT JOIN familias f ON p.id_familia_familias = f.id_familia
+        LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
+        LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
+        LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
+        LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
+        LEFT JOIN parroquia pr ON p.id_parroquia = pr.id_parroquia
+        WHERE p.id_parroquia = :idParroquia
+        ORDER BY p.primer_apellido, p.primer_nombre
+      `;
+      
+      const personas = await sequelize.query(personasQuery, {
+        replacements: { idParroquia },
+        type: QueryTypes.SELECT
+      });
+      
+      // Estructurar información de cada persona
+      const personasConSalud = personas.map(persona => ({
+        id: persona.id_personas,
+        documento: persona.documento,
+        nombre: persona.nombre_completo,
+        edad: parseInt(persona.edad),
+        sexo: persona.sexo,
+        telefono: persona.telefono,
+        fecha_nacimiento: persona.fecha_nacimiento,
+        familia: {
+          apellido: persona.apellido_familiar,
+          telefono: persona.telefono_familia,
+          direccion: persona.direccion_familia,
+          sector: persona.nombre_sector || persona.sector_familia
+        },
+        ubicacion: {
+          municipio: persona.nombre_municipio,
+          sector: persona.nombre_sector || persona.sector_familia,
+          vereda: persona.nombre_vereda,
+          parroquia: persona.nombre_parroquia
+        },
+        salud: {
+          tiene_enfermedades: persona.tiene_enfermedades,
+          enfermedades: persona.necesidad_enfermo ? 
+            persona.necesidad_enfermo.split(',').map(e => e.trim()) : [],
+          necesidades_medicas: persona.necesidad_enfermo
+        }
+      }));
+      
+      console.log('✅ Consulta de salud por parroquia exitosa:', {
+        parroquia: parroquia.nombre,
+        total_personas: personasConSalud.length
+      });
+      
+      return {
+        resumen: {
+          nombre_parroquia: parroquia.nombre,
+          id_parroquia: parseInt(idParroquia),
+          total_personas: parseInt(estadisticas.total_personas) || 0,
+          con_enfermedades: parseInt(estadisticas.con_enfermedades) || 0,
+          sin_enfermedades: parseInt(estadisticas.sin_enfermedades) || 0,
+          edad_promedio: parseFloat(estadisticas.edad_promedio) || 0
+        },
+        personas: personasConSalud
       };
+      
     } catch (error) {
       console.error('❌ Error obteniendo resumen por parroquia:', error);
       throw error;

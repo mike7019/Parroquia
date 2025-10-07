@@ -27,7 +27,7 @@ const Usuario = sequelize.define('Usuario', {
   },
   primer_nombre: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
     field: 'primer_nombre',
     validate: {
       len: [2, 50]
@@ -43,7 +43,7 @@ const Usuario = sequelize.define('Usuario', {
   },
   primer_apellido: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
     field: 'primer_apellido',
     validate: {
       len: [2, 50]

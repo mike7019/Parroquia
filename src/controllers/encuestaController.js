@@ -256,6 +256,8 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         id_sexo: sexoId,
         id_tipo_identificacion_tipo_identificacion: tipoIdentificacionId,
         id_estado_civil_estado_civil: estadoCivilId,
+        // Asociación geográfica (heredada de informacionGeneral)
+        id_parroquia: informacionGeneral.parroquia?.id ? parseInt(informacionGeneral.parroquia.id) : null,
         estudios: (miembro.estudio && typeof miembro.estudio === 'object') ? miembro.estudio.nombre : (miembro.estudio || null),
         en_que_eres_lider: null,
         necesidad_enfermo: null,
