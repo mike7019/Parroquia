@@ -4,7 +4,6 @@ import authMiddleware from '../middlewares/auth.js';
 import { validarEncuesta } from '../validators/encuestaValidator.js';
 import EncuestaValidationMiddleware from '../middlewares/encuestaValidation.js';
 import { EncuestaLoggingMiddleware } from '../middlewares/loggingMiddleware.js';
-import { encuestasQueryLimit, encuestasCreateLimit, encuestasDeleteLimit, adaptiveRateLimit } from '../middlewares/rateLimitMiddleware.js';
 import BackupMiddleware from '../middlewares/backupMiddleware.js';
 
 const router = express.Router();
@@ -242,6 +241,19 @@ const router = express.Router();
  *                   motivo: "Cumpleaños"
  *                   dia: "15"
  *                   mes: "03"
+ *                 destrezas:
+ *                   - id: 3
+ *                     nombre: "Carpintería"
+ *                   - id: 4
+ *                     nombre: "Electricidad"
+ *                 habilidades:
+ *                   - id: 1
+ *                     nombre: "Comunicación efectiva"
+ *                     nivel: "Avanzado"
+ *                   - id: 2
+ *                     nombre: "Trabajo en equipo"
+ *                     nivel: "Intermedio"
+ *                 en_que_eres_lider: "Líder comunitario del sector, coordinador de actividades deportivas"
  *             deceasedMembers:
  *               - nombres: "Pedro Antonio Rodríguez"
  *                 fechaFallecimiento: "2020-05-15"
@@ -474,7 +486,6 @@ const router = express.Router();
 
 // Ruta GET para obtener todas las encuestas
 router.get('/', 
-  adaptiveRateLimit,                 // Rate limiting adaptativo
   authMiddleware.authenticateToken,  // Middleware de autenticación
   EncuestaLoggingMiddleware.logOperacion('OBTENER_ENCUESTAS'), // Logging
   obtenerEncuestas
@@ -494,7 +505,6 @@ router.get('/',
  *         description: Estadísticas obtenidas exitosamente
  */
 router.get('/estadisticas', 
-  encuestasQueryLimit,
   authMiddleware.authenticateToken,
   EncuestaLoggingMiddleware.logOperacion('OBTENER_ESTADISTICAS'),
   async (req, res) => {
@@ -544,7 +554,6 @@ router.get('/estadisticas',
  *         description: Búsqueda completada exitosamente
  */
 router.get('/buscar', 
-  encuestasQueryLimit,
   authMiddleware.authenticateToken,
   EncuestaLoggingMiddleware.logOperacion('BUSCAR_ENCUESTAS'),
   async (req, res) => {
@@ -607,7 +616,6 @@ router.get('/buscar',
  *         description: Encuestas obtenidas con cursor exitosamente
  */
 router.get('/cursor', 
-  encuestasQueryLimit,
   authMiddleware.authenticateToken,
   EncuestaLoggingMiddleware.logOperacion('OBTENER_ENCUESTAS_CURSOR'),
   async (req, res) => {
@@ -639,13 +647,11 @@ router.get('/cursor',
 
 // Ruta GET para obtener encuesta por ID
 router.get('/:id', 
-  encuestasQueryLimit,               // Rate limiting para consultas
   authMiddleware.authenticateToken,  // Middleware de autenticación
   EncuestaLoggingMiddleware.logOperacion('OBTENER_ENCUESTA_POR_ID'), // Logging
   obtenerEncuestaPorId
 );
 router.get('/encuesta/:id', 
-  encuestasQueryLimit,               // Rate limiting para consultas
   authMiddleware.authenticateToken,  // Middleware de autenticación
   EncuestaLoggingMiddleware.logOperacion('OBTENER_ENCUESTA_POR_ID'), // Logging
   obtenerEncuestaPorId
@@ -653,7 +659,6 @@ router.get('/encuesta/:id',
 
 // Ruta POST para crear encuesta
 router.post('/', 
-  encuestasCreateLimit,              // Rate limiting estricto para creación
   authMiddleware.authenticateToken,  // Middleware de autenticación
   EncuestaLoggingMiddleware.logOperacion('CREAR_ENCUESTA'), // Logging
   EncuestaValidationMiddleware.validarEstructuraBasica,  // Validar estructura
@@ -665,7 +670,6 @@ router.post('/',
 
 // Ruta DELETE para eliminar encuesta por ID
 router.delete('/:id', 
-  encuestasDeleteLimit,              // Rate limiting muy restrictivo para eliminación
   authMiddleware.authenticateToken,  // Middleware de autenticación
   EncuestaLoggingMiddleware.logOperacion('ELIMINAR_ENCUESTA'), // Logging
   EncuestaValidationMiddleware.validarIdEncuesta,  // Validar ID
@@ -1002,7 +1006,6 @@ router.put('/:id',
 
 // Ruta PUT para actualizar encuesta completa
 router.put('/:id', 
-  encuestasQueryLimit,               // Rate limiting para actualizaciones
   authMiddleware.authenticateToken,  // Middleware de autenticación
   EncuestaLoggingMiddleware.logOperacion('ACTUALIZAR_ENCUESTA_COMPLETA'), // Logging
   EncuestaValidationMiddleware.validarIdEncuesta,  // Validar ID
