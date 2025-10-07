@@ -309,10 +309,10 @@ const procesarMiembrosFamiliaOptimizado = async (familiaId, familyMembers, infor
 
   // Inserción batch optimizada
   const placeholders = personasData.map((_, index) => 
-    `($${index * 18 + 1}, $${index * 18 + 2}, $${index * 18 + 3}, $${index * 18 + 4}, $${index * 18 + 5}, 
-     $${index * 18 + 6}, $${index * 18 + 7}, $${index * 18 + 8}, $${index * 18 + 9}, $${index * 18 + 10},
-     $${index * 18 + 11}, $${index * 18 + 12}, $${index * 18 + 13}, $${index * 18 + 14}, $${index * 18 + 15},
-     $${index * 18 + 16}, $${index * 18 + 17}, $${index * 18 + 18}, NOW(), NOW())`
+    `($${index * 20 + 1}, $${index * 20 + 2}, $${index * 20 + 3}, $${index * 20 + 4}, $${index * 20 + 5}, 
+     $${index * 20 + 6}, $${index * 20 + 7}, $${index * 20 + 8}, $${index * 20 + 9}, $${index * 20 + 10},
+     $${index * 20 + 11}, $${index * 20 + 12}, $${index * 20 + 13}, $${index * 20 + 14}, $${index * 20 + 15},
+     $${index * 20 + 16}, $${index * 20 + 17}, $${index * 20 + 18}, $${index * 20 + 19}, $${index * 20 + 20}, NOW(), NOW())`
   ).join(', ');
 
   const values = personasData.flatMap(persona => [
@@ -321,7 +321,7 @@ const procesarMiembrosFamiliaOptimizado = async (familiaId, familyMembers, infor
     persona.direccion, persona.id_familia_familias, persona.id_sexo, 
     persona.id_tipo_identificacion_tipo_identificacion, persona.id_estado_civil_estado_civil,
     persona.estudios, persona.talla_camisa, persona.talla_pantalon, persona.talla_zapato,
-    persona.motivo_celebrar
+    persona.motivo_celebrar, persona.dia_celebrar, persona.mes_celebrar
   ]);
 
   await sequelize.query(`
@@ -329,7 +329,8 @@ const procesarMiembrosFamiliaOptimizado = async (familiaId, familyMembers, infor
       primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, fecha_nacimiento,
       telefono, correo_electronico, identificacion, direccion, id_familia_familias,
       id_sexo, id_tipo_identificacion_tipo_identificacion, id_estado_civil_estado_civil,
-      estudios, talla_camisa, talla_pantalon, talla_zapato, motivo_celebrar,
+      estudios, talla_camisa, talla_pantalon, talla_zapato, motivo_celebrar, 
+      dia_celebrar, mes_celebrar,
       created_at, updated_at
     ) VALUES ${placeholders}
   `, {
