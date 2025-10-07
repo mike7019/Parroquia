@@ -1,5 +1,6 @@
 import { QueryTypes } from 'sequelize';
 import sequelize from '../../../config/sequelize.js';
+import ExcelJS from 'exceljs';
 
 class FamiliasConsolidadoService {
   
@@ -381,6 +382,285 @@ class FamiliasConsolidadoService {
       9: 'septiembre', 10: 'octubre', 11: 'noviembre', 12: 'diciembre'
     };
     return meses[numeroMes] || '';
+  }
+
+  /**
+   * Generar reporte Excel completo de familias
+   * GET /api/familias/reporte/excel
+   */
+  async generarReporteExcelFamilias(filtros = {}) {
+    const workbook = new ExcelJS.Workbook();
+    
+    // Configuración del workbook
+    workbook.creator = 'Sistema Parroquial - Familias';
+    workbook.created = new Date();
+    workbook.modified = new Date();
+    workbook.subject = 'Reporte Consolidado de Familias';
+    
+    try {
+      console.log('📊 Generando reporte Excel de familias con filtros:', filtros);
+      
+      // 1. Obtener datos consolidados
+      const datosFamilias = await this.consultarFamilias(filtros);
+      const familias = datosFamilias.datos || [];
+      
+      console.log(`📋 Procesando ${familias.length} familias para Excel`);
+      
+      // 2. HOJA 1: INFORMACIÓN GENERAL DE FAMILIAS
+      await this.crearHojaInfoGeneral(workbook, familias);
+      
+      // 3. HOJA 2: MIEMBROS DE FAMILIAS
+      await this.crearHojaMiembrosFamilias(workbook, familias);
+      
+      // 4. HOJA 3: DIFUNTOS POR FAMILIA
+      await this.crearHojaDifuntosFamilias(workbook, familias);
+      
+      // 5. HOJA 4: ESTADÍSTICAS GENERALES
+      await this.crearHojaEstadisticasFamilias(workbook, familias);
+      
+      console.log('✅ Excel de familias generado exitosamente');
+      return workbook;
+      
+    } catch (error) {
+      console.error('❌ Error generando Excel de familias:', error);
+      throw new Error(`Error en generación de Excel: ${error.message}`);
+    }
+  }
+
+  /**
+   * HOJA 1: INFORMACIÓN GENERAL DE FAMILIAS
+   */
+  async crearHojaInfoGeneral(workbook, familias) {
+    const hoja = workbook.addWorksheet('Información General');
+    
+    // Configurar columnas
+    hoja.columns = [
+      { header: 'Código Familia', key: 'codigo', width: 15 },
+      { header: 'Apellido Familiar', key: 'apellido', width: 25 },
+      { header: 'Dirección', key: 'direccion', width: 35 },
+      { header: 'Teléfono', key: 'telefono', width: 15 },
+      { header: 'Parroquia', key: 'parroquia', width: 20 },
+      { header: 'Municipio', key: 'municipio', width: 20 },
+      { header: 'Departamento', key: 'departamento', width: 20 },
+      { header: 'Sector', key: 'sector', width: 20 },
+      { header: 'Vereda', key: 'vereda', width: 20 },
+      { header: 'Tipo Vivienda', key: 'tipo_vivienda', width: 20 },
+      { header: 'Sistema Acueducto', key: 'acueducto', width: 25 },
+      { header: 'Disposición Basura', key: 'basura', width: 25 },
+      { header: 'Aguas Residuales', key: 'aguas', width: 25 },
+      { header: 'N° Miembros', key: 'num_miembros', width: 12 },
+      { header: 'N° Difuntos', key: 'num_difuntos', width: 12 }
+    ];
+    
+    // Agregar datos
+    familias.forEach(familia => {
+      hoja.addRow({
+        codigo: familia.codigo_familia || '',
+        apellido: familia.apellido_familiar,
+        direccion: familia.direccion_familia,
+        telefono: familia.telefono || '',
+        parroquia: familia.parroquia_nombre || '',
+        municipio: familia.municipio_nombre || '',
+        departamento: familia.departamento_nombre || '',
+        sector: familia.sector_nombre || '',
+        vereda: familia.vereda_nombre || '',
+        tipo_vivienda: familia.tipo_vivienda,
+        acueducto: familia.sistema_acueducto,
+        basura: familia.dispocision_basura,
+        aguas: familia.tipos_agua_residuales,
+        num_miembros: familia.miembros_familia?.length || 0,
+        num_difuntos: familia.difuntos_familia?.length || 0
+      });
+    });
+    
+    this.aplicarFormatoTabla(hoja, '4472C4'); // Azul para familias
+  }
+
+  /**
+   * HOJA 2: MIEMBROS DE FAMILIAS
+   */
+  async crearHojaMiembrosFamilias(workbook, familias) {
+    const hoja = workbook.addWorksheet('Miembros de Familias');
+    
+    hoja.columns = [
+      { header: 'Apellido Familia', key: 'familia', width: 25 },
+      { header: 'Nombre Completo', key: 'nombre', width: 35 },
+      { header: 'Tipo ID', key: 'tipo_id', width: 12 },
+      { header: 'Número ID', key: 'num_id', width: 15 },
+      { header: 'Parentesco', key: 'parentesco', width: 15 },
+      { header: 'Sexo', key: 'sexo', width: 10 },
+      { header: 'Edad', key: 'edad', width: 8 },
+      { header: 'Fecha Nacimiento', key: 'fecha_nac', width: 15 },
+      { header: 'Teléfono', key: 'telefono', width: 15 },
+      { header: 'Email', key: 'email', width: 30 },
+      { header: 'Situación Civil', key: 'situacion_civil', width: 18 },
+      { header: 'Estudios', key: 'estudios', width: 25 },
+      { header: 'Profesión', key: 'profesion', width: 25 },
+      { header: 'Comunidad Cultural', key: 'comunidad', width: 20 },
+      { header: 'Destrezas', key: 'destrezas', width: 30 },
+      { header: 'Liderazgo', key: 'liderazgo', width: 25 },
+      { header: 'Enfermedades', key: 'enfermedades', width: 30 }
+    ];
+    
+    // Agregar datos de todos los miembros
+    familias.forEach(familia => {
+      familia.miembros_familia?.forEach(miembro => {
+        hoja.addRow({
+          familia: familia.apellido_familiar,
+          nombre: miembro.nombre_completo,
+          tipo_id: miembro.tipo_identificacio,
+          num_id: miembro.numero_identificacion,
+          parentesco: miembro.parentesco,
+          sexo: miembro.sexo,
+          edad: miembro.edad,
+          fecha_nac: miembro.fecha_nacimiento,
+          telefono: miembro.telefono_personal,
+          email: miembro.email_personal,
+          situacion_civil: miembro.situacion_civil,
+          estudios: miembro.estudios,
+          profesion: miembro.profesion,
+          comunidad: miembro.comunidad_cultural,
+          destrezas: miembro.destrezas,
+          liderazgo: miembro.liderazgo,
+          enfermedades: miembro.enfermedades
+        });
+      });
+    });
+    
+    this.aplicarFormatoTabla(hoja, '70AD47'); // Verde para miembros
+  }
+
+  /**
+   * HOJA 3: DIFUNTOS POR FAMILIA
+   */
+  async crearHojaDifuntosFamilias(workbook, familias) {
+    const hoja = workbook.addWorksheet('Difuntos');
+    
+    hoja.columns = [
+      { header: 'Apellido Familia', key: 'familia', width: 25 },
+      { header: 'Nombre Difunto', key: 'nombre', width: 35 },
+      { header: 'Parentesco', key: 'parentesco', width: 15 },
+      { header: 'Sexo', key: 'sexo', width: 10 },
+      { header: 'Fecha Fallecimiento', key: 'fecha', width: 18 },
+      { header: 'Causa Fallecimiento', key: 'causa', width: 40 }
+    ];
+    
+    // Agregar datos de todos los difuntos
+    familias.forEach(familia => {
+      familia.difuntos_familia?.forEach(difunto => {
+        hoja.addRow({
+          familia: familia.apellido_familiar,
+          nombre: difunto.nombre_difunto,
+          parentesco: difunto.parentesco,
+          sexo: difunto.sexo,
+          fecha: difunto.fecha_fallecimiento,
+          causa: difunto.causa_fallecimiento
+        });
+      });
+    });
+    
+    this.aplicarFormatoTabla(hoja, '8B4513'); // Marrón para difuntos
+  }
+
+  /**
+   * HOJA 4: ESTADÍSTICAS GENERALES
+   */
+  async crearHojaEstadisticasFamilias(workbook, familias) {
+    const hoja = workbook.addWorksheet('Estadísticas');
+    
+    // Calcular estadísticas
+    const totalFamilias = familias.length;
+    const totalMiembros = familias.reduce((sum, f) => sum + (f.miembros_familia?.length || 0), 0);
+    const totalDifuntos = familias.reduce((sum, f) => sum + (f.difuntos_familia?.length || 0), 0);
+    
+    // Estadísticas por municipio
+    const porMunicipio = {};
+    familias.forEach(f => {
+      const municipio = f.municipio_nombre || 'Sin municipio';
+      porMunicipio[municipio] = (porMunicipio[municipio] || 0) + 1;
+    });
+    
+    // Estadísticas por sector
+    const porSector = {};
+    familias.forEach(f => {
+      const sector = f.sector_nombre || 'Sin sector';
+      porSector[sector] = (porSector[sector] || 0) + 1;
+    });
+    
+    // Crear resumen
+    hoja.addRow(['ESTADÍSTICAS GENERALES DE FAMILIAS']);
+    hoja.addRow([]);
+    hoja.addRow(['Concepto', 'Valor']);
+    hoja.addRow(['Total Familias', totalFamilias]);
+    hoja.addRow(['Total Miembros', totalMiembros]);
+    hoja.addRow(['Total Difuntos', totalDifuntos]);
+    hoja.addRow(['Promedio Miembros por Familia', (totalMiembros / totalFamilias).toFixed(2)]);
+    
+    hoja.addRow([]);
+    hoja.addRow(['DISTRIBUCIÓN POR MUNICIPIO']);
+    hoja.addRow([]);
+    hoja.addRow(['Municipio', 'Total Familias', 'Porcentaje']);
+    
+    Object.entries(porMunicipio)
+      .sort(([,a], [,b]) => b - a)
+      .forEach(([municipio, total]) => {
+        const porcentaje = ((total / totalFamilias) * 100).toFixed(1);
+        hoja.addRow([municipio, total, `${porcentaje}%`]);
+      });
+    
+    hoja.addRow([]);
+    hoja.addRow(['DISTRIBUCIÓN POR SECTOR']);
+    hoja.addRow([]);
+    hoja.addRow(['Sector', 'Total Familias', 'Porcentaje']);
+    
+    Object.entries(porSector)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 15) // Top 15 sectores
+      .forEach(([sector, total]) => {
+        const porcentaje = ((total / totalFamilias) * 100).toFixed(1);
+        hoja.addRow([sector, total, `${porcentaje}%`]);
+      });
+    
+    // Formato
+    hoja.getRow(1).font = { bold: true, size: 14 };
+    hoja.getRow(3).font = { bold: true };
+    hoja.getRow(9).font = { bold: true, size: 14 };
+    hoja.getRow(11).font = { bold: true };
+    
+    hoja.getColumn(1).width = 30;
+    hoja.getColumn(2).width = 15;
+    hoja.getColumn(3).width = 15;
+  }
+
+  /**
+   * FUNCIÓN AUXILIAR: Aplicar formato profesional a tablas
+   */
+  aplicarFormatoTabla(hoja, colorHex) {
+    // Formatear encabezados
+    hoja.getRow(1).eachCell(cell => {
+      cell.font = { bold: true, color: { argb: 'FFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colorHex } };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = {
+        top: { style: 'thin' },
+        bottom: { style: 'thin' },
+        left: { style: 'thin' },
+        right: { style: 'thin' }
+      };
+    });
+    
+    // Auto-ajustar altura de filas
+    hoja.eachRow((row, rowNumber) => {
+      row.height = rowNumber === 1 ? 25 : 20;
+    });
+    
+    // Aplicar filtros automáticos si hay datos
+    if (hoja.rowCount > 1) {
+      hoja.autoFilter = {
+        from: 'A1',
+        to: hoja.lastColumn.letter + '1'
+      };
+    }
   }
 }
 
