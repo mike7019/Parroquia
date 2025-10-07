@@ -198,7 +198,29 @@ class PersonasReporteService {
         }
         
         return {
-          ...persona,
+          id_personas: persona.id_personas,
+          identificacion: persona.identificacion,
+          nombre_completo: persona.nombre_completo,
+          fecha_nacimiento: persona.fecha_nacimiento,
+          edad: persona.edad,
+          telefono: persona.telefono,
+          email: persona.email,
+          direccion: persona.direccion,
+          sexo: persona.sexo,
+          familia_apellido: persona.apellido_familiar,
+          municipio: persona.nombre_municipio,
+          sector: persona.nombre_sector,
+          vereda: persona.nombre_vereda,
+          parroquia: persona.nombre_parroquia,
+          talla_camisa: persona.talla_camisa,
+          talla_pantalon: persona.talla_pantalon,
+          talla_zapatos: persona.talla_zapatos,
+          profesion: persona.profesion,
+          estudios: persona.estudios,
+          necesidad_enfermo: persona.necesidad_enfermo,
+          liderazgo: persona.en_que_eres_lider,
+          estado_civil: persona.estado_civil,
+          tipo_identificacion: persona.tipo_identificacion,
           destrezas: destrezas,
           total_destrezas: destrezas.length
         };
