@@ -29,6 +29,7 @@ import saludConsolidadoRoutes from './routes/consolidados/saludRoutes.js';
 import familiasConsolidadoRoutes from './routes/consolidados/familiasRoutes.js';
 import parroquiasConsolidadoRoutes from './routes/consolidados/parroquiasRoutes.js';
 import personasCapacidadesRoutes from './routes/consolidados/personasCapacidadesRoutes.js';
+import personasReporteRoutes from './routes/consolidados/personasReporteRoutes.js';
 
 // Import middlewares
 import errorHandler from './middlewares/errorHandler.js';
@@ -244,6 +245,7 @@ app.use('/api/parroquias', parroquiasConsolidadoRoutes); // Consolidated parroqu
 
 // Consolidated API Routes - Final Phase (100% coverage)
 app.use('/api/personas/capacidades', personasCapacidadesRoutes); // Consolidated personas capacidades routes
+app.use('/api/personas/capacidades/reporte', personasReporteRoutes); // Consolidated personas report routes
 
 app.use('/api', systemRoutes);
 
