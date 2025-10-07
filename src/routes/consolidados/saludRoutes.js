@@ -207,6 +207,79 @@ router.get('/estadisticas', authMiddleware.authenticateToken, saludConsolidadoCo
 
 /**
  * @swagger
+ * /api/personas/salud/reporte/excel:
+ *   get:
+ *     summary: Generar reporte de salud en Excel
+ *     description: Genera y descarga un archivo Excel con el reporte completo de salud de personas. Incluye todos los filtros disponibles.
+ *     tags: [Salud Consolidado]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id_enfermedad
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de enfermedad específica
+ *         example: 1
+ *       - in: query
+ *         name: enfermedad
+ *         schema:
+ *           type: string
+ *         description: Filtrar por texto en necesidades médicas
+ *         example: "diabetes"
+ *       - in: query
+ *         name: edad_min
+ *         schema:
+ *           type: integer
+ *         description: Edad mínima
+ *       - in: query
+ *         name: edad_max
+ *         schema:
+ *           type: integer
+ *         description: Edad máxima
+ *       - in: query
+ *         name: id_sexo
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de sexo
+ *       - in: query
+ *         name: id_parroquia
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de parroquia
+ *       - in: query
+ *         name: id_municipio
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de municipio
+ *       - in: query
+ *         name: id_sector
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de sector
+ *       - in: query
+ *         name: limite
+ *         schema:
+ *           type: integer
+ *           default: 5000
+ *         description: Límite de resultados (máximo para Excel)
+ *     responses:
+ *       200:
+ *         description: Archivo Excel generado exitosamente
+ *         content:
+ *           application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error generando el reporte
+ */
+router.get('/reporte/excel', authMiddleware.authenticateToken, saludConsolidadoController.generarReporteExcel);
+
+/**
+ * @swagger
  * /api/personas/salud/parroquia/{id}:
  *   get:
  *     summary: Obtener resumen de salud por parroquia

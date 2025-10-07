@@ -1,5 +1,6 @@
 import { QueryTypes } from 'sequelize';
 import sequelize from '../../../config/sequelize.js';
+import ExcelJS from 'exceljs';
 
 class SaludConsolidadoService {
   /**
@@ -390,6 +391,117 @@ class SaludConsolidadoService {
       
     } catch (error) {
       console.error('❌ Error obteniendo resumen por parroquia:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generar reporte de salud en formato Excel
+   */
+  async generarReporteExcel(filtros = {}) {
+    try {
+      console.log('📊 Generando reporte Excel de salud...');
+
+      // Obtener los datos usando el método existente
+      const resultado = await this.consultarSalud(filtros);
+      const personas = resultado.datos;
+
+      // Crear workbook
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Reporte Salud');
+
+      // Definir columnas
+      worksheet.columns = [
+        { header: 'ID', key: 'id', width: 8 },
+        { header: 'Documento', key: 'documento', width: 15 },
+        { header: 'Nombre Completo', key: 'nombre', width: 35 },
+        { header: 'Edad', key: 'edad', width: 8 },
+        { header: 'Sexo', key: 'sexo', width: 12 },
+        { header: 'Teléfono', key: 'telefono', width: 15 },
+        { header: 'Fecha Nacimiento', key: 'fecha_nacimiento', width: 18 },
+        { header: 'Municipio', key: 'municipio', width: 20 },
+        { header: 'Sector', key: 'sector', width: 20 },
+        { header: 'Vereda', key: 'vereda', width: 25 },
+        { header: 'Parroquia', key: 'parroquia', width: 25 },
+        { header: 'Dirección', key: 'direccion', width: 30 },
+        { header: 'Teléfono Familia', key: 'telefono_familia', width: 15 },
+        { header: 'Enfermedades', key: 'enfermedades', width: 40 },
+        { header: 'Necesidades Médicas', key: 'necesidades_medicas', width: 40 },
+        { header: 'Tiene Enfermedades', key: 'tiene_enfermedades', width: 18 }
+      ];
+
+      // Estilo del header
+      worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
+      worksheet.getRow(1).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: '4472C4' }
+      };
+      worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+      worksheet.getRow(1).height = 25;
+
+      // Agregar datos
+      personas.forEach((persona, index) => {
+        const row = worksheet.addRow({
+          id: persona.id,
+          documento: persona.documento || '',
+          nombre: persona.nombre || '',
+          edad: persona.edad || '',
+          sexo: persona.sexo || '',
+          telefono: persona.telefono || '',
+          fecha_nacimiento: persona.fecha_nacimiento || '',
+          municipio: persona.municipio || '',
+          sector: persona.sector || '',
+          vereda: persona.vereda || '',
+          parroquia: persona.parroquia || '',
+          direccion: persona.direccion || '',
+          telefono_familia: persona.telefono_familia || '',
+          enfermedades: persona.salud.enfermedades.join(', ') || '',
+          necesidades_medicas: persona.salud.necesidades_medicas || '',
+          tiene_enfermedades: persona.salud.tiene_enfermedades ? 'Sí' : 'No'
+        });
+
+        // Estilo zebra (filas alternadas)
+        if (index % 2 === 0) {
+          row.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'F2F2F2' }
+          };
+        }
+
+        // Bordes
+        row.eachCell((cell) => {
+          cell.border = {
+            top: { style: 'thin', color: { argb: 'D3D3D3' } },
+            left: { style: 'thin', color: { argb: 'D3D3D3' } },
+            bottom: { style: 'thin', color: { argb: 'D3D3D3' } },
+            right: { style: 'thin', color: { argb: 'D3D3D3' } }
+          };
+          cell.alignment = { vertical: 'middle', wrapText: true };
+        });
+      });
+
+      // Agregar autofiltro
+      worksheet.autoFilter = {
+        from: 'A1',
+        to: `P1`
+      };
+
+      // Congelar primera fila
+      worksheet.views = [
+        { state: 'frozen', xSplit: 0, ySplit: 1 }
+      ];
+
+      // Generar buffer
+      const buffer = await workbook.xlsx.writeBuffer();
+
+      console.log(`✅ Reporte Excel generado: ${personas.length} personas`);
+
+      return buffer;
+
+    } catch (error) {
+      console.error('❌ Error generando reporte Excel:', error);
       throw error;
     }
   }

@@ -122,6 +122,55 @@ class SaludConsolidadoController {
       });
     }
   }
+
+  /**
+   * Generar reporte de salud en Excel
+   * GET /api/personas/salud/reporte/excel
+   */
+  async generarReporteExcel(req, res) {
+    try {
+      const filtros = {
+        enfermedad: req.query.enfermedad,
+        edad_min: req.query.edad_min,
+        edad_max: req.query.edad_max,
+        id_sexo: req.query.id_sexo ? parseInt(req.query.id_sexo) : undefined,
+        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
+        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_enfermedad: req.query.id_enfermedad ? parseInt(req.query.id_enfermedad) : undefined,
+        limite: req.query.limite ? parseInt(req.query.limite) : 5000 // Límite más alto para Excel
+      };
+
+      // Remover filtros undefined
+      Object.keys(filtros).forEach(key => {
+        if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '') {
+          delete filtros[key];
+        }
+      });
+
+      console.log('📊 Generando reporte Excel de salud con filtros:', filtros);
+
+      const buffer = await saludConsolidadoService.generarReporteExcel(filtros);
+
+      // Configurar headers para descarga de archivo Excel
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `reporte_salud_${timestamp}.xlsx`;
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', buffer.length);
+
+      res.send(buffer);
+
+    } catch (error) {
+      console.error('❌ Error generando reporte Excel:', error);
+      res.status(500).json({
+        status: "error",
+        message: error.message,
+        code: "REPORTE_EXCEL_ERROR"
+      });
+    }
+  }
 }
 
 export default new SaludConsolidadoController();
