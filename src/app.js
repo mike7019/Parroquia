@@ -31,6 +31,7 @@ import parroquiasConsolidadoRoutes from './routes/consolidados/parroquiasRoutes.
 import personasConsolidadoRoutes from './routes/consolidados/personasRoutes.js';
 import personasCapacidadesRoutes from './routes/consolidados/personasCapacidadesRoutes.js';
 import personasReporteRoutes from './routes/consolidados/personasReporteRoutes.js';
+import catalogosRoutes from './routes/catalogosRoutes.js'; // Catálogos de destrezas y habilidades
 
 // Import middlewares
 import errorHandler from './middlewares/errorHandler.js';
@@ -230,6 +231,7 @@ app.use('/api/encuesta', encuestaRoutes); // Rutas de encuestas corregidas
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/catalog', catalogRoutes);
+app.use('/api', catalogosRoutes); // Catálogos de destrezas y habilidades
 app.use('/api/situaciones-civiles', situacionCivilRoutes); // Direct access for compatibility
 app.use('/api/difuntos/legacy', difuntosRoutes); // Rutas originales (compatibilidad)
 app.use('/api/consultas', familiasConsultasRoutes); // Rutas de consultas de familias

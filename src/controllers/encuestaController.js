@@ -267,9 +267,83 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         talla_zapato: miembro.talla_zapato || (miembro.talla ? miembro.talla.calzado : null)
       };
 
-      await Persona.create(personaData, { transaction });
+      const persona = await Persona.create(personaData, { transaction });
+      const personaId = persona.id_personas || persona.id; // Obtener ID de forma segura
       personasCreadas++;
-      console.log(`  ✅ Persona creada exitosamente: ${primerNombre}`);
+      console.log(`  ✅ Persona creada exitosamente: ${primerNombre} (ID: ${personaId})`);
+      
+      // ========================================================================
+      // PROCESAR DESTREZAS (relación muchos a muchos)
+      // ========================================================================
+      if (miembro.destrezas && Array.isArray(miembro.destrezas) && miembro.destrezas.length > 0) {
+        console.log(`    🎯 Procesando ${miembro.destrezas.length} destrezas...`);
+        
+        for (const destreza of miembro.destrezas) {
+          const destrezaId = typeof destreza === 'object' ? destreza.id : destreza;
+          
+          await sequelize.query(`
+            INSERT INTO persona_destreza (id_personas_personas, id_destrezas_destrezas, "createdAt", "updatedAt")
+            VALUES (:id_persona, :id_destreza, NOW(), NOW())
+            ON CONFLICT ON CONSTRAINT persona_destreza_pkey DO NOTHING
+          `, {
+            replacements: {
+              id_persona: personaId,
+              id_destreza: destrezaId
+            },
+            transaction
+          });
+          
+          console.log(`      ✅ Destreza ${destrezaId} asociada`);
+        }
+      }
+      
+      // ========================================================================
+      // PROCESAR HABILIDADES (relación muchos a muchos)
+      // ========================================================================
+      if (miembro.habilidades && Array.isArray(miembro.habilidades) && miembro.habilidades.length > 0) {
+        console.log(`    💡 Procesando ${miembro.habilidades.length} habilidades...`);
+        
+        for (const habilidad of miembro.habilidades) {
+          const habilidadId = typeof habilidad === 'object' ? habilidad.id : habilidad;
+          
+          await sequelize.query(`
+            INSERT INTO persona_habilidad (id_persona, id_habilidad, nivel, "createdAt", "updatedAt")
+            VALUES (:id_persona, :id_habilidad, :nivel, NOW(), NOW())
+            ON CONFLICT (id_persona, id_habilidad) DO NOTHING
+          `, {
+            replacements: {
+              id_persona: personaId,
+              id_habilidad: habilidadId,
+              nivel: habilidad.nivel || 'Básico'
+            },
+            transaction
+          });
+          
+          console.log(`      ✅ Habilidad ${habilidadId} asociada`);
+        }
+      }
+      
+      // ========================================================================
+      // PROCESAR LIDERAZGO (campo de texto libre)
+      // ========================================================================
+      if (miembro.en_que_eres_lider || miembro.liderazgo) {
+        const liderazgoTexto = miembro.en_que_eres_lider || miembro.liderazgo;
+        console.log(`    👑 Actualizando liderazgo: "${liderazgoTexto}"`);
+        
+        await sequelize.query(`
+          UPDATE personas 
+          SET en_que_eres_lider = :liderazgo
+          WHERE id_personas = :id_persona
+        `, {
+          replacements: {
+            liderazgo: liderazgoTexto,
+            id_persona: personaId
+          },
+          transaction
+        });
+        
+        console.log(`      ✅ Campo liderazgo actualizado`);
+      }
       
     } catch (error) {
       console.error(`  ❌ Error creando persona ${miembro.nombres}:`, error.message);
@@ -534,6 +608,7 @@ export const obtenerEncuestas = async (req, res) => {
             p.fecha_nacimiento,
             p.direccion,
             p.estudios,
+            p.en_que_eres_lider,
             p.talla_camisa,
             p.talla_pantalon,
             p.talla_zapato,
@@ -841,6 +916,42 @@ export const obtenerEncuestas = async (req, res) => {
             }
           }
 
+          // ========================================================================
+          // CONSULTAR DESTREZAS DE LA PERSONA
+          // ========================================================================
+          const destrezas = await sequelize.query(`
+            SELECT 
+              d.id_destreza,
+              d.nombre
+            FROM persona_destreza pd
+            INNER JOIN destrezas d ON pd.id_destrezas_destrezas = d.id_destreza
+            WHERE pd.id_personas_personas = :personaId
+            ORDER BY d.nombre
+          `, {
+            replacements: { personaId: persona.id_personas },
+            type: QueryTypes.SELECT
+          });
+
+          // ========================================================================
+          // CONSULTAR HABILIDADES DE LA PERSONA
+          // ========================================================================
+          const habilidades = await sequelize.query(`
+            SELECT 
+              h.id_habilidad,
+              h.nombre,
+              h.descripcion,
+              h.categoria,
+              ph.nivel
+            FROM persona_habilidad ph
+            INNER JOIN habilidades h ON ph.id_habilidad = h.id_habilidad
+            WHERE ph.id_persona = :personaId
+            AND h.activo = true
+            ORDER BY h.categoria, h.nombre
+          `, {
+            replacements: { personaId: persona.id_personas },
+            type: QueryTypes.SELECT
+          });
+
           return {
             id: persona.id_personas,
             nombre_completo: formatearNombreCompleto(persona.primer_nombre, persona.segundo_nombre, persona.primer_apellido, persona.segundo_apellido),
@@ -871,7 +982,20 @@ export const obtenerEncuestas = async (req, res) => {
               camisa: persona.talla_camisa,
               pantalon: persona.talla_pantalon,
               zapato: persona.talla_zapato
-            }
+            },
+            // ⭐ NUEVOS CAMPOS ⭐
+            destrezas: destrezas.map(d => ({
+              id: d.id_destreza,
+              nombre: d.nombre
+            })),
+            habilidades: habilidades.map(h => ({
+              id: h.id_habilidad,
+              nombre: h.nombre,
+              descripcion: h.descripcion,
+              categoria: h.categoria,
+              nivel: h.nivel
+            })),
+            en_que_eres_lider: persona.en_que_eres_lider || null
           };
         }));
 
@@ -1074,6 +1198,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
         p.id_sexo,
         p.id_tipo_identificacion_tipo_identificacion,
         p.id_estado_civil_estado_civil,
+        p.en_que_eres_lider,
         s.id_sexo as sexo_id,
         s.descripcion as sexo_descripcion,
         ti.id_tipo_identificacion as tipo_id_id,
@@ -1375,6 +1500,42 @@ export const obtenerEncuestaPorId = async (req, res) => {
         }
       }
 
+      // ========================================================================
+      // CONSULTAR DESTREZAS DE LA PERSONA
+      // ========================================================================
+      const destrezas = await sequelize.query(`
+        SELECT 
+          d.id_destreza,
+          d.nombre
+        FROM persona_destreza pd
+        INNER JOIN destrezas d ON pd.id_destrezas_destrezas = d.id_destreza
+        WHERE pd.id_personas_personas = :personaId
+        ORDER BY d.nombre
+      `, {
+        replacements: { personaId: persona.id_personas },
+        type: QueryTypes.SELECT
+      });
+
+      // ========================================================================
+      // CONSULTAR HABILIDADES DE LA PERSONA
+      // ========================================================================
+      const habilidades = await sequelize.query(`
+        SELECT 
+          h.id_habilidad,
+          h.nombre,
+          h.descripcion,
+          h.categoria,
+          ph.nivel
+        FROM persona_habilidad ph
+        INNER JOIN habilidades h ON ph.id_habilidad = h.id_habilidad
+        WHERE ph.id_persona = :personaId
+        AND h.activo = true
+        ORDER BY h.categoria, h.nombre
+      `, {
+        replacements: { personaId: persona.id_personas },
+        type: QueryTypes.SELECT
+      });
+
       return {
         id: persona.id_personas,
         nombre_completo: formatearNombreCompleto(persona.primer_nombre, persona.segundo_nombre, persona.primer_apellido, persona.segundo_apellido),
@@ -1405,7 +1566,20 @@ export const obtenerEncuestaPorId = async (req, res) => {
           camisa: persona.talla_camisa,
           pantalon: persona.talla_pantalon,
           zapato: persona.talla_zapato
-        }
+        },
+        // ⭐ NUEVOS CAMPOS ⭐
+        destrezas: destrezas.map(d => ({
+          id: d.id_destreza,
+          nombre: d.nombre
+        })),
+        habilidades: habilidades.map(h => ({
+          id: h.id_habilidad,
+          nombre: h.nombre,
+          descripcion: h.descripcion,
+          categoria: h.categoria,
+          nivel: h.nivel
+        })),
+        en_que_eres_lider: persona.en_que_eres_lider || null
       };
     }));
 

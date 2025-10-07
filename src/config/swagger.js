@@ -912,6 +912,67 @@ const swaggerConfig = {
                   example: '03'
                 }
               }
+            },
+            destrezas: {
+              type: 'array',
+              description: 'Lista de destrezas o habilidades prácticas del miembro',
+              items: {
+                type: 'object',
+                properties: {
+                  id: {
+                    type: 'integer',
+                    description: 'ID de la destreza (ver GET /api/destrezas)',
+                    example: 3
+                  },
+                  nombre: {
+                    type: 'string',
+                    description: 'Nombre de la destreza (opcional, informativo)',
+                    example: 'Carpintería'
+                  }
+                },
+                required: ['id']
+              },
+              example: [
+                { id: 3, nombre: 'Carpintería' },
+                { id: 4, nombre: 'Electricidad' }
+              ]
+            },
+            habilidades: {
+              type: 'array',
+              description: 'Lista de habilidades blandas o competencias del miembro',
+              items: {
+                type: 'object',
+                properties: {
+                  id: {
+                    type: 'integer',
+                    description: 'ID de la habilidad (ver GET /api/habilidades)',
+                    example: 1
+                  },
+                  nombre: {
+                    type: 'string',
+                    description: 'Nombre de la habilidad (opcional, informativo)',
+                    example: 'Comunicación efectiva'
+                  },
+                  nivel: {
+                    type: 'string',
+                    enum: ['Básico', 'Intermedio', 'Avanzado', 'Experto'],
+                    description: 'Nivel de dominio de la habilidad',
+                    example: 'Avanzado'
+                  }
+                },
+                required: ['id']
+              },
+              example: [
+                { id: 1, nombre: 'Comunicación efectiva', nivel: 'Avanzado' },
+                { id: 2, nombre: 'Trabajo en equipo', nivel: 'Intermedio' }
+              ]
+            },
+            en_que_eres_lider: {
+              type: 'string',
+              maxLength: 500,
+              nullable: true,
+              description: 'Descripción de los roles de liderazgo que desempeña en la comunidad',
+              example: 'Líder comunitario del sector, coordinador de actividades deportivas'
             }
           },
           required: ['nombres']
@@ -1136,6 +1197,84 @@ const swaggerConfig = {
             }
           },
           required: ['nombre']
+        },
+        Destreza: {
+          type: 'object',
+          properties: {
+            id_destreza: {
+              type: 'integer',
+              description: 'ID único de la destreza',
+              example: 1
+            },
+            nombre: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre de la destreza',
+              example: 'Carpintería'
+            },
+            activo: {
+              type: 'boolean',
+              description: 'Estado activo/inactivo de la destreza',
+              example: true
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación',
+              example: '2025-10-07T10:00:00Z'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización',
+              example: '2025-10-07T10:00:00Z'
+            }
+          }
+        },
+        Habilidad: {
+          type: 'object',
+          properties: {
+            id_habilidad: {
+              type: 'integer',
+              description: 'ID único de la habilidad',
+              example: 1
+            },
+            nombre: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Nombre de la habilidad',
+              example: 'Comunicación efectiva'
+            },
+            descripcion: {
+              type: 'string',
+              description: 'Descripción opcional de la habilidad',
+              example: 'Capacidad de expresar ideas claramente'
+            },
+            categoria: {
+              type: 'string',
+              maxLength: 50,
+              enum: ['Social', 'Cognitiva', 'Técnica', 'Física'],
+              description: 'Categoría de la habilidad',
+              example: 'Social'
+            },
+            activo: {
+              type: 'boolean',
+              description: 'Estado activo/inactivo de la habilidad',
+              example: true
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación',
+              example: '2025-10-07T10:00:00Z'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización',
+              example: '2025-10-07T10:00:00Z'
+            }
+          }
         },
         CreateMunicipioRequest: {
           type: 'object',
