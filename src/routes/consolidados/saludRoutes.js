@@ -44,8 +44,24 @@ const router = express.Router();
  *         salud:
  *           type: object
  *           properties:
- *             enfermedades:
+ *             enfermedades_registradas:
  *               type: array
+ *               description: Enfermedades desde tabla enfermedades
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id_enfermedad:
+ *                     type: integer
+ *                   nombre:
+ *                     type: string
+ *                   descripcion:
+ *                     type: string
+ *             total_enfermedades:
+ *               type: integer
+ *               description: Cantidad de enfermedades registradas
+ *             enfermedades_texto:
+ *               type: array
+ *               description: Enfermedades como texto (campo necesidad_enfermo)
  *               items:
  *                 type: string
  *             necesidades_medicas:
@@ -83,10 +99,16 @@ const router = express.Router();
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
+ *         name: id_enfermedad
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de enfermedad específica (tabla enfermedades)
+ *         example: 1
+ *       - in: query
  *         name: enfermedad
  *         schema:
  *           type: string
- *         description: Filtrar por enfermedad (búsqueda parcial)
+ *         description: Filtrar por texto en necesidades médicas (búsqueda parcial)
  *         example: "diabetes"
  *       - in: query
  *         name: edad_min

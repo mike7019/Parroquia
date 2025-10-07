@@ -14,7 +14,17 @@ class SaludConsolidadoService {
       let params = {};
       
       // Construir condiciones WHERE
-      // Filtrar por enfermedad (búsqueda de texto en necesidad_enfermo)
+      // Filtrar por ID de enfermedad (usar tabla relacional persona_enfermedad)
+      if (filtros.id_enfermedad) {
+        whereConditions.push(`EXISTS (
+          SELECT 1 FROM persona_enfermedad pe 
+          WHERE pe.id_persona = p.id_personas 
+          AND pe.id_enfermedad = :id_enfermedad
+        )`);
+        params.id_enfermedad = filtros.id_enfermedad;
+      }
+      
+      // Filtrar por texto en necesidad_enfermo (búsqueda parcial) - OPCIONAL
       if (filtros.enfermedad) {
         whereConditions.push(`p.necesidad_enfermo ILIKE :enfermedad`);
         params.enfermedad = `%${filtros.enfermedad}%`;
@@ -129,28 +139,43 @@ class SaludConsolidadoService {
       });
       
       // Procesar los datos para estructurar mejor la información de salud
-      const personasConSalud = personas.map(persona => ({
-        id: persona.id_personas,
-        documento: persona.documento,
-        nombre: persona.nombre_completo,
-        edad: persona.edad,
-        sexo: persona.sexo,
-        telefono: persona.telefono,
-        fecha_nacimiento: persona.fecha_nacimiento,
-        apellido_familiar: persona.apellido_familiar,
-        municipio: persona.nombre_municipio,
-        sector: persona.nombre_sector || persona.sector_familia,
-        vereda: persona.nombre_vereda,
-        parroquia: persona.nombre_parroquia,
-        direccion: persona.direccion_familia,
-        telefono_familia: persona.telefono_familia,
-        tipo_registro: persona.tipo_registro,
-        salud: {
-          enfermedades: persona.necesidad_enfermo ? 
-            persona.necesidad_enfermo.split(',').map(e => e.trim()) : [],
-          necesidades_medicas: persona.necesidad_enfermo,
-          tiene_enfermedades: persona.tiene_enfermedades
-        }
+      const personasConSalud = await Promise.all(personas.map(async (persona) => {
+        // Obtener enfermedades registradas de la persona
+        const enfermedadesRegistradas = await sequelize.query(`
+          SELECT e.id_enfermedad, e.nombre, e.descripcion
+          FROM persona_enfermedad pe
+          INNER JOIN enfermedades e ON pe.id_enfermedad = e.id_enfermedad
+          WHERE pe.id_persona = :id_persona
+        `, {
+          replacements: { id_persona: persona.id_personas },
+          type: QueryTypes.SELECT
+        });
+        
+        return {
+          id: persona.id_personas,
+          documento: persona.documento,
+          nombre: persona.nombre_completo,
+          edad: persona.edad,
+          sexo: persona.sexo,
+          telefono: persona.telefono,
+          fecha_nacimiento: persona.fecha_nacimiento,
+          apellido_familiar: persona.apellido_familiar,
+          municipio: persona.nombre_municipio,
+          sector: persona.nombre_sector || persona.sector_familia,
+          vereda: persona.nombre_vereda,
+          parroquia: persona.nombre_parroquia,
+          direccion: persona.direccion_familia,
+          telefono_familia: persona.telefono_familia,
+          tipo_registro: persona.tipo_registro,
+          salud: {
+            enfermedades_registradas: enfermedadesRegistradas,
+            total_enfermedades: enfermedadesRegistradas.length,
+            enfermedades_texto: persona.necesidad_enfermo ? 
+              persona.necesidad_enfermo.split(',').map(e => e.trim()) : [],
+            necesidades_medicas: persona.necesidad_enfermo,
+            tiene_enfermedades: persona.tiene_enfermedades || enfermedadesRegistradas.length > 0
+          }
+        };
       }));
       
       console.log('✅ Consulta de salud exitosa:', {
