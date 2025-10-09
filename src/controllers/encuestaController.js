@@ -238,6 +238,9 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
       const sexoId = mapearSexo(miembro.sexo);
       const tipoIdentificacionId = mapearTipoIdentificacion(miembro.tipoIdentificacion);
       const estadoCivilId = mapearEstadoCivil(miembro.situacionCivil);
+      const parentescoId = miembro.parentesco?.id ? parseInt(miembro.parentesco.id) : null;
+      const profesionId = miembro.profesion?.id ? parseInt(miembro.profesion.id) : null;
+      const comunidadCulturalId = miembro.comunidadCultural?.id ? parseInt(miembro.comunidadCultural.id) : null;
 
       const fechaNacimiento = miembro.fechaNacimiento || miembro.fecha_nacimiento;
       const identificacionUnica = await generarIdentificacionUnica('TEMP');
@@ -256,18 +259,33 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         id_sexo: sexoId,
         id_tipo_identificacion_tipo_identificacion: tipoIdentificacionId,
         id_estado_civil_estado_civil: estadoCivilId,
-        // Asociación geográfica (heredada de informacionGeneral)
-        id_parroquia: informacionGeneral.parroquia?.id ? parseInt(informacionGeneral.parroquia.id) : null,
+        id_parentesco: parentescoId, // ⭐ AGREGADO
+        id_profesion: profesionId, // ⭐ AGREGADO
+        id_comunidad_cultural: comunidadCulturalId, // ⭐ AGREGADO
         estudios: (miembro.estudio && typeof miembro.estudio === 'object') ? miembro.estudio.nombre : (miembro.estudio || null),
-        en_que_eres_lider: null,
-        necesidad_enfermo: null,
-        id_profesion: null,
+        en_que_eres_lider: miembro.en_que_eres_lider || null, // ⭐ CORREGIDO
+        necesidad_enfermo: miembro.enfermedad?.nombre || null, // ⭐ CORREGIDO
+        motivo_celebrar: miembro.motivoFechaCelebrar?.motivo || null, // ⭐ AGREGADO
+        dia_celebrar: miembro.motivoFechaCelebrar?.dia ? parseInt(miembro.motivoFechaCelebrar.dia) : null, // ⭐ AGREGADO
+        mes_celebrar: miembro.motivoFechaCelebrar?.mes ? parseInt(miembro.motivoFechaCelebrar.mes) : null, // ⭐ AGREGADO
         talla_camisa: miembro['talla_camisa/blusa'] || (miembro.talla ? miembro.talla.camisa : null),
         talla_pantalon: miembro.talla_pantalon || (miembro.talla ? miembro.talla.pantalon : null),
         talla_zapato: miembro.talla_zapato || (miembro.talla ? miembro.talla.calzado : null)
       };
 
-      const persona = await Persona.create(personaData, { transaction });
+      const persona = await Persona.create(personaData, { 
+        transaction,
+        fields: [
+          'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido',
+          'fecha_nacimiento', 'telefono', 'correo_electronico', 'identificacion',
+          'direccion', 'id_familia_familias', 'id_sexo', 
+          'id_tipo_identificacion_tipo_identificacion', 'id_estado_civil_estado_civil',
+          'id_parentesco', 'id_profesion', 'id_comunidad_cultural',
+          'estudios', 'en_que_eres_lider', 'necesidad_enfermo',
+          'motivo_celebrar', 'dia_celebrar', 'mes_celebrar',
+          'talla_camisa', 'talla_pantalon', 'talla_zapato'
+        ]
+      });
       const personaId = persona.id_personas || persona.id; // Obtener ID de forma segura
       personasCreadas++;
       console.log(`  ✅ Persona creada exitosamente: ${primerNombre} (ID: ${personaId})`);
@@ -1903,22 +1921,38 @@ export const crearEncuesta = async (req, res) => {
     
     const familiaData = {
       apellido_familiar: informacionGeneral.apellido_familiar,
-      sector: informacionGeneral.sector?.nombre || informacionGeneral.sector || 'General',
+      sector: (typeof informacionGeneral.sector === 'object' && informacionGeneral.sector !== null) 
+        ? (informacionGeneral.sector.nombre || 'General') 
+        : (informacionGeneral.sector || 'General'),
       direccion_familia: informacionGeneral.direccion,
       telefono: informacionGeneral.telefono,
       email: informacionGeneral.email || null,
       tamaño_familia: tamanioFamiliaCalculado,
-      tipo_vivienda: vivienda.tipo_vivienda?.id || vivienda.tipo_vivienda?.nombre || vivienda.tipo_vivienda || 'Casa',
+      tipo_vivienda: vivienda.tipo_vivienda?.nombre || vivienda.tipo_vivienda || 'Casa', // Campo de texto legacy
+      id_tipo_vivienda: vivienda.tipo_vivienda?.id ? parseInt(vivienda.tipo_vivienda.id) : null, // FK correcta
       estado_encuesta: 'completed',
       numero_encuestas: 1,
       fecha_ultima_encuesta: new Date().toISOString().split('T')[0],
+      fecha_encuesta: informacionGeneral.fecha || new Date().toISOString().split('T')[0], // Fecha de registro
       codigo_familia: `FAM_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
       tutor_responsable: null,
       id_municipio: informacionGeneral.municipio?.id ? parseInt(informacionGeneral.municipio.id) : null,
       id_parroquia: informacionGeneral.parroquia?.id ? parseInt(informacionGeneral.parroquia.id) : null,
       id_vereda: informacionGeneral.vereda?.id ? parseInt(informacionGeneral.vereda.id) : null,
       id_sector: informacionGeneral.sector?.id ? parseInt(informacionGeneral.sector.id) : null,
-      comunionEnCasa: informacionGeneral.comunionEnCasa || false
+      comunionEnCasa: informacionGeneral.comunionEnCasa || false,
+      
+      // CAMPOS BOOLEANOS DE SERVICIOS DE AGUA
+      pozo_septico: servicios_agua?.pozo_septico || false,
+      letrina: servicios_agua?.letrina || false,
+      campo_abierto: servicios_agua?.campo_abierto || false,
+      
+      // CAMPOS BOOLEANOS DE DISPOSICIÓN DE BASURAS
+      disposicion_recolector: vivienda?.disposicion_basuras?.recolector || false,
+      disposicion_quemada: vivienda?.disposicion_basuras?.quemada || false,
+      disposicion_enterrada: vivienda?.disposicion_basuras?.enterrada || false,
+      disposicion_recicla: vivienda?.disposicion_basuras?.recicla || false,
+      disposicion_aire_libre: vivienda?.disposicion_basuras?.aire_libre || false
     };
 
     console.log('🔍 DEBUG - familiaData a guardar:', JSON.stringify({
