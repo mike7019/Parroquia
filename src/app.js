@@ -33,8 +33,12 @@ import personasCapacidadesRoutes from './routes/consolidados/personasCapacidades
 import personasReporteRoutes from './routes/consolidados/personasReporteRoutes.js';
 import catalogosRoutes from './routes/catalogosRoutes.js'; // Catálogos de destrezas y habilidades
 
+// Import admin routes
+import ipWhitelistRoutes from './routes/admin/ipWhitelistRoutes.js';
+
 // Import middlewares
 import errorHandler from './middlewares/errorHandler.js';
+import { ipWhitelistMiddleware } from './middlewares/ipWhitelist.js';
 
 // Import Swagger configuration
 import { setupSwagger } from './config/swagger.js';
@@ -110,6 +114,9 @@ app.use(compression({
   threshold: 1024, // Solo comprimir archivos > 1KB
   level: 6 // Nivel de compresión balanceado (1-9)
 }));
+
+// IP Whitelist Middleware - DEBE IR ANTES de otros middlewares de seguridad
+app.use(ipWhitelistMiddleware);
 
 // Custom middleware to log request IPs
 app.use((req, res, next) => {
@@ -230,6 +237,7 @@ app.get('/api/ip-test', (req, res) => {
 app.use('/api/encuesta', encuestaRoutes); // Rutas de encuestas corregidas
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/admin', ipWhitelistRoutes); // Rutas de administración de IP whitelist
 app.use('/api/catalog', catalogRoutes);
 app.use('/api', catalogosRoutes); // Catálogos de destrezas y habilidades
 app.use('/api/situaciones-civiles', situacionCivilRoutes); // Direct access for compatibility
