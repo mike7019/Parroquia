@@ -1,11 +1,11 @@
 import express from 'express';
-import authMiddleware from '../middlewares/auth.js';
+import authMiddleware from '../../middlewares/auth.js';
 import { 
   getWhitelistedIPs, 
   addIPToWhitelist, 
   removeIPFromWhitelist,
   getRealIP 
-} from '../middlewares/ipWhitelist.js';
+} from '../../middlewares/ipWhitelist.js';
 
 const router = express.Router();
 

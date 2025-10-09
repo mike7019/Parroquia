@@ -139,6 +139,11 @@ export const getWhitelistedIPs = () => {
   return [...WHITELISTED_IPS]; // Retornar copia para evitar modificaciones directas
 };
 
+/**
+ * Exportar funciones auxiliares
+ */
+export { getRealIP, isIPWhitelisted };
+
 export default {
   ipWhitelistMiddleware,
   rateLimitWithWhitelist,
