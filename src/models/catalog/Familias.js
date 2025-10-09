@@ -103,6 +103,79 @@ const Familias = sequelize.define('Familias', {
     type: DataTypes.STRING(50),
     allowNull: true,
     comment: 'Número de contrato con EPM (Empresas Públicas)'
+  },
+  id_tipo_vivienda: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    references: {
+      model: 'tipos_vivienda',
+      key: 'id_tipo_vivienda'
+    }
+  },
+  fecha_encuesta: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+    comment: 'Fecha en que se realizó la encuesta/registro'
+  },
+  id_parroquia: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    references: {
+      model: 'parroquia',
+      key: 'id_parroquia'
+    }
+  },
+  
+  // CAMPOS BOOLEANOS DE SERVICIOS DE AGUA
+  pozo_septico: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+    comment: 'Indica si la familia tiene pozo séptico'
+  },
+  letrina: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+    comment: 'Indica si la familia tiene letrina'
+  },
+  campo_abierto: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+    comment: 'Indica si la familia usa campo abierto para aguas residuales'
+  },
+  
+  // CAMPOS BOOLEANOS DE DISPOSICIÓN DE BASURAS
+  disposicion_recolector: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+    comment: 'Usa servicio de recolección de basuras'
+  },
+  disposicion_quemada: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+    comment: 'Quema las basuras'
+  },
+  disposicion_enterrada: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+    comment: 'Entierra las basuras'
+  },
+  disposicion_recicla: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+    comment: 'Recicla las basuras'
+  },
+  disposicion_aire_libre: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+    comment: 'Deja las basuras al aire libre'
   }
 }, {
   tableName: 'familias',
