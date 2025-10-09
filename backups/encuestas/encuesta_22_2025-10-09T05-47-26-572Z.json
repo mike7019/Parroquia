@@ -1,0 +1,152 @@
+{
+  "metadata": {
+    "backup_date": "2025-10-09T05:47:26.571Z",
+    "encuesta_id": 22,
+    "user_id": "acdb6fc5-ac64-4936-b756-0498873986c1",
+    "operation": "DELETE",
+    "backup_version": "1.0"
+  },
+  "familia": {
+    "id_familia": "22",
+    "apellido_familiar": "Rodríguez García",
+    "sector": "Centro",
+    "direccion_familia": "Carrera 45 # 23-67",
+    "numero_contacto": null,
+    "telefono": "3001234567",
+    "email": null,
+    "tamaño_familia": 2,
+    "tipo_vivienda": "1",
+    "estado_encuesta": "completed",
+    "numero_encuestas": 1,
+    "fecha_ultima_encuesta": "2025-10-07",
+    "codigo_familia": "FAM_1759875912875_52712cbe",
+    "tutor_responsable": null,
+    "id_municipio": "1",
+    "id_vereda": "1",
+    "id_sector": "1",
+    "comunionEnCasa": false,
+    "numero_contrato_epm": null,
+    "id_parroquia": "1",
+    "comunionencasa": false,
+    "fecha_encuesta": "2025-10-07",
+    "sustento_familia": null,
+    "observaciones_encuestador": null,
+    "autorizacion_datos": false,
+    "pozo_septico": false,
+    "letrina": false,
+    "campo_abierto": false,
+    "disposicion_recolector": false,
+    "disposicion_quemada": false,
+    "disposicion_enterrada": false,
+    "disposicion_recicla": false,
+    "disposicion_aire_libre": false,
+    "disposicion_no_aplica": false,
+    "id_tipo_vivienda": "1",
+    "nombre_municipio": "Abejorral",
+    "nombre_vereda": "Vereda Central Abejorral",
+    "nombre_sector": "Sector Centro",
+    "nombre_parroquia": "Parroquia San José",
+    "nombre_tipo_vivienda": "Casa"
+  },
+  "personas": [
+    {
+      "id_personas": "44",
+      "primer_nombre": "Carlos",
+      "segundo_nombre": "Andrés",
+      "primer_apellido": "Rodríguez",
+      "segundo_apellido": "García",
+      "id_tipo_identificacion_tipo_identificacion": "1",
+      "identificacion": "12345678",
+      "telefono": "32066666666",
+      "correo_electronico": "carlos.1759875912923.0@temp.com",
+      "fecha_nacimiento": "1985-03-14",
+      "direccion": "Carrera 45 # 23-67",
+      "id_familia_familias": "22",
+      "id_estado_civil_estado_civil": "1",
+      "estudios": "Universitario",
+      "en_que_eres_lider": "Líder comunitario del sector, coordinador de actividades deportivas",
+      "necesidad_enfermo": null,
+      "id_profesion": null,
+      "id_sexo": "1",
+      "talla_camisa": "L",
+      "talla_pantalon": "32",
+      "talla_zapato": "42",
+      "id_familia": null,
+      "id_parroquia": "1",
+      "id_parentesco": "23",
+      "id_comunidad_cultural": "2",
+      "id_nivel_educativo": null,
+      "motivo_celebrar": null,
+      "dia_celebrar": null,
+      "mes_celebrar": null,
+      "sexo_nombre": "Sexo masculino",
+      "tipo_identificacion_nombre": "Cédula de Ciudadanía",
+      "estado_civil_nombre": "Soltero(a)"
+    }
+  ],
+  "difuntos": [
+    {
+      "id_difunto": "10",
+      "nombre_completo": "Pedro Antonio Rodríguez",
+      "fecha_fallecimiento": "2020-05-15",
+      "observaciones": "Enfermedad cardiovascular",
+      "id_familia_familias": "22",
+      "createdAt": "2025-10-07T22:25:12.938Z",
+      "updatedAt": "2025-10-07T22:25:12.939Z",
+      "id_sexo": "1",
+      "id_parentesco": "2",
+      "causa_fallecimiento": "Enfermedad cardiovascular",
+      "sexo_nombre": "Sexo masculino",
+      "parentesco_nombre": "Padre"
+    }
+  ],
+  "servicios": {
+    "disposicion_basuras": [
+      {
+        "id": "120",
+        "id_familia": "22",
+        "id_tipo_disposicion_basura": "1",
+        "created_at": "2025-10-07T22:25:12.898Z",
+        "updated_at": "2025-10-07T22:25:12.898Z",
+        "nombre": "Recolección Pública"
+      },
+      {
+        "id": "121",
+        "id_familia": "22",
+        "id_tipo_disposicion_basura": "4",
+        "created_at": "2025-10-07T22:25:12.898Z",
+        "updated_at": "2025-10-07T22:25:12.898Z",
+        "nombre": "Reciclaje"
+      }
+    ],
+    "sistema_acueducto": [
+      {
+        "id_familia": "22",
+        "id_sistema_acueducto": "1",
+        "id": "129",
+        "created_at": "2025-10-07T22:25:12.898Z",
+        "updated_at": "2025-10-07T22:25:12.898Z",
+        "nombre": "Acueducto Público"
+      }
+    ],
+    "aguas_residuales": [
+      {
+        "id": "66",
+        "id_familia": "22",
+        "id_tipo_aguas_residuales": "1",
+        "created_at": "2025-10-07T22:25:12.898Z",
+        "updated_at": "2025-10-07T22:25:12.898Z",
+        "nombre": "Alcantarillado"
+      }
+    ],
+    "tipo_vivienda": [
+      {
+        "id_familia": "22",
+        "id_tipo_vivienda": "1",
+        "created_at": "2025-10-07T22:25:12.898Z",
+        "updated_at": "2025-10-07T22:25:12.898Z",
+        "nombre": "Casa"
+      }
+    ]
+  }
+}

@@ -105,6 +105,43 @@ const Persona = sequelize.define('Persona', {
     type: DataTypes.STRING(10),
     allowNull: true
   },
+  // Campos adicionales para encuesta
+  id_parentesco: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    references: {
+      model: 'parentescos',
+      key: 'id_parentesco'
+    }
+  },
+  id_comunidad_cultural: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    references: {
+      model: 'comunidades_culturales',
+      key: 'id_comunidad_cultural'
+    }
+  },
+  motivo_celebrar: {
+    type: DataTypes.STRING(100),
+    allowNull: true
+  },
+  dia_celebrar: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    validate: {
+      min: 1,
+      max: 31
+    }
+  },
+  mes_celebrar: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    validate: {
+      min: 1,
+      max: 12
+    }
+  },
   id_familia: {
     type: DataTypes.BIGINT,
     allowNull: true

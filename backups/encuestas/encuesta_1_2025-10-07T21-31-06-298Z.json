@@ -1,0 +1,152 @@
+{
+  "metadata": {
+    "backup_date": "2025-10-07T21:31:06.297Z",
+    "encuesta_id": 1,
+    "user_id": "acdb6fc5-ac64-4936-b756-0498873986c1",
+    "operation": "DELETE",
+    "backup_version": "1.0"
+  },
+  "familia": {
+    "id_familia": "1",
+    "apellido_familiar": "Test García",
+    "sector": "Centro",
+    "direccion_familia": "Carrera 45 # 23-67",
+    "numero_contacto": null,
+    "telefono": "3001234567",
+    "email": null,
+    "tamaño_familia": 2,
+    "tipo_vivienda": "1",
+    "estado_encuesta": "completed",
+    "numero_encuestas": 1,
+    "fecha_ultima_encuesta": "2025-09-18",
+    "codigo_familia": "FAM_1758173307299_b30105ef",
+    "tutor_responsable": null,
+    "id_municipio": "1",
+    "id_vereda": "1",
+    "id_sector": "1",
+    "comunionEnCasa": false,
+    "numero_contrato_epm": null,
+    "id_parroquia": "1",
+    "comunionencasa": false,
+    "fecha_encuesta": null,
+    "sustento_familia": null,
+    "observaciones_encuestador": null,
+    "autorizacion_datos": false,
+    "pozo_septico": false,
+    "letrina": false,
+    "campo_abierto": false,
+    "disposicion_recolector": false,
+    "disposicion_quemada": false,
+    "disposicion_enterrada": false,
+    "disposicion_recicla": false,
+    "disposicion_aire_libre": false,
+    "disposicion_no_aplica": false,
+    "id_tipo_vivienda": null,
+    "nombre_municipio": "Abejorral",
+    "nombre_vereda": "Vereda Central Abejorral",
+    "nombre_sector": "Sector Centro",
+    "nombre_parroquia": "Parroquia San José",
+    "nombre_tipo_vivienda": null
+  },
+  "personas": [
+    {
+      "id_personas": "1",
+      "primer_nombre": "Carlos",
+      "segundo_nombre": "Test",
+      "primer_apellido": "García",
+      "segundo_apellido": null,
+      "id_tipo_identificacion_tipo_identificacion": "1",
+      "identificacion": "12345678",
+      "telefono": "3206666666",
+      "correo_electronico": "carlos.1758173307335.0@temp.com",
+      "fecha_nacimiento": "1985-03-14",
+      "direccion": "Carrera 45 # 23-67",
+      "id_familia_familias": "1",
+      "id_estado_civil_estado_civil": "2",
+      "estudios": "Universitario",
+      "en_que_eres_lider": "Líder comunal",
+      "necesidad_enfermo": "Diabetes",
+      "id_profesion": "1",
+      "id_sexo": "1",
+      "talla_camisa": "L",
+      "talla_pantalon": "32",
+      "talla_zapato": "42",
+      "id_familia": "1",
+      "id_parroquia": "1",
+      "id_parentesco": null,
+      "id_comunidad_cultural": "1",
+      "id_nivel_educativo": null,
+      "motivo_celebrar": "Cumpleaños",
+      "dia_celebrar": 15,
+      "mes_celebrar": 6,
+      "sexo_nombre": "Sexo masculino",
+      "tipo_identificacion_nombre": "Cédula de Ciudadanía",
+      "estado_civil_nombre": "En Proceso(a)"
+    }
+  ],
+  "difuntos": [
+    {
+      "id_difunto": "1",
+      "nombre_completo": "Pedro Test García",
+      "fecha_fallecimiento": "2020-05-15",
+      "observaciones": "Enfermedad cardiovascular",
+      "id_familia_familias": "1",
+      "createdAt": "2025-09-18T05:28:27.341Z",
+      "updatedAt": "2025-09-18T05:28:27.341Z",
+      "id_sexo": "1",
+      "id_parentesco": "2",
+      "causa_fallecimiento": "Enfermedad cardiovascular",
+      "sexo_nombre": "Sexo masculino",
+      "parentesco_nombre": "Padre"
+    }
+  ],
+  "servicios": {
+    "disposicion_basuras": [
+      {
+        "id": "78",
+        "id_familia": "1",
+        "id_tipo_disposicion_basura": "1",
+        "created_at": "2025-09-18T05:28:27.169Z",
+        "updated_at": "2025-09-18T05:28:27.169Z",
+        "nombre": "Recolección Pública"
+      },
+      {
+        "id": "79",
+        "id_familia": "1",
+        "id_tipo_disposicion_basura": "4",
+        "created_at": "2025-09-18T05:28:27.169Z",
+        "updated_at": "2025-09-18T05:28:27.169Z",
+        "nombre": "Reciclaje"
+      }
+    ],
+    "sistema_acueducto": [
+      {
+        "id_familia": "1",
+        "id_sistema_acueducto": "1",
+        "id": "108",
+        "created_at": "2025-09-18T05:28:27.169Z",
+        "updated_at": "2025-09-18T05:28:27.169Z",
+        "nombre": "Acueducto Público"
+      }
+    ],
+    "aguas_residuales": [
+      {
+        "id": "45",
+        "id_familia": "1",
+        "id_tipo_aguas_residuales": "1",
+        "created_at": "2025-09-18T05:28:27.169Z",
+        "updated_at": "2025-09-18T05:28:27.169Z",
+        "nombre": "Alcantarillado"
+      }
+    ],
+    "tipo_vivienda": [
+      {
+        "id_familia": "1",
+        "id_tipo_vivienda": "1",
+        "created_at": "2025-09-18T05:28:27.169Z",
+        "updated_at": "2025-09-18T05:28:27.169Z",
+        "nombre": "Casa"
+      }
+    ]
+  }
+}

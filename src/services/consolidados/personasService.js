@@ -66,7 +66,7 @@ class PersonasService {
       }
 
       if (id_parroquia) {
-        whereConditions.push('p.id_parroquia = :id_parroquia');
+        whereConditions.push('f.id_parroquia = :id_parroquia');
         params.id_parroquia = id_parroquia;
       }
 
@@ -184,10 +184,6 @@ class PersonasService {
             ' ', p.primer_apellido,
             CASE WHEN p.segundo_apellido IS NOT NULL THEN ' ' || p.segundo_apellido ELSE '' END
           ) as nombre_completo,
-          p.primer_nombre,
-          p.segundo_nombre,
-          p.primer_apellido,
-          p.segundo_apellido,
           p.identificacion as documento,
           ti.nombre as tipo_identificacion,
           EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
@@ -222,9 +218,8 @@ class PersonasService {
           f.disposicion_aire_libre as basura_aire_libre,
           
           -- Datos personales
-          ec.descripcion as estado_civil,
+          ec.nombre as estado_civil,
           prof.nombre as profesion,
-          ne.nivel as nivel_estudios,
           p.estudios,
           cc.nombre as comunidad_cultural,
           p.en_que_eres_lider as liderazgo,
@@ -243,16 +238,15 @@ class PersonasService {
           p.mes_celebrar
           
         FROM personas p
-        LEFT JOIN familias f ON p.id_familia = f.id_familia
+        LEFT JOIN familias f ON p.id_familia_familias = f.id_familia
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
         LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
-        LEFT JOIN parroquia pr ON p.id_parroquia = pr.id_parroquia
+        LEFT JOIN parroquia pr ON f.id_parroquia = pr.id_parroquia
         LEFT JOIN parentescos par ON p.id_parentesco = par.id_parentesco
-        LEFT JOIN estados_civiles ec ON p.id_estado_civil_estado_civil = ec.id_estado
+        LEFT JOIN situaciones_civiles ec ON p.id_estado_civil_estado_civil = ec.id_situacion_civil
         LEFT JOIN profesiones prof ON p.id_profesion = prof.id_profesion
-        LEFT JOIN niveles_educativos ne ON p.id_nivel_educativo = ne.id_niveles_educativos
         LEFT JOIN comunidades_culturales cc ON p.id_comunidad_cultural = cc.id_comunidad_cultural
         LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
         LEFT JOIN tipos_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
@@ -265,16 +259,15 @@ class PersonasService {
       const countQuery = `
         SELECT COUNT(p.id_personas) as total
         FROM personas p
-        LEFT JOIN familias f ON p.id_familia = f.id_familia
+        LEFT JOIN familias f ON p.id_familia_familias = f.id_familia
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
         LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
-        LEFT JOIN parroquia pr ON p.id_parroquia = pr.id_parroquia
+        LEFT JOIN parroquia pr ON f.id_parroquia = pr.id_parroquia
         LEFT JOIN parentescos par ON p.id_parentesco = par.id_parentesco
-        LEFT JOIN estados_civiles ec ON p.id_estado_civil_estado_civil = ec.id_estado
+        LEFT JOIN situaciones_civiles ec ON p.id_estado_civil_estado_civil = ec.id_situacion_civil
         LEFT JOIN profesiones prof ON p.id_profesion = prof.id_profesion
-        LEFT JOIN niveles_educativos ne ON p.id_nivel_educativo = ne.id_niveles_educativos
         LEFT JOIN comunidades_culturales cc ON p.id_comunidad_cultural = cc.id_comunidad_cultural
         LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
         ${whereClause}
@@ -344,10 +337,6 @@ class PersonasService {
         { header: 'Documento', key: 'documento', width: 15 },
         { header: 'Tipo ID', key: 'tipo_identificacion', width: 15 },
         { header: 'Nombre Completo', key: 'nombre_completo', width: 35 },
-        { header: 'Primer Nombre', key: 'primer_nombre', width: 20 },
-        { header: 'Segundo Nombre', key: 'segundo_nombre', width: 20 },
-        { header: 'Primer Apellido', key: 'primer_apellido', width: 20 },
-        { header: 'Segundo Apellido', key: 'segundo_apellido', width: 20 },
         { header: 'Edad', key: 'edad', width: 8 },
         { header: 'Fecha Nacimiento', key: 'fecha_nacimiento', width: 15 },
         { header: 'Sexo', key: 'sexo', width: 12 },
@@ -365,7 +354,6 @@ class PersonasService {
         { header: 'Tipo Vivienda', key: 'tipo_vivienda', width: 20 },
         { header: 'Estado Civil', key: 'estado_civil', width: 15 },
         { header: 'Profesión', key: 'profesion', width: 25 },
-        { header: 'Nivel Estudios', key: 'nivel_estudios', width: 20 },
         { header: 'Estudios', key: 'estudios', width: 25 },
         { header: 'Comunidad Cultural', key: 'comunidad_cultural', width: 25 },
         { header: 'Liderazgo', key: 'liderazgo', width: 30 },
