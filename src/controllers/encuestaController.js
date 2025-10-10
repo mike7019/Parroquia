@@ -627,10 +627,17 @@ export const obtenerEncuestas = async (req, res) => {
             p.direccion,
             p.estudios,
             p.en_que_eres_lider,
+            p.necesidad_enfermo,
             p.talla_camisa,
             p.talla_pantalon,
             p.talla_zapato,
             p.id_sexo,
+            p.id_profesion,
+            p.id_parentesco,
+            p.id_comunidad_cultural,
+            p.motivo_celebrar,
+            p.dia_celebrar,
+            p.mes_celebrar,
             p.id_tipo_identificacion_tipo_identificacion,
             p.id_estado_civil_estado_civil,
             s.id_sexo as sexo_id,
@@ -639,11 +646,20 @@ export const obtenerEncuestas = async (req, res) => {
             ti.nombre as tipo_id_nombre,
             ti.codigo as tipo_id_codigo,
             sc.id_situacion_civil as estado_civil_id,
-            sc.nombre as estado_civil_nombre
+            sc.nombre as estado_civil_nombre,
+            prof.id_profesion as profesion_id,
+            prof.nombre as profesion_nombre,
+            par.id_parentesco as parentesco_id,
+            par.nombre as parentesco_nombre,
+            cc.id_comunidad_cultural as comunidad_cultural_id,
+            cc.nombre as comunidad_cultural_nombre
           FROM personas p
           LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
           LEFT JOIN tipos_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
           LEFT JOIN situaciones_civiles sc ON p.id_estado_civil_estado_civil = sc.id_situacion_civil
+          LEFT JOIN profesiones prof ON p.id_profesion = prof.id_profesion
+          LEFT JOIN parentescos par ON p.id_parentesco = par.id_parentesco
+          LEFT JOIN comunidades_culturales cc ON p.id_comunidad_cultural = cc.id_comunidad_cultural
           WHERE p.id_familia_familias = :familiaId 
           AND (p.identificacion NOT LIKE 'FALLECIDO%' OR p.identificacion IS NULL)
         `, {
@@ -1013,7 +1029,24 @@ export const obtenerEncuestas = async (req, res) => {
               categoria: h.categoria,
               nivel: h.nivel
             })),
-            en_que_eres_lider: persona.en_que_eres_lider || null
+            en_que_eres_lider: persona.en_que_eres_lider || null,
+            // ⭐ CAMPOS AGREGADOS - profesion, parentesco, comunidad cultural, celebraciones, necesidades ⭐
+            profesion: persona.id_profesion ? {
+              id: persona.id_profesion,
+              nombre: persona.profesion_nombre || null
+            } : null,
+            parentesco: persona.id_parentesco ? {
+              id: persona.id_parentesco,
+              nombre: persona.parentesco_nombre || null
+            } : null,
+            comunidad_cultural: persona.id_comunidad_cultural ? {
+              id: persona.id_comunidad_cultural,
+              nombre: persona.comunidad_cultural_nombre || null
+            } : null,
+            motivo_celebrar: persona.motivo_celebrar || null,
+            dia_celebrar: persona.dia_celebrar || null,
+            mes_celebrar: persona.mes_celebrar || null,
+            necesidad_enfermo: persona.necesidad_enfermo || null
           };
         }));
 
@@ -1199,35 +1232,51 @@ export const obtenerEncuestaPorId = async (req, res) => {
     // Obtener personas VIVAS de la familia (excluir fallecidos)
     const personas = await sequelize.query(`
       SELECT 
-        p.id_personas,
-        p.primer_nombre,
-        p.segundo_nombre,
-        p.primer_apellido,
-        p.segundo_apellido,
-        p.identificacion,
-        p.telefono,
-        p.correo_electronico,
-        p.fecha_nacimiento,
-        p.direccion,
-        p.estudios,
-        p.talla_camisa,
-        p.talla_pantalon,
-        p.talla_zapato,
-        p.id_sexo,
-        p.id_tipo_identificacion_tipo_identificacion,
-        p.id_estado_civil_estado_civil,
-        p.en_que_eres_lider,
-        s.id_sexo as sexo_id,
-        s.descripcion as sexo_descripcion,
-        ti.id_tipo_identificacion as tipo_id_id,
-        ti.nombre as tipo_id_nombre,
-        ti.codigo as tipo_id_codigo,
-        sc.id_situacion_civil as estado_civil_id,
-        sc.nombre as estado_civil_nombre
+      p.id_personas,
+      p.primer_nombre,
+      p.segundo_nombre,
+      p.primer_apellido,
+      p.segundo_apellido,
+      p.identificacion,
+      p.telefono,
+      p.correo_electronico,
+      p.fecha_nacimiento,
+      p.direccion,
+      p.estudios,
+      p.en_que_eres_lider,
+      p.necesidad_enfermo,
+      p.talla_camisa,
+      p.talla_pantalon,
+      p.talla_zapato,
+      p.id_sexo,
+      p.id_profesion,
+      p.id_parentesco,
+      p.id_comunidad_cultural,
+      p.motivo_celebrar,
+      p.dia_celebrar,
+      p.mes_celebrar,
+      p.id_tipo_identificacion_tipo_identificacion,
+      p.id_estado_civil_estado_civil,
+      s.id_sexo as sexo_id,
+      s.descripcion as sexo_descripcion,
+      ti.id_tipo_identificacion as tipo_id_id,
+      ti.nombre as tipo_id_nombre,
+      ti.codigo as tipo_id_codigo,
+      sc.id_situacion_civil as estado_civil_id,
+      sc.nombre as estado_civil_nombre,
+      prof.id_profesion as profesion_id,
+      prof.nombre as profesion_nombre,
+      par.id_parentesco as parentesco_id,
+      par.nombre as parentesco_nombre,
+      cc.id_comunidad_cultural as comunidad_cultural_id,
+      cc.nombre as comunidad_cultural_nombre
       FROM personas p
       LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
       LEFT JOIN tipos_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
       LEFT JOIN situaciones_civiles sc ON p.id_estado_civil_estado_civil = sc.id_situacion_civil
+      LEFT JOIN profesiones prof ON p.id_profesion = prof.id_profesion
+      LEFT JOIN parentescos par ON p.id_parentesco = par.id_parentesco
+      LEFT JOIN comunidades_culturales cc ON p.id_comunidad_cultural = cc.id_comunidad_cultural
       WHERE p.id_familia_familias = :familiaId 
       AND (p.identificacion NOT LIKE 'FALLECIDO%' OR p.identificacion IS NULL)
     `, {
@@ -1597,7 +1646,24 @@ export const obtenerEncuestaPorId = async (req, res) => {
           categoria: h.categoria,
           nivel: h.nivel
         })),
-        en_que_eres_lider: persona.en_que_eres_lider || null
+        en_que_eres_lider: persona.en_que_eres_lider || null,
+        // ⭐ CAMPOS AGREGADOS - profesion, parentesco, comunidad cultural, celebraciones, necesidades ⭐
+        profesion: persona.id_profesion ? {
+          id: persona.id_profesion,
+          nombre: persona.profesion_nombre || null
+        } : null,
+        parentesco: persona.id_parentesco ? {
+          id: persona.id_parentesco,
+          nombre: persona.parentesco_nombre || null
+        } : null,
+        comunidad_cultural: persona.id_comunidad_cultural ? {
+          id: persona.id_comunidad_cultural,
+          nombre: persona.comunidad_cultural_nombre || null
+        } : null,
+        motivo_celebrar: persona.motivo_celebrar || null,
+        dia_celebrar: persona.dia_celebrar || null,
+        mes_celebrar: persona.mes_celebrar || null,
+        necesidad_enfermo: persona.necesidad_enfermo || null
       };
     }));
 
