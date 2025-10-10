@@ -583,6 +583,7 @@ export const obtenerEncuestas = async (req, res) => {
         f.fecha_ultima_encuesta,
         f.codigo_familia,
         f.tutor_responsable,
+        f.numero_contrato_epm,
         f.id_municipio,
         f.id_vereda,
         f.id_sector,
@@ -641,7 +642,7 @@ export const obtenerEncuestas = async (req, res) => {
             p.id_tipo_identificacion_tipo_identificacion,
             p.id_estado_civil_estado_civil,
             s.id_sexo as sexo_id,
-            s.descripcion as sexo_descripcion,
+            s.nombre as sexo_nombre,
             ti.id_tipo_identificacion as tipo_id_id,
             ti.nombre as tipo_id_nombre,
             ti.codigo as tipo_id_codigo,
@@ -678,7 +679,7 @@ export const obtenerEncuestas = async (req, res) => {
             '' as segundo_apellido,
             df.id_sexo,
             df.id_parentesco,
-            s.descripcion as sexo_descripcion,
+            s.nombre as sexo_nombre,
             par.nombre as parentesco_nombre,
             df.fecha_fallecimiento,
             df.causa_fallecimiento,
@@ -1006,7 +1007,7 @@ export const obtenerEncuestas = async (req, res) => {
               Math.floor((new Date() - new Date(persona.fecha_nacimiento)) / (365.25 * 24 * 60 * 60 * 1000)) : null,
             sexo: persona.sexo_id ? {
               id: persona.sexo_id,
-              descripcion: persona.sexo_descripcion
+              nombre: persona.sexo_nombre
             } : null,
             estado_civil: persona.estado_civil_id ? {
               id: persona.estado_civil_id,
@@ -1058,7 +1059,7 @@ export const obtenerEncuestas = async (req, res) => {
             fechaFallecimiento: fallecido.fecha_fallecimiento || null,
             sexo: fallecido.id_sexo ? {
               id: parseInt(fallecido.id_sexo),
-              nombre: fallecido.sexo_descripcion || null
+              nombre: fallecido.sexo_nombre || null
             } : {
               id: null,
               nombre: null
@@ -1119,6 +1120,9 @@ export const obtenerEncuestas = async (req, res) => {
           
           // *** INFORMACIÓN RELIGIOSA ***
           comunion_en_casa: familiaData.comunionEnCasa,
+          
+          // *** INFORMACIÓN DE SERVICIOS PÚBLICOS ***
+          numero_contrato_epm: familiaData.numero_contrato_epm || null,
           
           // Información de personas/miembros de familia - SEPARADOS CORRECTAMENTE
           miembros_familia: {
@@ -1193,6 +1197,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
         f.fecha_ultima_encuesta,
         f.codigo_familia,
         f.tutor_responsable,
+        f.numero_contrato_epm,
         f.id_municipio,
         f.id_vereda,
         f.id_sector,
@@ -1258,7 +1263,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
       p.id_tipo_identificacion_tipo_identificacion,
       p.id_estado_civil_estado_civil,
       s.id_sexo as sexo_id,
-      s.descripcion as sexo_descripcion,
+      s.nombre as sexo_nombre,
       ti.id_tipo_identificacion as tipo_id_id,
       ti.nombre as tipo_id_nombre,
       ti.codigo as tipo_id_codigo,
@@ -1295,7 +1300,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
         '' as segundo_apellido,
         df.id_sexo,
         df.id_parentesco,
-        s.descripcion as sexo_descripcion,
+        s.nombre as sexo_nombre,
         par.nombre as parentesco_nombre,
         df.fecha_fallecimiento,
         df.causa_fallecimiento,
@@ -1623,7 +1628,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
           Math.floor((new Date() - new Date(persona.fecha_nacimiento)) / (365.25 * 24 * 60 * 60 * 1000)) : null,
         sexo: persona.sexo_id ? {
           id: persona.sexo_id,
-          descripcion: persona.sexo_descripcion
+          nombre: persona.sexo_nombre
         } : null,
         estado_civil: persona.estado_civil_id ? {
           id: persona.estado_civil_id,
@@ -1675,7 +1680,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
         fechaFallecimiento: fallecido.fecha_fallecimiento || null,
         sexo: fallecido.id_sexo ? {
           id: parseInt(fallecido.id_sexo),
-          nombre: fallecido.sexo_descripcion || null
+          nombre: fallecido.sexo_nombre || null
         } : {
           id: null,
           nombre: null
@@ -1736,6 +1741,9 @@ export const obtenerEncuestaPorId = async (req, res) => {
       
       // *** INFORMACIÓN RELIGIOSA ***
       comunion_en_casa: familiaData.comunionEnCasa,
+      
+      // *** INFORMACIÓN DE SERVICIOS PÚBLICOS ***
+      numero_contrato_epm: familiaData.numero_contrato_epm || null,
       
       // Información de personas/miembros de familia - SEPARADOS CORRECTAMENTE
       miembros_familia: {
