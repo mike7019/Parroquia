@@ -13,6 +13,7 @@ import TipoVivienda from './TipoVivienda.js';
 import ComunidadCultural from './ComunidadCultural.js';
 import DifuntosFamilia from './DifuntosFamilia.js';
 import Persona from './Persona.js';
+import Habilidad from './Habilidad.js';
 
 // ⚠️  ASOCIACIONES COMENTADAS TEMPORALMENTE PARA EVITAR CONFLICTOS
 // Las asociaciones se configurarán en un archivo separado o en el momento de uso
@@ -68,19 +69,20 @@ try {
 */
 
 export {
-    TipoIdentificacion,
-    Parroquia,
-    Sexo,
-    Sector,
-    Veredas,
-    Municipios,
-    Departamentos,
-    Familias,
-    TipoDisposicionBasura,
-    FamiliaDisposicionBasura,
-    TipoAguasResiduales,
-    TipoVivienda,
-    ComunidadCultural,
-    DifuntosFamilia,
-    Persona
+  TipoIdentificacion,
+  Parroquia,
+  Sexo,
+  Sector,
+  Veredas,
+  Municipios,
+  Departamentos,
+  Familias,
+  TipoDisposicionBasura,
+  FamiliaDisposicionBasura,
+  TipoAguasResiduales,
+  TipoVivienda,
+  ComunidadCultural,
+  DifuntosFamilia,
+  Persona,
+  Habilidad
 };
