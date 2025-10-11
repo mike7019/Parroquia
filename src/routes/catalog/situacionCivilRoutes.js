@@ -235,7 +235,7 @@ router.get('/', AuthMiddleware.authenticateToken, SituacionCivilController.getAl
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.post('/', AuthMiddleware.authenticateToken, SituacionCivilController.create);
+router.post('/', AuthMiddleware.authenticateToken, AuthMiddleware.requireRole(['Administrador']), SituacionCivilController.create);
 
 /**
  * @swagger
@@ -403,7 +403,7 @@ router.get('/:id', AuthMiddleware.authenticateToken, SituacionCivilController.ge
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.put('/:id', AuthMiddleware.authenticateToken, SituacionCivilController.update);
+router.put('/:id', AuthMiddleware.authenticateToken, AuthMiddleware.requireRole(['Administrador']), SituacionCivilController.update);
 
 /**
  * @swagger
@@ -447,7 +447,7 @@ router.put('/:id', AuthMiddleware.authenticateToken, SituacionCivilController.up
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.delete('/:id', AuthMiddleware.authenticateToken, SituacionCivilController.delete);
+router.delete('/:id', AuthMiddleware.authenticateToken, AuthMiddleware.requireRole(['Administrador']), SituacionCivilController.delete);
 
 /**
  * @swagger

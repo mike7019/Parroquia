@@ -233,7 +233,9 @@ router.get('/',
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.post('/', authMiddleware.authenticateToken, estudioController.createEstudio);
+router.post('/', authMiddleware.authenticateToken, 
+  authMiddleware.requireRole(['Administrador']),
+  estudioController.createEstudio);
 
 /**
  * @swagger
@@ -400,7 +402,9 @@ router.get('/:id', authMiddleware.authenticateToken, estudioController.getEstudi
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.put('/:id', authMiddleware.authenticateToken, estudioController.updateEstudio);
+router.put('/:id', authMiddleware.authenticateToken, 
+  authMiddleware.requireRole(['Administrador']),
+  estudioController.updateEstudio);
 
 /**
  * @swagger
@@ -444,7 +448,9 @@ router.put('/:id', authMiddleware.authenticateToken, estudioController.updateEst
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.delete('/:id', authMiddleware.authenticateToken, estudioController.deleteEstudio);
+router.delete('/:id', authMiddleware.authenticateToken, 
+  authMiddleware.requireRole(['Administrador']),
+  estudioController.deleteEstudio);
 
 /**
  * @swagger

@@ -224,7 +224,9 @@ router.get('/:id', authMiddleware.authenticateToken, habilidadController.getHabi
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/', authMiddleware.authenticateToken, habilidadController.createHabilidad);
+router.post('/', authMiddleware.authenticateToken, 
+  authMiddleware.requireRole(['Administrador']),
+  habilidadController.createHabilidad);
 
 /**
  * @swagger
@@ -278,7 +280,9 @@ router.post('/', authMiddleware.authenticateToken, habilidadController.createHab
  *       500:
  *         description: Error interno del servidor
  */
-router.put('/:id', authMiddleware.authenticateToken, habilidadController.updateHabilidad);
+router.put('/:id', authMiddleware.authenticateToken, 
+  authMiddleware.requireRole(['Administrador']),
+  habilidadController.updateHabilidad);
 
 /**
  * @swagger
@@ -307,6 +311,8 @@ router.put('/:id', authMiddleware.authenticateToken, habilidadController.updateH
  *       500:
  *         description: Error interno del servidor
  */
-router.delete('/:id', authMiddleware.authenticateToken, habilidadController.deleteHabilidad);
+router.delete('/:id', authMiddleware.authenticateToken, 
+  authMiddleware.requireRole(['Administrador']),
+  habilidadController.deleteHabilidad);
 
 export default router;

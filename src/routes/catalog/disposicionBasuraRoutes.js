@@ -294,6 +294,8 @@ router.get('/tipos/:id',
  */
 router.post('/tipos',
   authMiddleware.authenticateToken,
+  
+  authMiddleware.requireRole(['Administrador']),
   disposicionBasuraValidators.validateCreateTipo,
   validationMiddleware.handleValidationErrors,
   disposicionBasuraController.createTipo
@@ -365,6 +367,8 @@ router.post('/tipos',
  */
 router.put('/tipos/:id',
   authMiddleware.authenticateToken,
+  
+  authMiddleware.requireRole(['Administrador']),
   disposicionBasuraValidators.validateUpdateTipo,
   validationMiddleware.handleValidationErrors,
   disposicionBasuraController.updateTipo
@@ -428,6 +432,8 @@ router.put('/tipos/:id',
  */
 router.delete('/tipos/:id',
   authMiddleware.authenticateToken,
+  
+  authMiddleware.requireRole(['Administrador']),
   disposicionBasuraValidators.validateId,
   validationMiddleware.handleValidationErrors,
   disposicionBasuraController.deleteTipo
@@ -539,6 +545,8 @@ router.get('/estadisticas',
  */
 router.post('/asignar',
   authMiddleware.authenticateToken,
+  
+  authMiddleware.requireRole(['Administrador']),
   disposicionBasuraValidators.validateAsignacion,
   validationMiddleware.handleValidationErrors,
   disposicionBasuraController.asignarTipoAFamilia
@@ -603,6 +611,8 @@ router.post('/asignar',
  */
 router.delete('/familia/:idFamilia/tipo/:idTipo',
   authMiddleware.authenticateToken,
+  
+  authMiddleware.requireRole(['Administrador']),
   disposicionBasuraValidators.validateRemoveAsignacion,
   validationMiddleware.handleValidationErrors,
   disposicionBasuraController.removerTipoDeFamilia

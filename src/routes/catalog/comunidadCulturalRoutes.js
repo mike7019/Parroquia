@@ -1,7 +1,7 @@
 import express from 'express';
 import comunidadCulturalController from '../../controllers/catalog/comunidadCulturalController.js';
 import authMiddleware from '../../middlewares/auth.js';
-const { authenticateToken } = authMiddleware;
+const { authenticateToken, requireRole } = authMiddleware;
 
 const router = express.Router();
 
@@ -141,7 +141,7 @@ router.use(authenticateToken);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/', comunidadCulturalController.createComunidadCultural);
+router.post('/', requireRole(['Administrador']), comunidadCulturalController.createComunidadCultural);
 
 /**
  * @swagger
@@ -340,7 +340,7 @@ router.get('/:id', comunidadCulturalController.getComunidadCulturalById);
  *       500:
  *         description: Error del servidor
  */
-router.put('/:id', comunidadCulturalController.updateComunidadCultural);
+router.put('/:id', requireRole(['Administrador']), comunidadCulturalController.updateComunidadCultural);
 
 /**
  * @swagger
@@ -373,6 +373,6 @@ router.put('/:id', comunidadCulturalController.updateComunidadCultural);
  *       500:
  *         description: Error del servidor
  */
-router.delete('/:id', comunidadCulturalController.deleteComunidadCultural);
+router.delete('/:id', requireRole(['Administrador']), comunidadCulturalController.deleteComunidadCultural);
 
 export default router;

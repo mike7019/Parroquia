@@ -1,7 +1,7 @@
 import express from 'express';
 import aguasResidualesController from '../../controllers/catalog/aguasResidualesController.js';
 import authMiddleware from '../../middlewares/auth.js';
-const { authenticateToken } = authMiddleware;
+const { authenticateToken, requireRole } = authMiddleware;
 
 const router = express.Router();
 
@@ -97,7 +97,7 @@ router.use(authenticateToken);
  *             schema:
  *               $ref: '#/components/schemas/ApiResponse'
  */
-router.post('/', aguasResidualesController.createTipoAguasResiduales);
+router.post('/', requireRole(['Administrador']), aguasResidualesController.createTipoAguasResiduales);
 
 /**
  * @swagger
@@ -330,7 +330,7 @@ router.get('/:id', aguasResidualesController.getTipoAguasResidualesById);
  *             schema:
  *               $ref: '#/components/schemas/ApiResponse'
  */
-router.put('/:id', aguasResidualesController.updateTipoAguasResiduales);
+router.put('/:id', requireRole(['Administrador']), aguasResidualesController.updateTipoAguasResiduales);
 
 /**
  * @swagger
@@ -388,6 +388,6 @@ router.put('/:id', aguasResidualesController.updateTipoAguasResiduales);
  *             schema:
  *               $ref: '#/components/schemas/ApiResponse'
  */
-router.delete('/:id', aguasResidualesController.deleteTipoAguasResiduales);
+router.delete('/:id', requireRole(['Administrador']), aguasResidualesController.deleteTipoAguasResiduales);
 
 export default router;

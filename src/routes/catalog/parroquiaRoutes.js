@@ -1,7 +1,7 @@
 import express from 'express';
 import parroquiaController from '../../controllers/catalog/parroquiaController.js';
 import authMiddleware from '../../middlewares/auth.js';
-const { authenticateToken } = authMiddleware;
+const { authenticateToken, requireRole } = authMiddleware;
 
 const router = express.Router();
 
@@ -64,7 +64,7 @@ router.use(authenticateToken);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/', parroquiaController.createParroquia);
+router.post('/', requireRole(['Administrador']), parroquiaController.createParroquia);
 
 /**
  * @swagger
@@ -243,7 +243,7 @@ router.get('/:id', parroquiaController.getParroquiaById);
  *       500:
  *         description: Server error
  */
-router.put('/:id', parroquiaController.updateParroquia);
+router.put('/:id', requireRole(['Administrador']), parroquiaController.updateParroquia);
 
 /**
  * @swagger
@@ -270,7 +270,7 @@ router.put('/:id', parroquiaController.updateParroquia);
  *       500:
  *         description: Server error
  */
-router.delete('/:id', parroquiaController.deleteParroquia);
+router.delete('/:id', requireRole(['Administrador']), parroquiaController.deleteParroquia);
 
 /**
  * @swagger

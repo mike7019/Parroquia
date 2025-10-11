@@ -448,7 +448,9 @@ router.get('/:id', authMiddleware.authenticateToken, destrezaController.getDestr
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.post('/', authMiddleware.authenticateToken, destrezaController.createDestreza);
+router.post('/', authMiddleware.authenticateToken, 
+  authMiddleware.requireRole(['Administrador']),
+  destrezaController.createDestreza);
 
 /**
  * @swagger
@@ -507,7 +509,9 @@ router.post('/', authMiddleware.authenticateToken, destrezaController.createDest
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.post('/persona/:idPersona/asociar', authMiddleware.authenticateToken, destrezaController.asociarDestrezaPersona);
+router.post('/persona/:idPersona/asociar', authMiddleware.authenticateToken, 
+  authMiddleware.requireRole(['Administrador']),
+  destrezaController.asociarDestrezaPersona);
 
 /**
  * @swagger
@@ -556,7 +560,9 @@ router.post('/persona/:idPersona/asociar', authMiddleware.authenticateToken, des
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.put('/:id', authMiddleware.authenticateToken, destrezaController.updateDestreza);
+router.put('/:id', authMiddleware.authenticateToken, 
+  authMiddleware.requireRole(['Administrador']),
+  destrezaController.updateDestreza);
 
 /**
  * @swagger
@@ -615,7 +621,9 @@ router.put('/:id', authMiddleware.authenticateToken, destrezaController.updateDe
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.delete('/:id', authMiddleware.authenticateToken, destrezaController.deleteDestreza);
+router.delete('/:id', authMiddleware.authenticateToken, 
+  authMiddleware.requireRole(['Administrador']),
+  destrezaController.deleteDestreza);
 
 /**
  * @swagger
@@ -674,6 +682,8 @@ router.delete('/:id', authMiddleware.authenticateToken, destrezaController.delet
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.delete('/persona/:idPersona/desasociar', authMiddleware.authenticateToken, destrezaController.desasociarDestrezaPersona);
+router.delete('/persona/:idPersona/desasociar', authMiddleware.authenticateToken, 
+  authMiddleware.requireRole(['Administrador']),
+  destrezaController.desasociarDestrezaPersona);
 
 export default router;

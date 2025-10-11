@@ -1,7 +1,7 @@
 import express from 'express';
 import enfermedadController from '../../controllers/catalog/enfermedadController.js';
 import authMiddleware from '../../middlewares/auth.js';
-const { authenticateToken } = authMiddleware;
+const { authenticateToken, requireRole } = authMiddleware;
 
 const router = express.Router();
 
@@ -53,7 +53,7 @@ router.use(authenticateToken);
  *             schema:
  *               $ref: '#/components/schemas/ApiResponse'
  */
-router.post('/', enfermedadController.createEnfermedad);
+router.post('/', requireRole(['Administrador']), enfermedadController.createEnfermedad);
 
 /**
  * @swagger
@@ -214,7 +214,7 @@ router.get('/:id', enfermedadController.getEnfermedadById);
  *             schema:
  *               $ref: '#/components/schemas/ApiResponse'
  */
-router.put('/:id', enfermedadController.updateEnfermedad);
+router.put('/:id', requireRole(['Administrador']), enfermedadController.updateEnfermedad);
 
 /**
  * @swagger
@@ -272,7 +272,7 @@ router.put('/:id', enfermedadController.updateEnfermedad);
  *             schema:
  *               $ref: '#/components/schemas/ApiResponse'
  */
-router.delete('/:id', enfermedadController.deleteEnfermedad);
+router.delete('/:id', requireRole(['Administrador']), enfermedadController.deleteEnfermedad);
 
 /**
  * @swagger
@@ -380,7 +380,7 @@ router.get('/persona/:personaId', enfermedadController.getEnfermedadesByPersona)
  *             schema:
  *               $ref: '#/components/schemas/ApiResponse'
  */
-router.post('/:enfermedadId/persona/:personaId', enfermedadController.associateEnfermedadWithPersona);
+router.post('/:enfermedadId/persona/:personaId', requireRole(['Administrador']), enfermedadController.associateEnfermedadWithPersona);
 
 /**
  * @swagger
@@ -438,6 +438,6 @@ router.post('/:enfermedadId/persona/:personaId', enfermedadController.associateE
  *             schema:
  *               $ref: '#/components/schemas/ApiResponse'
  */
-router.delete('/:enfermedadId/persona/:personaId', enfermedadController.removeEnfermedadFromPersona);
+router.delete('/:enfermedadId/persona/:personaId', requireRole(['Administrador']), enfermedadController.removeEnfermedadFromPersona);
 
 export default router;

@@ -222,7 +222,7 @@ router.get('/:id', authMiddleware.authenticateToken, profesionController.getProf
  * /api/catalog/profesiones:
  *   post:
  *     summary: Crear nueva profesión
- *     description: Crea una nueva profesión en el sistema
+ *     description: Crea una nueva profesión en el sistema (solo Administrador)
  *     tags: [Profesiones]
  *     security:
  *       - bearerAuth: []
@@ -252,6 +252,8 @@ router.get('/:id', authMiddleware.authenticateToken, profesionController.getProf
  *               $ref: '#/components/schemas/ProfesionResponse'
  *       400:
  *         description: Datos de entrada inválidos
+ *       403:
+ *         description: Permisos insuficientes (solo Administrador)
  *       409:
  *         description: Ya existe una profesión con ese nombre
  *       401:
@@ -259,14 +261,18 @@ router.get('/:id', authMiddleware.authenticateToken, profesionController.getProf
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/', authMiddleware.authenticateToken, profesionController.createProfesion);
+router.post('/', 
+  authMiddleware.authenticateToken, 
+  authMiddleware.requireRole(['Administrador']),
+  profesionController.createProfesion
+);
 
 /**
  * @swagger
  * /api/catalog/profesiones/{id}:
  *   put:
  *     summary: Actualizar profesión
- *     description: Actualiza una profesión existente
+ *     description: Actualiza una profesión existente (solo Administrador)
  *     tags: [Profesiones]
  *     security:
  *       - bearerAuth: []
@@ -308,6 +314,8 @@ router.post('/', authMiddleware.authenticateToken, profesionController.createPro
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ProfesionResponse'
+ *       403:
+ *         description: Permisos insuficientes (solo Administrador)
  *       404:
  *         description: Profesión no encontrada
  *       409:
@@ -317,14 +325,18 @@ router.post('/', authMiddleware.authenticateToken, profesionController.createPro
  *       500:
  *         description: Error interno del servidor
  */
-router.put('/:id', authMiddleware.authenticateToken, profesionController.updateProfesion);
+router.put('/:id', 
+  authMiddleware.authenticateToken, 
+  authMiddleware.requireRole(['Administrador']),
+  profesionController.updateProfesion
+);
 
 /**
  * @swagger
  * /api/catalog/profesiones/{id}:
  *   delete:
  *     summary: Eliminar profesión
- *     description: Elimina una profesión (soft delete - marca como inactiva)
+ *     description: Elimina una profesión (soft delete - solo Administrador)
  *     tags: [Profesiones]
  *     security:
  *       - bearerAuth: []
@@ -359,6 +371,8 @@ router.put('/:id', authMiddleware.authenticateToken, profesionController.updateP
  *                 timestamp:
  *                   type: string
  *                   format: date-time
+ *       403:
+ *         description: Permisos insuficientes (solo Administrador)
  *       404:
  *         description: Profesión no encontrada
  *       401:
@@ -366,6 +380,10 @@ router.put('/:id', authMiddleware.authenticateToken, profesionController.updateP
  *       500:
  *         description: Error interno del servidor
  */
-router.delete('/:id', authMiddleware.authenticateToken, profesionController.deleteProfesion);
+router.delete('/:id', 
+  authMiddleware.authenticateToken, 
+  authMiddleware.requireRole(['Administrador']),
+  profesionController.deleteProfesion
+);
 
 export default router;

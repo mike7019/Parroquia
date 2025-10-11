@@ -1,7 +1,7 @@
 import express from 'express';
 import veredaController from '../../controllers/catalog/veredaController.js';
 import authMiddleware from '../../middlewares/auth.js';
-const { authenticateToken } = authMiddleware;
+const { authenticateToken, requireRole } = authMiddleware;
 
 const router = express.Router();
 
@@ -30,7 +30,7 @@ router.use(authenticateToken);
  *       500:
  *         description: Server error
  */
-router.post('/', veredaController.createVereda);
+router.post('/', requireRole(['Administrador']), veredaController.createVereda);
 
 /**
  * @swagger
@@ -221,7 +221,7 @@ router.get('/:id/details', veredaController.getVeredaDetails);
  *       500:
  *         description: Server error
  */
-router.put('/:id', veredaController.updateVereda);
+router.put('/:id', requireRole(['Administrador']), veredaController.updateVereda);
 
 /**
  * @swagger
@@ -248,6 +248,6 @@ router.put('/:id', veredaController.updateVereda);
  *       500:
  *         description: Server error
  */
-router.delete('/:id', veredaController.deleteVereda);
+router.delete('/:id', requireRole(['Administrador']), veredaController.deleteVereda);
 
 export default router;

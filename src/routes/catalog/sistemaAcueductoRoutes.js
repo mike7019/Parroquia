@@ -11,7 +11,7 @@ import {
   bulkCreateSistemasAcueducto
 } from '../../controllers/catalog/sistemaAcueductoController.js';
 import authMiddleware from '../../middlewares/auth.js';
-const { authenticateToken } = authMiddleware;
+const { authenticateToken, requireRole } = authMiddleware;
 
 const router = express.Router();
 

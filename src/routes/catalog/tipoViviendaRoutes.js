@@ -341,6 +341,8 @@ router.get('/:id',
  */
 router.post('/',
   authMiddleware.authenticateToken,
+  
+  authMiddleware.requireRole(['Administrador']),
   tipoViviendaValidators.validateCreateTipo,
   validationMiddleware.handleValidationErrors,
   tipoViviendaController.createTipo
@@ -413,6 +415,8 @@ router.post('/',
  */
 router.put('/:id',
   authMiddleware.authenticateToken,
+  
+  authMiddleware.requireRole(['Administrador']),
   tipoViviendaValidators.validateUpdateTipo,
   validationMiddleware.handleValidationErrors,
   tipoViviendaController.updateTipo
@@ -466,6 +470,8 @@ router.put('/:id',
  */
 router.delete('/:id',
   authMiddleware.authenticateToken,
+  
+  authMiddleware.requireRole(['Administrador']),
   tipoViviendaValidators.validateId,
   validationMiddleware.handleValidationErrors,
   tipoViviendaController.deleteTipo

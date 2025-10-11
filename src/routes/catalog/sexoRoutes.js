@@ -1,7 +1,7 @@
 import express from 'express';
 import sexoController from '../../controllers/catalog/sexoController.js';
 import authMiddleware from '../../middlewares/auth.js';
-const { authenticateToken } = authMiddleware;
+const { authenticateToken, requireRole } = authMiddleware;
 
 const router = express.Router();
 
@@ -203,7 +203,7 @@ router.use(authenticateToken);
  *             schema:
  *               $ref: '#/components/schemas/ApiResponse'
  */
-router.post('/', sexoController.createSexo);
+router.post('/', requireRole(['Administrador']), sexoController.createSexo);
 
 /**
  * @swagger
@@ -644,7 +644,7 @@ router.get('/:id', sexoController.getSexoById);
  *             schema:
  *               $ref: '#/components/schemas/ApiResponse'
  */
-router.put('/:id', sexoController.updateSexo);
+router.put('/:id', requireRole(['Administrador']), sexoController.updateSexo);
 
 /**
  * @swagger
@@ -732,6 +732,6 @@ router.put('/:id', sexoController.updateSexo);
  *             schema:
  *               $ref: '#/components/schemas/ApiResponse'
  */
-router.delete('/:id', sexoController.deleteSexo);
+router.delete('/:id', requireRole(['Administrador']), sexoController.deleteSexo);
 
 export default router;

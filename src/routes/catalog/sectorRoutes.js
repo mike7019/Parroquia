@@ -1,7 +1,7 @@
 import express from 'express';
 import sectorController from '../../controllers/catalog/sectorController.js';
 import authMiddleware from '../../middlewares/auth.js';
-const { authenticateToken } = authMiddleware;
+const { authenticateToken, requireRole } = authMiddleware;
 
 const router = express.Router();
 
@@ -96,7 +96,7 @@ router.use(authenticateToken);
  *       500:
  *         description: Server error
  */
-router.post('/', sectorController.createSector);
+router.post('/', requireRole(['Administrador']), sectorController.createSector);
 
 /**
  * @swagger
@@ -206,7 +206,7 @@ router.get('/:id', sectorController.getSectorById);
  *       500:
  *         description: Error del servidor
  */
-router.put('/:id', sectorController.updateSector);
+router.put('/:id', requireRole(['Administrador']), sectorController.updateSector);
 
 /**
  * @swagger
@@ -234,6 +234,6 @@ router.put('/:id', sectorController.updateSector);
  *       500:
  *         description: Error del servidor
  */
-router.delete('/:id', sectorController.deleteSector);
+router.delete('/:id', requireRole(['Administrador']), sectorController.deleteSector);
 
 export default router;

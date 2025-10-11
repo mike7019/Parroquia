@@ -78,7 +78,7 @@ router.get('/', parentescoController.getAllParentescos);
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/', parentescoController.createParentesco);
+router.post('/', authMiddleware.requireRole(['Administrador']), parentescoController.createParentesco);
 
 /**
  * @swagger
@@ -145,7 +145,7 @@ router.get('/:id', parentescoController.getParentescoById);
  *       500:
  *         description: Error interno del servidor
  */
-router.put('/:id', parentescoController.updateParentesco);
+router.put('/:id', authMiddleware.requireRole(['Administrador']), parentescoController.updateParentesco);
 
 /**
  * @swagger
@@ -172,6 +172,6 @@ router.put('/:id', parentescoController.updateParentesco);
  *       500:
  *         description: Error interno del servidor
  */
-router.delete('/:id', parentescoController.deleteParentesco);
+router.delete('/:id', authMiddleware.requireRole(['Administrador']), parentescoController.deleteParentesco);
 
 export default router;
