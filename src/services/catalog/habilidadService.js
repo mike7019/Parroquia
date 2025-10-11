@@ -264,7 +264,7 @@ class HabilidadService {
           COUNT(DISTINCT h.id_habilidad) FILTER (WHERE ph.id_persona IS NULL) as habilidades_sin_personas,
           COUNT(DISTINCT ph.id_persona) as total_personas_con_habilidades
         FROM habilidades h
-        LEFT JOIN personas_habilidades ph ON h.id_habilidad = ph.id_habilidad
+        LEFT JOIN persona_habilidad ph ON h.id_habilidad = ph.id_habilidad
       `, { type: QueryTypes.SELECT });
 
       // 2. Top 10 habilidades más comunes
@@ -273,13 +273,13 @@ class HabilidadService {
           h.nombre as habilidad,
           h.descripcion,
           COUNT(DISTINCT ph.id_persona) as total_personas,
-          ROUND(COUNT(DISTINCT ph.id_persona) * 100.0 / NULLIF((SELECT COUNT(DISTINCT id_persona) FROM personas_habilidades), 0), 2) as porcentaje_sobre_total,
+          ROUND(COUNT(DISTINCT ph.id_persona) * 100.0 / NULLIF((SELECT COUNT(DISTINCT id_persona) FROM persona_habilidad), 0), 2) as porcentaje_sobre_total,
           COUNT(DISTINCT p.id_familia) as familias,
-          COUNT(CASE WHEN ph.nivel = 'básico' THEN 1 END) as nivel_basico,
-          COUNT(CASE WHEN ph.nivel = 'intermedio' THEN 1 END) as nivel_intermedio,
-          COUNT(CASE WHEN ph.nivel = 'avanzado' THEN 1 END) as nivel_avanzado
+          COUNT(CASE WHEN ph.nivel = 'Básico' THEN 1 END) as nivel_basico,
+          COUNT(CASE WHEN ph.nivel = 'Intermedio' THEN 1 END) as nivel_intermedio,
+          COUNT(CASE WHEN ph.nivel = 'Avanzado' THEN 1 END) as nivel_avanzado
         FROM habilidades h
-        LEFT JOIN personas_habilidades ph ON h.id_habilidad = ph.id_habilidad
+        LEFT JOIN persona_habilidad ph ON h.id_habilidad = ph.id_habilidad
         LEFT JOIN personas p ON ph.id_persona = p.id_persona
         WHERE ph.id_persona IS NOT NULL
         GROUP BY h.id_habilidad, h.nombre, h.descripcion
@@ -293,8 +293,8 @@ class HabilidadService {
           COALESCE(ph.nivel, 'sin especificar') as nivel,
           COUNT(DISTINCT ph.id_persona) as total_personas,
           COUNT(DISTINCT ph.id_habilidad) as habilidades_distintas,
-          ROUND(COUNT(DISTINCT ph.id_persona) * 100.0 / NULLIF((SELECT COUNT(DISTINCT id_persona) FROM personas_habilidades), 0), 2) as porcentaje
-        FROM personas_habilidades ph
+          ROUND(COUNT(DISTINCT ph.id_persona) * 100.0 / NULLIF((SELECT COUNT(DISTINCT id_persona) FROM persona_habilidad), 0), 2) as porcentaje
+        FROM persona_habilidad ph
         GROUP BY ph.nivel
         ORDER BY total_personas DESC
       `, { type: QueryTypes.SELECT });
@@ -310,7 +310,7 @@ class HabilidadService {
             p.id_familia,
             COUNT(DISTINCT ph.id_habilidad) as habilidades_por_familia
           FROM personas p
-          JOIN personas_habilidades ph ON p.id_persona = ph.id_persona
+          JOIN persona_habilidad ph ON p.id_persona = ph.id_persona
           WHERE p.id_familia IS NOT NULL
           GROUP BY p.id_familia
         ) as fam_hab
@@ -326,7 +326,7 @@ class HabilidadService {
           (
             SELECT hab.nombre 
             FROM habilidades hab
-            JOIN personas_habilidades persh ON hab.id_habilidad = persh.id_habilidad
+            JOIN persona_habilidad persh ON hab.id_habilidad = persh.id_habilidad
             JOIN personas pers ON persh.id_persona = pers.id_persona
             JOIN familias fams ON pers.id_familia = fams.id_familia
             WHERE fams.id_parroquia = par.id_parroquia
@@ -337,7 +337,7 @@ class HabilidadService {
         FROM parroquia par
         LEFT JOIN familias f ON par.id_parroquia = f.id_parroquia
         LEFT JOIN personas p ON f.id_familia = p.id_familia
-        LEFT JOIN personas_habilidades ph ON p.id_persona = ph.id_persona
+        LEFT JOIN persona_habilidad ph ON p.id_persona = ph.id_persona
         LEFT JOIN habilidades h ON ph.id_habilidad = h.id_habilidad
         GROUP BY par.id_parroquia, par.nombre
         HAVING COUNT(DISTINCT p.id_persona) > 0
@@ -348,7 +348,7 @@ class HabilidadService {
       const habilidadesSinUso = await sequelize.query(`
         SELECT h.nombre as habilidad
         FROM habilidades h
-        LEFT JOIN personas_habilidades ph ON h.id_habilidad = ph.id_habilidad
+        LEFT JOIN persona_habilidad ph ON h.id_habilidad = ph.id_habilidad
         WHERE ph.id_persona IS NULL
         ORDER BY h.nombre
       `, { type: QueryTypes.SELECT });
@@ -359,10 +359,10 @@ class HabilidadService {
           s.nombre as sexo,
           COUNT(DISTINCT p.id_persona) as total_personas,
           COUNT(DISTINCT ph.id_habilidad) as habilidades_distintas,
-          ROUND(COUNT(DISTINCT p.id_persona) * 100.0 / NULLIF((SELECT COUNT(DISTINCT id_persona) FROM personas_habilidades), 0), 2) as porcentaje
+          ROUND(COUNT(DISTINCT p.id_persona) * 100.0 / NULLIF((SELECT COUNT(DISTINCT id_persona) FROM persona_habilidad), 0), 2) as porcentaje
         FROM sexo s
         LEFT JOIN personas p ON s.id_sexo = p.id_sexo
-        LEFT JOIN personas_habilidades ph ON p.id_persona = ph.id_persona
+        LEFT JOIN persona_habilidad ph ON p.id_persona = ph.id_persona
         WHERE ph.id_persona IS NOT NULL
         GROUP BY s.id_sexo, s.nombre
         ORDER BY total_personas DESC
@@ -376,8 +376,8 @@ class HabilidadService {
             u.nombre_completo as usuario,
             COUNT(DISTINCT ph.id_persona) as personas_registradas,
             COUNT(DISTINCT ph.id_habilidad) as habilidades_distintas,
-            MAX(ph.created_at) as ultimo_registro
-          FROM personas_habilidades ph
+            MAX(ph.createdAt) as ultimo_registro
+          FROM persona_habilidad ph
           LEFT JOIN usuarios u ON ph.created_by = u.id
           WHERE u.id IS NOT NULL
           GROUP BY u.id, u.nombre_completo
@@ -385,7 +385,7 @@ class HabilidadService {
           LIMIT 10
         `, { type: QueryTypes.SELECT });
       } catch (error) {
-        console.log('Campo created_by no disponible en personas_habilidades');
+        console.log('Campo created_by no disponible en persona_habilidad');
       }
 
       // Construir respuesta completa
