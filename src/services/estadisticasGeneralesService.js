@@ -168,8 +168,8 @@ class EstadisticasGeneralesService {
       const [distribucionSexo] = await sequelize.query(`
         SELECT 
           s.nombre as sexo,
-          COUNT(p.id_personass) as total,
-          ROUND(COUNT(p.id_personass) * 100.0 / SUM(COUNT(p.id_personass)) OVER(), 2) as porcentaje
+          COUNT(p.id_personas) as total,
+          ROUND(COUNT(p.id_personas) * 100.0 / SUM(COUNT(p.id_personas)) OVER(), 2) as porcentaje
         FROM personas p
         LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
         GROUP BY s.id_sexo, s.nombre
@@ -180,8 +180,8 @@ class EstadisticasGeneralesService {
       const [distribucionEstadoCivil] = await sequelize.query(`
         SELECT 
           sc.nombre as estado_civil,
-          COUNT(p.id_personass) as total,
-          ROUND(COUNT(p.id_personass) * 100.0 / SUM(COUNT(p.id_personass)) OVER(), 2) as porcentaje
+          COUNT(p.id_personas) as total,
+          ROUND(COUNT(p.id_personas) * 100.0 / SUM(COUNT(p.id_personas)) OVER(), 2) as porcentaje
         FROM personas p
         LEFT JOIN situaciones_civiles sc ON p.id_estado_civil_estado_civil = sc.id_situacion_civil
         GROUP BY sc.id_situacion_civil, sc.nombre
@@ -212,7 +212,7 @@ class EstadisticasGeneralesService {
       const [distribucionTipoId] = await sequelize.query(`
         SELECT 
           ti.nombre as tipo_identificacion,
-          COUNT(p.id_personass) as total
+          COUNT(p.id_personas) as total
         FROM personas p
         LEFT JOIN tipos_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
         GROUP BY ti.id_tipo_identificacion, ti.nombre
@@ -295,7 +295,7 @@ class EstadisticasGeneralesService {
       const [totales] = await sequelize.query(`
         SELECT 
           COUNT(*) as total_personas,
-          COUNT(CASE WHEN id_persona NOT IN (SELECT id_persona FROM difuntos_familia) THEN 1 END) as total_personas_vivas,
+          COUNT(*) as total_personas_vivas,
           COUNT(CASE WHEN necesidad_enfermo IS NOT NULL AND necesidad_enfermo != '' THEN 1 END) as personas_con_enfermedades,
           COUNT(CASE WHEN necesidad_enfermo IS NULL OR necesidad_enfermo = '' THEN 1 END) as personas_sanas
         FROM personas
@@ -314,7 +314,7 @@ class EstadisticasGeneralesService {
           COUNT(CASE WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.fecha_nacimiento)) BETWEEN 18 AND 60 THEN 1 END) as entre_18_60,
           COUNT(CASE WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.fecha_nacimiento)) > 60 THEN 1 END) as mayores_60
         FROM personas p
-        LEFT JOIN sexo s ON p.id_sexo = s.id_sexo
+        LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
         WHERE p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != ''
         GROUP BY p.necesidad_enfermo
         ORDER BY total_personas DESC
