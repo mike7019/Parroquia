@@ -940,13 +940,11 @@ export const obtenerEncuestas = async (req, res) => {
               h.id_habilidad,
               h.nombre,
               h.descripcion,
-              h.categoria,
               ph.nivel
             FROM persona_habilidad ph
             INNER JOIN habilidades h ON ph.id_habilidad = h.id_habilidad
             WHERE ph.id_persona = :personaId
-            AND h.activo = true
-            ORDER BY h.categoria, h.nombre
+            ORDER BY h.nombre
           `, {
             replacements: { personaId: persona.id_personas },
             type: QueryTypes.SELECT
@@ -992,7 +990,6 @@ export const obtenerEncuestas = async (req, res) => {
               id: h.id_habilidad,
               nombre: h.nombre,
               descripcion: h.descripcion,
-              categoria: h.categoria,
               nivel: h.nivel
             })),
             en_que_eres_lider: persona.en_que_eres_lider || null
@@ -1524,13 +1521,11 @@ export const obtenerEncuestaPorId = async (req, res) => {
           h.id_habilidad,
           h.nombre,
           h.descripcion,
-          h.categoria,
           ph.nivel
         FROM persona_habilidad ph
         INNER JOIN habilidades h ON ph.id_habilidad = h.id_habilidad
         WHERE ph.id_persona = :personaId
-        AND h.activo = true
-        ORDER BY h.categoria, h.nombre
+        ORDER BY h.nombre
       `, {
         replacements: { personaId: persona.id_personas },
         type: QueryTypes.SELECT
@@ -1576,7 +1571,6 @@ export const obtenerEncuestaPorId = async (req, res) => {
           id: h.id_habilidad,
           nombre: h.nombre,
           descripcion: h.descripcion,
-          categoria: h.categoria,
           nivel: h.nivel
         })),
         en_que_eres_lider: persona.en_que_eres_lider || null
