@@ -291,18 +291,167 @@ class EstadisticasGeneralesService {
    */
   async getEstadisticasSalud() {
     try {
-      // Simplificado: solo retornar conteos básicos
-      const result = await sequelize.query(`
+      // 1. Totales generales
+      const [totales] = await sequelize.query(`
         SELECT 
           COUNT(*) as total_personas,
-          COUNT(CASE WHEN necesidad_enfermo IS NOT NULL AND necesidad_enfermo != '' THEN 1 END) as con_enfermedades
+          COUNT(CASE WHEN id_persona NOT IN (SELECT id_persona FROM difuntos_familia) THEN 1 END) as total_personas_vivas,
+          COUNT(CASE WHEN necesidad_enfermo IS NOT NULL AND necesidad_enfermo != '' THEN 1 END) as personas_con_enfermedades,
+          COUNT(CASE WHEN necesidad_enfermo IS NULL OR necesidad_enfermo = '' THEN 1 END) as personas_sanas
         FROM personas
       `, { type: QueryTypes.SELECT });
-      
+
+      // 2. Distribución por tipo de enfermedad (usando el campo necesidad_enfermo)
+      const distribucionPorEnfermedad = await sequelize.query(`
+        SELECT 
+          necesidad_enfermo as enfermedad,
+          COUNT(DISTINCT p.id_persona) as total_personas,
+          ROUND(COUNT(DISTINCT p.id_persona) * 100.0 / NULLIF((SELECT COUNT(*) FROM personas WHERE necesidad_enfermo IS NOT NULL AND necesidad_enfermo != ''), 0), 2) as porcentaje,
+          COUNT(DISTINCT p.id_familia) as familias,
+          COUNT(CASE WHEN s.nombre = 'Masculino' THEN 1 END) as masculino,
+          COUNT(CASE WHEN s.nombre = 'Femenino' THEN 1 END) as femenino,
+          COUNT(CASE WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.fecha_nacimiento)) < 18 THEN 1 END) as menores_18,
+          COUNT(CASE WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.fecha_nacimiento)) BETWEEN 18 AND 60 THEN 1 END) as entre_18_60,
+          COUNT(CASE WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.fecha_nacimiento)) > 60 THEN 1 END) as mayores_60
+        FROM personas p
+        LEFT JOIN sexo s ON p.id_sexo = s.id_sexo
+        WHERE p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != ''
+        GROUP BY p.necesidad_enfermo
+        ORDER BY total_personas DESC
+        LIMIT 20
+      `, { type: QueryTypes.SELECT });
+
+      // 3. Familias afectadas
+      const [familiasStats] = await sequelize.query(`
+        SELECT 
+          COUNT(DISTINCT f.id_familia) as familias_con_personas_enfermas,
+          COUNT(DISTINCT CASE WHEN personas_enfermas = 0 THEN f.id_familia END) as familias_completamente_sanas,
+          ROUND(AVG(personas_enfermas), 2) as promedio_enfermos_por_familia
+        FROM familias f
+        LEFT JOIN (
+          SELECT 
+            id_familia,
+            COUNT(CASE WHEN necesidad_enfermo IS NOT NULL AND necesidad_enfermo != '' THEN 1 END) as personas_enfermas
+          FROM personas
+          WHERE id_familia IS NOT NULL
+          GROUP BY id_familia
+        ) as p ON f.id_familia = p.id_familia
+      `, { type: QueryTypes.SELECT });
+
+      // 4. Top 10 enfermedades más comunes
+      const top10EnfermedadesMasComunes = await sequelize.query(`
+        SELECT 
+          necesidad_enfermo as enfermedad,
+          COUNT(DISTINCT p.id_persona) as casos,
+          COUNT(DISTINCT p.id_familia) as familias,
+          ROUND(COUNT(DISTINCT p.id_persona) * 100.0 / NULLIF((SELECT COUNT(*) FROM personas WHERE necesidad_enfermo IS NOT NULL AND necesidad_enfermo != ''), 0), 2) as porcentaje_del_total
+        FROM personas p
+        WHERE p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != ''
+        GROUP BY p.necesidad_enfermo
+        ORDER BY casos DESC
+        LIMIT 10
+      `, { type: QueryTypes.SELECT });
+
+      // 5. Distribución geográfica
+      const distribucionPorParroquia = await sequelize.query(`
+        SELECT 
+          par.nombre as parroquia,
+          COUNT(DISTINCT CASE WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN p.id_persona END) as personas_con_enfermedades,
+          COUNT(DISTINCT f.id_familia) as familias,
+          (
+            SELECT p2.necesidad_enfermo
+            FROM personas p2
+            JOIN familias f2 ON p2.id_familia = f2.id_familia
+            WHERE f2.id_parroquia = par.id_parroquia 
+              AND p2.necesidad_enfermo IS NOT NULL 
+              AND p2.necesidad_enfermo != ''
+            GROUP BY p2.necesidad_enfermo
+            ORDER BY COUNT(*) DESC
+            LIMIT 1
+          ) as enfermedad_mas_comun
+        FROM parroquia par
+        LEFT JOIN familias f ON par.id_parroquia = f.id_parroquia
+        LEFT JOIN personas p ON f.id_familia = p.id_familia
+        GROUP BY par.id_parroquia, par.nombre
+        HAVING COUNT(DISTINCT CASE WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN p.id_persona END) > 0
+        ORDER BY personas_con_enfermedades DESC
+      `, { type: QueryTypes.SELECT });
+
+      // 6. Distribución por usuario (si existe created_by)
+      let distribucionPorUsuario = [];
+      try {
+        distribucionPorUsuario = await sequelize.query(`
+          SELECT 
+            u.nombre_completo as usuario,
+            COUNT(DISTINCT p.id_persona) as registros_realizados,
+            COUNT(DISTINCT CASE WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN p.id_persona END) as personas_con_enfermedades_registradas,
+            MAX(p.created_at) as ultimo_registro
+          FROM personas p
+          LEFT JOIN usuarios u ON p.created_by = u.id
+          WHERE u.id IS NOT NULL
+          GROUP BY u.id, u.nombre_completo
+          ORDER BY registros_realizados DESC
+          LIMIT 10
+        `, { type: QueryTypes.SELECT });
+      } catch (error) {
+        console.log('Campo created_by no disponible en personas');
+      }
+
+      // Construir respuesta completa
       return {
-        totalPersonas: parseInt(result[0].total_personas),
-        personasConEnfermedades: parseInt(result[0].con_enfermedades),
-        mensaje: 'Endpoint de salud simplificado - en desarrollo'
+        // Totales generales
+        totalPersonas: parseInt(totales.total_personas) || 0,
+        totalPersonasVivas: parseInt(totales.total_personas_vivas) || 0,
+        personasConEnfermedades: parseInt(totales.personas_con_enfermedades) || 0,
+        personasSanas: parseInt(totales.personas_sanas) || 0,
+        
+        // Distribución por tipo de enfermedad
+        distribucionPorEnfermedad: distribucionPorEnfermedad.map(item => ({
+          enfermedad: item.enfermedad,
+          totalPersonas: parseInt(item.total_personas),
+          porcentaje: parseFloat(item.porcentaje) || 0,
+          familias: parseInt(item.familias),
+          distribucionPorSexo: {
+            masculino: parseInt(item.masculino) || 0,
+            femenino: parseInt(item.femenino) || 0
+          },
+          distribucionPorEdad: {
+            menores18: parseInt(item.menores_18) || 0,
+            entre18y60: parseInt(item.entre_18_60) || 0,
+            mayores60: parseInt(item.mayores_60) || 0
+          }
+        })),
+        
+        // Familias afectadas
+        familiasConPersonasEnfermas: parseInt(familiasStats.familias_con_personas_enfermas) || 0,
+        familiasCompletamenteSanas: parseInt(familiasStats.familias_completamente_sanas) || 0,
+        promedioEnfermosPorFamilia: parseFloat(familiasStats.promedio_enfermos_por_familia) || 0,
+        
+        // Top 10 enfermedades más comunes
+        top10EnfermedadesMasComunes: top10EnfermedadesMasComunes.map(item => ({
+          enfermedad: item.enfermedad,
+          casos: parseInt(item.casos),
+          familias: parseInt(item.familias),
+          porcentajeDelTotal: parseFloat(item.porcentaje_del_total) || 0
+        })),
+        
+        // Distribución geográfica
+        distribucionPorParroquia: distribucionPorParroquia.map(item => ({
+          parroquia: item.parroquia,
+          personasConEnfermedades: parseInt(item.personas_con_enfermedades),
+          familias: parseInt(item.familias),
+          enfermedadMasComun: item.enfermedad_mas_comun
+        })),
+        
+        // Distribución por usuario (si disponible)
+        ...(distribucionPorUsuario.length > 0 && {
+          distribucionPorUsuario: distribucionPorUsuario.map(item => ({
+            usuario: item.usuario,
+            registrosRealizados: parseInt(item.registros_realizados),
+            personasConEnfermedadesRegistradas: parseInt(item.personas_con_enfermedades_registradas),
+            ultimoRegistro: item.ultimo_registro
+          }))
+        })
       };
     } catch (error) {
       console.error('Error al obtener estadísticas de salud:', error);
@@ -315,20 +464,202 @@ class EstadisticasGeneralesService {
    */
   async getEstadisticasEducacion() {
     try {
-      // Simplificado: conteos básicos sin usar Sequelize count()
+      // 1. Totales generales
       const [totales] = await sequelize.query(`
         SELECT 
-          (SELECT COUNT(*) FROM profesiones) as total_profesiones,
-          (SELECT COUNT(*) FROM habilidades) as total_habilidades,
-          (SELECT COUNT(DISTINCT id_profesion) FROM personas WHERE id_profesion IS NOT NULL) as personas_con_profesion
-        FROM (SELECT 1) as dummy
+          (SELECT COUNT(*) FROM personas) as total_personas,
+          (SELECT COUNT(DISTINCT id_persona) FROM personas WHERE id_profesion IS NOT NULL) as personas_con_profesion,
+          (SELECT COUNT(DISTINCT ph.id_persona) FROM personas_habilidades ph) as personas_con_habilidades,
+          (SELECT COUNT(*) FROM personas WHERE id_profesion IS NULL) as personas_sin_profesion,
+          (SELECT COUNT(*) FROM profesiones) as total_profesiones_catalogo,
+          (SELECT COUNT(*) FROM habilidades) as total_habilidades_catalogo,
+          (SELECT COUNT(*) FROM estudios) as total_estudios_catalogo
       `, { type: QueryTypes.SELECT });
 
+      // 2. Distribución por nivel de estudio (si existe relación con estudios)
+      let distribucionPorNivelEstudio = [];
+      try {
+        distribucionPorNivelEstudio = await sequelize.query(`
+          SELECT 
+            e.nombre as nivel,
+            e.descripcion,
+            COUNT(DISTINCT p.id_persona) as total_personas,
+            ROUND(COUNT(DISTINCT p.id_persona) * 100.0 / NULLIF((SELECT COUNT(*) FROM personas WHERE id_estudio IS NOT NULL), 0), 2) as porcentaje,
+            COUNT(DISTINCT p.id_familia) as familias
+          FROM estudios e
+          LEFT JOIN personas p ON e.id_estudio = p.id_estudio
+          WHERE p.id_persona IS NOT NULL
+          GROUP BY e.id_estudio, e.nombre, e.descripcion
+          ORDER BY total_personas DESC
+        `, { type: QueryTypes.SELECT });
+      } catch (error) {
+        console.log('Relación personas-estudios no disponible');
+      }
+
+      // 3. Familias con profesionales y habilidades
+      const [familiasStats] = await sequelize.query(`
+        SELECT 
+          COUNT(DISTINCT CASE WHEN personas_con_profesion > 0 THEN f.id_familia END) as familias_con_profesionales,
+          COUNT(DISTINCT CASE WHEN personas_con_profesion > 1 THEN f.id_familia END) as familias_con_multiples_profesiones,
+          COUNT(DISTINCT CASE WHEN personas_con_habilidades > 0 THEN f.id_familia END) as familias_con_habilidades,
+          ROUND(AVG(CASE WHEN personas_con_profesion > 0 THEN personas_con_profesion END), 2) as promedio_profesionales_por_familia
+        FROM familias f
+        LEFT JOIN (
+          SELECT 
+            id_familia,
+            COUNT(CASE WHEN id_profesion IS NOT NULL THEN 1 END) as personas_con_profesion,
+            COUNT(DISTINCT ph.id_persona) as personas_con_habilidades
+          FROM personas p
+          LEFT JOIN personas_habilidades ph ON p.id_persona = ph.id_persona
+          WHERE id_familia IS NOT NULL
+          GROUP BY id_familia
+        ) as stats ON f.id_familia = stats.id_familia
+      `, { type: QueryTypes.SELECT });
+
+      // 4. Combinación profesión + habilidades
+      const [combinacionStats] = await sequelize.query(`
+        SELECT 
+          COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL AND ph.id_persona IS NOT NULL THEN p.id_persona END) as personas_con_profesion_y_habilidades,
+          COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL AND ph.id_persona IS NULL THEN p.id_persona END) as personas_solo_profesion,
+          COUNT(DISTINCT CASE WHEN p.id_profesion IS NULL AND ph.id_persona IS NOT NULL THEN p.id_persona END) as personas_solo_habilidades,
+          COUNT(DISTINCT CASE WHEN p.id_profesion IS NULL AND ph.id_persona IS NULL THEN p.id_persona END) as personas_sin_ninguna
+        FROM personas p
+        LEFT JOIN personas_habilidades ph ON p.id_persona = ph.id_persona
+      `, { type: QueryTypes.SELECT });
+
+      // 5. Top 5 profesiones
+      const top5Profesiones = await sequelize.query(`
+        SELECT 
+          prof.nombre as profesion,
+          COUNT(DISTINCT p.id_persona) as total_personas,
+          COUNT(DISTINCT p.id_familia) as familias
+        FROM profesiones prof
+        LEFT JOIN personas p ON prof.id_profesion = p.id_profesion
+        WHERE p.id_persona IS NOT NULL
+        GROUP BY prof.id_profesion, prof.nombre
+        ORDER BY total_personas DESC
+        LIMIT 5
+      `, { type: QueryTypes.SELECT });
+
+      // 6. Top 5 habilidades
+      const top5Habilidades = await sequelize.query(`
+        SELECT 
+          h.nombre as habilidad,
+          COUNT(DISTINCT ph.id_persona) as total_personas,
+          COUNT(DISTINCT p.id_familia) as familias
+        FROM habilidades h
+        LEFT JOIN personas_habilidades ph ON h.id_habilidad = ph.id_habilidad
+        LEFT JOIN personas p ON ph.id_persona = p.id_persona
+        WHERE ph.id_persona IS NOT NULL
+        GROUP BY h.id_habilidad, h.nombre
+        ORDER BY total_personas DESC
+        LIMIT 5
+      `, { type: QueryTypes.SELECT });
+
+      // 7. Distribución educativa por parroquia
+      const distribucionPorParroquia = await sequelize.query(`
+        SELECT 
+          par.nombre as parroquia,
+          COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL THEN p.id_persona END) as personas_con_profesion,
+          COUNT(DISTINCT CASE WHEN ph.id_persona IS NOT NULL THEN p.id_persona END) as personas_con_habilidades,
+          COUNT(DISTINCT f.id_familia) as familias
+        FROM parroquia par
+        LEFT JOIN familias f ON par.id_parroquia = f.id_parroquia
+        LEFT JOIN personas p ON f.id_familia = p.id_familia
+        LEFT JOIN personas_habilidades ph ON p.id_persona = ph.id_persona
+        GROUP BY par.id_parroquia, par.nombre
+        HAVING COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL THEN p.id_persona END) > 0
+        ORDER BY personas_con_profesion DESC
+      `, { type: QueryTypes.SELECT });
+
+      // 8. Por usuario (si disponible)
+      let registrosPorUsuario = [];
+      try {
+        registrosPorUsuario = await sequelize.query(`
+          SELECT 
+            u.nombre_completo as usuario,
+            COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL THEN p.id_persona END) as profesiones_registradas,
+            COUNT(DISTINCT ph.id_persona) as habilidades_registradas,
+            MAX(GREATEST(p.created_at, ph.created_at)) as ultimo_registro
+          FROM usuarios u
+          LEFT JOIN personas p ON u.id = p.created_by
+          LEFT JOIN personas_habilidades ph ON u.id = ph.created_by
+          WHERE p.id_persona IS NOT NULL OR ph.id_persona IS NOT NULL
+          GROUP BY u.id, u.nombre_completo
+          ORDER BY (profesiones_registradas + habilidades_registradas) DESC
+          LIMIT 10
+        `, { type: QueryTypes.SELECT });
+      } catch (error) {
+        console.log('Campo created_by no disponible');
+      }
+
+      // Construir respuesta completa
       return {
-        totalProfesionesCatalogo: parseInt(totales.total_profesiones),
-        totalHabilidadesCatalogo: parseInt(totales.total_habilidades),
-        personasConProfesion: parseInt(totales.personas_con_profesion),
-        mensaje: 'Endpoint de educación simplificado - en desarrollo'
+        // Totales generales
+        totalPersonas: parseInt(totales.total_personas) || 0,
+        personasConProfesion: parseInt(totales.personas_con_profesion) || 0,
+        personasConHabilidades: parseInt(totales.personas_con_habilidades) || 0,
+        personasSinProfesion: parseInt(totales.personas_sin_profesion) || 0,
+        
+        // Catálogos disponibles
+        totalProfesionesCatalogo: parseInt(totales.total_profesiones_catalogo) || 0,
+        totalHabilidadesCatalogo: parseInt(totales.total_habilidades_catalogo) || 0,
+        totalEstudiosCatalogo: parseInt(totales.total_estudios_catalogo) || 0,
+        
+        // Nivel educativo (si disponible)
+        ...(distribucionPorNivelEstudio.length > 0 && {
+          distribucionPorNivelEstudio: distribucionPorNivelEstudio.map(item => ({
+            nivel: item.nivel,
+            descripcion: item.descripcion,
+            totalPersonas: parseInt(item.total_personas),
+            porcentaje: parseFloat(item.porcentaje) || 0,
+            familias: parseInt(item.familias)
+          }))
+        }),
+        
+        // Profesiones en familias
+        familiasConProfesionales: parseInt(familiasStats.familias_con_profesionales) || 0,
+        familiasConMultiplesProfesiones: parseInt(familiasStats.familias_con_multiples_profesiones) || 0,
+        familiasConHabilidades: parseInt(familiasStats.familias_con_habilidades) || 0,
+        promedioProfesionalesPorFamilia: parseFloat(familiasStats.promedio_profesionales_por_familia) || 0,
+        
+        // Combinación profesión + habilidades
+        personasConProfesionYHabilidades: parseInt(combinacionStats.personas_con_profesion_y_habilidades) || 0,
+        personasSoloProfesion: parseInt(combinacionStats.personas_solo_profesion) || 0,
+        personasSoloHabilidades: parseInt(combinacionStats.personas_solo_habilidades) || 0,
+        personasSinNinguna: parseInt(combinacionStats.personas_sin_ninguna) || 0,
+        
+        // Top 5 profesiones
+        top5Profesiones: top5Profesiones.map(item => ({
+          profesion: item.profesion,
+          totalPersonas: parseInt(item.total_personas),
+          familias: parseInt(item.familias)
+        })),
+        
+        // Top 5 habilidades
+        top5Habilidades: top5Habilidades.map(item => ({
+          habilidad: item.habilidad,
+          totalPersonas: parseInt(item.total_personas),
+          familias: parseInt(item.familias)
+        })),
+        
+        // Distribución geográfica
+        distribucionEducativaPorParroquia: distribucionPorParroquia.map(item => ({
+          parroquia: item.parroquia,
+          personasConProfesion: parseInt(item.personas_con_profesion),
+          personasConHabilidades: parseInt(item.personas_con_habilidades),
+          familias: parseInt(item.familias)
+        })),
+        
+        // Por usuario (si disponible)
+        ...(registrosPorUsuario.length > 0 && {
+          registrosPorUsuario: registrosPorUsuario.map(item => ({
+            usuario: item.usuario,
+            profesionesRegistradas: parseInt(item.profesiones_registradas) || 0,
+            habilidadesRegistradas: parseInt(item.habilidades_registradas) || 0,
+            ultimoRegistro: item.ultimo_registro
+          }))
+        })
       };
     } catch (error) {
       console.error('Error al obtener estadísticas de educación:', error);
