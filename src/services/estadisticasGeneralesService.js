@@ -168,8 +168,8 @@ class EstadisticasGeneralesService {
       const [distribucionSexo] = await sequelize.query(`
         SELECT 
           s.nombre as sexo,
-          COUNT(p.id_personas) as total,
-          ROUND(COUNT(p.id_personas) * 100.0 / SUM(COUNT(p.id_personas)) OVER(), 2) as porcentaje
+          COUNT(p.id_personass) as total,
+          ROUND(COUNT(p.id_personass) * 100.0 / SUM(COUNT(p.id_personass)) OVER(), 2) as porcentaje
         FROM personas p
         LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
         GROUP BY s.id_sexo, s.nombre
@@ -180,8 +180,8 @@ class EstadisticasGeneralesService {
       const [distribucionEstadoCivil] = await sequelize.query(`
         SELECT 
           sc.nombre as estado_civil,
-          COUNT(p.id_personas) as total,
-          ROUND(COUNT(p.id_personas) * 100.0 / SUM(COUNT(p.id_personas)) OVER(), 2) as porcentaje
+          COUNT(p.id_personass) as total,
+          ROUND(COUNT(p.id_personass) * 100.0 / SUM(COUNT(p.id_personass)) OVER(), 2) as porcentaje
         FROM personas p
         LEFT JOIN situaciones_civiles sc ON p.id_estado_civil_estado_civil = sc.id_situacion_civil
         GROUP BY sc.id_situacion_civil, sc.nombre
@@ -212,7 +212,7 @@ class EstadisticasGeneralesService {
       const [distribucionTipoId] = await sequelize.query(`
         SELECT 
           ti.nombre as tipo_identificacion,
-          COUNT(p.id_personas) as total
+          COUNT(p.id_personass) as total
         FROM personas p
         LEFT JOIN tipos_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
         GROUP BY ti.id_tipo_identificacion, ti.nombre
@@ -305,8 +305,8 @@ class EstadisticasGeneralesService {
       const distribucionPorEnfermedad = await sequelize.query(`
         SELECT 
           necesidad_enfermo as enfermedad,
-          COUNT(DISTINCT p.id_persona) as total_personas,
-          ROUND(COUNT(DISTINCT p.id_persona) * 100.0 / NULLIF((SELECT COUNT(*) FROM personas WHERE necesidad_enfermo IS NOT NULL AND necesidad_enfermo != ''), 0), 2) as porcentaje,
+          COUNT(DISTINCT p.id_personas) as total_personas,
+          ROUND(COUNT(DISTINCT p.id_personas) * 100.0 / NULLIF((SELECT COUNT(*) FROM personas WHERE necesidad_enfermo IS NOT NULL AND necesidad_enfermo != ''), 0), 2) as porcentaje,
           COUNT(DISTINCT p.id_familia) as familias,
           COUNT(CASE WHEN s.nombre = 'Masculino' THEN 1 END) as masculino,
           COUNT(CASE WHEN s.nombre = 'Femenino' THEN 1 END) as femenino,
@@ -342,9 +342,9 @@ class EstadisticasGeneralesService {
       const top10EnfermedadesMasComunes = await sequelize.query(`
         SELECT 
           necesidad_enfermo as enfermedad,
-          COUNT(DISTINCT p.id_persona) as casos,
+          COUNT(DISTINCT p.id_personas) as casos,
           COUNT(DISTINCT p.id_familia) as familias,
-          ROUND(COUNT(DISTINCT p.id_persona) * 100.0 / NULLIF((SELECT COUNT(*) FROM personas WHERE necesidad_enfermo IS NOT NULL AND necesidad_enfermo != ''), 0), 2) as porcentaje_del_total
+          ROUND(COUNT(DISTINCT p.id_personas) * 100.0 / NULLIF((SELECT COUNT(*) FROM personas WHERE necesidad_enfermo IS NOT NULL AND necesidad_enfermo != ''), 0), 2) as porcentaje_del_total
         FROM personas p
         WHERE p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != ''
         GROUP BY p.necesidad_enfermo
@@ -356,7 +356,7 @@ class EstadisticasGeneralesService {
       const distribucionPorParroquia = await sequelize.query(`
         SELECT 
           par.nombre as parroquia,
-          COUNT(DISTINCT CASE WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN p.id_persona END) as personas_con_enfermedades,
+          COUNT(DISTINCT CASE WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN p.id_personas END) as personas_con_enfermedades,
           COUNT(DISTINCT f.id_familia) as familias,
           (
             SELECT p2.necesidad_enfermo
@@ -373,7 +373,7 @@ class EstadisticasGeneralesService {
         LEFT JOIN familias f ON par.id_parroquia = f.id_parroquia
         LEFT JOIN personas p ON f.id_familia = p.id_familia
         GROUP BY par.id_parroquia, par.nombre
-        HAVING COUNT(DISTINCT CASE WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN p.id_persona END) > 0
+        HAVING COUNT(DISTINCT CASE WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN p.id_personas END) > 0
         ORDER BY personas_con_enfermedades DESC
       `, { type: QueryTypes.SELECT });
 
@@ -383,8 +383,8 @@ class EstadisticasGeneralesService {
         distribucionPorUsuario = await sequelize.query(`
           SELECT 
             u.nombre_completo as usuario,
-            COUNT(DISTINCT p.id_persona) as registros_realizados,
-            COUNT(DISTINCT CASE WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN p.id_persona END) as personas_con_enfermedades_registradas,
+            COUNT(DISTINCT p.id_personas) as registros_realizados,
+            COUNT(DISTINCT CASE WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN p.id_personas END) as personas_con_enfermedades_registradas,
             MAX(p.created_at) as ultimo_registro
           FROM personas p
           LEFT JOIN usuarios u ON p.created_by = u.id
@@ -468,12 +468,11 @@ class EstadisticasGeneralesService {
       const [totales] = await sequelize.query(`
         SELECT 
           (SELECT COUNT(*) FROM personas) as total_personas,
-          (SELECT COUNT(DISTINCT id_persona) FROM personas WHERE id_profesion IS NOT NULL) as personas_con_profesion,
-          (SELECT COUNT(DISTINCT ph.id_persona) FROM persona_habilidad ph) as personas_con_habilidades,
+          (SELECT COUNT(DISTINCT id_personas) FROM personas WHERE id_profesion IS NOT NULL) as personas_con_profesion,
+          (SELECT COUNT(DISTINCT persona_habilidad.id_persona) FROM persona_habilidad) as personas_con_habilidades,
           (SELECT COUNT(*) FROM personas WHERE id_profesion IS NULL) as personas_sin_profesion,
           (SELECT COUNT(*) FROM profesiones) as total_profesiones_catalogo,
-          (SELECT COUNT(*) FROM habilidades) as total_habilidades_catalogo,
-          (SELECT COUNT(*) FROM estudios) as total_estudios_catalogo
+          (SELECT COUNT(*) FROM habilidades) as total_habilidades_catalogo
       `, { type: QueryTypes.SELECT });
 
       // 2. Distribución por nivel de estudio (si existe relación con estudios)
@@ -483,12 +482,12 @@ class EstadisticasGeneralesService {
           SELECT 
             e.nombre as nivel,
             e.descripcion,
-            COUNT(DISTINCT p.id_persona) as total_personas,
-            ROUND(COUNT(DISTINCT p.id_persona) * 100.0 / NULLIF((SELECT COUNT(*) FROM personas WHERE id_estudio IS NOT NULL), 0), 2) as porcentaje,
+            COUNT(DISTINCT p.id_personas) as total_personas,
+            ROUND(COUNT(DISTINCT p.id_personas) * 100.0 / NULLIF((SELECT COUNT(*) FROM personas WHERE id_estudio IS NOT NULL), 0), 2) as porcentaje,
             COUNT(DISTINCT p.id_familia) as familias
           FROM estudios e
           LEFT JOIN personas p ON e.id_estudio = p.id_estudio
-          WHERE p.id_persona IS NOT NULL
+          WHERE p.id_personas IS NOT NULL
           GROUP BY e.id_estudio, e.nombre, e.descripcion
           ORDER BY total_personas DESC
         `, { type: QueryTypes.SELECT });
@@ -510,7 +509,7 @@ class EstadisticasGeneralesService {
             COUNT(CASE WHEN id_profesion IS NOT NULL THEN 1 END) as personas_con_profesion,
             COUNT(DISTINCT ph.id_persona_habilidad) as personas_con_habilidades
           FROM personas p
-          LEFT JOIN persona_habilidad ph ON p.id_persona = ph.id_persona
+          LEFT JOIN persona_habilidad ph ON p.id_personas = ph.id_persona
           WHERE id_familia IS NOT NULL
           GROUP BY id_familia
         ) as stats ON f.id_familia = stats.id_familia
@@ -519,23 +518,23 @@ class EstadisticasGeneralesService {
       // 4. Combinación profesión + habilidades
       const [combinacionStats] = await sequelize.query(`
         SELECT 
-          COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL AND ph.id_persona_habilidad IS NOT NULL THEN p.id_persona END) as personas_con_profesion_y_habilidades,
-          COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL AND ph.id_persona_habilidad IS NULL THEN p.id_persona END) as personas_solo_profesion,
-          COUNT(DISTINCT CASE WHEN p.id_profesion IS NULL AND ph.id_persona_habilidad IS NOT NULL THEN p.id_persona END) as personas_solo_habilidades,
-          COUNT(DISTINCT CASE WHEN p.id_profesion IS NULL AND ph.id_persona_habilidad IS NULL THEN p.id_persona END) as personas_sin_ninguna
+          COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL AND ph.id_persona_habilidad IS NOT NULL THEN p.id_personas END) as personas_con_profesion_y_habilidades,
+          COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL AND ph.id_persona_habilidad IS NULL THEN p.id_personas END) as personas_solo_profesion,
+          COUNT(DISTINCT CASE WHEN p.id_profesion IS NULL AND ph.id_persona_habilidad IS NOT NULL THEN p.id_personas END) as personas_solo_habilidades,
+          COUNT(DISTINCT CASE WHEN p.id_profesion IS NULL AND ph.id_persona_habilidad IS NULL THEN p.id_personas END) as personas_sin_ninguna
         FROM personas p
-        LEFT JOIN persona_habilidad ph ON p.id_persona = ph.id_persona
+        LEFT JOIN persona_habilidad ph ON p.id_personas = ph.id_persona
       `, { type: QueryTypes.SELECT });
 
       // 5. Top 5 profesiones
       const top5Profesiones = await sequelize.query(`
         SELECT 
           prof.nombre as profesion,
-          COUNT(DISTINCT p.id_persona) as total_personas,
+          COUNT(DISTINCT p.id_personas) as total_personas,
           COUNT(DISTINCT p.id_familia) as familias
         FROM profesiones prof
         LEFT JOIN personas p ON prof.id_profesion = p.id_profesion
-        WHERE p.id_persona IS NOT NULL
+        WHERE p.id_personas IS NOT NULL
         GROUP BY prof.id_profesion, prof.nombre
         ORDER BY total_personas DESC
         LIMIT 5
@@ -545,12 +544,12 @@ class EstadisticasGeneralesService {
       const top5Habilidades = await sequelize.query(`
         SELECT 
           h.nombre as habilidad,
-          COUNT(DISTINCT ph.id_persona) as total_personas,
+          COUNT(DISTINCT p.id_personas) as total_personas,
           COUNT(DISTINCT p.id_familia) as familias
         FROM habilidades h
         LEFT JOIN persona_habilidad ph ON h.id_habilidad = ph.id_habilidad
-        LEFT JOIN personas p ON ph.id_persona = p.id_persona
-        WHERE p.id_persona IS NOT NULL
+        LEFT JOIN personas p ON ph.id_persona = p.id_personas
+        WHERE p.id_personas IS NOT NULL
         GROUP BY h.id_habilidad, h.nombre
         ORDER BY total_personas DESC
         LIMIT 5
@@ -560,15 +559,15 @@ class EstadisticasGeneralesService {
       const distribucionPorParroquia = await sequelize.query(`
         SELECT 
           par.nombre as parroquia,
-          COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL THEN p.id_persona END) as personas_con_profesion,
-          COUNT(DISTINCT p.id_persona) FILTER (WHERE ph.id_persona_habilidad IS NOT NULL) as personas_con_habilidades,
+          COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL THEN p.id_personas END) as personas_con_profesion,
+          COUNT(DISTINCT p.id_personas) FILTER (WHERE ph.id_persona_habilidad IS NOT NULL) as personas_con_habilidades,
           COUNT(DISTINCT f.id_familia) as familias
         FROM parroquia par
         LEFT JOIN familias f ON par.id_parroquia = f.id_parroquia
         LEFT JOIN personas p ON f.id_familia = p.id_familia
-        LEFT JOIN persona_habilidad ph ON p.id_persona = ph.id_persona
+        LEFT JOIN persona_habilidad ph ON p.id_personas = ph.id_persona
         GROUP BY par.id_parroquia, par.nombre
-        HAVING COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL THEN p.id_persona END) > 0
+        HAVING COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL THEN p.id_personas END) > 0
         ORDER BY personas_con_profesion DESC
       `, { type: QueryTypes.SELECT });
 
@@ -578,13 +577,13 @@ class EstadisticasGeneralesService {
         registrosPorUsuario = await sequelize.query(`
           SELECT 
             u.nombre_completo as usuario,
-            COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL THEN p.id_persona END) as profesiones_registradas,
-            COUNT(DISTINCT p.id_persona) FILTER (WHERE ph.id_persona_habilidad IS NOT NULL) as habilidades_registradas,
+            COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL THEN p.id_personas END) as profesiones_registradas,
+            COUNT(DISTINCT p.id_personas) FILTER (WHERE ph.id_persona_habilidad IS NOT NULL) as habilidades_registradas,
             MAX(GREATEST(COALESCE(p.created_at, '1900-01-01'), COALESCE(ph.createdAt, '1900-01-01'))) as ultimo_registro
           FROM usuarios u
           LEFT JOIN personas p ON u.id = p.created_by
           LEFT JOIN persona_habilidad ph ON u.id = ph.created_by
-          WHERE p.id_persona IS NOT NULL OR ph.id_persona_habilidad IS NOT NULL
+          WHERE p.id_personas IS NOT NULL OR ph.id_persona_habilidad IS NOT NULL
           GROUP BY u.id, u.nombre_completo
           ORDER BY (COALESCE(profesiones_registradas, 0) + COALESCE(habilidades_registradas, 0)) DESC
           LIMIT 10
@@ -604,7 +603,6 @@ class EstadisticasGeneralesService {
         // Catálogos disponibles
         totalProfesionesCatalogo: parseInt(totales.total_profesiones_catalogo) || 0,
         totalHabilidadesCatalogo: parseInt(totales.total_habilidades_catalogo) || 0,
-        totalEstudiosCatalogo: parseInt(totales.total_estudios_catalogo) || 0,
         
         // Nivel educativo (si disponible)
         ...(distribucionPorNivelEstudio.length > 0 && {
