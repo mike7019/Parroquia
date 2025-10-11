@@ -651,11 +651,6 @@ router.get('/:id',
   EncuestaLoggingMiddleware.logOperacion('OBTENER_ENCUESTA_POR_ID'), // Logging
   obtenerEncuestaPorId
 );
-router.get('/encuesta/:id', 
-  authMiddleware.authenticateToken,  // Middleware de autenticación
-  EncuestaLoggingMiddleware.logOperacion('OBTENER_ENCUESTA_POR_ID'), // Logging
-  obtenerEncuestaPorId
-);
 
 // Ruta POST para crear encuesta
 router.post('/', 
@@ -993,15 +988,6 @@ router.patch('/:id',
   EncuestaValidationMiddleware.validarEncuestaExiste,  // Verificar que existe
   EncuestaValidationMiddleware.validarCamposActualizacion,  // Validar campos permitidos
   actualizarCamposEncuesta          // Controlador
-);
-
-// Ruta PUT para actualizar encuesta completa
-router.put('/:id', 
-  authMiddleware.authenticateToken,  // Middleware de autenticación
-  EncuestaValidationMiddleware.validarIdEncuesta,  // Validar ID
-  EncuestaValidationMiddleware.validarEncuestaExiste,  // Verificar que existe
-  EncuestaValidationMiddleware.validarActualizacionCompleta,  // Validar campos requeridos
-  actualizarEncuestaCompleta        // Controlador
 );
 
 // Ruta PUT para actualizar encuesta completa
