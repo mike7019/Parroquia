@@ -508,7 +508,7 @@ class EstadisticasGeneralesService {
           SELECT 
             id_familia,
             COUNT(CASE WHEN id_profesion IS NOT NULL THEN 1 END) as personas_con_profesion,
-            COUNT(DISTINCT ph.id_persona) as personas_con_habilidades
+            COUNT(DISTINCT ph.id_persona_habilidad) as personas_con_habilidades
           FROM personas p
           LEFT JOIN persona_habilidad ph ON p.id_persona = ph.id_persona
           WHERE id_familia IS NOT NULL
@@ -519,10 +519,10 @@ class EstadisticasGeneralesService {
       // 4. Combinación profesión + habilidades
       const [combinacionStats] = await sequelize.query(`
         SELECT 
-          COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL AND ph.id_persona IS NOT NULL THEN p.id_persona END) as personas_con_profesion_y_habilidades,
-          COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL AND ph.id_persona IS NULL THEN p.id_persona END) as personas_solo_profesion,
-          COUNT(DISTINCT CASE WHEN p.id_profesion IS NULL AND ph.id_persona IS NOT NULL THEN ph.id_persona END) as personas_solo_habilidades,
-          COUNT(DISTINCT CASE WHEN p.id_profesion IS NULL AND ph.id_persona IS NULL THEN p.id_persona END) as personas_sin_ninguna
+          COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL AND ph.id_persona_habilidad IS NOT NULL THEN p.id_persona END) as personas_con_profesion_y_habilidades,
+          COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL AND ph.id_persona_habilidad IS NULL THEN p.id_persona END) as personas_solo_profesion,
+          COUNT(DISTINCT CASE WHEN p.id_profesion IS NULL AND ph.id_persona_habilidad IS NOT NULL THEN p.id_persona END) as personas_solo_habilidades,
+          COUNT(DISTINCT CASE WHEN p.id_profesion IS NULL AND ph.id_persona_habilidad IS NULL THEN p.id_persona END) as personas_sin_ninguna
         FROM personas p
         LEFT JOIN persona_habilidad ph ON p.id_persona = ph.id_persona
       `, { type: QueryTypes.SELECT });
@@ -550,7 +550,7 @@ class EstadisticasGeneralesService {
         FROM habilidades h
         LEFT JOIN persona_habilidad ph ON h.id_habilidad = ph.id_habilidad
         LEFT JOIN personas p ON ph.id_persona = p.id_persona
-        WHERE ph.id_persona IS NOT NULL
+        WHERE p.id_persona IS NOT NULL
         GROUP BY h.id_habilidad, h.nombre
         ORDER BY total_personas DESC
         LIMIT 5
@@ -561,7 +561,7 @@ class EstadisticasGeneralesService {
         SELECT 
           par.nombre as parroquia,
           COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL THEN p.id_persona END) as personas_con_profesion,
-          COUNT(DISTINCT ph.id_persona) as personas_con_habilidades,
+          COUNT(DISTINCT p.id_persona) FILTER (WHERE ph.id_persona_habilidad IS NOT NULL) as personas_con_habilidades,
           COUNT(DISTINCT f.id_familia) as familias
         FROM parroquia par
         LEFT JOIN familias f ON par.id_parroquia = f.id_parroquia
@@ -579,12 +579,12 @@ class EstadisticasGeneralesService {
           SELECT 
             u.nombre_completo as usuario,
             COUNT(DISTINCT CASE WHEN p.id_profesion IS NOT NULL THEN p.id_persona END) as profesiones_registradas,
-            COUNT(DISTINCT ph.id_persona) as habilidades_registradas,
+            COUNT(DISTINCT p.id_persona) FILTER (WHERE ph.id_persona_habilidad IS NOT NULL) as habilidades_registradas,
             MAX(GREATEST(COALESCE(p.created_at, '1900-01-01'), COALESCE(ph.createdAt, '1900-01-01'))) as ultimo_registro
           FROM usuarios u
           LEFT JOIN personas p ON u.id = p.created_by
           LEFT JOIN persona_habilidad ph ON u.id = ph.created_by
-          WHERE p.id_persona IS NOT NULL OR ph.id_persona IS NOT NULL
+          WHERE p.id_persona IS NOT NULL OR ph.id_persona_habilidad IS NOT NULL
           GROUP BY u.id, u.nombre_completo
           ORDER BY (COALESCE(profesiones_registradas, 0) + COALESCE(habilidades_registradas, 0)) DESC
           LIMIT 10
