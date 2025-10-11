@@ -3634,6 +3634,10 @@ const swaggerConfig = {
         description: '🎯 **[NUEVO] Personas y Capacidades** - Sistema completo para análisis de capacidades, destrezas y análisis geográfico. **Funcionalidades:** Consultas por destrezas/habilidades, análisis geográfico por sectores/veredas, consultas por profesiones, comunidades culturales. **100% coverage final endpoint.**'
       },
       {
+        name: 'Estadísticas Generales',
+        description: '📊 **[NUEVO] Estadísticas Generales** - Sistema completo de estadísticas de TODO el sistema. **Categorías:** Geografía, Población, Familias, Salud, Educación, Vivienda, Catálogos, Usuarios. **Incluye:** Distribuciones demográficas, análisis de servicios, métricas completas de cada módulo, resumen general del sistema.'
+      },
+      {
         name: 'Parroquias',
         description: '⛪ **Catálogo de Parroquias** - Gestión de parroquias del sistema eclesiástico.'
       },
