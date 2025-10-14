@@ -1,11 +1,67 @@
 import sequelize from '../../../config/sequelize.js';
 import '../../../config/sequelize.js';
 import '../../models/index.js'; // Asegurar que los modelos estén importados
+import logger from '../../utils/logger.js';
 
 // Obtener el modelo Enfermedad desde Sequelize una vez que se cargue
 const getEnfermedadModel = () => sequelize.models.Enfermedad;
 
 class EnfermedadService {
+  /**
+   * Reorganizar IDs después de eliminar para evitar gaps
+   */
+  async reorganizeIds() {
+    try {
+      const Enfermedad = getEnfermedadModel();
+      
+      // Obtener todas las enfermedades ordenadas por ID actual
+      const enfermedades = await Enfermedad.findAll({
+        order: [['id_enfermedad', 'ASC']],
+        raw: true
+      });
+
+      console.log('Reorganizando IDs de enfermedades...');
+      
+      // Reorganizar IDs secuencialmente
+      for (let i = 0; i < enfermedades.length; i++) {
+        const newId = i + 1;
+        const currentId = enfermedades[i].id_enfermedad;
+        
+        if (currentId !== newId) {
+          // Actualizar usando SQL directo para evitar problemas con la PK
+          await sequelize.query(
+            'UPDATE enfermedades SET id_enfermedad = :newId WHERE id_enfermedad = :currentId',
+            {
+              replacements: { newId, currentId },
+              type: sequelize.QueryTypes.UPDATE
+            }
+          );
+          console.log(`ID ${currentId} -> ${newId}`);
+        }
+      }
+      
+      // Reiniciar la secuencia si existe
+      const nextId = enfermedades.length + 1;
+      try {
+        await sequelize.query(
+          `SELECT setval('enfermedades_id_enfermedad_seq', :nextId, false)`,
+          {
+            replacements: { nextId },
+            type: sequelize.QueryTypes.SELECT
+          }
+        );
+        console.log(`Secuencia reiniciada a ${nextId}`);
+      } catch (seqError) {
+        console.log('No se encontró secuencia para reiniciar (puede ser normal)');
+      }
+      
+      console.log('Reorganización completada');
+    } catch (error) {
+      logger.error('Error reorganizando IDs:', error);
+      throw error;
+    }
+  }
+
   /**
    * Find or create an enfermedad to avoid duplicates
    */
@@ -128,8 +184,16 @@ class EnfermedadService {
       //   throw new Error('Cannot delete enfermedad: it has associated personas');
       // }
 
+      // Eliminar la enfermedad
       await enfermedad.destroy();
-      return { message: 'Enfermedad deleted successfully' };
+      
+      // Reorganizar IDs automáticamente para eliminar gaps
+      await this.reorganizeIds();
+      
+      return { 
+        message: 'Enfermedad deleted successfully and IDs reorganized',
+        reorganized: true
+      };
     } catch (error) {
       throw new Error(`Error deleting enfermedad: ${error.message}`);
     }
