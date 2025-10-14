@@ -10,47 +10,24 @@ const getMunicipiosModel = () => models.Municipios || sequelize.models.Municipio
 class ParroquiaService {
   
   /**
-   * Función para encontrar el próximo ID disponible reutilizando gaps
+   * Función para encontrar el próximo ID disponible (sin gaps - secuencial)
    */
   async findNextAvailableId() {
     try {
       const Parroquia = getParroquiaModel();
       
-      // Obtener todos los IDs existentes ordenados
-      const existingIds = await Parroquia.findAll({
-        attributes: ['id_parroquia'],
-        order: [['id_parroquia', 'ASC']],
+      // Obtener el ID máximo actual
+      const maxIdResult = await Parroquia.findOne({
+        attributes: [[sequelize.fn('MAX', sequelize.col('id_parroquia')), 'maxId']],
         raw: true
       });
 
-      console.log('📊 IDs existentes:', existingIds.map(e => e.id_parroquia));
+      const maxId = maxIdResult?.maxId ? parseInt(maxIdResult.maxId) : 0;
+      const nextId = maxId + 1;
 
-      // Si no hay registros, empezar desde 1
-      if (existingIds.length === 0) {
-        console.log('✅ No hay parroquias, iniciando con ID: 1');
-        return 1;
-      }
+      console.log(`� ID máximo actual: ${maxId}`);
+      console.log(`✅ Siguiente ID asignado: ${nextId}`);
 
-      // Convertir IDs a números para comparación segura
-      const ids = existingIds.map(e => parseInt(e.id_parroquia)).sort((a, b) => a - b);
-      console.log('📊 IDs ordenados:', ids);
-
-      // Buscar el primer gap en la secuencia
-      for (let i = 0; i < ids.length; i++) {
-        const expectedId = i + 1;
-        const actualId = ids[i];
-        
-        console.log(`🔍 Comparando: esperado=${expectedId}, actual=${actualId}`);
-        
-        if (actualId > expectedId) {
-          console.log(`✅ Gap encontrado, usando ID: ${expectedId}`);
-          return expectedId;
-        }
-      }
-
-      // Si no hay gaps, usar el siguiente ID después del último
-      const nextId = ids[ids.length - 1] + 1;
-      console.log(`✅ Sin gaps, siguiente ID: ${nextId}`);
       return nextId;
     } catch (error) {
       logger.error('Error finding next available ID for parroquia:', error);
