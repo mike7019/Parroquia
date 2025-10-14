@@ -23,23 +23,35 @@ class ParroquiaService {
         raw: true
       });
 
+      console.log('📊 IDs existentes:', existingIds.map(e => e.id_parroquia));
+
       // Si no hay registros, empezar desde 1
       if (existingIds.length === 0) {
+        console.log('✅ No hay parroquias, iniciando con ID: 1');
         return 1;
       }
 
+      // Convertir IDs a números para comparación segura
+      const ids = existingIds.map(e => parseInt(e.id_parroquia)).sort((a, b) => a - b);
+      console.log('📊 IDs ordenados:', ids);
+
       // Buscar el primer gap en la secuencia
-      for (let i = 0; i < existingIds.length; i++) {
+      for (let i = 0; i < ids.length; i++) {
         const expectedId = i + 1;
-        const actualId = existingIds[i].id_parroquia;
+        const actualId = ids[i];
         
-        if (actualId !== expectedId) {
+        console.log(`🔍 Comparando: esperado=${expectedId}, actual=${actualId}`);
+        
+        if (actualId > expectedId) {
+          console.log(`✅ Gap encontrado, usando ID: ${expectedId}`);
           return expectedId;
         }
       }
 
       // Si no hay gaps, usar el siguiente ID después del último
-      return existingIds.length + 1;
+      const nextId = ids[ids.length - 1] + 1;
+      console.log(`✅ Sin gaps, siguiente ID: ${nextId}`);
+      return nextId;
     } catch (error) {
       logger.error('Error finding next available ID for parroquia:', error);
       throw error;
@@ -65,40 +77,57 @@ class ParroquiaService {
       // Find the next available ID
       const nextId = await this.findNextAvailableId();
 
-      // Create data object with only available fields
+      // Create data object with only fields that exist in the model
       const createData = {
         id_parroquia: nextId,
-        nombre: parroquiaData.nombre
+        nombre: parroquiaData.nombre,
+        id_municipio: parroquiaData.id_municipio
       };
 
-      // Add optional fields only if they exist in the model
-      const modelAttributes = Object.keys(Parroquia.rawAttributes);
-      
-      if (modelAttributes.includes('id_municipio') && parroquiaData.id_municipio) {
-        createData.id_municipio = parroquiaData.id_municipio;
-      }
-      if (modelAttributes.includes('descripcion') && parroquiaData.descripcion) {
-        createData.descripcion = parroquiaData.descripcion;
-      }
-      if (modelAttributes.includes('direccion') && parroquiaData.direccion) {
+      // Add optional fields only if they are provided
+      if (parroquiaData.direccion !== undefined && parroquiaData.direccion !== null) {
         createData.direccion = parroquiaData.direccion;
       }
-      if (modelAttributes.includes('telefono') && parroquiaData.telefono) {
+      if (parroquiaData.telefono !== undefined && parroquiaData.telefono !== null) {
         createData.telefono = parroquiaData.telefono;
       }
-      if (modelAttributes.includes('email') && parroquiaData.email) {
+      if (parroquiaData.email !== undefined && parroquiaData.email !== null) {
         createData.email = parroquiaData.email;
       }
-      if (modelAttributes.includes('activo')) {
-        createData.activo = parroquiaData.activo !== undefined ? parroquiaData.activo : true;
-      }
+      
+      // Log data being created for debugging
+      console.log('📝 Creating parroquia with data:', JSON.stringify(createData, null, 2));
 
       const parroquia = await Parroquia.create(createData);
 
       // Return the parroquia with its municipio if the association exists
       return await this.getParroquiaById(parroquia.id_parroquia);
     } catch (error) {
-      throw new Error(`Error creating parroquia: ${error.message}`);
+      console.error('❌ Error creating parroquia:', error);
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      if (error.errors) {
+        console.error('Validation errors:', JSON.stringify(error.errors, null, 2));
+      }
+      
+      // Handle Sequelize validation errors
+      if (error.name === 'SequelizeValidationError') {
+        const validationErrors = error.errors.map(e => `${e.path}: ${e.message}`).join(', ');
+        throw new Error(`Validation error: ${validationErrors}`);
+      }
+      
+      // Handle Sequelize unique constraint errors
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        throw new Error('A parroquia with this name already exists in the municipality');
+      }
+      
+      // Handle foreign key constraint errors
+      if (error.name === 'SequelizeForeignKeyConstraintError') {
+        throw new Error('Invalid municipio ID provided');
+      }
+      
+      // Return the actual error message for debugging
+      throw new Error(`Error creating parroquia: ${error.message} (Type: ${error.name})`);
     }
   }
 

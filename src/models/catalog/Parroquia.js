@@ -25,7 +25,13 @@ const Parroquia = sequelize.define('Parroquia', {
     type: DataTypes.STRING(20),
     allowNull: true,
     validate: {
-      len: [7, 20]
+      isValidPhone(value) {
+        if (value && value.trim() !== '') {
+          if (value.length < 7 || value.length > 20) {
+            throw new Error('Teléfono debe tener entre 7 y 20 caracteres');
+          }
+        }
+      }
     },
     comment: 'Número de teléfono de contacto'
   },
@@ -33,8 +39,16 @@ const Parroquia = sequelize.define('Parroquia', {
     type: DataTypes.STRING(100),
     allowNull: true,
     validate: {
-      isEmail: true,
-      len: [5, 100]
+      isValidEmail(value) {
+        if (value && value.trim() !== '') {
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+            throw new Error('Email debe ser válido');
+          }
+          if (value.length < 5 || value.length > 100) {
+            throw new Error('Email debe tener entre 5 y 100 caracteres');
+          }
+        }
+      }
     },
     comment: 'Correo electrónico de contacto'
   },
