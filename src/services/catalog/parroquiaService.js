@@ -10,13 +10,13 @@ const getMunicipiosModel = () => models.Municipios || sequelize.models.Municipio
 class ParroquiaService {
   
   /**
-   * Función para encontrar el próximo ID disponible (sin gaps - secuencial)
+   * Función para encontrar el próximo ID disponible (siempre secuencial sin gaps)
    */
   async findNextAvailableId() {
     try {
       const Parroquia = getParroquiaModel();
       
-      // Obtener el ID máximo actual
+      // Obtener el ID máximo actual (como los IDs se reorganizan, siempre será secuencial)
       const maxIdResult = await Parroquia.findOne({
         attributes: [[sequelize.fn('MAX', sequelize.col('id_parroquia')), 'maxId']],
         raw: true
@@ -25,8 +25,7 @@ class ParroquiaService {
       const maxId = maxIdResult?.maxId ? parseInt(maxIdResult.maxId) : 0;
       const nextId = maxId + 1;
 
-      console.log(`� ID máximo actual: ${maxId}`);
-      console.log(`✅ Siguiente ID asignado: ${nextId}`);
+      console.log('Proximo ID a asignar:', nextId);
 
       return nextId;
     } catch (error) {
@@ -267,6 +266,61 @@ class ParroquiaService {
   }
 
   /**
+   * Reorganizar IDs después de eliminar para evitar gaps
+   */
+  async reorganizeIds() {
+    try {
+      const Parroquia = getParroquiaModel();
+      
+      // Obtener todas las parroquias ordenadas por ID actual
+      const parroquias = await Parroquia.findAll({
+        order: [['id_parroquia', 'ASC']],
+        raw: true
+      });
+
+      console.log('Reorganizando IDs de parroquias...');
+      
+      // Reorganizar IDs secuencialmente
+      for (let i = 0; i < parroquias.length; i++) {
+        const newId = i + 1;
+        const currentId = parroquias[i].id_parroquia;
+        
+        if (currentId !== newId) {
+          // Actualizar usando SQL directo para evitar problemas con la PK
+          await sequelize.query(
+            'UPDATE parroquia SET id_parroquia = :newId WHERE id_parroquia = :currentId',
+            {
+              replacements: { newId, currentId },
+              type: sequelize.QueryTypes.UPDATE
+            }
+          );
+          console.log(`ID ${currentId} -> ${newId}`);
+        }
+      }
+      
+      // Reiniciar la secuencia si existe
+      const nextId = parroquias.length + 1;
+      try {
+        await sequelize.query(
+          `SELECT setval('parroquia_id_parroquia_seq', :nextId, false)`,
+          {
+            replacements: { nextId },
+            type: sequelize.QueryTypes.SELECT
+          }
+        );
+        console.log(`Secuencia reiniciada a ${nextId}`);
+      } catch (seqError) {
+        console.log('No se encontró secuencia para reiniciar (puede ser normal)');
+      }
+      
+      console.log('Reorganización completada');
+    } catch (error) {
+      logger.error('Error reorganizando IDs:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Delete parroquia
    */
   async deleteParroquia(id) {
@@ -304,8 +358,16 @@ class ParroquiaService {
           console.log('Personas association not found, proceeding with delete');
         }
 
+        // Eliminar la parroquia
         await parroquia.destroy();
-        return { message: 'Parroquia deleted successfully' };
+        
+        // Reorganizar IDs automáticamente para eliminar gaps
+        await this.reorganizeIds();
+        
+        return { 
+          message: 'Parroquia deleted successfully and IDs reorganized',
+          reorganized: true
+        };
       }
     } catch (error) {
       throw new Error(`Error deleting parroquia: ${error.message}`);
