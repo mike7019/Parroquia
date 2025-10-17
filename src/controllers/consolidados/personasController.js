@@ -148,7 +148,7 @@ class PersonasController {
   }
 
   /**
-   * Consultar personas por tallas
+   * Consultar personas por tallas con filtros de edad y sexo
    * GET /api/personas/consolidado/tallas
    */
   async consultarPorTallas(req, res) {
@@ -157,9 +157,19 @@ class PersonasController {
       const filtros = {
         page: req.query.page ? parseInt(req.query.page) : 1,
         limit: req.query.limit ? parseInt(req.query.limit) : 10,
+        
+        // Filtros de tallas
         talla_camisa: req.query.talla_camisa,
         talla_pantalon: req.query.talla_pantalon,
-        talla_zapato: req.query.talla_zapato
+        talla_zapato: req.query.talla_zapato,
+        
+        // Filtros adicionales: edad
+        edad_min: req.query.edad_min ? parseInt(req.query.edad_min) : undefined,
+        edad_max: req.query.edad_max ? parseInt(req.query.edad_max) : undefined,
+        
+        // Filtros adicionales: sexo
+        id_sexo: req.query.id_sexo ? parseInt(req.query.id_sexo) : undefined,
+        sexo: req.query.sexo
       };
 
       Object.keys(filtros).forEach(key => {
@@ -168,7 +178,7 @@ class PersonasController {
         }
       });
 
-      console.log('👕 Consulta por tallas:', filtros);
+      console.log('👕 Consulta por tallas con filtros de edad y sexo:', filtros);
 
       if (format === 'excel') {
         const buffer = await personasService.generarExcelPersonas(filtros);

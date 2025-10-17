@@ -303,8 +303,8 @@ router.get('/personal', authMiddleware.authenticateToken, personasController.con
  * @swagger
  * /api/personas/consolidado/tallas:
  *   get:
- *     summary: Consultar personas por tallas
- *     description: Filtrar personas por talla de camisa, pantalón o zapato
+ *     summary: Consultar personas por tallas con filtros de edad y sexo
+ *     description: Filtrar personas por talla de camisa, pantalón o zapato, con opciones adicionales de edad y sexo
  *     tags:
  *       - Personas Consolidado
  *     security:
@@ -329,6 +329,30 @@ router.get('/personal', authMiddleware.authenticateToken, personasController.con
  *         description: Talla de zapato
  *         example: 42
  *       - in: query
+ *         name: edad_min
+ *         schema:
+ *           type: integer
+ *         description: Edad mínima (filtro opcional)
+ *         example: 18
+ *       - in: query
+ *         name: edad_max
+ *         schema:
+ *           type: integer
+ *         description: Edad máxima (filtro opcional)
+ *         example: 65
+ *       - in: query
+ *         name: id_sexo
+ *         schema:
+ *           type: integer
+ *         description: ID del sexo (1=Masculino, 2=Femenino)
+ *         example: 1
+ *       - in: query
+ *         name: sexo
+ *         schema:
+ *           type: string
+ *         description: Nombre del sexo (alternativa a id_sexo)
+ *         example: Masculino
+ *       - in: query
  *         name: page
  *         schema:
  *           type: integer
@@ -349,7 +373,7 @@ router.get('/personal', authMiddleware.authenticateToken, personasController.con
  *         description: Formato de respuesta
  *     responses:
  *       200:
- *         description: Lista de personas filtradas por tallas
+ *         description: Lista de personas filtradas por tallas, edad y sexo
  *         content:
  *           application/json:
  *             schema:

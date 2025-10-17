@@ -40,6 +40,10 @@ class PersonasService {
         id_comunidad_cultural,
         liderazgo,
         id_destreza,
+        
+        // Sexo
+        id_sexo,
+        sexo,
 
         // Tallas
         talla_camisa,
@@ -146,6 +150,17 @@ class PersonasService {
       if (talla_zapato) {
         whereConditions.push('p.talla_zapato = :talla_zapato');
         params.talla_zapato = talla_zapato;
+      }
+
+      // FILTROS DE SEXO
+      if (id_sexo) {
+        whereConditions.push('p.id_sexo = :id_sexo');
+        params.id_sexo = id_sexo;
+      }
+
+      if (sexo) {
+        whereConditions.push('sx.nombre ILIKE :sexo');
+        params.sexo = `%${sexo}%`;
       }
 
       // FILTROS DE EDAD
