@@ -1,6 +1,7 @@
 import TipoDisposicionBasura from '../../models/catalog/TipoDisposicionBasura.js';
 import FamiliaDisposicionBasura from '../../models/catalog/FamiliaDisposicionBasura.js';
 import sequelize from '../../../config/sequelize.js';
+import { Op } from 'sequelize';
 import logger from '../../utils/logger.js';
 
 class DisposicionBasuraService {
@@ -131,7 +132,7 @@ class DisposicionBasuraService {
         const existingTipo = await TipoDisposicionBasura.findOne({
           where: { 
             nombre: tipoData.nombre,
-            id_tipo_disposicion_basura: { '!=': id }
+            id_tipo_disposicion_basura: { [Op.ne]: id }
           }
         });
 
