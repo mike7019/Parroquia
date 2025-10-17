@@ -157,25 +157,57 @@ class ExcelService {
     const primerPadre = familia.padres && familia.padres.length > 0 ? familia.padres[0] : null;
     const primeraMadre = familia.madres && familia.madres.length > 0 ? familia.madres[0] : null;
     
-    // Crear lista de todas las personas
-    const listaPersonas = familia.todas_personas ? 
-      familia.todas_personas.map(p => p.nombre_completo).join(', ') : 
-      'Sin información';
+    // Crear lista de todas las personas desde familyMembers o todas_personas
+    let listaPersonas = 'Sin información';
+    if (familia.familyMembers && familia.familyMembers.length > 0) {
+      listaPersonas = familia.familyMembers
+        .map(p => p.nombres || p.nombre_completo || 'Sin nombre')
+        .join(', ');
+    } else if (familia.todas_personas && familia.todas_personas.length > 0) {
+      listaPersonas = familia.todas_personas
+        .map(p => p.nombre_completo || 'Sin nombre')
+        .join(', ');
+    }
+    
+    // Obtener ID de familia - puede venir como id_familia o id_encuesta
+    const idFamilia = familia.id_familia || familia.id_encuesta || 'N/A';
+    
+    // Extraer información de la estructura anidada si existe
+    const infoGeneral = familia.informacionGeneral || {};
+    const vivienda = familia.vivienda || {};
+    const metadata = familia.metadata || {};
+    
+    // Obtener datos con prioridad: estructura anidada > datos directos
+    const apellidoFamiliar = infoGeneral.apellido_familiar || familia.apellido_familiar || 'Sin apellido';
+    const municipio = infoGeneral.municipio?.nombre || familia.municipio || 'N/A';
+    const sector = infoGeneral.sector?.nombre || familia.sector || 'N/A';
+    const vereda = infoGeneral.vereda?.nombre || familia.vereda || 'N/A';
+    const direccion = infoGeneral.direccion || familia.direccion_familia || 'Sin dirección';
+    const telefono = infoGeneral.telefono || familia.telefono || 'Sin teléfono';
+    const email = familia.email || 'Sin email';
+    const tipoVivienda = vivienda.tipo_vivienda?.nombre || familia.tipo_vivienda || 'No especificado';
+    
+    // Calcular totales desde metadata o datos directos
+    const totalPersonas = metadata.total_miembros || familia.total_personas || 
+      (familia.familyMembers ? familia.familyMembers.length : 0);
+    const totalPadres = familia.total_padres || 0;
+    const totalMadres = familia.total_madres || 0;
+    const estadoEncuesta = metadata.completed ? 'Completada' : (familia.estado_encuesta || 'Pendiente');
     
     return [
-      familia.id_familia || 'N/A',
-      familia.apellido_familiar || 'Sin apellido',
-      familia.municipio || 'N/A',
-      familia.sector || 'N/A',
-      familia.vereda || 'N/A',
-      familia.direccion_familia || 'Sin dirección',
-      familia.telefono || 'Sin teléfono',
-      familia.email || 'Sin email',
-      familia.tipo_vivienda || 'No especificado',
-      familia.total_personas || 0,
-      familia.total_padres || 0,
-      familia.total_madres || 0,
-      familia.estado_encuesta || 'Pendiente',
+      idFamilia,
+      apellidoFamiliar,
+      municipio,
+      sector,
+      vereda,
+      direccion,
+      telefono,
+      email,
+      tipoVivienda,
+      totalPersonas,
+      totalPadres,
+      totalMadres,
+      estadoEncuesta,
       
       // Información del primer padre
       primerPadre ? primerPadre.nombre_completo : 'Sin padre registrado',
