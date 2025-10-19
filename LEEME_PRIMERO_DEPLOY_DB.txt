@@ -1,0 +1,114 @@
+╔═══════════════════════════════════════════════════════════════╗
+║     🗃️  CÓMO APLICAR CAMBIOS EN BASE DE DATOS REMOTA          ║
+╚═══════════════════════════════════════════════════════════════╝
+
+RESUMEN: Necesitas aplicar la migración para agregar la tabla 
+'corregimientos' y la columna 'id_corregimiento' en 'familias'.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 ARCHIVOS DISPONIBLES:
+
+1. migrations/add-corregimientos-table.sql
+   → Script SQL idempotente (se puede ejecutar varias veces)
+   
+2. apply-migration-remote.js  
+   → Script automatizado en Node.js
+   
+3. deploy-db-changes.sh
+   → Script Bash para SSH
+   
+4. GUIA_DEPLOY_DB.md
+   → Documentación completa y detallada
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 OPCIÓN RECOMENDADA (LA MÁS FÁCIL):
+
+Opción A: SSH Manual
+────────────────────
+
+1. Conectar al servidor:
+   ssh ubuntu@206.62.139.11
+
+2. Ir al directorio de la app:
+   cd /home/ubuntu/parroquia-api
+
+3. Pull de cambios:
+   git pull origin develop
+   npm install
+
+4. Ejecutar migración:
+   psql -h localhost -U parroquia_user -d parroquia_db -f migrations/add-corregimientos-table.sql
+
+5. Reiniciar app:
+   pm2 restart parroquia-api
+
+6. Verificar:
+   curl http://localhost:3000/api/catalog/corregimientos
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🖥️ OPCIÓN ALTERNATIVA: Script Node.js
+
+Opción B: Desde Tu Computadora
+───────────────────────────────
+
+1. Configurar credenciales en .env:
+   
+   REMOTE_DB_HOST=206.62.139.11
+   REMOTE_DB_PORT=5432
+   REMOTE_DB_NAME=parroquia_db
+   REMOTE_DB_USER=parroquia_user
+   REMOTE_DB_PASSWORD=tu_contraseña
+
+2. Ejecutar script:
+   node apply-migration-remote.js
+
+3. SSH al servidor y reiniciar:
+   ssh ubuntu@206.62.139.11 "pm2 restart parroquia-api"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ VERIFICACIÓN POST-DESPLIEGUE:
+
+1. Verificar que la app esté corriendo:
+   ssh ubuntu@206.62.139.11 "pm2 status"
+
+2. Probar endpoint de corregimientos:
+   curl http://206.62.139.11:3000/api/catalog/corregimientos
+
+3. Probar que encuestas guarden corregimiento:
+   - Crear una encuesta con campo corregimiento
+   - Consultar esa encuesta
+   - Verificar que devuelva el campo corregimiento
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 PARA MÁS DETALLES:
+
+Lee el archivo GUIA_DEPLOY_DB.md que contiene:
+- 3 opciones de despliegue detalladas
+- Troubleshooting completo
+- Comandos de verificación
+- Proceso de rollback si algo sale mal
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️  IMPORTANTE:
+
+1. El script SQL es idempotente (se puede ejecutar varias veces)
+2. NO eliminará datos existentes
+3. Haz backup antes si quieres estar 100% seguro
+4. Los cambios en develop ya están listos, solo falta la BD
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+¿NECESITAS AYUDA?
+
+1. Lee GUIA_DEPLOY_DB.md (más detallado)
+2. Revisa los logs: pm2 logs parroquia-api
+3. Verifica conexión a BD primero
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
