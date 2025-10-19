@@ -1778,6 +1778,15 @@ const swaggerConfig = {
                     nombre: { type: 'string', example: 'La Macarena' }
                   }
                 },
+                corregimiento: {
+                  type: 'object',
+                  nullable: true,
+                  description: 'Corregimiento al que pertenece la familia (opcional)',
+                  properties: {
+                    id: { type: 'integer', example: 1 },
+                    nombre: { type: 'string', example: 'Corregimiento El Centro' }
+                  }
+                },
                 fecha: {
                   type: 'string',
                   format: 'date',
