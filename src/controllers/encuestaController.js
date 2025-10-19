@@ -584,14 +584,17 @@ export const obtenerEncuestas = async (req, res) => {
         f.codigo_familia,
         f.tutor_responsable,
         f.numero_contrato_epm,
+        f."comunionEnCasa",
         f.id_municipio,
         f.id_vereda,
         f.id_sector,
         f.id_parroquia,
+        f.id_corregimiento,
         m.nombre_municipio,
         v.nombre as nombre_vereda,
         s.nombre as nombre_sector,
         p.nombre as nombre_parroquia,
+        corr.nombre as nombre_corregimiento,
         tv.id_tipo_vivienda,
         tv.nombre as nombre_tipo_vivienda
       FROM familias f
@@ -599,6 +602,7 @@ export const obtenerEncuestas = async (req, res) => {
       LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
       LEFT JOIN sectores s ON f.id_sector = s.id_sector
       LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
+      LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
       LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
       WHERE ${whereClause}
       ORDER BY f.fecha_ultima_encuesta DESC 
@@ -698,6 +702,7 @@ export const obtenerEncuestas = async (req, res) => {
         let veredaInfo = null;
         let sectorInfo = null;
         let parroquiaInfo = null;
+        let corregimientoInfo = null;
         let tipoViviendaInfo = null;
 
         // Usar datos de municipio ya obtenidos en el JOIN
@@ -765,6 +770,14 @@ export const obtenerEncuestas = async (req, res) => {
               nombre: `ID: ${familiaData.id_parroquia}`
             };
           }
+        }
+
+        // Usar datos de corregimiento ya obtenidos en el JOIN
+        if (familiaData.id_corregimiento && familiaData.nombre_corregimiento) {
+          corregimientoInfo = {
+            id: familiaData.id_corregimiento,
+            nombre: familiaData.nombre_corregimiento
+          };
         }
 
         // Usar datos de tipo de vivienda ya obtenidos en el JOIN
@@ -1108,6 +1121,7 @@ export const obtenerEncuestas = async (req, res) => {
           municipio: municipioInfo,
           vereda: veredaInfo,
           parroquia: parroquiaInfo,
+          corregimiento: corregimientoInfo,
           // Removido: sector_especifico (no lo necesitas según indicaciones)
           
           // *** INFORMACIÓN DE SERVICIOS CON ID Y NOMBRE ***
@@ -1195,14 +1209,17 @@ export const obtenerEncuestaPorId = async (req, res) => {
         f.codigo_familia,
         f.tutor_responsable,
         f.numero_contrato_epm,
+        f."comunionEnCasa",
         f.id_municipio,
         f.id_vereda,
         f.id_sector,
         f.id_parroquia,
+        f.id_corregimiento,
         m.nombre_municipio,
         v.nombre as nombre_vereda,
         s.nombre as nombre_sector,
         p.nombre as nombre_parroquia,
+        corr.nombre as nombre_corregimiento,
         tv.id_tipo_vivienda,
         tv.nombre as nombre_tipo_vivienda
       FROM familias f
@@ -1210,6 +1227,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
       LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
       LEFT JOIN sectores s ON f.id_sector = s.id_sector
       LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
+      LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
       LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
       WHERE f.id_familia = :familiaId
     `;
@@ -1316,6 +1334,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
     let veredaInfo = null;
     let sectorInfo = null;
     let parroquiaInfo = null;
+    let corregimientoInfo = null;
     let tipoViviendaInfo = null;
 
     // Usar datos de municipio ya obtenidos en el JOIN
@@ -1383,6 +1402,14 @@ export const obtenerEncuestaPorId = async (req, res) => {
           nombre: `ID: ${familiaData.id_parroquia}`
         };
       }
+    }
+
+    // Usar datos de corregimiento ya obtenidos en el JOIN
+    if (familiaData.id_corregimiento && familiaData.nombre_corregimiento) {
+      corregimientoInfo = {
+        id: familiaData.id_corregimiento,
+        nombre: familiaData.nombre_corregimiento
+      };
     }
 
     // Usar datos de tipo de vivienda ya obtenidos en el JOIN
@@ -1727,6 +1754,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
       municipio: municipioInfo,
       vereda: veredaInfo,
       parroquia: parroquiaInfo,
+      corregimiento: corregimientoInfo,
       
       // *** INFORMACIÓN DE SERVICIOS CON ID Y NOMBRE ***
       basuras: disposicionBasuras, // Siempre array, nunca null
@@ -1972,20 +2000,11 @@ export const crearEncuesta = async (req, res) => {
     } = req.body;
 
     console.log('✅ Validaciones completadas por middlewares');
-    console.log('🔍 DEBUG - informacionGeneral.parroquia:', JSON.stringify(informacionGeneral.parroquia, null, 2));
-    console.log('🔍 DEBUG - parroquia ID extraído:', informacionGeneral.parroquia?.id);
-
+    
     // 1. CREAR FAMILIA
     console.log('💾 Creando registro de familia...');
     
     const tamanioFamiliaCalculado = Math.max(1, (familyMembers.length || 0) + (deceasedMembers.length || 0));
-    
-    // DEBUG: Log para verificar valores de ID geográficos
-    console.log('🌍 DEBUG - Valores geográficos a guardar:');
-    console.log('  id_municipio:', informacionGeneral.municipio?.id ? parseInt(informacionGeneral.municipio.id) : null);
-    console.log('  id_parroquia:', informacionGeneral.parroquia?.id ? parseInt(informacionGeneral.parroquia.id) : null);
-    console.log('  id_sector:', informacionGeneral.sector?.id ? parseInt(informacionGeneral.sector.id) : null);
-    console.log('  id_vereda:', informacionGeneral.vereda?.id ? parseInt(informacionGeneral.vereda.id) : null);
     
     const familiaData = {
       apellido_familiar: informacionGeneral.apellido_familiar,
@@ -2004,10 +2023,12 @@ export const crearEncuesta = async (req, res) => {
       fecha_encuesta: informacionGeneral.fecha || new Date().toISOString().split('T')[0], // Fecha de registro
       codigo_familia: `FAM_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
       tutor_responsable: null,
+      numero_contrato_epm: informacionGeneral.numero_contrato_epm || null,
       id_municipio: informacionGeneral.municipio?.id ? parseInt(informacionGeneral.municipio.id) : null,
       id_parroquia: informacionGeneral.parroquia?.id ? parseInt(informacionGeneral.parroquia.id) : null,
       id_vereda: informacionGeneral.vereda?.id ? parseInt(informacionGeneral.vereda.id) : null,
       id_sector: informacionGeneral.sector?.id ? parseInt(informacionGeneral.sector.id) : null,
+      id_corregimiento: informacionGeneral.corregimiento?.id ? parseInt(informacionGeneral.corregimiento.id) : null,
       comunionEnCasa: informacionGeneral.comunionEnCasa || false,
       
       // CAMPOS BOOLEANOS DE SERVICIOS DE AGUA
@@ -2022,13 +2043,6 @@ export const crearEncuesta = async (req, res) => {
       disposicion_recicla: vivienda?.disposicion_basuras?.recicla || false,
       disposicion_aire_libre: vivienda?.disposicion_basuras?.aire_libre || false
     };
-
-    console.log('🔍 DEBUG - familiaData a guardar:', JSON.stringify({
-      id_municipio: familiaData.id_municipio,
-      id_parroquia: familiaData.id_parroquia,
-      id_vereda: familiaData.id_vereda,
-      id_sector: familiaData.id_sector
-    }, null, 2));
 
     const familia = await Familias.create(familiaData, { transaction });
     console.log(`✅ Familia creada con ID: ${familia.id_familia}`);
@@ -2045,18 +2059,6 @@ export const crearEncuesta = async (req, res) => {
       );
       console.log(`✅ id_parroquia actualizado a: ${familiaData.id_parroquia}`);
     }
-    
-    // DEBUG: Verificar qué se guardó realmente
-    console.log('🔍 DEBUG - Familia guardada en BD:', JSON.stringify({
-      id_familia: familia.id_familia,
-      id_municipio: familia.id_municipio,
-      id_parroquia: familia.id_parroquia,
-      id_sector: familia.id_sector,
-      id_vereda: familia.id_vereda
-    }, null, 2));
-    
-    // DEBUG ADICIONAL: Verificar objeto completo de familia retornado por Sequelize
-    console.log('🔍 DEBUG - Familia objeto completo:', familia.toJSON ? JSON.stringify(familia.toJSON(), null, 2) : 'No toJSON available');
     
     if (!familia.id_familia) {
       throw new Error('Error al crear la familia: ID no generado correctamente');

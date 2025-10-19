@@ -12,6 +12,7 @@ import Veredas from './catalog/Veredas.js';
 import Municipios from './catalog/Municipios.js';
 import Departamentos from './catalog/Departamentos.js';
 import Familias from './catalog/Familias.js';
+import Corregimientos from './catalog/Corregimientos.js';
 import TipoDisposicionBasura from './catalog/TipoDisposicionBasura.js';
 // Import FamiliaDisposicionBasura from main (CommonJS) instead of catalog
 import { createRequire } from 'module';
@@ -60,8 +61,13 @@ try {
     Departamentos, Sector, TipoIdentificacion, Enfermedad, Familias, Persona, 
     TipoVivienda, Parentesco, SituacionCivil, Estudio, Talla, DifuntosFamilia,
     TipoDisposicionBasura, FamiliaDisposicionBasura, TipoAguasResiduales, 
-    FamiliaSistemaAguasResiduales, ComunidadCultural, Destreza
+    FamiliaSistemaAguasResiduales, ComunidadCultural, Destreza, Corregimientos
   };
+  // Ejecutar asociaciones de Corregimientos
+  if (Corregimientos && typeof Corregimientos.associate === 'function') {
+    Corregimientos.associate(models);
+    console.log('✅ Asociaciones de Corregimientos configuradas');
+  }
 
   // Ejecutar asociaciones de Familias
   if (Familias && typeof Familias.associate === 'function') {

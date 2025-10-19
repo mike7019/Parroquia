@@ -18,6 +18,7 @@ import systemRoutes from './routes/systemRoutes.js';
 import catalogRoutes from './routes/catalog/index.js';
 import situacionCivilRoutes from './routes/catalog/situacionCivilRoutes.js';
 import habilidadRoutes from './routes/catalog/habilidadRoutes.js';
+import corregimientosRoutes from './routes/catalog/corregimientosRoutes.js';
 import estadisticasGeneralesRoutes from './routes/estadisticasGeneralesRoutes.js';
 import encuestaRoutes from './routes/encuestaRoutes.js';
 import difuntosRoutes from './routes/difuntosRoutes.js';
@@ -242,6 +243,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/admin', ipWhitelistRoutes); // Rutas de administración de IP whitelist
 app.use('/api/catalog', catalogRoutes);
 app.use('/api/catalog/habilidades', habilidadRoutes); // CRUD de catálogo de habilidades
+app.use('/api/catalog/corregimientos', corregimientosRoutes); // CRUD de catálogo de corregimientos
 app.use('/api', catalogosRoutes); // Catálogos de destrezas y habilidades
 app.use('/api/estadisticas', estadisticasGeneralesRoutes); // Estadísticas generales del sistema
 app.use('/api/situaciones-civiles', situacionCivilRoutes); // Direct access for compatibility
