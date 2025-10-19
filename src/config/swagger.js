@@ -2635,6 +2635,14 @@ const swaggerConfig = {
                     nombre: { type: 'string', description: 'Nombre de la vereda', example: 'El Carmen' }
                   }
                 },
+                corregimiento: {
+                  type: 'object',
+                  description: 'Corregimiento al que pertenece la familia (opcional)',
+                  properties: {
+                    id: { type: 'integer', description: 'ID del corregimiento', example: 1 },
+                    nombre: { type: 'string', description: 'Nombre del corregimiento', example: 'El Centro' }
+                  }
+                },
                 fecha: { 
                   type: 'string', 
                   format: 'date-time',
@@ -3648,6 +3656,10 @@ const swaggerConfig = {
       {
         name: 'Veredas',
         description: '🌄 **Catálogo de Veredas** - Gestión de veredas y divisiones territoriales menores.'
+      },
+      {
+        name: 'Corregimientos',
+        description: '🏘️ **Catálogo de Corregimientos** - Gestión de corregimientos y divisiones territoriales. **Funcionalidades:** CRUD completo, búsqueda por nombre/código, filtrado por municipio, estadísticas de uso, asociación con familias.'
       },
       {
         name: 'Sexos',
