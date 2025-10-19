@@ -11,6 +11,7 @@ pnpm-debug.log*
 .env.development.local
 .env.test
 .env.production.local
+.env.docker          # Archivo generado por deploy-docker.sh
 # Keep .env.example for documentation
 
 # Build outputs
@@ -139,6 +140,10 @@ __pycache__/
 
 # Docker
 docker-compose.override.yml
+
+# Docker logs y volúmenes
+.docker/
+docker-data/
 
 # PM2
 ecosystem.json

@@ -1,0 +1,130 @@
+{
+  "metadata": {
+    "backup_date": "2025-10-19T02:32:39.598Z",
+    "encuesta_id": 60,
+    "user_id": "acdb6fc5-ac64-4936-b756-0498873986c1",
+    "operation": "DELETE",
+    "backup_version": "1.0"
+  },
+  "familia": {
+    "id_familia": "60",
+    "apellido_familiar": "FULL_TEST_1760841159496",
+    "sector": "Centro",
+    "direccion_familia": "Calle Full Test 1760841159496",
+    "numero_contacto": null,
+    "telefono": "3001159496",
+    "email": null,
+    "tamaño_familia": 1,
+    "tipo_vivienda": "Casa",
+    "estado_encuesta": "completed",
+    "numero_encuestas": 1,
+    "fecha_ultima_encuesta": "2025-10-19",
+    "codigo_familia": "FAM_1760841159515_bacc22b1",
+    "tutor_responsable": null,
+    "id_municipio": "1",
+    "id_vereda": "1",
+    "id_sector": "1",
+    "comunionEnCasa": true,
+    "numero_contrato_epm": "EPM-123-FULL-TEST",
+    "id_parroquia": "1",
+    "comunionencasa": false,
+    "fecha_encuesta": "2025-10-18",
+    "sustento_familia": null,
+    "observaciones_encuestador": null,
+    "autorizacion_datos": false,
+    "pozo_septico": false,
+    "letrina": false,
+    "campo_abierto": false,
+    "disposicion_recolector": true,
+    "disposicion_quemada": false,
+    "disposicion_enterrada": false,
+    "disposicion_recicla": false,
+    "disposicion_aire_libre": false,
+    "disposicion_no_aplica": false,
+    "id_tipo_vivienda": "1",
+    "id_corregimiento": "1",
+    "nombre_municipio": "Abejorral",
+    "nombre_vereda": "Vereda Central Abejorral",
+    "nombre_sector": "Sector Centro",
+    "nombre_parroquia": "Parroquia San José",
+    "nombre_tipo_vivienda": "Casa"
+  },
+  "personas": [
+    {
+      "id_personas": "81",
+      "primer_nombre": "Test",
+      "segundo_nombre": "Full",
+      "primer_apellido": "Persona",
+      "segundo_apellido": null,
+      "id_tipo_identificacion_tipo_identificacion": "1",
+      "identificacion": "FULL1760841159496",
+      "telefono": "3001111111",
+      "correo_electronico": "test.1760841159546.0@temp.com",
+      "fecha_nacimiento": "1989-12-31",
+      "direccion": "Calle Full Test 1760841159496",
+      "id_familia_familias": "60",
+      "id_estado_civil_estado_civil": "1",
+      "estudios": "Universitario",
+      "en_que_eres_lider": null,
+      "necesidad_enfermo": "Ninguna",
+      "id_profesion": "1",
+      "id_sexo": "1",
+      "talla_camisa": "M",
+      "talla_pantalon": "32",
+      "talla_zapato": "40",
+      "id_familia": null,
+      "id_parroquia": null,
+      "id_parentesco": "1",
+      "id_comunidad_cultural": "1",
+      "id_nivel_educativo": null,
+      "motivo_celebrar": null,
+      "dia_celebrar": null,
+      "mes_celebrar": null,
+      "sexo_nombre": "Sexo masculino",
+      "tipo_identificacion_nombre": "Cédula de Ciudadanía",
+      "estado_civil_nombre": "Soltero(a)"
+    }
+  ],
+  "difuntos": [],
+  "servicios": {
+    "disposicion_basuras": [
+      {
+        "id": "169",
+        "id_familia": "60",
+        "id_tipo_disposicion_basura": "1",
+        "created_at": "2025-10-19T02:32:39.171Z",
+        "updated_at": "2025-10-19T02:32:39.171Z",
+        "nombre": "Recolección Pública"
+      }
+    ],
+    "sistema_acueducto": [
+      {
+        "id_familia": "60",
+        "id_sistema_acueducto": "1",
+        "id": "164",
+        "created_at": "2025-10-19T02:32:39.171Z",
+        "updated_at": "2025-10-19T02:32:39.171Z",
+        "nombre": "Acueducto Público"
+      }
+    ],
+    "aguas_residuales": [
+      {
+        "id": "101",
+        "id_familia": "60",
+        "id_tipo_aguas_residuales": "1",
+        "created_at": "2025-10-19T02:32:39.171Z",
+        "updated_at": "2025-10-19T02:32:39.171Z",
+        "nombre": "Alcantarillado"
+      }
+    ],
+    "tipo_vivienda": [
+      {
+        "id_familia": "60",
+        "id_tipo_vivienda": "1",
+        "created_at": "2025-10-19T02:32:39.171Z",
+        "updated_at": "2025-10-19T02:32:39.171Z",
+        "nombre": "Casa"
+      }
+    ]
+  }
+}

@@ -208,6 +208,13 @@ export const crearEncuesta = async (req, res) => {
  * Crear registro de familia optimizado
  */
 const crearRegistroFamilia = async (informacionGeneral, vivienda, servicios_agua, observaciones, transaction) => {
+  // 🐛 DEBUG: Verificar valor de corregimiento
+  logger.info('🔍 DEBUG crearRegistroFamilia - informacionGeneral.corregimiento:', {
+    corregimiento: informacionGeneral.corregimiento,
+    corregimiento_id: informacionGeneral.corregimiento?.id,
+    type: typeof informacionGeneral.corregimiento
+  });
+
   const familiaData = {
     apellido_familiar: informacionGeneral.apellido_familiar,
     sector: informacionGeneral.sector?.nombre || informacionGeneral.sector,
@@ -226,6 +233,7 @@ const crearRegistroFamilia = async (informacionGeneral, vivienda, servicios_agua
     id_vereda: informacionGeneral.vereda?.id || null,
     id_sector: informacionGeneral.sector?.id || null,
     id_parroquia: informacionGeneral.parroquia?.id || null,
+    id_corregimiento: informacionGeneral.corregimiento?.id || null,
     
     // Información adicional
     numero_contrato_epm: informacionGeneral.numero_contrato_epm || null,
@@ -245,18 +253,28 @@ const crearRegistroFamilia = async (informacionGeneral, vivienda, servicios_agua
     id_tipo_vivienda: vivienda.tipo_vivienda?.id || null
   };
 
+  // 🐛 DEBUG: Verificar familiaData antes del INSERT
+  logger.info('🔍 DEBUG familiaData construido:', {
+    id_municipio: familiaData.id_municipio,
+    id_vereda: familiaData.id_vereda,
+    id_sector: familiaData.id_sector,
+    id_parroquia: familiaData.id_parroquia,
+    id_corregimiento: familiaData.id_corregimiento,
+    apellido_familiar: familiaData.apellido_familiar
+  });
+
   const [familia] = await sequelize.query(`
     INSERT INTO familias (
       apellido_familiar, sector, direccion_familia, numero_contacto, telefono, email,
       tamaño_familia, estado_encuesta, numero_encuestas, fecha_ultima_encuesta, fecha_encuesta,
-      id_municipio, id_vereda, id_sector, id_parroquia, numero_contrato_epm, comunionEnCasa,
+      id_municipio, id_vereda, id_sector, id_parroquia, id_corregimiento, numero_contrato_epm, comunionEnCasa,
       sustento_familia, observaciones_encuestador, autorizacion_datos,
       pozo_septico, letrina, campo_abierto, id_tipo_vivienda,
       created_at, updated_at
     ) VALUES (
       :apellido_familiar, :sector, :direccion_familia, :numero_contacto, :telefono, :email,
       :tamaño_familia, :estado_encuesta, :numero_encuestas, :fecha_ultima_encuesta, :fecha_encuesta,
-      :id_municipio, :id_vereda, :id_sector, :id_parroquia, :numero_contrato_epm, :comunionEnCasa,
+      :id_municipio, :id_vereda, :id_sector, :id_parroquia, :id_corregimiento, :numero_contrato_epm, :comunionEnCasa,
       :sustento_familia, :observaciones_encuestador, :autorizacion_datos,
       :pozo_septico, :letrina, :campo_abierto, :id_tipo_vivienda,
       NOW(), NOW()

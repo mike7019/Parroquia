@@ -7,7 +7,7 @@ pipeline {
         // Usuario para conectar por SSH al servidor
         SERVER_USER = 'l4bs' // Ajusta según tu usuario real
         // Ruta absoluta a la carpeta de tu proyecto en el servidor
-        PROJECT_PATH = '/home/l4bs/parroquia/backend/Parroquia' // Ajusta según tu ruta real
+        PROJECT_PATH = '/home/l4bsb/Parroquia' // Ajusta según tu ruta real
         // ID de la credencial SSH que creaste en Jenkins
         SSH_CREDENTIAL_ID = 'servidor-produccion-ssh'
         // Puerto de la aplicación

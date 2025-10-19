@@ -117,19 +117,35 @@ async function crearTablaCorregimientos() {
 
     if (municipios.length > 0) {
       const municipioId = municipios[0].id_municipio;
+      
+      console.log(`   📍 Usando municipio ID: ${municipioId}\n`);
 
-      await sequelize.query(`
-        INSERT INTO corregimientos (nombre, codigo_corregimiento, id_municipio_municipios)
-        VALUES 
-          ('Corregimiento El Centro', 'COR-001', :municipioId),
-          ('Corregimiento La Esperanza', 'COR-002', :municipioId),
-          ('Corregimiento San Antonio', 'COR-003', :municipioId)
-        ON CONFLICT (codigo_corregimiento) DO NOTHING;
-      `, {
-        replacements: { municipioId }
-      });
+      // Insertar uno por uno para mejor control
+      try {
+        await sequelize.query(`
+          INSERT INTO corregimientos (nombre, codigo_corregimiento, id_municipio_municipios)
+          VALUES ('Corregimiento El Centro', 'COR-001', ${municipioId})
+          ON CONFLICT (codigo_corregimiento) DO NOTHING;
+        `);
+        console.log('   ✅ Corregimiento 1 insertado');
 
-      console.log('✅ Corregimientos de prueba insertados\n');
+        await sequelize.query(`
+          INSERT INTO corregimientos (nombre, codigo_corregimiento, id_municipio_municipios)
+          VALUES ('Corregimiento La Esperanza', 'COR-002', ${municipioId})
+          ON CONFLICT (codigo_corregimiento) DO NOTHING;
+        `);
+        console.log('   ✅ Corregimiento 2 insertado');
+
+        await sequelize.query(`
+          INSERT INTO corregimientos (nombre, codigo_corregimiento, id_municipio_municipios)
+          VALUES ('Corregimiento San Antonio', 'COR-003', ${municipioId})
+          ON CONFLICT (codigo_corregimiento) DO NOTHING;
+        `);
+        console.log('   ✅ Corregimiento 3 insertado\n');
+        
+      } catch (insertError) {
+        console.log('   ℹ️  Corregimientos ya existen (ok)\n');
+      }
     } else {
       console.log('⚠️  No hay municipios para insertar datos de prueba\n');
     }

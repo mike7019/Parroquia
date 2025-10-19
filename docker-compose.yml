@@ -7,90 +7,104 @@ services:
     container_name: parroquia-postgres
     restart: unless-stopped
     environment:
-      # Using exact variables from your .bashrc
-      POSTGRES_DB: parroquia_db
-      POSTGRES_USER: parroquia_user
-      POSTGRES_PASSWORD: ParroquiaSecure2025
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
     networks:
       - parroquia-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U parroquia_user -d parroquia_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
   # API Application
-  # api:
-  #   build: 
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: parroquia-api
-  #   restart: unless-stopped
-  #   environment:
-  #     # Database connection using your .bashrc variables
-  #     DB_HOST: postgres
-  #     DB_PORT: 5432
-  #     DB_NAME: ${DB_NAME}
-  #     DB_USER: ${DB_USER}
-  #     DB_PASSWORD: ${DB_PASSWORD}
-  #     
-  #     # JWT Secrets from your .bashrc
-  #     JWT_SECRET: ${JWT_SECRET}
-  #     JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
-  #     JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
-  #     JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN}
-  #     
-  #     # Environment
-  #     NODE_ENV: ${NODE_ENV}
-  #     PORT: ${PORT}
-  #     
-  #     # Email Configuration from your .bashrc
-  #     EMAIL_HOST: ${EMAIL_HOST}
-  #     EMAIL_PORT: ${EMAIL_PORT}
-  #     EMAIL_USER: ${EMAIL_USER}
-  #     EMAIL_PASS: ${EMAIL_PASS}
-  #     EMAIL_FROM: ${EMAIL_FROM}
-  #     SEND_REAL_EMAILS: ${SEND_REAL_EMAILS}
-  #     SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL}
-  #     
-  #     # Application Configuration from your .bashrc
-  #     APP_NAME: ${APP_NAME}
-  #     APP_URL: ${APP_URL}
-  #     
-  #     # Security Configuration from your .bashrc
-  #     CORS_ORIGIN: ${CORS_ORIGIN}
-  #     BCRYPT_ROUNDS: ${BCRYPT_ROUNDS}
-  #     
-  #     # Rate Limiting from your .bashrc
-  #     RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS}
-  #     RATE_LIMIT_MAX: ${RATE_LIMIT_MAX}
-  #     RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS}
-  #     
-  #     # Logging
-  #     LOG_LEVEL: ${LOG_LEVEL}
-  #   ports:
-  #     - "${PORT}:${PORT}"
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   networks:
-  #     - parroquia-network
-  #   volumes:
-  #     - ./logs:/app/logs
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "curl -f http://localhost:${PORT}/api/health || exit 1"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
+  api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: ${NODE_ENV:-production}
+    container_name: parroquia-api
+    restart: unless-stopped
+    environment:
+      # Database Configuration
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      
+      # JWT Configuration
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-72h}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      
+      # Email Configuration
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASS: ${EMAIL_PASS}
+      EMAIL_FROM: ${EMAIL_FROM}
+      SEND_REAL_EMAILS: ${SEND_REAL_EMAILS:-true}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL}
+      
+      # SMTP Configuration
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      
+      # Application Configuration
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3000}
+      APP_NAME: ${APP_NAME:-Parroquia API}
+      APP_URL: ${APP_URL}
+      FRONTEND_URL: ${FRONTEND_URL}
+      
+      # Security Configuration
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-900000}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-100}
+      
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      
+      # API Keys (opcional)
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      
+    ports:
+      - "${PORT:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - parroquia-network
+    volumes:
+      - ./logs:/app/logs
+      - ./temp:/app/temp
+      - ./uploads:/app/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
 volumes:
   postgres_data:
     driver: local
+    name: parroquia_postgres_data
 
 networks:
   parroquia-network:
     driver: bridge
+    name: parroquia_network

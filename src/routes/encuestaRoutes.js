@@ -196,6 +196,7 @@ const router = express.Router();
  *               parroquia: { id: 1, nombre: "San José" }
  *               sector: { id: 1, nombre: "Centro" }
  *               vereda: { id: 1, nombre: "La Macarena" }
+ *               corregimiento: { id: 1, nombre: "El Centro" }
  *               fecha: "2025-08-25"
  *               apellido_familiar: "Rodríguez García"
  *               direccion: "Carrera 45 # 23-67"

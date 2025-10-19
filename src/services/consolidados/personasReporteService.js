@@ -35,6 +35,11 @@ class PersonasReporteService {
         params.id_vereda = filtros.id_vereda;
       }
       
+      if (filtros.id_corregimiento) {
+        whereConditions.push('f.id_corregimiento = :id_corregimiento');
+        params.id_corregimiento = filtros.id_corregimiento;
+      }
+      
       if (filtros.id_parroquia) {
         whereConditions.push('p.id_parroquia = :id_parroquia');
         params.id_parroquia = filtros.id_parroquia;
@@ -105,6 +110,8 @@ class PersonasReporteService {
           sec.nombre as nombre_sector,
           v.id_vereda,
           v.nombre as nombre_vereda,
+          corr.id_corregimiento,
+          corr.nombre as nombre_corregimiento,
           pr.id_parroquia,
           pr.nombre as nombre_parroquia,
           
@@ -133,6 +140,7 @@ class PersonasReporteService {
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
+        LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
         LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
         LEFT JOIN parroquia pr ON p.id_parroquia = pr.id_parroquia
         LEFT JOIN profesiones prof ON p.id_profesion = prof.id_profesion
@@ -211,6 +219,7 @@ class PersonasReporteService {
           municipio: persona.nombre_municipio,
           sector: persona.nombre_sector,
           vereda: persona.nombre_vereda,
+          corregimiento: persona.nombre_corregimiento,
           parroquia: persona.nombre_parroquia,
           talla_camisa: persona.talla_camisa,
           talla_pantalon: persona.talla_pantalon,
@@ -237,6 +246,7 @@ class PersonasReporteService {
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
+        LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
         LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
         LEFT JOIN parroquia pr ON p.id_parroquia = pr.id_parroquia
         LEFT JOIN profesiones prof ON p.id_profesion = prof.id_profesion
@@ -298,6 +308,7 @@ class PersonasReporteService {
         { header: 'Municipio', key: 'municipio', width: 25 },
         { header: 'Sector', key: 'sector', width: 25 },
         { header: 'Vereda', key: 'vereda', width: 25 },
+        { header: 'Corregimiento', key: 'corregimiento', width: 25 },
         { header: 'Parroquia', key: 'parroquia', width: 30 },
         { header: 'Familia', key: 'familia_apellido', width: 30 },
         
@@ -361,7 +372,7 @@ class PersonasReporteService {
       // Aplicar autofiltro
       sheet.autoFilter = {
         from: 'A1',
-        to: `Y1` // Hasta la columna Y (25 columnas)
+        to: `Z1` // Hasta la columna Z (26 columnas - agregamos corregimiento)
       };
       
       // Congelar primera fila

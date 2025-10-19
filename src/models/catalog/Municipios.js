@@ -75,6 +75,14 @@ const Municipios = sequelize.define('Municipios', {
 
 // Definir asociaciones completas
 Municipios.associate = function(models) {
+  // Relación con Corregimientos - un municipio puede tener muchos corregimientos
+  if (models.Corregimientos) {
+    Municipios.hasMany(models.Corregimientos, {
+      foreignKey: 'id_municipio_municipios',
+      sourceKey: 'id_municipio',
+      as: 'corregimientos'
+    });
+  }
   // Relación con Departamento - un municipio pertenece a un departamento
   Municipios.belongsTo(models.Departamentos, {
     foreignKey: 'id_departamento',

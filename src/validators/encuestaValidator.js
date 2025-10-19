@@ -31,6 +31,63 @@ export const validarEncuesta = [
     .optional()
     .isBoolean()
     .withMessage('comunionEnCasa debe ser un valor booleano (true/false)'),
+  
+  // Validaciones opcionales para campos geográficos
+  body('informacionGeneral.municipio')
+    .optional()
+    .custom((value) => {
+      // Permitir objeto {id, nombre} o null
+      if (value !== null && typeof value === 'object') {
+        if (!value.id) {
+          throw new Error('Objeto municipio debe tener propiedad id');
+        }
+      }
+      return true;
+    }),
+  body('informacionGeneral.vereda')
+    .optional()
+    .custom((value) => {
+      // Permitir objeto {id, nombre} o null
+      if (value !== null && typeof value === 'object') {
+        if (!value.id) {
+          throw new Error('Objeto vereda debe tener propiedad id');
+        }
+      }
+      return true;
+    }),
+  body('informacionGeneral.sector')
+    .optional()
+    .custom((value) => {
+      // Permitir objeto {id, nombre} o null
+      if (value !== null && typeof value === 'object') {
+        if (!value.id) {
+          throw new Error('Objeto sector debe tener propiedad id');
+        }
+      }
+      return true;
+    }),
+  body('informacionGeneral.parroquia')
+    .optional()
+    .custom((value) => {
+      // Permitir objeto {id, nombre} o null
+      if (value !== null && typeof value === 'object') {
+        if (!value.id) {
+          throw new Error('Objeto parroquia debe tener propiedad id');
+        }
+      }
+      return true;
+    }),
+  body('informacionGeneral.corregimiento')
+    .optional()
+    .custom((value) => {
+      // Permitir objeto {id, nombre} o null
+      if (value !== null && typeof value === 'object') {
+        if (!value.id) {
+          throw new Error('Objeto corregimiento debe tener propiedad id');
+        }
+      }
+      return true;
+    }),
 
   // Validaciones para vivienda
   body('vivienda').isObject().withMessage('vivienda debe ser un objeto'),

@@ -67,6 +67,7 @@ class EncuestaService {
         v.nombre as nombre_vereda,
         s.nombre as nombre_sector,
         p.nombre as nombre_parroquia,
+        corr.nombre as nombre_corregimiento,
         tv.nombre as nombre_tipo_vivienda,
         -- Agregación de personas vivas
         COALESCE(
@@ -103,13 +104,14 @@ class EncuestaService {
       LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
       LEFT JOIN sectores s ON f.id_sector = s.id_sector
       LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
+      LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
       LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
       LEFT JOIN personas per ON f.id_familia = per.id_familia_familias 
         AND per.identificacion NOT LIKE 'FALLECIDO%'
       LEFT JOIN difuntos_familia df ON f.id_familia = df.id_familia_familias
       WHERE ${whereClause}
       GROUP BY f.id_familia, fs.total_personas, fs.total_difuntos, 
-               m.nombre_municipio, v.nombre, s.nombre, p.nombre, tv.nombre
+               m.nombre_municipio, v.nombre, s.nombre, p.nombre, corr.nombre, tv.nombre
       ${orderClause}
       ${limitClause}
     `;
@@ -134,6 +136,7 @@ class EncuestaService {
         SELECT COUNT(*) as total 
         FROM familias f
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
+        LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
         WHERE ${whereClause.replace(' LIMIT :limit', '').replace(' OFFSET :offset', '')}
       `;
       const [{ total: totalCount }] = await sequelize.query(countQuery, {
@@ -179,6 +182,7 @@ class EncuestaService {
         v.nombre as nombre_vereda,
         s.nombre as nombre_sector,
         p.nombre as nombre_parroquia,
+        corr.nombre as nombre_corregimiento,
         tv.nombre as nombre_tipo_vivienda,
         -- Personas vivas con detalles completos
         COALESCE(
@@ -227,6 +231,7 @@ class EncuestaService {
       LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
       LEFT JOIN sectores s ON f.id_sector = s.id_sector
       LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
+      LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
       LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
       LEFT JOIN personas per ON f.id_familia = per.id_familia_familias 
         AND per.identificacion NOT LIKE 'FALLECIDO%'
@@ -236,7 +241,7 @@ class EncuestaService {
       LEFT JOIN sexos dfsx ON df.id_sexo = dfsx.id_sexo
       LEFT JOIN parentescos par ON df.id_parentesco = par.id_parentesco
       WHERE f.id_familia = :id
-      GROUP BY f.id_familia, m.nombre_municipio, v.nombre, s.nombre, p.nombre, tv.nombre
+      GROUP BY f.id_familia, m.nombre_municipio, v.nombre, s.nombre, p.nombre, corr.nombre, tv.nombre
     `;
 
     const [encuesta] = await sequelize.query(query, {
@@ -337,6 +342,7 @@ class EncuestaService {
         ) as personas` : ''}
       FROM familias f
       LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
+      LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
       ${incluirPersonas ? 'LEFT JOIN personas p ON f.id_familia = p.id_familia_familias AND p.identificacion NOT LIKE \'FALLECIDO%\'' : ''}
       WHERE to_tsvector('spanish', 
         COALESCE(f.apellido_familiar, '') || ' ' ||
