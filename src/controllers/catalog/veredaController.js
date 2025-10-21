@@ -37,9 +37,13 @@ class VeredaController {
       });
 
       if (!result.created) {
+        const mensajeError = id_municipio 
+          ? `Vereda "${nombre}" ya existe en este municipio`
+          : `Vereda "${nombre}" ya existe`;
+        
         return res.status(409).json(
           createErrorResponse(
-            'Vereda ya existe con ese nombre o código',
+            mensajeError,
             null,
             'DUPLICATE_ERROR'
           )

@@ -102,10 +102,18 @@ class VeredaService {
         veredaData.codigo_vereda = await this.generateNextVeredaCode();
       }
 
+      // Validar duplicados por nombre Y municipio (no solo por nombre)
+      const whereClause = {
+        nombre: veredaData.nombre
+      };
+
+      // Si se proporciona municipio, incluirlo en la búsqueda de duplicados
+      if (veredaData.id_municipio) {
+        whereClause.id_municipio_municipios = veredaData.id_municipio;
+      }
+
       const [vereda, created] = await getVeredasModel().findOrCreate({
-        where: {
-          nombre: veredaData.nombre
-        },
+        where: whereClause,
         defaults: {
           nombre: veredaData.nombre,
           codigo_vereda: veredaData.codigo_vereda,
