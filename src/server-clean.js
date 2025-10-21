@@ -16,6 +16,12 @@ import difuntosRoutes from './routes/difuntosRoutes.js';
 
 // Import middlewares
 import errorHandler from './middlewares/errorHandler.js';
+import { 
+  mobileOptimizationMiddleware, 
+  mobileResponseOptimizer, 
+  mobileConnectionHandler,
+  mobileLogger 
+} from './middlewares/mobileOptimization.js';
 
 // Import Swagger configuration
 import { setupSwagger } from './config/swagger.js';
@@ -54,13 +60,26 @@ const corsOptions = {
     'Content-Type',
     'Accept',
     'Authorization',
+    'User-Agent',
     'Cache-Control',
     'Pragma'
   ],
-  optionsSuccessStatus: 200
+  exposedHeaders: [
+    'X-Total-Count',
+    'X-Page-Count',
+    'Content-Disposition'
+  ],
+  optionsSuccessStatus: 200,
+  maxAge: 86400
 };
 
 app.use(cors(corsOptions));
+
+// Mobile optimization middleware - Después de CORS pero antes de routes
+app.use(mobileOptimizationMiddleware);
+app.use(mobileConnectionHandler);
+app.use(mobileLogger);
+app.use(mobileResponseOptimizer);
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));

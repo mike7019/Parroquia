@@ -42,6 +42,12 @@ import ipWhitelistRoutes from './routes/admin/ipWhitelistRoutes.js';
 // Import middlewares
 import errorHandler from './middlewares/errorHandler.js';
 import { ipWhitelistMiddleware } from './middlewares/ipWhitelist.js';
+import { 
+  mobileOptimizationMiddleware, 
+  mobileResponseOptimizer, 
+  mobileConnectionHandler,
+  mobileLogger 
+} from './middlewares/mobileOptimization.js';
 
 // Import Swagger configuration
 import { setupSwagger } from './config/swagger.js';
@@ -89,8 +95,18 @@ const corsOptions = {
     'X-Requested-With',
     'Content-Type',
     'Accept',
-    'Authorization'
-  ]
+    'Authorization',
+    'User-Agent',
+    'Cache-Control',
+    'Pragma'
+  ],
+  exposedHeaders: [
+    'X-Total-Count',
+    'X-Page-Count',
+    'Content-Disposition'
+  ],
+  optionsSuccessStatus: 200,
+  maxAge: 86400
 };
 
 // CORS configuration - Simplified and clean
@@ -120,6 +136,12 @@ app.use(compression({
 
 // IP Whitelist Middleware - DEBE IR ANTES de otros middlewares de seguridad
 app.use(ipWhitelistMiddleware);
+
+// Mobile optimization middleware - Después de CORS pero antes de routes
+app.use(mobileOptimizationMiddleware);
+app.use(mobileConnectionHandler);
+app.use(mobileLogger);
+app.use(mobileResponseOptimizer);
 
 // Custom middleware to log request IPs
 app.use((req, res, next) => {
