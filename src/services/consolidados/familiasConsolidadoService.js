@@ -483,6 +483,7 @@ class FamiliasConsolidadoService {
     const hoja = workbook.addWorksheet('Miembros de Familias');
     
     hoja.columns = [
+      { header: 'ID Familia', key: 'id_familia', width: 12 },
       { header: 'Apellido Familia', key: 'familia', width: 25 },
       { header: 'Nombre Completo', key: 'nombre', width: 35 },
       { header: 'Tipo ID', key: 'tipo_id', width: 12 },
@@ -506,6 +507,7 @@ class FamiliasConsolidadoService {
     familias.forEach(familia => {
       familia.miembros_familia?.forEach(miembro => {
         hoja.addRow({
+          id_familia: familia.id_familia,
           familia: familia.apellido_familiar,
           nombre: miembro.nombre_completo,
           tipo_id: miembro.tipo_identificacio,
@@ -537,6 +539,7 @@ class FamiliasConsolidadoService {
     const hoja = workbook.addWorksheet('Difuntos');
     
     hoja.columns = [
+      { header: 'ID Familia', key: 'id_familia', width: 12 },
       { header: 'Apellido Familia', key: 'familia', width: 25 },
       { header: 'Nombre Difunto', key: 'nombre', width: 35 },
       { header: 'Parentesco', key: 'parentesco', width: 15 },
@@ -549,6 +552,7 @@ class FamiliasConsolidadoService {
     familias.forEach(familia => {
       familia.difuntos_familia?.forEach(difunto => {
         hoja.addRow({
+          id_familia: familia.id_familia,
           familia: familia.apellido_familiar,
           nombre: difunto.nombre_difunto,
           parentesco: difunto.parentesco,
