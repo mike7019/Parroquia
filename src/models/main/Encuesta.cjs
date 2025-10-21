@@ -72,27 +72,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     id_sector: {
       type: DataTypes.BIGINT,
-      allowNull: false,
-      validate: {
-        notNull: {
-          msg: 'El sector es requerido'
-        },
-        notEmpty: {
-          msg: 'El sector no puede estar vacío'
-        }
-      }
+      allowNull: true
     },
     id_vereda: {
       type: DataTypes.BIGINT,
-      allowNull: false,
-      validate: {
-        notNull: {
-          msg: 'La vereda es requerida'
-        },
-        notEmpty: {
-          msg: 'La vereda no puede estar vacía'
-        }
-      }
+      allowNull: true
     },
     observaciones: {
       type: DataTypes.TEXT,
