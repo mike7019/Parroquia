@@ -110,6 +110,39 @@ class SectorController {
   }
 
   /**
+   * Get sectors by municipio
+   */
+  async getSectorsByMunicipio(req, res) {
+    try {
+      const { id_municipio } = req.params;
+
+      if (!id_municipio || isNaN(id_municipio)) {
+        return res.status(400).json(
+          createErrorResponse('ID de municipio válido es requerido', null, 'VALIDATION_ERROR')
+        );
+      }
+
+      const result = await sectorService.getSectorsByMunicipio(parseInt(id_municipio));
+
+      if (result.status === 'error') {
+        return res.status(404).json(
+          createErrorResponse(result.message, null, 'NOT_FOUND')
+        );
+      }
+
+      res.json(result);
+    } catch (error) {
+      res.status(500).json(
+        createErrorResponse(
+          'Error al obtener sectores por municipio',
+          error.message,
+          'FETCH_ERROR'
+        )
+      );
+    }
+  }
+
+  /**
    * Get sector by ID
    */
   async getSectorById(req, res) {

@@ -51,6 +51,47 @@ class CorregimientosController {
   }
 
   /**
+   * Obtener corregimientos por municipio
+   */
+  async getCorregimientosByMunicipio(req, res, next) {
+    const controllerLogger = logger.child({ 
+      controller: 'CorregimientosController', 
+      action: 'getCorregimientosByMunicipio',
+      ip: req.ip 
+    });
+
+    try {
+      const { id_municipio } = req.params;
+
+      controllerLogger.info('Getting corregimientos by municipio', { id_municipio });
+
+      const resultado = await DatabaseErrorHandler.executeWithErrorHandling(
+        () => corregimientosService.getCorregimientosByMunicipio(id_municipio),
+        { operation: 'get_corregimientos_by_municipio', id_municipio }
+      );
+
+      controllerLogger.info('Corregimientos by municipio retrieved successfully', {
+        id_municipio,
+        total: resultado.total
+      });
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      if (error.statusCode === 404) {
+        controllerLogger.warn('Municipio not found', { id_municipio: req.params.id_municipio });
+        return res.status(404).json({
+          status: 'error',
+          message: error.message,
+          code: error.code
+        });
+      }
+
+      controllerLogger.error('Error getting corregimientos by municipio', error);
+      next(error);
+    }
+  }
+
+  /**
    * Obtener un corregimiento por ID
    */
   async getCorregimientoById(req, res, next) {

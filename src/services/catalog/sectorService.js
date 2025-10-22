@@ -140,6 +140,52 @@ class SectorService {
   }
 
   /**
+   * Get sectors by municipio ID
+   */
+  async getSectorsByMunicipio(id_municipio) {
+    try {
+      // Validar que el municipio existe
+      const municipio = await getMunicipiosModel().findByPk(id_municipio);
+      if (!municipio) {
+        return {
+          status: 'error',
+          data: [],
+          total: 0,
+          message: 'El municipio especificado no existe'
+        };
+      }
+
+      const sectors = await getSectorModel().findAll({
+        where: { id_municipio },
+        include: [{
+          model: getMunicipiosModel(),
+          as: 'municipio',
+          attributes: ['id_municipio', 'nombre_municipio']
+        }],
+        order: [['nombre', 'ASC']]
+      });
+
+      return {
+        status: 'success',
+        data: sectors,
+        total: sectors.length,
+        municipio: {
+          id_municipio: municipio.id_municipio,
+          nombre_municipio: municipio.nombre_municipio
+        },
+        message: `Se encontraron ${sectors.length} sectores en ${municipio.nombre_municipio}`
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        data: [],
+        total: 0,
+        message: `Error al obtener sectores: ${error.message}`
+      };
+    }
+  }
+
+  /**
    * Get sector by ID
    */
   async getSectorById(id) {

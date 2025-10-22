@@ -177,6 +177,64 @@ router.get('/',
 
 /**
  * @swagger
+ * /api/catalog/corregimientos/municipio/{id_municipio}:
+ *   get:
+ *     tags: [Corregimientos]
+ *     summary: Obtener corregimientos por municipio
+ *     description: Obtiene todos los corregimientos de un municipio específico
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id_municipio
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: ID del municipio
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: Corregimientos obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Corregimiento'
+ *                 total:
+ *                   type: integer
+ *                   example: 3
+ *                 municipio:
+ *                   type: object
+ *                   properties:
+ *                     id_municipio:
+ *                       type: integer
+ *                     nombre_municipio:
+ *                       type: string
+ *                 message:
+ *                   type: string
+ *                   example: Se encontraron 3 corregimiento(s) en Medellín
+ *       404:
+ *         description: Municipio no encontrado
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+router.get('/municipio/:id_municipio',
+  authMiddleware.authenticateToken,
+  corregimientosController.getCorregimientosByMunicipio
+);
+
+/**
+ * @swagger
  * /api/catalog/corregimientos/statistics:
  *   get:
  *     tags: [Corregimientos]
