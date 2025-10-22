@@ -46,6 +46,48 @@ class CentrosPobladosService {
   }
 
   /**
+   * Obtener centros poblados por municipio
+   */
+  async getCentrosPobladosByMunicipio(id_municipio) {
+    try {
+      // Validar que el municipio existe
+      const municipio = await Municipios.findByPk(id_municipio);
+      if (!municipio) {
+        const error = new Error('El municipio especificado no existe');
+        error.statusCode = 404;
+        error.code = 'MUNICIPIO_NOT_FOUND';
+        throw error;
+      }
+
+      const centros_poblados = await CentrosPoblados.findAll({
+        where: { id_municipio_municipios: id_municipio },
+        include: [
+          {
+            model: Municipios,
+            as: 'municipio',
+            attributes: ['id_municipio', 'nombre_municipio', 'codigo_dane']
+          }
+        ],
+        order: [['nombre', 'ASC']]
+      });
+
+      return {
+        status: 'success',
+        data: centros_poblados,
+        total: centros_poblados.length,
+        municipio: {
+          id_municipio: municipio.id_municipio,
+          nombre_municipio: municipio.nombre_municipio
+        },
+        message: `Se encontraron ${centros_poblados.length} centro(s) poblado(s) en ${municipio.nombre_municipio}`
+      };
+    } catch (error) {
+      logger.error(`Error getting centros poblados by municipio ${id_municipio}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Obtener todos los centros poblados con filtros opcionales
    */
   async getAllCentrosPoblados(filters = {}) {

@@ -51,6 +51,47 @@ class CentrosPobladosController {
   }
 
   /**
+   * Obtener centros poblados por municipio
+   */
+  async getCentrosPobladosByMunicipio(req, res, next) {
+    const controllerLogger = logger.child({ 
+      controller: 'CentrosPobladosController', 
+      action: 'getCentrosPobladosByMunicipio',
+      ip: req.ip 
+    });
+
+    try {
+      const { id_municipio } = req.params;
+
+      controllerLogger.info('Getting centros poblados by municipio', { id_municipio });
+
+      const resultado = await DatabaseErrorHandler.executeWithErrorHandling(
+        () => centrosPobladosService.getCentrosPobladosByMunicipio(id_municipio),
+        { operation: 'get_centros_poblados_by_municipio', id_municipio }
+      );
+
+      controllerLogger.info('Centros poblados by municipio retrieved successfully', {
+        id_municipio,
+        total: resultado.total
+      });
+
+      res.status(200).json(resultado);
+    } catch (error) {
+      if (error.statusCode === 404) {
+        controllerLogger.warn('Municipio not found', { id_municipio: req.params.id_municipio });
+        return res.status(404).json({
+          status: 'error',
+          message: error.message,
+          code: error.code
+        });
+      }
+
+      controllerLogger.error('Error getting centros poblados by municipio', error);
+      next(error);
+    }
+  }
+
+  /**
    * Obtener un centro poblado por ID
    */
   async getCentroPobladoById(req, res, next) {

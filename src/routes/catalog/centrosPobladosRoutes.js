@@ -177,6 +177,64 @@ router.get('/',
 
 /**
  * @swagger
+ * /api/catalog/centros-poblados/municipio/{id_municipio}:
+ *   get:
+ *     tags: [Centros Poblados]
+ *     summary: Obtener centros poblados por municipio
+ *     description: Obtiene todos los centros poblados de un municipio específico
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id_municipio
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: ID del municipio
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: Centros poblados obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/CentroPoblado'
+ *                 total:
+ *                   type: integer
+ *                   example: 2
+ *                 municipio:
+ *                   type: object
+ *                   properties:
+ *                     id_municipio:
+ *                       type: integer
+ *                     nombre_municipio:
+ *                       type: string
+ *                 message:
+ *                   type: string
+ *                   example: Se encontraron 2 centro(s) poblado(s) en Medellín
+ *       404:
+ *         description: Municipio no encontrado
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+router.get('/municipio/:id_municipio',
+  authMiddleware.authenticateToken,
+  centrosPobladosController.getCentrosPobladosByMunicipio
+);
+
+/**
+ * @swagger
  * /api/catalog/centros-poblados/statistics:
  *   get:
  *     tags: [Centros Poblados]
