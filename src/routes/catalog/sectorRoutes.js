@@ -135,6 +135,57 @@ router.get('/', sectorController.getAllSectors);
 
 /**
  * @swagger
+ * /api/catalog/sectors/municipio/{id_municipio}:
+ *   get:
+ *     summary: Get sectors by municipio
+ *     description: Obtiene todos los sectores de un municipio específico
+ *     tags: [Sectors]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id_municipio
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del municipio
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: Sectores obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Sector'
+ *                 total:
+ *                   type: integer
+ *                   example: 5
+ *                 municipio:
+ *                   type: object
+ *                   properties:
+ *                     id_municipio:
+ *                       type: integer
+ *                     nombre_municipio:
+ *                       type: string
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Municipio no encontrado
+ *       500:
+ *         description: Error del servidor
+ */
+router.get('/municipio/:id_municipio', sectorController.getSectorsByMunicipio);
+
+/**
+ * @swagger
  * /api/catalog/sectors/{id}:
  *   get:
  *     summary: Get sector by ID

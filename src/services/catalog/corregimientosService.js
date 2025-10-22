@@ -109,6 +109,48 @@ class CorregimientosService {
   }
 
   /**
+   * Obtener corregimientos por municipio
+   */
+  async getCorregimientosByMunicipio(id_municipio) {
+    try {
+      // Validar que el municipio existe
+      const municipio = await Municipios.findByPk(id_municipio);
+      if (!municipio) {
+        const error = new Error('El municipio especificado no existe');
+        error.statusCode = 404;
+        error.code = 'MUNICIPIO_NOT_FOUND';
+        throw error;
+      }
+
+      const corregimientos = await Corregimientos.findAll({
+        where: { id_municipio_municipios: id_municipio },
+        include: [
+          {
+            model: Municipios,
+            as: 'municipio',
+            attributes: ['id_municipio', 'nombre_municipio', 'codigo_dane']
+          }
+        ],
+        order: [['nombre', 'ASC']]
+      });
+
+      return {
+        status: 'success',
+        data: corregimientos,
+        total: corregimientos.length,
+        municipio: {
+          id_municipio: municipio.id_municipio,
+          nombre_municipio: municipio.nombre_municipio
+        },
+        message: `Se encontraron ${corregimientos.length} corregimiento(s) en ${municipio.nombre_municipio}`
+      };
+    } catch (error) {
+      logger.error(`Error getting corregimientos by municipio ${id_municipio}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Obtener un corregimiento por ID
    */
   async getCorregimientoById(id) {
