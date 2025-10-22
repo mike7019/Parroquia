@@ -1787,6 +1787,15 @@ const swaggerConfig = {
                     nombre: { type: 'string', example: 'Corregimiento El Centro' }
                   }
                 },
+                centro_poblado: {
+                  type: 'object',
+                  nullable: true,
+                  description: 'Centro poblado al que pertenece la familia (opcional)',
+                  properties: {
+                    id: { type: 'integer', example: 1 },
+                    nombre: { type: 'string', example: 'Centro Poblado San Pedro' }
+                  }
+                },
                 fecha: {
                   type: 'string',
                   format: 'date',
@@ -2650,6 +2659,14 @@ const swaggerConfig = {
                   properties: {
                     id: { type: 'integer', description: 'ID del corregimiento', example: 1 },
                     nombre: { type: 'string', description: 'Nombre del corregimiento', example: 'El Centro' }
+                  }
+                },
+                centro_poblado: {
+                  type: 'object',
+                  description: 'Centro poblado al que pertenece la familia (opcional)',
+                  properties: {
+                    id: { type: 'integer', description: 'ID del centro poblado', example: 1 },
+                    nombre: { type: 'string', description: 'Nombre del centro poblado', example: 'San Pedro' }
                   }
                 },
                 fecha: { 
@@ -3669,6 +3686,10 @@ const swaggerConfig = {
       {
         name: 'Corregimientos',
         description: '🏘️ **Catálogo de Corregimientos** - Gestión de corregimientos y divisiones territoriales. **Funcionalidades:** CRUD completo, búsqueda por nombre/código, filtrado por municipio, estadísticas de uso, asociación con familias.'
+      },
+      {
+        name: 'Centros Poblados',
+        description: '🏘️ **Catálogo de Centros Poblados** - Gestión de centros poblados y divisiones territoriales. **Funcionalidades:** CRUD completo, búsqueda por nombre/código, filtrado por municipio, estadísticas de uso, asociación con familias.'
       },
       {
         name: 'Sexos',
