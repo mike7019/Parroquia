@@ -101,6 +101,14 @@ const Familias = sequelize.define('Familias', {
       key: 'id_corregimiento'
     }
   },
+  id_centro_poblado: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    references: {
+      model: 'centros_poblados',
+      key: 'id_centro_poblado'
+    }
+  },
   comunionEnCasa: {
     type: DataTypes.BOOLEAN,
     allowNull: true,
@@ -202,6 +210,9 @@ const Familias = sequelize.define('Familias', {
       fields: ['id_corregimiento']
     },
     {
+      fields: ['id_centro_poblado']
+    },
+    {
       fields: ['estado_encuesta']
     }
   ]
@@ -227,6 +238,13 @@ Familias.associate = function(models) {
     Familias.belongsTo(models.Corregimientos, {
       foreignKey: 'id_corregimiento',
       as: 'corregimiento'
+    });
+  }
+  
+  if (models.CentrosPoblados) {
+    Familias.belongsTo(models.CentrosPoblados, {
+      foreignKey: 'id_centro_poblado',
+      as: 'centro_poblado'
     });
   }
   

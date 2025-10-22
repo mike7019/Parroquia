@@ -40,6 +40,11 @@ class PersonasReporteService {
         params.id_corregimiento = filtros.id_corregimiento;
       }
       
+      if (filtros.id_centro_poblado) {
+        whereConditions.push('f.id_centro_poblado = :id_centro_poblado');
+        params.id_centro_poblado = filtros.id_centro_poblado;
+      }
+      
       if (filtros.id_parroquia) {
         whereConditions.push('p.id_parroquia = :id_parroquia');
         params.id_parroquia = filtros.id_parroquia;
@@ -112,6 +117,8 @@ class PersonasReporteService {
           v.nombre as nombre_vereda,
           corr.id_corregimiento,
           corr.nombre as nombre_corregimiento,
+          cp.id_centro_poblado,
+          cp.nombre as nombre_centro_poblado,
           pr.id_parroquia,
           pr.nombre as nombre_parroquia,
           
@@ -141,6 +148,7 @@ class PersonasReporteService {
         LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
         LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
+        LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
         LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
         LEFT JOIN parroquia pr ON p.id_parroquia = pr.id_parroquia
         LEFT JOIN profesiones prof ON p.id_profesion = prof.id_profesion
@@ -220,6 +228,7 @@ class PersonasReporteService {
           sector: persona.nombre_sector,
           vereda: persona.nombre_vereda,
           corregimiento: persona.nombre_corregimiento,
+          centro_poblado: persona.nombre_centro_poblado,
           parroquia: persona.nombre_parroquia,
           talla_camisa: persona.talla_camisa,
           talla_pantalon: persona.talla_pantalon,
@@ -247,6 +256,7 @@ class PersonasReporteService {
         LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
         LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
+        LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
         LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
         LEFT JOIN parroquia pr ON p.id_parroquia = pr.id_parroquia
         LEFT JOIN profesiones prof ON p.id_profesion = prof.id_profesion
@@ -309,6 +319,7 @@ class PersonasReporteService {
         { header: 'Sector', key: 'sector', width: 25 },
         { header: 'Vereda', key: 'vereda', width: 25 },
         { header: 'Corregimiento', key: 'corregimiento', width: 25 },
+        { header: 'Centro Poblado', key: 'centro_poblado', width: 25 },
         { header: 'Parroquia', key: 'parroquia', width: 30 },
         { header: 'Familia', key: 'familia_apellido', width: 30 },
         

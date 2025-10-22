@@ -13,6 +13,7 @@ import Municipios from './catalog/Municipios.js';
 import Departamentos from './catalog/Departamentos.js';
 import Familias from './catalog/Familias.js';
 import Corregimientos from './catalog/Corregimientos.js';
+import CentrosPoblados from './catalog/CentrosPoblados.js';
 import TipoDisposicionBasura from './catalog/TipoDisposicionBasura.js';
 // Import FamiliaDisposicionBasura from main (CommonJS) instead of catalog
 import { createRequire } from 'module';
@@ -61,12 +62,18 @@ try {
     Departamentos, Sector, TipoIdentificacion, Enfermedad, Familias, Persona, 
     TipoVivienda, Parentesco, SituacionCivil, Estudio, Talla, DifuntosFamilia,
     TipoDisposicionBasura, FamiliaDisposicionBasura, TipoAguasResiduales, 
-    FamiliaSistemaAguasResiduales, ComunidadCultural, Destreza, Corregimientos
+    FamiliaSistemaAguasResiduales, ComunidadCultural, Destreza, Corregimientos, CentrosPoblados
   };
   // Ejecutar asociaciones de Corregimientos
   if (Corregimientos && typeof Corregimientos.associate === 'function') {
     Corregimientos.associate(models);
     console.log('✅ Asociaciones de Corregimientos configuradas');
+  }
+
+  // Ejecutar asociaciones de CentrosPoblados
+  if (CentrosPoblados && typeof CentrosPoblados.associate === 'function') {
+    CentrosPoblados.associate(models);
+    console.log('✅ Asociaciones de CentrosPoblados configuradas');
   }
 
   // Ejecutar asociaciones de Familias
@@ -158,7 +165,9 @@ export default {
   FamiliaSistemaAguasResiduales,
   ComunidadCultural,
   Destreza,
-  Profesion
+  Profesion,
+  Corregimientos,
+  CentrosPoblados
 };
 
 export {
@@ -190,5 +199,7 @@ export {
   FamiliaSistemaAguasResiduales,
   ComunidadCultural,
   Destreza,
-  Profesion
+  Profesion,
+  Corregimientos,
+  CentrosPoblados
 };
