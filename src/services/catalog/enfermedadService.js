@@ -87,7 +87,7 @@ class EnfermedadService {
   async getAllEnfermedades() {
     try {
       const enfermedades = await getEnfermedadModel().findAll({
-        order: [['id_enfermedad', 'ASC']]
+        order: [['nombre', 'ASC']]
       });
 
       return {
