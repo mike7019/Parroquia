@@ -5,6 +5,9 @@ import DifuntosFamilia from '../models/catalog/DifuntosFamilia.js';
 import crypto from 'crypto';
 import FamiliasConsultasService from '../services/familiasConsultasService.js';
 import { generarIdentificacionUnica } from '../middlewares/encuestaValidation.js';
+import { ErrorCodes, createError } from '../utils/errorCodes.js';
+import { successResponse, paginatedResponse, errorResponse } from '../utils/responseFormatter.js';
+import EncuestaService from '../services/encuestaService.js';
 
 /**
  * Helper function to format complete names properly
@@ -63,7 +66,12 @@ const registrarDisposicionBasuras = async (familiaId, disposicionBasuras, transa
           console.log(`  ℹ️ Disposición ya existe: ${tipo}`);
         }
       } catch (error) {
-        console.log(`  ⚠️ Error registrando ${tipo}: ${error.message}`);
+        throw createError(ErrorCodes.BUSINESS_LOGIC.SERVICE_REGISTRATION_FAILED, {
+          service: 'disposicion_basuras',
+          tipo,
+          familiaId,
+          originalError: error.message
+        });
       }
     }
   }
@@ -102,7 +110,12 @@ const registrarSistemaAcueducto = async (familiaId, sistemaAcueducto, transactio
       console.log(`  ℹ️ Sistema acueducto ya existe: ID ${sistemaId}`);
     }
   } catch (error) {
-    console.log(`  ⚠️ Error registrando sistema acueducto: ${error.message}`);
+    throw createError(ErrorCodes.BUSINESS_LOGIC.SERVICE_REGISTRATION_FAILED, {
+      service: 'sistema_acueducto',
+      familiaId,
+      sistemaId: sistemaAcueducto?.id,
+      originalError: error.message
+    });
   }
 };
 
@@ -139,7 +152,12 @@ const registrarAguasResiduales = async (familiaId, aguasResiduales, transaction)
       console.log(`  ℹ️ Aguas residuales ya existen: ID ${aguaResidualesId}`);
     }
   } catch (error) {
-    console.log(`  ⚠️ Error registrando aguas residuales: ${error.message}`);
+    throw createError(ErrorCodes.BUSINESS_LOGIC.SERVICE_REGISTRATION_FAILED, {
+      service: 'aguas_residuales',
+      familiaId,
+      aguaResidualesId: aguasResiduales?.id,
+      originalError: error.message
+    });
   }
 };
 
@@ -183,7 +201,12 @@ const registrarTipoVivienda = async (familiaId, tipoVivienda, transaction) => {
       console.log(`  ℹ️ Tipo vivienda ya existe: ID ${tipoViviendaId}`);
     }
   } catch (error) {
-    console.log(`  ⚠️ Error registrando tipo de vivienda: ${error.message}`);
+    throw createError(ErrorCodes.BUSINESS_LOGIC.SERVICE_REGISTRATION_FAILED, {
+      service: 'tipo_vivienda',
+      familiaId,
+      tipoViviendaId: tipoVivienda?.id,
+      originalError: error.message
+    });
   }
 };
 
@@ -482,6 +505,7 @@ const procesarMiembrosFallecidos = async (familiaId, deceasedMembers, informacio
       
     } catch (error) {
       console.error(`  ❌ Error registrando persona fallecida ${fallecido.nombres}:`, error.message);
+      throw error;
     }
   }
 
@@ -1159,8 +1183,7 @@ export const obtenerEncuestas = async (req, res) => {
     
     console.log(`✅ Se encontraron ${total} encuestas con información completa`);
 
-    res.status(200).json({
-      status: 'success',
+    return paginatedResponse(res, {
       message: 'Encuestas obtenidas exitosamente',
       data: encuestasFormateadas,
       pagination: {
@@ -1175,11 +1198,7 @@ export const obtenerEncuestas = async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error obteniendo encuestas:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Error interno del servidor al obtener encuestas',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Error interno'
-    });
+    return errorResponse(res, error);
   }
 };
 
@@ -1190,6 +1209,15 @@ export const obtenerEncuestaPorId = async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`🔍 Buscando encuesta con ID: ${id}`);
+
+    // Validar que el ID sea un número válido
+    const idNumerico = parseInt(id);
+    if (isNaN(idNumerico) || idNumerico <= 0) {
+      throw createError(ErrorCodes.VALIDATION.INVALID_ID_FORMAT, {
+        field: 'id_familia',
+        value: id
+      });
+    }
 
     // Buscar la familia usando la misma consulta que obtenerEncuestas
     const familiasQuery = `
@@ -1239,10 +1267,8 @@ export const obtenerEncuestaPorId = async (req, res) => {
 
     if (!familiaData) {
       console.log(`❌ Encuesta con ID ${id} no encontrada`);
-      return res.status(404).json({
-        status: 'error',
-        message: 'Encuesta no encontrada',
-        code: 'NOT_FOUND'
+      throw createError(ErrorCodes.NOT_FOUND.ENCUESTA_NOT_FOUND, {
+        id: idNumerico
       });
     }
 
@@ -1784,19 +1810,14 @@ export const obtenerEncuestaPorId = async (req, res) => {
       }
     };
 
-    res.status(200).json({
-      status: 'success',
+    return successResponse(res, {
       message: 'Encuesta obtenida exitosamente',
       data: encuestaFormateada
     });
 
   } catch (error) {
     console.error('❌ Error obteniendo encuesta por ID:', error);
-    res.status(500).json({
-      status: 'error',
-      message: `Error interno del servidor al obtener encuesta: ${error.message}`,
-      code: 'INTERNAL_SERVER_ERROR'
-    });
+    return errorResponse(res, error);
   }
 };
 
@@ -1984,7 +2005,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
  */
 
 export const crearEncuesta = async (req, res) => {
-  const transaction = await sequelize.transaction();
+  let transaction;
   
   try {
     console.log('🔄 Iniciando procesamiento de encuesta...');
@@ -2000,6 +2021,23 @@ export const crearEncuesta = async (req, res) => {
     } = req.body;
 
     console.log('✅ Validaciones completadas por middlewares');
+    
+    // VALIDAR INTEGRIDAD DE DATOS ANTES DE INICIAR TRANSACCIÓN
+    console.log('🔍 Validando integridad de datos...');
+    try {
+      await EncuestaService.validarIntegridadDatos({
+        informacionGeneral,
+        vivienda,
+        servicios_agua
+      });
+      console.log('✅ Validación de integridad completada');
+    } catch (validationError) {
+      console.log('❌ Error en validación de integridad:', validationError.message);
+      throw validationError; // Propagar el AppError del servicio
+    }
+    
+    // Iniciar transacción SOLO después de validar
+    transaction = await sequelize.transaction();
     
     // 1. CREAR FAMILIA
     console.log('💾 Creando registro de familia...');
@@ -2081,15 +2119,14 @@ export const crearEncuesta = async (req, res) => {
     console.log('✅ Transacción completada exitosamente');
     
     // 5. RESPUESTA EXITOSA
-    const responseData = {
-      status: 'success',
+    return successResponse(res, {
+      statusCode: 201,
       message: 'Encuesta guardada exitosamente',
       data: {
         familia_id: familiaId,
+        codigo_familia: familia.codigo_familia,
         personas_creadas: personasCreadas,
         personas_fallecidas: personasFallecidas,
-        transaccion_id: `txn_${Date.now()}`,
-        codigo_familia: familia.codigo_familia,
         informacion_persistida: {
           informacion_general: true,
           vivienda_y_disposicion_basuras: true,
@@ -2097,45 +2134,35 @@ export const crearEncuesta = async (req, res) => {
           miembros_familia: personasCreadas > 0,
           personas_fallecidas: personasFallecidas > 0,
           ubicacion_geografica: !!(informacionGeneral.municipio || informacionGeneral.vereda || informacionGeneral.sector)
-        },
-        metadata: {
-          timestamp: new Date().toISOString(),
-          version: '2.0',
-          completada: metadata.completed || false,
-          etapa_actual: metadata.currentStage || null,
-          observaciones_procesadas: !!(observaciones.sustento_familia || observaciones.observaciones_encuestador),
-          autorizacion_datos: observaciones.autorizacion_datos || false,
-          validacion_duplicados: 'verificada'
         }
+      },
+      metadata: {
+        transaccion_id: `txn_${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        version: '2.0',
+        completada: metadata.completed || false,
+        etapa_actual: metadata.currentStage || null,
+        observaciones_procesadas: !!(observaciones.sustento_familia || observaciones.observaciones_encuestador),
+        autorizacion_datos: observaciones.autorizacion_datos || false,
+        validacion_duplicados: 'verificada'
       }
-    };
-    
-    res.status(201).json(responseData);
-    console.log('✅ Respuesta 201 enviada exitosamente');
+    });
 
   } catch (error) {
     console.log('❌ ERROR CAPTURADO - VERIFICANDO ESTADO DE TRANSACCIÓN');
     
-    try {
-      if (transaction && !transaction.finished) {
+    if (transaction && !transaction.finished) {
+      try {
         console.log('❌ Transacción activa - Iniciando rollback');
         await transaction.rollback();
         console.log('❌ ROLLBACK COMPLETADO');
+      } catch (rollbackError) {
+        console.error('❌ Error durante rollback:', rollbackError.message);
       }
-    } catch (rollbackError) {
-      console.log('❌ Error durante rollback:', rollbackError.message);
     }
     
     console.error('❌ Error procesando encuesta:', error);
-
-    if (!res.headersSent) {
-      res.status(500).json({
-        status: 'error',
-        message: 'Error interno del servidor al procesar la encuesta',
-        details: process.env.NODE_ENV === 'development' ? error.message : 'Error interno',
-        error_code: 'ENCUESTA_PROCESSING_ERROR'
-      });
-    }
+    return errorResponse(res, error);
   }
 };
 
@@ -2147,6 +2174,16 @@ export const eliminarEncuesta = async (req, res) => {
   
   try {
     const { id } = req.params;
+    
+    // Validar ID numérico
+    const idNumerico = parseInt(id);
+    if (isNaN(idNumerico) || idNumerico <= 0) {
+      throw createError(ErrorCodes.VALIDATION.INVALID_ID_FORMAT, {
+        field: 'id_familia',
+        value: id
+      });
+    }
+    
     const encuesta = req.encuesta; // Viene del middleware de validación
 
     console.log(`🗑️ Iniciando eliminación de encuesta: ${encuesta.apellido_familiar}`);
@@ -2201,18 +2238,16 @@ export const eliminarEncuesta = async (req, res) => {
 
     if (familiaEliminada === 0) {
       await transaction.rollback();
-      return res.status(500).json({
-        status: 'error',
-        message: 'No se pudo eliminar la encuesta',
-        code: 'DELETE_FAILED'
+      throw createError(ErrorCodes.BUSINESS_LOGIC.DELETE_FAILED, {
+        id: idNumerico,
+        apellido_familiar: encuesta.apellido_familiar
       });
     }
 
     await transaction.commit();
     console.log('✅ Eliminación completada exitosamente');
 
-    res.status(200).json({
-      status: 'success',
+    return successResponse(res, {
       message: `Encuesta de la familia ${estadisticasEliminacion.apellido_familiar} eliminada exitosamente`,
       data: {
         eliminacion_completada: true,
@@ -2237,13 +2272,7 @@ export const eliminarEncuesta = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
     console.error('❌ Error eliminando encuesta:', error);
-
-    res.status(500).json({
-      status: 'error',
-      message: 'Error interno del servidor al eliminar la encuesta',
-      details: process.env.NODE_ENV === 'development' ? error.message : 'Error interno',
-      error_code: 'DELETE_ENCUESTA_ERROR'
-    });
+    return errorResponse(res, error);
   }
 };
 
@@ -2294,12 +2323,11 @@ export const actualizarCamposEncuesta = async (req, res) => {
     await transaction.commit();
     console.log('✅ Campos actualizados exitosamente');
 
-    res.status(200).json({
-      exito: true,
-      mensaje: 'Campos de encuesta actualizados exitosamente',
-      datos: familiaActualizada[0],
-      campos_actualizados: Object.keys(camposValidos),
+    return successResponse(res, {
+      message: 'Campos de encuesta actualizados exitosamente',
+      data: familiaActualizada[0],
       metadata: {
+        campos_actualizados: Object.keys(camposValidos),
         timestamp: new Date().toISOString(),
         operacion: 'PATCH',
         registros_afectados: 1
@@ -2309,13 +2337,7 @@ export const actualizarCamposEncuesta = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
     console.error('❌ Error actualizando campos de encuesta:', error);
-
-    res.status(500).json({
-      status: 'error',
-      message: 'Error interno del servidor al actualizar la encuesta',
-      details: process.env.NODE_ENV === 'development' ? error.message : 'Error interno',
-      error_code: 'UPDATE_FIELDS_ERROR'
-    });
+    return errorResponse(res, error);
   }
 };
 
@@ -2382,10 +2404,9 @@ export const actualizarEncuestaCompleta = async (req, res) => {
     await transaction.commit();
     console.log('✅ Encuesta completa actualizada exitosamente');
 
-    res.status(200).json({
-      exito: true,
-      mensaje: 'Encuesta actualizada completamente',
-      datos: familiaActualizada[0],
+    return successResponse(res, {
+      message: 'Encuesta actualizada completamente',
+      data: familiaActualizada[0],
       metadata: {
         timestamp: new Date().toISOString(),
         operacion: 'PUT',
@@ -2396,13 +2417,7 @@ export const actualizarEncuestaCompleta = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
     console.error('❌ Error actualizando encuesta completa:', error);
-
-    res.status(500).json({
-      status: 'error',
-      message: 'Error interno del servidor al actualizar la encuesta',
-      details: process.env.NODE_ENV === 'development' ? error.message : 'Error interno',
-      error_code: 'UPDATE_COMPLETE_ERROR'
-    });
+    return errorResponse(res, error);
   }
 };
 
@@ -2427,24 +2442,19 @@ const consultarFamiliasConPadresMadres = async (req, res) => {
 
     console.log(`✅ Consulta completada: ${resultado.total} familias encontradas`);
 
-    res.status(200).json({
-      status: 'success',
-      mensaje: resultado.mensaje,
-      datos: resultado.datos,
-      total: resultado.total,
-      filtros_aplicados: filtros,
-      nota: 'Toda la información del request se preserva en el response'
+    return successResponse(res, {
+      message: resultado.mensaje,
+      data: resultado.datos,
+      metadata: {
+        total: resultado.total,
+        filtros_aplicados: filtros,
+        nota: 'Toda la información del request se preserva en el response'
+      }
     });
 
   } catch (error) {
     console.error('❌ Error en consultarFamiliasConPadresMadres:', error);
-    
-    res.status(500).json({
-      status: 'error',
-      message: 'Error al consultar familias con información completa',
-      details: process.env.NODE_ENV === 'development' ? error.message : 'Error interno',
-      error_code: 'CONSULTA_FAMILIAS_ERROR'
-    });
+    return errorResponse(res, error);
   }
 };
 
