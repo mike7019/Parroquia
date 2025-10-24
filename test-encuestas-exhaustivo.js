@@ -30,6 +30,11 @@ const ADMIN_PASSWORD = 'Admin123!';
 // Token de autenticación
 let authToken = null;
 
+// IDs para tests de UPDATE y DELETE
+let encuestaValidaId = null;
+let encuestaUpdateId = null;
+let encuestaDeleteId = null;
+
 // Contadores de resultados
 const resultados = {
   total: 0,
@@ -266,14 +271,14 @@ async function testPOSTValido() {
         "talla_camisa/blusa": "L",
         "talla_pantalon": "32",
         "talla_zapato": "42",
-        "profesion": { "id": 1 },
+        "profesion": { "id": 1 },  // Ingeniero - ID válido
         "motivoFechaCelebrar": {
           "motivo": "Cumpleaños",
           "dia": "15",
           "mes": "03"
         },
-        "destrezas": [{ "id": 3 }],
-        "habilidades": [{ "id": 1, "nivel": "Avanzado" }],
+        "destrezas": [{ "id": 31 }],  // Manualidades - ID válido
+        "habilidades": [{ "id": 1, "nivel": "Avanzado" }],  // Carpintería - ID válido
         "en_que_eres_lider": "Líder de pruebas"
       }
     ],
@@ -298,10 +303,14 @@ async function testPOSTValido() {
       throw new Error('Formato de respuesta incorrecto');
     }
     
-    const encuestaId = response.data.data?.id || response.data.datos?.id;
+    // Buscar familia_id en la respuesta
+    const encuestaId = response.data.data?.familia_id || response.data.data?.id || response.data.datos?.id_familia || response.data.datos?.id;
     if (!encuestaId) {
       throw new Error('No se retornó el ID de la encuesta creada');
     }
+    
+    // Guardar para usar en tests de UPDATE y DELETE
+    encuestaValidaId = encuestaId;
     
     log.info(`  → Encuesta creada exitosamente con ID: ${encuestaId}`);
     log.info(`  → Status: ${response.status}`);
@@ -712,22 +721,26 @@ async function testActualizacion() {
   
   await registrarTest('Crear encuesta base para actualización', async () => {
     const response = await axios.post(`${API_URL}/encuesta`, encuestaBase);
-    encuestaId = response.data.data?.id || response.data.datos?.id;
+    encuestaId = response.data.data?.familia_id || response.data.data?.id || response.data.datos?.id_familia || response.data.datos?.id;
     
     if (!encuestaId) {
       throw new Error('No se pudo crear encuesta base');
     }
     
+    encuestaUpdateId = encuestaId; // Guardar globalmente
     log.info(`  → Encuesta base creada con ID: ${encuestaId}`);
   });
   
   // Test PATCH
   await registrarTest('PATCH /api/encuesta/:id - Actualización parcial', async () => {
+    // IMPORTANT: PATCH expects FLAT fields (not nested objects)
+    // Allowed fields: apellido_familiar, sector, direccion_familia,
+    // numero_contacto, telefono, email, tamaño_familia, tipo_vivienda,
+    // estado_encuesta, tutor_responsable, comunionEnCasa
     const actualizacion = {
-      informacionGeneral: {
-        telefono: "3009999999",
-        numero_contrato_epm: "99999999"
-      }
+      telefono: "3009999999",
+      email: "actualizado@test.com",
+      numero_contacto: "Usuario Actualizado"
     };
     
     const response = await axios.patch(`${API_URL}/encuesta/${encuestaId}`, actualizacion);
@@ -737,8 +750,14 @@ async function testActualizacion() {
       throw new Error('Formato de respuesta incorrecto');
     }
     
+    // Verify fields were actually updated
+    const data = response.data.data || response.data.datos;
+    if (data.telefono !== "3009999999" || data.email !== "actualizado@test.com") {
+      throw new Error('Los campos no se actualizaron correctamente');
+    }
+    
     log.info(`  → Actualización exitosa`);
-    log.info(`  → Formato: ${JSON.stringify(Object.keys(response.data))}`);
+    log.info(`  → Campos actualizados: telefono, email, numero_contacto`);
   });
   
   // Test PATCH con ID inválido
@@ -770,12 +789,13 @@ async function testEliminacion() {
   
   await registrarTest('Crear encuesta base para eliminación', async () => {
     const response = await axios.post(`${API_URL}/encuesta`, encuestaBase);
-    encuestaId = response.data.data?.id || response.data.datos?.id;
+    encuestaId = response.data.data?.familia_id || response.data.data?.id || response.data.datos?.id_familia || response.data.datos?.id;
     
     if (!encuestaId) {
       throw new Error('No se pudo crear encuesta base');
     }
     
+    encuestaDeleteId = encuestaId; // Guardar globalmente
     log.info(`  → Encuesta base creada con ID: ${encuestaId}`);
   });
   
@@ -790,6 +810,10 @@ async function testEliminacion() {
     log.info(`  → Eliminación exitosa`);
   });
   
+  // Wait a bit for server to stabilize after DELETE
+  log.info('  → Esperando 2 segundos para que el servidor se estabilice...');
+  await sleep(2000);
+  
   // Test DELETE con ID inexistente
   await registrarTest('DELETE con ID inexistente - Debe retornar error', async () => {
     try {
@@ -798,8 +822,11 @@ async function testEliminacion() {
     } catch (error) {
       if (error.response?.status === 404) {
         log.info('  → Error ENCUESTA_NOT_FOUND correctamente detectado');
+        return; // Success - test passed
+      } else if (error.message === 'Debió retornar error ENCUESTA_NOT_FOUND') {
+        throw error; // Re-throw if endpoint didn't return error
       } else {
-        throw error;
+        throw new Error(`Error inesperado: Status ${error.response?.status || 'N/A'} - ${error.message}`);
       }
     }
   });
@@ -812,8 +839,11 @@ async function testEliminacion() {
     } catch (error) {
       if (error.response?.status === 400) {
         log.info('  → Error INVALID_ID_FORMAT correctamente detectado');
+        return; // Success - test passed
+      } else if (error.message === 'Debió retornar error INVALID_ID_FORMAT') {
+        throw error; // Re-throw if endpoint didn't return error
       } else {
-        throw error;
+        throw new Error(`Error inesperado: Status ${error.response?.status || 'N/A'} - ${error.message}`);
       }
     }
   });
