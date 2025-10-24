@@ -513,7 +513,7 @@ class EncuestaService {
           'parroquia',
           informacionGeneral.parroquia.id,
           'id_parroquia',
-          'parroquias'
+          'parroquia'
         );
       }
 

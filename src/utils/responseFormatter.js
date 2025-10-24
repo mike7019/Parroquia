@@ -89,13 +89,18 @@ export const errorResponse = (res, error) => {
 };
 
 /**
- * Formatear respuesta de validación de express-validator
+ * Formatear respuesta de validación de express-validator o array de errores
  */
 export const validationErrorResponse = (res, errors) => {
-  const formattedErrors = errors.array().map(error => ({
-    field: error.path || error.param,
-    message: error.msg,
-    value: error.value
+  // Si errors ya es un array (desde middlewares), usarlo directamente
+  // Si errors tiene el método .array() (desde express-validator), convertirlo
+  const errorsArray = Array.isArray(errors) ? errors : errors.array();
+  
+  const formattedErrors = errorsArray.map(error => ({
+    field: error.path || error.param || error.field,
+    message: error.msg || error.message,
+    value: error.value,
+    location: error.location || 'body'
   }));
 
   return res.status(400).json({
