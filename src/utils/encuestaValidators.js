@@ -214,7 +214,7 @@ export const validateGeographicConsistency = async (sequelize, datosUbicacion) =
   // Si hay vereda, debe pertenecer al municipio
   if (id_vereda && id_municipio) {
     const [result] = await sequelize.query(
-      `SELECT 1 FROM veredas WHERE id_vereda = :id_vereda AND id_municipio = :id_municipio LIMIT 1`,
+      `SELECT 1 FROM veredas WHERE id_vereda = :id_vereda AND id_municipio_municipios = :id_municipio LIMIT 1`,
       {
         replacements: { id_vereda, id_municipio },
         type: sequelize.QueryTypes.SELECT
@@ -249,10 +249,10 @@ export const validateGeographicConsistency = async (sequelize, datosUbicacion) =
     }
   }
 
-  // Si hay corregimiento, debe pertenecer al municipio
+  // Si hay corregimiento, debe pertenecer al municipio (verificar nombre de columna en DB)
   if (id_corregimiento && id_municipio) {
     const [result] = await sequelize.query(
-      `SELECT 1 FROM corregimientos WHERE id_corregimiento = :id_corregimiento AND id_municipio = :id_municipio LIMIT 1`,
+      `SELECT 1 FROM corregimientos WHERE id_corregimiento = :id_corregimiento AND id_municipio_municipios = :id_municipio LIMIT 1`,
       {
         replacements: { id_corregimiento, id_municipio },
         type: sequelize.QueryTypes.SELECT

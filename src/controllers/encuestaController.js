@@ -2053,7 +2053,10 @@ export const crearEncuesta = async (req, res) => {
       telefono: informacionGeneral.telefono,
       email: informacionGeneral.email || null,
       tamaño_familia: tamanioFamiliaCalculado,
-      tipo_vivienda: vivienda.tipo_vivienda?.nombre || vivienda.tipo_vivienda || 'Casa', // Campo de texto legacy
+      // Campo de texto legacy - solo si es string, no objeto
+      tipo_vivienda: (typeof vivienda.tipo_vivienda === 'string') 
+        ? vivienda.tipo_vivienda 
+        : (vivienda.tipo_vivienda?.nombre || 'Casa'),
       id_tipo_vivienda: vivienda.tipo_vivienda?.id ? parseInt(vivienda.tipo_vivienda.id) : null, // FK correcta
       estado_encuesta: 'completed',
       numero_encuestas: 1,
