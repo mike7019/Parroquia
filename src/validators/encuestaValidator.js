@@ -1,4 +1,5 @@
 import { body, validationResult } from 'express-validator';
+import { validationErrorResponse } from '../utils/responseFormatter.js';
 
 /**
  * Validador para encuestas familiares
@@ -414,17 +415,12 @@ export const validarEncuesta = [
     
     if (!errors.isEmpty()) {
       const formattedErrors = errors.array().map(error => ({
-        field: error.path,
+        field: error.path || error.param,
         message: error.msg,
         value: error.value
       }));
 
-      return res.status(400).json({
-        status: 'error',
-        message: 'Errores de validación en los datos de la encuesta',
-        errors: formattedErrors,
-        total_errors: formattedErrors.length
-      });
+      return validationErrorResponse(res, formattedErrors);
     }
     
     next();
