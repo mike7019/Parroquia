@@ -66,6 +66,16 @@ const registrarDisposicionBasuras = async (familiaId, disposicionBasuras, transa
           console.log(`  ℹ️ Disposición ya existe: ${tipo}`);
         }
       } catch (error) {
+        // Detectar violaciones de foreign key
+        if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
+          throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
+            catalog: 'tipo_disposicion_basura',
+            invalidId: disposicionMapping[tipo],
+            details: `El tipo de disposición de basura "${tipo}" (ID ${disposicionMapping[tipo]}) no existe en el catálogo`,
+            suggestion: 'Verifique que el tipo de disposición de basura sea válido'
+          });
+        }
+        
         throw createError(ErrorCodes.BUSINESS_LOGIC.SERVICE_REGISTRATION_FAILED, {
           service: 'disposicion_basuras',
           tipo,
@@ -110,6 +120,16 @@ const registrarSistemaAcueducto = async (familiaId, sistemaAcueducto, transactio
       console.log(`  ℹ️ Sistema acueducto ya existe: ID ${sistemaId}`);
     }
   } catch (error) {
+    // Detectar violaciones de foreign key
+    if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
+      throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
+        catalog: 'sistemas_acueducto',
+        invalidId: sistemaId,
+        details: `El sistema de acueducto con ID ${sistemaId} no existe en el catálogo`,
+        suggestion: 'Verifique que el ID del sistema de acueducto sea correcto o seleccione un sistema válido del catálogo'
+      });
+    }
+    
     throw createError(ErrorCodes.BUSINESS_LOGIC.SERVICE_REGISTRATION_FAILED, {
       service: 'sistema_acueducto',
       familiaId,
@@ -152,6 +172,16 @@ const registrarAguasResiduales = async (familiaId, aguasResiduales, transaction)
       console.log(`  ℹ️ Aguas residuales ya existen: ID ${aguaResidualesId}`);
     }
   } catch (error) {
+    // Detectar violaciones de foreign key
+    if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
+      throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
+        catalog: 'tipos_aguas_residuales',
+        invalidId: aguaResidualesId,
+        details: `El tipo de aguas residuales con ID ${aguaResidualesId} no existe en el catálogo`,
+        suggestion: 'Verifique que el ID del tipo de aguas residuales sea correcto o seleccione un tipo válido del catálogo'
+      });
+    }
+    
     throw createError(ErrorCodes.BUSINESS_LOGIC.SERVICE_REGISTRATION_FAILED, {
       service: 'aguas_residuales',
       familiaId,
@@ -201,6 +231,16 @@ const registrarTipoVivienda = async (familiaId, tipoVivienda, transaction) => {
       console.log(`  ℹ️ Tipo vivienda ya existe: ID ${tipoViviendaId}`);
     }
   } catch (error) {
+    // Detectar violaciones de foreign key
+    if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
+      throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
+        catalog: 'tipos_vivienda',
+        invalidId: tipoViviendaId,
+        details: `El tipo de vivienda con ID ${tipoViviendaId} no existe en el catálogo`,
+        suggestion: 'Verifique que el ID del tipo de vivienda sea correcto o seleccione un tipo válido del catálogo'
+      });
+    }
+    
     throw createError(ErrorCodes.BUSINESS_LOGIC.SERVICE_REGISTRATION_FAILED, {
       service: 'tipo_vivienda',
       familiaId,
@@ -296,19 +336,69 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         talla_zapato: miembro.talla_zapato || (miembro.talla ? miembro.talla.calzado : null)
       };
 
-      const persona = await Persona.create(personaData, { 
-        transaction,
-        fields: [
-          'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido',
-          'fecha_nacimiento', 'telefono', 'correo_electronico', 'identificacion',
-          'direccion', 'id_familia_familias', 'id_sexo', 
-          'id_tipo_identificacion_tipo_identificacion', 'id_estado_civil_estado_civil',
-          'id_parentesco', 'id_profesion', 'id_comunidad_cultural',
-          'estudios', 'en_que_eres_lider', 'necesidad_enfermo',
-          'motivo_celebrar', 'dia_celebrar', 'mes_celebrar',
-          'talla_camisa', 'talla_pantalon', 'talla_zapato'
-        ]
-      });
+      let persona;
+      try {
+        persona = await Persona.create(personaData, { 
+          transaction,
+          fields: [
+            'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido',
+            'fecha_nacimiento', 'telefono', 'correo_electronico', 'identificacion',
+            'direccion', 'id_familia_familias', 'id_sexo', 
+            'id_tipo_identificacion_tipo_identificacion', 'id_estado_civil_estado_civil',
+            'id_parentesco', 'id_profesion', 'id_comunidad_cultural',
+            'estudios', 'en_que_eres_lider', 'necesidad_enfermo',
+            'motivo_celebrar', 'dia_celebrar', 'mes_celebrar',
+            'talla_camisa', 'talla_pantalon', 'talla_zapato'
+          ]
+        });
+      } catch (error) {
+        // Detectar violaciones de foreign key y dar mensajes específicos
+        if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
+          const constraint = error.original?.constraint || '';
+          
+          // Determinar qué catálogo falló basado en el constraint name
+          if (constraint.includes('profesion') || profesionId) {
+            throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
+              catalog: 'profesiones',
+              invalidId: profesionId,
+              person: miembro.nombres,
+              details: `La profesión con ID ${profesionId} no existe en el catálogo`,
+              suggestion: 'Verifique que el ID de la profesión sea correcto o seleccione una profesión válida del catálogo'
+            });
+          }
+          
+          if (constraint.includes('parentesco') || parentescoId) {
+            throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
+              catalog: 'parentescos',
+              invalidId: parentescoId,
+              person: miembro.nombres,
+              details: `El parentesco con ID ${parentescoId} no existe en el catálogo`,
+              suggestion: 'Verifique que el ID del parentesco sea correcto o seleccione un parentesco válido del catálogo'
+            });
+          }
+          
+          if (constraint.includes('comunidad') || comunidadCulturalId) {
+            throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
+              catalog: 'comunidades_culturales',
+              invalidId: comunidadCulturalId,
+              person: miembro.nombres,
+              details: `La comunidad cultural con ID ${comunidadCulturalId} no existe en el catálogo`,
+              suggestion: 'Verifique que el ID de la comunidad cultural sea correcto o seleccione una comunidad válida del catálogo'
+            });
+          }
+          
+          // Si no podemos determinar cuál FK falló, error genérico
+          throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
+            catalog: 'unknown',
+            person: miembro.nombres,
+            details: `Error de referencia en catálogo al crear persona: ${error.message}`,
+            suggestion: 'Verifique que todos los IDs de catálogos sean válidos'
+          });
+        }
+        
+        throw error;
+      }
+      
       const personaId = persona.id_personas || persona.id; // Obtener ID de forma segura
       personasCreadas++;
       console.log(`  ✅ Persona creada exitosamente: ${primerNombre} (ID: ${personaId})`);
@@ -2067,7 +2157,39 @@ export const crearEncuesta = async (req, res) => {
     // Iniciar transacción SOLO después de validar
     transaction = await sequelize.transaction();
     
-    // 1. CREAR FAMILIA
+    // 1. VALIDAR UNICIDAD DE NÚMERO DE CONTRATO EPM
+    if (informacionGeneral.numero_contrato_epm) {
+      console.log(`🔍 Verificando unicidad de contrato EPM: ${informacionGeneral.numero_contrato_epm}...`);
+      
+      const [existingFamily] = await sequelize.query(`
+        SELECT f.id_familia, f.apellido_familiar, f.telefono, f.direccion_familia
+        FROM familias f
+        WHERE f.numero_contrato_epm = :numero_contrato_epm
+        LIMIT 1
+      `, {
+        replacements: { numero_contrato_epm: informacionGeneral.numero_contrato_epm },
+        type: QueryTypes.SELECT,
+        transaction
+      });
+      
+      if (existingFamily) {
+        console.log('❌ Número de contrato EPM duplicado:', existingFamily);
+        throw createError(ErrorCodes.DUPLICATES.DUPLICATE_EPM_CONTRACT, {
+          numeroContrato: informacionGeneral.numero_contrato_epm,
+          familiaExistente: {
+            id: existingFamily.id_familia,
+            apellido: existingFamily.apellido_familiar,
+            telefono: existingFamily.telefono,
+            direccion: existingFamily.direccion_familia
+          },
+          details: `El contrato EPM ${informacionGeneral.numero_contrato_epm} ya está asignado a la familia "${existingFamily.apellido_familiar}"`
+        });
+      }
+      
+      console.log('✅ Número de contrato EPM disponible');
+    }
+    
+    // 2. CREAR FAMILIA
     console.log('💾 Creando registro de familia...');
     
     const tamanioFamiliaCalculado = Math.max(1, (familyMembers.length || 0) + (deceasedMembers.length || 0));

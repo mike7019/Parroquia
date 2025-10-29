@@ -125,6 +125,13 @@ export const ErrorCodes = {
       userMessage: 'Posible error de digitación detectado',
       technicalMessage: 'Familia existente con miembros diferentes a los proporcionados',
       suggestion: 'Verifique que no haya cambiado incorrectamente las cédulas de miembros existentes'
+    },
+    DUPLICATE_EPM_CONTRACT: {
+      code: 'DUPLICATE_EPM_CONTRACT',
+      httpStatus: 409,
+      userMessage: 'Este número de contrato EPM ya está registrado',
+      technicalMessage: 'Número de contrato EPM duplicado en otra familia',
+      suggestion: 'Verifique el número de contrato EPM. Si es correcto, la familia ya existe en el sistema'
     }
   },
 
