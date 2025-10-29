@@ -26,62 +26,124 @@ const formatearNombreCompleto = (primerNombre, segundoNombre, primerApellido, se
 
 /**
  * Registrar disposición de basuras
+ * Soporta dos formatos:
+ * - Formato v1: { recolector: true, quemada: false, ... }
+ * - Formato v2: [{ id: "5", nombre: "Campo Abierto", seleccionado: true }, ...]
  */
 const registrarDisposicionBasuras = async (familiaId, disposicionBasuras, transaction) => {
   console.log('🗑️ Registrando disposición de basuras...');
   if (!disposicionBasuras) return;
 
-  const disposicionMapping = {
-    recolector: 1,    // "Recolección Pública"
-    quemada: 2,       // "Quema"
-    enterrada: 3,     // "Entierro"
-    recicla: 4,       // "Reciclaje"
-    aire_libre: 6,    // "Botadero"
-    no_aplica: 7      // "Otro"
-  };
-
-  for (const [tipo, activo] of Object.entries(disposicionBasuras)) {
-    if (activo && disposicionMapping[tipo]) {
-      try {
-        // Verificar si ya existe antes de insertar
-        const existingRecord = await sequelize.query(
-          'SELECT id FROM familia_disposicion_basura WHERE id_familia = $1 AND id_tipo_disposicion_basura = $2',
-          {
-            bind: [familiaId, disposicionMapping[tipo]],
-            type: QueryTypes.SELECT,
-            transaction
-          }
-        );
+  // Detectar si es formato v2 (array) o v1 (objeto)
+  const isV2Format = Array.isArray(disposicionBasuras);
+  
+  if (isV2Format) {
+    // Formato v2: Array de objetos con ID directo
+    console.log('  📋 Detectado formato v2.0 (array de disposiciones)');
+    
+    for (const disposicion of disposicionBasuras) {
+      if (disposicion.seleccionado) {
+        const disposicionId = parseInt(disposicion.id);
         
-        if (existingRecord.length === 0) {
-          await sequelize.query(
-            'INSERT INTO familia_disposicion_basura (id_familia, id_tipo_disposicion_basura, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
+        try {
+          // Verificar si ya existe antes de insertar
+          const existingRecord = await sequelize.query(
+            'SELECT id FROM familia_disposicion_basura WHERE id_familia = $1 AND id_tipo_disposicion_basura = $2',
             {
-              bind: [familiaId, disposicionMapping[tipo]],
+              bind: [familiaId, disposicionId],
+              type: QueryTypes.SELECT,
               transaction
             }
           );
-          console.log(`  ✅ Disposición registrada: ${tipo}`);
-        } else {
-          console.log(`  ℹ️ Disposición ya existe: ${tipo}`);
-        }
-      } catch (error) {
-        // Detectar violaciones de foreign key
-        if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
-          throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
-            catalog: 'tipo_disposicion_basura',
-            invalidId: disposicionMapping[tipo],
-            details: `El tipo de disposición de basura "${tipo}" (ID ${disposicionMapping[tipo]}) no existe en el catálogo`,
-            suggestion: 'Verifique que el tipo de disposición de basura sea válido'
+          
+          if (existingRecord.length === 0) {
+            await sequelize.query(
+              'INSERT INTO familia_disposicion_basura (id_familia, id_tipo_disposicion_basura, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
+              {
+                bind: [familiaId, disposicionId],
+                transaction
+              }
+            );
+            console.log(`  ✅ Disposición registrada: ${disposicion.nombre} (ID: ${disposicionId})`);
+          } else {
+            console.log(`  ℹ️ Disposición ya existe: ${disposicion.nombre}`);
+          }
+        } catch (error) {
+          // Detectar violaciones de foreign key
+          if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
+            throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
+              catalog: 'tipo_disposicion_basura',
+              invalidId: disposicionId,
+              details: `El tipo de disposición de basura "${disposicion.nombre}" (ID ${disposicionId}) no existe en el catálogo`,
+              suggestion: 'Verifique que el ID de la disposición de basura sea válido del catálogo'
+            });
+          }
+          
+          throw createError(ErrorCodes.BUSINESS_LOGIC.SERVICE_REGISTRATION_FAILED, {
+            service: 'disposicion_basuras',
+            tipo: disposicion.nombre,
+            familiaId,
+            originalError: error.message
           });
         }
-        
-        throw createError(ErrorCodes.BUSINESS_LOGIC.SERVICE_REGISTRATION_FAILED, {
-          service: 'disposicion_basuras',
-          tipo,
-          familiaId,
-          originalError: error.message
-        });
+      }
+    }
+  } else {
+    // Formato v1: Objeto con propiedades booleanas
+    console.log('  📋 Detectado formato v1.0 (objeto con booleanos)');
+    
+    const disposicionMapping = {
+      recolector: 1,    // "Recolección Pública"
+      quemada: 2,       // "Quema"
+      enterrada: 3,     // "Entierro"
+      recicla: 4,       // "Reciclaje"
+      aire_libre: 6,    // "Botadero"
+      no_aplica: 7      // "Otro"
+    };
+
+    for (const [tipo, activo] of Object.entries(disposicionBasuras)) {
+      if (activo && disposicionMapping[tipo]) {
+        try {
+          // Verificar si ya existe antes de insertar
+          const existingRecord = await sequelize.query(
+            'SELECT id FROM familia_disposicion_basura WHERE id_familia = $1 AND id_tipo_disposicion_basura = $2',
+            {
+              bind: [familiaId, disposicionMapping[tipo]],
+              type: QueryTypes.SELECT,
+              transaction
+            }
+          );
+          
+          if (existingRecord.length === 0) {
+            await sequelize.query(
+              'INSERT INTO familia_disposicion_basura (id_familia, id_tipo_disposicion_basura, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
+              {
+                bind: [familiaId, disposicionMapping[tipo]],
+                transaction
+              }
+            );
+            console.log(`  ✅ Disposición registrada: ${tipo}`);
+          } else {
+            console.log(`  ℹ️ Disposición ya existe: ${tipo}`);
+          }
+        } catch (error) {
+          // Detectar violaciones de foreign key
+          if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
+            throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
+              catalog: 'tipo_disposicion_basura',
+              invalidId: disposicionMapping[tipo],
+              details: `El tipo de disposición de basura "${tipo}" (ID ${disposicionMapping[tipo]}) no existe en el catálogo`,
+              suggestion: 'Verifique que el tipo de disposición de basura sea válido'
+            });
+          }
+          
+          throw createError(ErrorCodes.BUSINESS_LOGIC.SERVICE_REGISTRATION_FAILED, {
+            service: 'disposicion_basuras',
+            tipo,
+            familiaId,
+            originalError: error.message
+          });
+        }
       }
     }
   }
@@ -141,53 +203,115 @@ const registrarSistemaAcueducto = async (familiaId, sistemaAcueducto, transactio
 
 /**
  * Registrar aguas residuales
+ * Soporta dos formatos:
+ * - Formato v1: { id: 1, nombre: "Alcantarillado" }
+ * - Formato v2: [{ id: "1", nombre: "Alcantarillado Público", seleccionado: true }, ...]
  */
 const registrarAguasResiduales = async (familiaId, aguasResiduales, transaction) => {
   console.log('🚰 Registrando aguas residuales...');
   if (!aguasResiduales) return;
 
-  try {
-    let aguaResidualesId = aguasResiduales.id || 1; // Default: Alcantarillado
+  // Detectar si es formato v2 (array) o v1 (objeto)
+  const isV2Format = Array.isArray(aguasResiduales);
+  
+  if (isV2Format) {
+    // Formato v2: Array de objetos - procesar todos los seleccionados
+    console.log('  📋 Detectado formato v2.0 (array de aguas residuales)');
     
-    // Verificar si ya existe antes de insertar
-    const existingRecord = await sequelize.query(
-      'SELECT id FROM familia_sistema_aguas_residuales WHERE id_familia = $1 AND id_tipo_aguas_residuales = $2',
-      {
-        bind: [familiaId, aguaResidualesId],
-        type: QueryTypes.SELECT,
-        transaction
+    for (const aguaResidual of aguasResiduales) {
+      if (aguaResidual.seleccionado) {
+        const aguaResidualId = parseInt(aguaResidual.id);
+        
+        try {
+          // Verificar si ya existe antes de insertar
+          const existingRecord = await sequelize.query(
+            'SELECT id FROM familia_sistema_aguas_residuales WHERE id_familia = $1 AND id_tipo_aguas_residuales = $2',
+            {
+              bind: [familiaId, aguaResidualId],
+              type: QueryTypes.SELECT,
+              transaction
+            }
+          );
+          
+          if (existingRecord.length === 0) {
+            await sequelize.query(
+              'INSERT INTO familia_sistema_aguas_residuales (id_familia, id_tipo_aguas_residuales, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
+              {
+                bind: [familiaId, aguaResidualId],
+                transaction
+              }
+            );
+            console.log(`  ✅ Agua residual registrada: ${aguaResidual.nombre} (ID: ${aguaResidualId})`);
+          } else {
+            console.log(`  ℹ️ Agua residual ya existe: ${aguaResidual.nombre}`);
+          }
+        } catch (error) {
+          // Detectar violaciones de foreign key
+          if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
+            throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
+              catalog: 'tipos_aguas_residuales',
+              invalidId: aguaResidualId,
+              details: `El tipo de aguas residuales "${aguaResidual.nombre}" (ID ${aguaResidualId}) no existe en el catálogo`,
+              suggestion: 'Verifique que el ID del tipo de aguas residuales sea válido del catálogo'
+            });
+          }
+          
+          throw createError(ErrorCodes.BUSINESS_LOGIC.SERVICE_REGISTRATION_FAILED, {
+            service: 'aguas_residuales',
+            familiaId,
+            aguaResidualesId: aguaResidualId,
+            originalError: error.message
+          });
+        }
       }
-    );
+    }
+  } else {
+    // Formato v1: Objeto único
+    console.log('  📋 Detectado formato v1.0 (objeto único)');
     
-    if (existingRecord.length === 0) {
-      await sequelize.query(
-        'INSERT INTO familia_sistema_aguas_residuales (id_familia, id_tipo_aguas_residuales, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
+    try {
+      let aguaResidualesId = aguasResiduales.id || 1; // Default: Alcantarillado
+      
+      // Verificar si ya existe antes de insertar
+      const existingRecord = await sequelize.query(
+        'SELECT id FROM familia_sistema_aguas_residuales WHERE id_familia = $1 AND id_tipo_aguas_residuales = $2',
         {
           bind: [familiaId, aguaResidualesId],
+          type: QueryTypes.SELECT,
           transaction
         }
       );
-      console.log(`  ✅ Aguas residuales registradas: ID ${aguaResidualesId}`);
-    } else {
-      console.log(`  ℹ️ Aguas residuales ya existen: ID ${aguaResidualesId}`);
-    }
-  } catch (error) {
-    // Detectar violaciones de foreign key
-    if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
-      throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
-        catalog: 'tipos_aguas_residuales',
-        invalidId: aguaResidualesId,
-        details: `El tipo de aguas residuales con ID ${aguaResidualesId} no existe en el catálogo`,
-        suggestion: 'Verifique que el ID del tipo de aguas residuales sea correcto o seleccione un tipo válido del catálogo'
+      
+      if (existingRecord.length === 0) {
+        await sequelize.query(
+          'INSERT INTO familia_sistema_aguas_residuales (id_familia, id_tipo_aguas_residuales, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
+          {
+            bind: [familiaId, aguaResidualesId],
+            transaction
+          }
+        );
+        console.log(`  ✅ Aguas residuales registradas: ID ${aguaResidualesId}`);
+      } else {
+        console.log(`  ℹ️ Aguas residuales ya existen: ID ${aguaResidualesId}`);
+      }
+    } catch (error) {
+      // Detectar violaciones de foreign key
+      if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
+        throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
+          catalog: 'tipos_aguas_residuales',
+          invalidId: aguasResiduales.id,
+          details: `El tipo de aguas residuales con ID ${aguasResiduales.id} no existe en el catálogo`,
+          suggestion: 'Verifique que el ID del tipo de aguas residuales sea correcto o seleccione un tipo válido del catálogo'
+        });
+      }
+      
+      throw createError(ErrorCodes.BUSINESS_LOGIC.SERVICE_REGISTRATION_FAILED, {
+        service: 'aguas_residuales',
+        familiaId,
+        aguaResidualesId: aguasResiduales?.id,
+        originalError: error.message
       });
     }
-    
-    throw createError(ErrorCodes.BUSINESS_LOGIC.SERVICE_REGISTRATION_FAILED, {
-      service: 'aguas_residuales',
-      familiaId,
-      aguaResidualesId: aguasResiduales?.id,
-      originalError: error.message
-    });
   }
 };
 
@@ -302,11 +426,67 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
       const tipoIdentificacionId = mapearTipoIdentificacion(miembro.tipoIdentificacion);
       const estadoCivilId = mapearEstadoCivil(miembro.situacionCivil);
       const parentescoId = miembro.parentesco?.id ? parseInt(miembro.parentesco.id) : null;
-      const profesionId = miembro.profesion?.id ? parseInt(miembro.profesion.id) : null;
+      
+      // ⭐ SOPORTE v2.0: Extraer profesión desde profesionMotivoFechaCelebrar o profesion
+      let profesionId = null;
+      if (miembro.profesionMotivoFechaCelebrar?.profesion?.id) {
+        profesionId = parseInt(miembro.profesionMotivoFechaCelebrar.profesion.id);
+      } else if (miembro.profesion?.id) {
+        profesionId = parseInt(miembro.profesion.id);
+      }
+      
       const comunidadCulturalId = miembro.comunidadCultural?.id ? parseInt(miembro.comunidadCultural.id) : null;
 
       const fechaNacimiento = miembro.fechaNacimiento || miembro.fecha_nacimiento;
       const identificacionUnica = await generarIdentificacionUnica('TEMP');
+      
+      // ⭐ SOPORTE v2.0: Extraer motivoFechaCelebrar desde profesionMotivoFechaCelebrar.celebraciones[0] o motivoFechaCelebrar
+      let motivoCelebrar = null;
+      let diaCelebrar = null;
+      let mesCelebrar = null;
+      
+      if (miembro.profesionMotivoFechaCelebrar?.celebraciones && Array.isArray(miembro.profesionMotivoFechaCelebrar.celebraciones) && miembro.profesionMotivoFechaCelebrar.celebraciones.length > 0) {
+        // Formato v2.0: Array de celebraciones, tomar la primera
+        const primeraCelebracion = miembro.profesionMotivoFechaCelebrar.celebraciones[0];
+        motivoCelebrar = primeraCelebracion.motivo || null;
+        diaCelebrar = primeraCelebracion.dia ? parseInt(primeraCelebracion.dia) : null;
+        mesCelebrar = primeraCelebracion.mes ? parseInt(primeraCelebracion.mes) : null;
+      } else if (miembro.motivoFechaCelebrar) {
+        // Formato v1.0: Objeto único
+        motivoCelebrar = miembro.motivoFechaCelebrar.motivo || null;
+        diaCelebrar = miembro.motivoFechaCelebrar.dia ? parseInt(miembro.motivoFechaCelebrar.dia) : null;
+        mesCelebrar = miembro.motivoFechaCelebrar.mes ? parseInt(miembro.motivoFechaCelebrar.mes) : null;
+      }
+      
+      // ⭐ SOPORTE v2.0: Procesar enfermedades (plural) o enfermedad (singular)
+      let nombreEnfermedad = null;
+      if (miembro.enfermedades && Array.isArray(miembro.enfermedades) && miembro.enfermedades.length > 0) {
+        // Formato v2.0: Array de enfermedades, tomar la primera
+        nombreEnfermedad = miembro.enfermedades[0].nombre || null;
+      } else if (miembro.enfermedad) {
+        // Formato v1.0: Objeto único
+        nombreEnfermedad = miembro.enfermedad.nombre || null;
+      }
+      
+      // ⭐ SOPORTE v2.0: Procesar enQueEresLider como array o string
+      let enQueEresLider = null;
+      if (miembro.enQueEresLider && Array.isArray(miembro.enQueEresLider)) {
+        // Formato v2.0: Array de strings, unir con comas
+        enQueEresLider = miembro.enQueEresLider.join(', ');
+      } else if (miembro.en_que_eres_lider) {
+        // Formato v1.0: String
+        enQueEresLider = miembro.en_que_eres_lider;
+      }
+      
+      // ⭐ SOPORTE v2.0: Procesar necesidadesEnfermo (guardar como JSON string)
+      let necesidadEnfermo = null;
+      if (miembro.necesidadesEnfermo && Array.isArray(miembro.necesidadesEnfermo) && miembro.necesidadesEnfermo.length > 0) {
+        // Formato v2.0: Array de necesidades, unir con comas
+        necesidadEnfermo = miembro.necesidadesEnfermo.join(', ');
+      } else {
+        // Mantener compatibilidad con formato anterior (nombre de enfermedad)
+        necesidadEnfermo = nombreEnfermedad;
+      }
       
       const personaData = {
         primer_nombre: primerNombre,
@@ -322,16 +502,16 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         id_sexo: sexoId,
         id_tipo_identificacion_tipo_identificacion: tipoIdentificacionId,
         id_estado_civil_estado_civil: estadoCivilId,
-        id_parentesco: parentescoId, // ⭐ AGREGADO
-        id_profesion: profesionId, // ⭐ AGREGADO
-        id_comunidad_cultural: comunidadCulturalId, // ⭐ AGREGADO
+        id_parentesco: parentescoId,
+        id_profesion: profesionId,
+        id_comunidad_cultural: comunidadCulturalId,
         estudios: (miembro.estudio && typeof miembro.estudio === 'object') ? miembro.estudio.nombre : (miembro.estudio || null),
-        en_que_eres_lider: miembro.en_que_eres_lider || null, // ⭐ CORREGIDO
-        necesidad_enfermo: miembro.enfermedad?.nombre || null, // ⭐ CORREGIDO
-        motivo_celebrar: miembro.motivoFechaCelebrar?.motivo || null, // ⭐ AGREGADO
-        dia_celebrar: miembro.motivoFechaCelebrar?.dia ? parseInt(miembro.motivoFechaCelebrar.dia) : null, // ⭐ AGREGADO
-        mes_celebrar: miembro.motivoFechaCelebrar?.mes ? parseInt(miembro.motivoFechaCelebrar.mes) : null, // ⭐ AGREGADO
-        talla_camisa: miembro['talla_camisa/blusa'] || (miembro.talla ? miembro.talla.camisa : null),
+        en_que_eres_lider: enQueEresLider,
+        necesidad_enfermo: necesidadEnfermo,
+        motivo_celebrar: motivoCelebrar,
+        dia_celebrar: diaCelebrar,
+        mes_celebrar: mesCelebrar,
+        talla_camisa: miembro.talla_camisa || miembro['talla_camisa/blusa'] || (miembro.talla ? miembro.talla.camisa : null),
         talla_pantalon: miembro.talla_pantalon || (miembro.talla ? miembro.talla.pantalon : null),
         talla_zapato: miembro.talla_zapato || (miembro.talla ? miembro.talla.calzado : null)
       };
@@ -2220,7 +2400,11 @@ export const crearEncuesta = async (req, res) => {
       id_vereda: informacionGeneral.vereda?.id ? parseInt(informacionGeneral.vereda.id) : null,
       id_sector: informacionGeneral.sector?.id ? parseInt(informacionGeneral.sector.id) : null,
       id_corregimiento: informacionGeneral.corregimiento?.id ? parseInt(informacionGeneral.corregimiento.id) : null,
-      comunionEnCasa: informacionGeneral.comunionEnCasa || false,
+      
+      // ⭐ SOPORTE v2.0: comunionEnCasa puede venir en informacionGeneral O en cualquier miembro (solicitudComunionCasa)
+      comunionEnCasa: informacionGeneral.comunionEnCasa || 
+                     (familyMembers && familyMembers.some(m => m.solicitudComunionCasa === true)) || 
+                     false,
       
       // CAMPOS BOOLEANOS DE SERVICIOS DE AGUA
       pozo_septico: servicios_agua?.pozo_septico || false,
