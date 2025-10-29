@@ -3098,9 +3098,60 @@ const swaggerConfig = {
               example: false
             }
           }
+        },
+        
+        Paginacion: {
+          type: 'object',
+          properties: {
+            paginaActual: {
+              type: 'integer',
+              description: 'Número de página actual',
+              example: 1
+            },
+            totalPaginas: {
+              type: 'integer',
+              description: 'Total de páginas disponibles',
+              example: 5
+            },
+            totalRegistros: {
+              type: 'integer',
+              description: 'Total de registros',
+              example: 48
+            },
+            registrosPorPagina: {
+              type: 'integer',
+              description: 'Número de registros por página',
+              example: 10
+            },
+            hasNext: {
+              type: 'boolean',
+              description: 'Si hay página siguiente',
+              example: true
+            },
+            hasPrev: {
+              type: 'boolean',
+              description: 'Si hay página anterior',
+              example: false
+            }
+          }
         }
       },
       responses: {
+        Unauthorized: {
+          description: 'Token de acceso requerido o inválido',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/ErrorResponse'
+              },
+              example: {
+                status: 'error',
+                message: 'Token de acceso requerido',
+                code: 'UNAUTHORIZED'
+              }
+            }
+          }
+        },
         UnauthorizedError: {
           description: 'Token de acceso requerido o inválido',
           content: {

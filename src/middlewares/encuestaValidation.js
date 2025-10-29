@@ -201,7 +201,7 @@ class EncuestaValidationMiddleware {
           }
         }));
         
-        throw createError(ErrorCodes.DUPLICATES.DUPLICATE_IDENTIFICATION, {
+        throw createError(ErrorCodes.DUPLICATES.DUPLICATE_MEMBER, {
           conflictos,
           total: personasExistentes.length
         });
