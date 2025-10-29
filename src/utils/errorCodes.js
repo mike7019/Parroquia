@@ -84,6 +84,13 @@ export const ErrorCodes = {
       userMessage: 'No se proporcionaron campos válidos para actualizar',
       technicalMessage: 'Ningún campo en la solicitud es actualizable',
       suggestion: 'Incluya al menos un campo válido para actualizar'
+    },
+    INVALID_CATALOG_REFERENCE: {
+      code: 'INVALID_CATALOG_REFERENCE',
+      httpStatus: 422,
+      userMessage: 'El registro seleccionado no existe en el catálogo',
+      technicalMessage: 'Foreign key constraint violation - referenced record does not exist',
+      suggestion: 'Verifique que el ID seleccionado sea válido'
     }
   },
 

@@ -322,19 +322,33 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         for (const destreza of miembro.destrezas) {
           const destrezaId = typeof destreza === 'object' ? destreza.id : destreza;
           
-          await sequelize.query(`
-            INSERT INTO persona_destreza (id_personas_personas, id_destrezas_destrezas, "createdAt", "updatedAt")
-            VALUES (:id_persona, :id_destreza, NOW(), NOW())
-            ON CONFLICT ON CONSTRAINT persona_destreza_pkey DO NOTHING
-          `, {
-            replacements: {
-              id_persona: personaId,
-              id_destreza: destrezaId
-            },
-            transaction
-          });
-          
-          console.log(`      ✅ Destreza ${destrezaId} asociada`);
+          try {
+            await sequelize.query(`
+              INSERT INTO persona_destreza (id_personas_personas, id_destrezas_destrezas, "createdAt", "updatedAt")
+              VALUES (:id_persona, :id_destreza, NOW(), NOW())
+              ON CONFLICT ON CONSTRAINT persona_destreza_pkey DO NOTHING
+            `, {
+              replacements: {
+                id_persona: personaId,
+                id_destreza: destrezaId
+              },
+              transaction
+            });
+            
+            console.log(`      ✅ Destreza ${destrezaId} asociada`);
+          } catch (error) {
+            // Si es error de foreign key, dar mensaje específico
+            if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
+              throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
+                catalog: 'destrezas',
+                invalidId: destrezaId,
+                person: miembro.nombres,
+                details: `La destreza con ID ${destrezaId} no existe en el catálogo`,
+                suggestion: 'Verifique que el ID de la destreza sea correcto o seleccione una destreza válida del catálogo'
+              });
+            }
+            throw error;
+          }
         }
       }
       
@@ -347,20 +361,34 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         for (const habilidad of miembro.habilidades) {
           const habilidadId = typeof habilidad === 'object' ? habilidad.id : habilidad;
           
-          await sequelize.query(`
-            INSERT INTO persona_habilidad (id_persona, id_habilidad, nivel, "createdAt", "updatedAt")
-            VALUES (:id_persona, :id_habilidad, :nivel, NOW(), NOW())
-            ON CONFLICT (id_persona, id_habilidad) DO NOTHING
-          `, {
-            replacements: {
-              id_persona: personaId,
-              id_habilidad: habilidadId,
-              nivel: habilidad.nivel || 'Básico'
-            },
-            transaction
-          });
-          
-          console.log(`      ✅ Habilidad ${habilidadId} asociada`);
+          try {
+            await sequelize.query(`
+              INSERT INTO persona_habilidad (id_persona, id_habilidad, nivel, "createdAt", "updatedAt")
+              VALUES (:id_persona, :id_habilidad, :nivel, NOW(), NOW())
+              ON CONFLICT (id_persona, id_habilidad) DO NOTHING
+            `, {
+              replacements: {
+                id_persona: personaId,
+                id_habilidad: habilidadId,
+                nivel: habilidad.nivel || 'Básico'
+              },
+              transaction
+            });
+            
+            console.log(`      ✅ Habilidad ${habilidadId} asociada`);
+          } catch (error) {
+            // Si es error de foreign key, dar mensaje específico
+            if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
+              throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
+                catalog: 'habilidades',
+                invalidId: habilidadId,
+                person: miembro.nombres,
+                details: `La habilidad con ID ${habilidadId} no existe en el catálogo`,
+                suggestion: 'Verifique que el ID de la habilidad sea correcto o seleccione una habilidad válida del catálogo'
+              });
+            }
+            throw error;
+          }
         }
       }
       
