@@ -8,6 +8,7 @@ import { generarIdentificacionUnica } from '../middlewares/encuestaValidation.js
 import { ErrorCodes, createError } from '../utils/errorCodes.js';
 import { successResponse, paginatedResponse, errorResponse } from '../utils/responseFormatter.js';
 import EncuestaService from '../services/encuestaService.js';
+import personaDetallesHelper from '../services/helpers/personaDetallesHelper.js';
 
 /**
  * Helper function to format complete names properly
@@ -663,6 +664,198 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
       }
       
       // ========================================================================
+      // PROCESAR CELEBRACIONES (tabla intermedia persona_celebracion)
+      // ========================================================================
+      if (miembro.profesionMotivoFechaCelebrar?.celebraciones && Array.isArray(miembro.profesionMotivoFechaCelebrar.celebraciones)) {
+        console.log(`    🎉 Procesando ${miembro.profesionMotivoFechaCelebrar.celebraciones.length} celebraciones...`);
+        
+        for (const celebracion of miembro.profesionMotivoFechaCelebrar.celebraciones) {
+          const motivo = celebracion.motivo || null;
+          const dia = celebracion.dia ? parseInt(celebracion.dia) : null;
+          const mes = celebracion.mes ? parseInt(celebracion.mes) : null;
+          
+          if (motivo) {
+            try {
+              await sequelize.query(`
+                INSERT INTO persona_celebracion (id_persona, motivo, dia, mes, created_at, updated_at)
+                VALUES (:id_persona, :motivo, :dia, :mes, NOW(), NOW())
+                ON CONFLICT (id_persona, motivo, dia, mes) DO NOTHING
+              `, {
+                replacements: {
+                  id_persona: personaId,
+                  motivo: motivo,
+                  dia: dia,
+                  mes: mes
+                },
+                transaction
+              });
+              
+              console.log(`      ✅ Celebración guardada: ${motivo} - ${dia}/${mes}`);
+            } catch (error) {
+              console.error(`      ⚠️ Error guardando celebración "${motivo}": ${error.message}`);
+            }
+          }
+        }
+      } else if (motivoCelebrar && diaCelebrar && mesCelebrar) {
+        // Formato v1.0: Una sola celebración (ya guardada en tabla personas)
+        // También guardarla en persona_celebracion para consistencia
+        console.log(`    🎉 Guardando celebración v1.0 en tabla intermedia...`);
+        
+        try {
+          await sequelize.query(`
+            INSERT INTO persona_celebracion (id_persona, motivo, dia, mes, created_at, updated_at)
+            VALUES (:id_persona, :motivo, :dia, :mes, NOW(), NOW())
+            ON CONFLICT (id_persona, motivo, dia, mes) DO NOTHING
+          `, {
+            replacements: {
+              id_persona: personaId,
+              motivo: motivoCelebrar,
+              dia: diaCelebrar,
+              mes: mesCelebrar
+            },
+            transaction
+          });
+          
+          console.log(`      ✅ Celebración guardada: ${motivoCelebrar} - ${diaCelebrar}/${mesCelebrar}`);
+        } catch (error) {
+          console.error(`      ⚠️ Error guardando celebración v1.0: ${error.message}`);
+        }
+      }
+      
+      // ========================================================================
+      // PROCESAR ENFERMEDADES (tabla intermedia persona_enfermedad)
+      // ========================================================================
+      if (miembro.enfermedades && Array.isArray(miembro.enfermedades) && miembro.enfermedades.length > 0) {
+        console.log(`    🏥 Procesando ${miembro.enfermedades.length} enfermedades...`);
+        
+        for (const enfermedad of miembro.enfermedades) {
+          // Validar y convertir ID de forma segura
+          const enfermedadIdRaw = enfermedad.id ? String(enfermedad.id).trim() : null;
+          const enfermedadId = enfermedadIdRaw && !isNaN(enfermedadIdRaw) ? parseInt(enfermedadIdRaw) : null;
+          const enfermedadNombre = enfermedad.nombre || null;
+          
+          if (enfermedadId && !isNaN(enfermedadId)) {
+            try {
+              // Primero verificar que la enfermedad existe en el catálogo
+              // NOTA: El campo ahora se llama 'id' no 'id_enfermedad'
+              const [enfermedadExiste] = await sequelize.query(`
+                SELECT id FROM enfermedades WHERE id = :id_enfermedad LIMIT 1
+              `, {
+                replacements: { id_enfermedad: enfermedadId },
+                type: QueryTypes.SELECT,
+                transaction
+              });
+              
+              if (!enfermedadExiste) {
+                console.error(`      ⚠️ Enfermedad con ID ${enfermedadId} no existe en catálogo, omitiendo...`);
+                continue;
+              }
+              
+              await sequelize.query(`
+                INSERT INTO persona_enfermedad (id_persona, id_enfermedad, notas, activo, created_at, updated_at)
+                VALUES (:id_persona, :id_enfermedad, :notas, true, NOW(), NOW())
+                ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
+              `, {
+                replacements: {
+                  id_persona: personaId,
+                  id_enfermedad: enfermedadId,
+                  notas: enfermedadNombre
+                },
+                transaction
+              });
+              
+              console.log(`      ✅ Enfermedad guardada: ${enfermedadNombre} (ID: ${enfermedadId})`);
+            } catch (error) {
+              if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
+                console.error(`      ⚠️ Enfermedad con ID ${enfermedadId} no existe en catálogo`);
+              } else {
+                console.error(`      ⚠️ Error guardando enfermedad "${enfermedadNombre}": ${error.message}`);
+              }
+            }
+          } else if (enfermedadNombre) {
+            // Si solo viene el nombre, intentar buscar en el catálogo
+            console.log(`      ℹ️ Buscando enfermedad por nombre: "${enfermedadNombre}"`);
+            
+            try {
+              const [enfermedadCatalogo] = await sequelize.query(`
+                SELECT id FROM enfermedades WHERE LOWER(nombre) = LOWER(:nombre) LIMIT 1
+              `, {
+                replacements: { nombre: enfermedadNombre },
+                type: QueryTypes.SELECT,
+                transaction
+              });
+              
+              if (enfermedadCatalogo) {
+                await sequelize.query(`
+                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, notas, activo, created_at, updated_at)
+                  VALUES (:id_persona, :id_enfermedad, :notas, true, NOW(), NOW())
+                  ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
+                `, {
+                  replacements: {
+                    id_persona: personaId,
+                    id_enfermedad: enfermedadCatalogo.id,
+                    notas: enfermedadNombre
+                  },
+                  transaction
+                });
+                
+                console.log(`      ✅ Enfermedad guardada por nombre: ${enfermedadNombre}`);
+              } else {
+                // Si no existe, usar "Otra" (ID 14)
+                await sequelize.query(`
+                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, notas, activo, created_at, updated_at)
+                  VALUES (:id_persona, 14, :notas, true, NOW(), NOW())
+                  ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
+                `, {
+                  replacements: {
+                    id_persona: personaId,
+                    notas: enfermedadNombre
+                  },
+                  transaction
+                });
+                
+                console.log(`      ⚠️ Enfermedad no encontrada en catálogo, guardada como "Otra": ${enfermedadNombre}`);
+              }
+            } catch (error) {
+              console.error(`      ⚠️ Error procesando enfermedad "${enfermedadNombre}": ${error.message}`);
+            }
+          }
+        }
+      } else if (nombreEnfermedad) {
+        // Formato v1.0: Una sola enfermedad
+        console.log(`    🏥 Procesando enfermedad v1.0: ${nombreEnfermedad}`);
+        
+        try {
+          const [enfermedadCatalogo] = await sequelize.query(`
+            SELECT id FROM enfermedades WHERE LOWER(nombre) = LOWER(:nombre) LIMIT 1
+          `, {
+            replacements: { nombre: nombreEnfermedad },
+            type: QueryTypes.SELECT,
+            transaction
+          });
+          
+          const idEnfermedad = enfermedadCatalogo ? enfermedadCatalogo.id : 14; // 14 = "Otra"
+          
+          await sequelize.query(`
+            INSERT INTO persona_enfermedad (id_persona, id_enfermedad, notas, activo, created_at, updated_at)
+            VALUES (:id_persona, :id_enfermedad, :notas, true, NOW(), NOW())
+            ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
+          `, {
+            replacements: {
+              id_persona: personaId,
+              id_enfermedad: idEnfermedad,
+              notas: nombreEnfermedad
+            },
+            transaction
+          });
+          
+          console.log(`      ✅ Enfermedad v1.0 guardada: ${nombreEnfermedad}`);
+        } catch (error) {
+          console.error(`      ⚠️ Error guardando enfermedad v1.0: ${error.message}`);
+        }
+      }
+      
+      // ========================================================================
       // PROCESAR LIDERAZGO (campo de texto libre)
       // ========================================================================
       if (miembro.en_que_eres_lider || miembro.liderazgo) {
@@ -939,60 +1132,10 @@ export const obtenerEncuestas = async (req, res) => {
     // Para cada familia, obtener información adicional manualmente
     const encuestasFormateadas = await Promise.all(
       encuestas.map(async (familiaData) => {
-        // Obtener personas VIVAS de la familia (excluir fallecidos)
-        const personas = await sequelize.query(`
-          SELECT 
-            p.id_personas,
-            p.primer_nombre,
-            p.segundo_nombre,
-            p.primer_apellido,
-            p.segundo_apellido,
-            p.identificacion,
-            p.telefono,
-            p.correo_electronico,
-            p.fecha_nacimiento,
-            p.direccion,
-            p.estudios,
-            p.en_que_eres_lider,
-            p.necesidad_enfermo,
-            p.talla_camisa,
-            p.talla_pantalon,
-            p.talla_zapato,
-            p.id_sexo,
-            p.id_profesion,
-            p.id_parentesco,
-            p.id_comunidad_cultural,
-            p.motivo_celebrar,
-            p.dia_celebrar,
-            p.mes_celebrar,
-            p.id_tipo_identificacion_tipo_identificacion,
-            p.id_estado_civil_estado_civil,
-            s.id_sexo as sexo_id,
-            s.nombre as sexo_nombre,
-            ti.id_tipo_identificacion as tipo_id_id,
-            ti.nombre as tipo_id_nombre,
-            ti.codigo as tipo_id_codigo,
-            sc.id_situacion_civil as estado_civil_id,
-            sc.nombre as estado_civil_nombre,
-            prof.id_profesion as profesion_id,
-            prof.nombre as profesion_nombre,
-            par.id_parentesco as parentesco_id,
-            par.nombre as parentesco_nombre,
-            cc.id_comunidad_cultural as comunidad_cultural_id,
-            cc.nombre as comunidad_cultural_nombre
-          FROM personas p
-          LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
-          LEFT JOIN tipos_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
-          LEFT JOIN situaciones_civiles sc ON p.id_estado_civil_estado_civil = sc.id_situacion_civil
-          LEFT JOIN profesiones prof ON p.id_profesion = prof.id_profesion
-          LEFT JOIN parentescos par ON p.id_parentesco = par.id_parentesco
-          LEFT JOIN comunidades_culturales cc ON p.id_comunidad_cultural = cc.id_comunidad_cultural
-          WHERE p.id_familia_familias = :familiaId 
-          AND (p.identificacion NOT LIKE 'FALLECIDO%' OR p.identificacion IS NULL)
-        `, {
-          replacements: { familiaId: familiaData.id_familia },
-          type: QueryTypes.SELECT
-        });
+        // Obtener personas VIVAS de la familia (excluir fallecidos) con celebraciones y enfermedades
+        const personas = await personaDetallesHelper.obtenerPersonasFamiliaCompletas(
+          familiaData.id_familia
+        );
 
         // Obtener difuntos desde la tabla difuntos_familia (en lugar de personas con FALLECIDO%)
         const difuntos = await sequelize.query(`
@@ -1376,10 +1519,14 @@ export const obtenerEncuestas = async (req, res) => {
               id: persona.id_comunidad_cultural,
               nombre: persona.comunidad_cultural_nombre || null
             } : null,
-            motivo_celebrar: persona.motivo_celebrar || null,
-            dia_celebrar: persona.dia_celebrar || null,
-            mes_celebrar: persona.mes_celebrar || null,
-            necesidad_enfermo: persona.necesidad_enfermo || null
+            // ⭐ NUEVOS CAMPOS - Celebraciones y Enfermedades (arrays) ⭐
+            celebraciones: persona.celebraciones || [],
+            enfermedades: persona.enfermedades || [],
+            // Campos deprecados - mantener para compatibilidad v1.0
+            motivo_celebrar_deprecated: persona.motivo_celebrar || null,
+            dia_celebrar_deprecated: persona.dia_celebrar || null,
+            mes_celebrar_deprecated: persona.mes_celebrar || null,
+            necesidad_enfermo_deprecated: persona.necesidad_enfermo || null
           };
         }));
 
@@ -1572,61 +1719,10 @@ export const obtenerEncuestaPorId = async (req, res) => {
 
     console.log(`✅ Encuesta encontrada: ${familiaData.apellido_familiar}`);
 
-    // Usar exactamente la misma lógica que obtenerEncuestas para una familia individual
-    // Obtener personas VIVAS de la familia (excluir fallecidos)
-    const personas = await sequelize.query(`
-      SELECT 
-      p.id_personas,
-      p.primer_nombre,
-      p.segundo_nombre,
-      p.primer_apellido,
-      p.segundo_apellido,
-      p.identificacion,
-      p.telefono,
-      p.correo_electronico,
-      p.fecha_nacimiento,
-      p.direccion,
-      p.estudios,
-      p.en_que_eres_lider,
-      p.necesidad_enfermo,
-      p.talla_camisa,
-      p.talla_pantalon,
-      p.talla_zapato,
-      p.id_sexo,
-      p.id_profesion,
-      p.id_parentesco,
-      p.id_comunidad_cultural,
-      p.motivo_celebrar,
-      p.dia_celebrar,
-      p.mes_celebrar,
-      p.id_tipo_identificacion_tipo_identificacion,
-      p.id_estado_civil_estado_civil,
-      s.id_sexo as sexo_id,
-      s.nombre as sexo_nombre,
-      ti.id_tipo_identificacion as tipo_id_id,
-      ti.nombre as tipo_id_nombre,
-      ti.codigo as tipo_id_codigo,
-      sc.id_situacion_civil as estado_civil_id,
-      sc.nombre as estado_civil_nombre,
-      prof.id_profesion as profesion_id,
-      prof.nombre as profesion_nombre,
-      par.id_parentesco as parentesco_id,
-      par.nombre as parentesco_nombre,
-      cc.id_comunidad_cultural as comunidad_cultural_id,
-      cc.nombre as comunidad_cultural_nombre
-      FROM personas p
-      LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
-      LEFT JOIN tipos_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
-      LEFT JOIN situaciones_civiles sc ON p.id_estado_civil_estado_civil = sc.id_situacion_civil
-      LEFT JOIN profesiones prof ON p.id_profesion = prof.id_profesion
-      LEFT JOIN parentescos par ON p.id_parentesco = par.id_parentesco
-      LEFT JOIN comunidades_culturales cc ON p.id_comunidad_cultural = cc.id_comunidad_cultural
-      WHERE p.id_familia_familias = :familiaId 
-      AND (p.identificacion NOT LIKE 'FALLECIDO%' OR p.identificacion IS NULL)
-    `, {
-      replacements: { familiaId: familiaData.id_familia },
-      type: QueryTypes.SELECT
-    });
+    // ⭐ USAR HELPER para obtener personas con celebraciones y enfermedades
+    const personas = await personaDetallesHelper.obtenerPersonasFamiliaCompletas(
+      familiaData.id_familia
+    );
 
     // Obtener difuntos desde la tabla difuntos_familia (en lugar de personas con FALLECIDO%)
     const difuntos = await sequelize.query(`
@@ -2010,10 +2106,14 @@ export const obtenerEncuestaPorId = async (req, res) => {
           id: persona.id_comunidad_cultural,
           nombre: persona.comunidad_cultural_nombre || null
         } : null,
-        motivo_celebrar: persona.motivo_celebrar || null,
-        dia_celebrar: persona.dia_celebrar || null,
-        mes_celebrar: persona.mes_celebrar || null,
-        necesidad_enfermo: persona.necesidad_enfermo || null
+        // ⭐ NUEVOS CAMPOS - Celebraciones y Enfermedades (arrays) ⭐
+        celebraciones: persona.celebraciones || [],
+        enfermedades: persona.enfermedades || [],
+        // Campos deprecados - mantener para compatibilidad v1.0
+        motivo_celebrar_deprecated: persona.motivo_celebrar || null,
+        dia_celebrar_deprecated: persona.dia_celebrar || null,
+        mes_celebrar_deprecated: persona.mes_celebrar || null,
+        necesidad_enfermo_deprecated: persona.necesidad_enfermo || null
       };
     }));
 

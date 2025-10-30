@@ -291,102 +291,116 @@ class EstadisticasGeneralesService {
    */
   async getEstadisticasSalud() {
     try {
-      // 1. Totales generales
+      // 1. Totales generales - usando tabla persona_enfermedad
       const [totales] = await sequelize.query(`
         SELECT 
-          COUNT(*) as total_personas,
-          COUNT(*) as total_personas_vivas,
-          COUNT(CASE WHEN necesidad_enfermo IS NOT NULL AND necesidad_enfermo != '' THEN 1 END) as personas_con_enfermedades,
-          COUNT(CASE WHEN necesidad_enfermo IS NULL OR necesidad_enfermo = '' THEN 1 END) as personas_sanas
-        FROM personas
+          COUNT(DISTINCT p.id_personas) as total_personas,
+          COUNT(DISTINCT p.id_personas) as total_personas_vivas,
+          COUNT(DISTINCT pe.id_persona) as personas_con_enfermedades,
+          COUNT(DISTINCT p.id_personas) - COUNT(DISTINCT pe.id_persona) as personas_sanas
+        FROM personas p
+        LEFT JOIN persona_enfermedad pe ON p.id_personas = pe.id_persona AND pe.activo = true
       `, { type: QueryTypes.SELECT });
 
-      // 2. Distribución por tipo de enfermedad (usando el campo necesidad_enfermo)
+      // 2. Distribución por tipo de enfermedad - usando tabla enfermedades
       const distribucionPorEnfermedad = await sequelize.query(`
         SELECT 
-          necesidad_enfermo as enfermedad,
-          COUNT(DISTINCT p.id_personas) as total_personas,
-          ROUND(COUNT(DISTINCT p.id_personas) * 100.0 / NULLIF((SELECT COUNT(*) FROM personas WHERE necesidad_enfermo IS NOT NULL AND necesidad_enfermo != ''), 0), 2) as porcentaje,
-          COUNT(DISTINCT p.id_familia) as familias,
+          e.nombre as enfermedad,
+          e.descripcion as descripcion_enfermedad,
+          COUNT(DISTINCT pe.id_persona) as total_personas,
+          ROUND(COUNT(DISTINCT pe.id_persona) * 100.0 / NULLIF((
+            SELECT COUNT(DISTINCT id_persona) FROM persona_enfermedad WHERE activo = true
+          ), 0), 2) as porcentaje,
+          COUNT(DISTINCT p.id_familia_familias) as familias,
           COUNT(CASE WHEN s.nombre = 'Masculino' THEN 1 END) as masculino,
           COUNT(CASE WHEN s.nombre = 'Femenino' THEN 1 END) as femenino,
           COUNT(CASE WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.fecha_nacimiento)) < 18 THEN 1 END) as menores_18,
           COUNT(CASE WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.fecha_nacimiento)) BETWEEN 18 AND 60 THEN 1 END) as entre_18_60,
           COUNT(CASE WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.fecha_nacimiento)) > 60 THEN 1 END) as mayores_60
-        FROM personas p
+        FROM persona_enfermedad pe
+        INNER JOIN enfermedades e ON pe.id = e.id
+        INNER JOIN personas p ON pe.id_persona = p.id_personas
         LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
-        WHERE p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != ''
-        GROUP BY p.necesidad_enfermo
+        WHERE pe.activo = true
+        GROUP BY e.id, e.nombre, e.descripcion
         ORDER BY total_personas DESC
         LIMIT 20
       `, { type: QueryTypes.SELECT });
 
-      // 3. Familias afectadas
+      // 3. Familias afectadas - usando tabla persona_enfermedad
       const [familiasStats] = await sequelize.query(`
         SELECT 
           COUNT(DISTINCT f.id_familia) as familias_con_personas_enfermas,
-          COUNT(DISTINCT CASE WHEN personas_enfermas = 0 THEN f.id_familia END) as familias_completamente_sanas,
-          ROUND(AVG(personas_enfermas), 2) as promedio_enfermos_por_familia
+          COUNT(DISTINCT CASE WHEN COALESCE(personas_enfermas, 0) = 0 THEN f.id_familia END) as familias_completamente_sanas,
+          ROUND(AVG(COALESCE(personas_enfermas, 0)), 2) as promedio_enfermos_por_familia
         FROM familias f
         LEFT JOIN (
           SELECT 
-            id_familia,
-            COUNT(CASE WHEN necesidad_enfermo IS NOT NULL AND necesidad_enfermo != '' THEN 1 END) as personas_enfermas
-          FROM personas
-          WHERE id_familia IS NOT NULL
-          GROUP BY id_familia
+            p.id_familia_familias as id_familia,
+            COUNT(DISTINCT pe.id_persona) as personas_enfermas
+          FROM personas p
+          LEFT JOIN persona_enfermedad pe ON p.id_personas = pe.id_persona AND pe.activo = true
+          WHERE p.id_familia_familias IS NOT NULL
+          GROUP BY p.id_familia_familias
         ) as p ON f.id_familia = p.id_familia
       `, { type: QueryTypes.SELECT });
 
-      // 4. Top 10 enfermedades más comunes
+      // 4. Top 10 enfermedades más comunes - usando tabla enfermedades
       const top10EnfermedadesMasComunes = await sequelize.query(`
         SELECT 
-          necesidad_enfermo as enfermedad,
-          COUNT(DISTINCT p.id_personas) as casos,
-          COUNT(DISTINCT p.id_familia) as familias,
-          ROUND(COUNT(DISTINCT p.id_personas) * 100.0 / NULLIF((SELECT COUNT(*) FROM personas WHERE necesidad_enfermo IS NOT NULL AND necesidad_enfermo != ''), 0), 2) as porcentaje_del_total
-        FROM personas p
-        WHERE p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != ''
-        GROUP BY p.necesidad_enfermo
+          e.nombre as enfermedad,
+          COUNT(DISTINCT pe.id_persona) as casos,
+          COUNT(DISTINCT p.id_familia_familias) as familias,
+          ROUND(COUNT(DISTINCT pe.id_persona) * 100.0 / NULLIF((
+            SELECT COUNT(DISTINCT id_persona) FROM persona_enfermedad WHERE activo = true
+          ), 0), 2) as porcentaje_del_total
+        FROM persona_enfermedad pe
+        INNER JOIN enfermedades e ON pe.id = e.id
+        INNER JOIN personas p ON pe.id_persona = p.id_personas
+        WHERE pe.activo = true
+        GROUP BY e.id, e.nombre
         ORDER BY casos DESC
         LIMIT 10
       `, { type: QueryTypes.SELECT });
 
-      // 5. Distribución geográfica
+      // 5. Distribución geográfica - usando tabla persona_enfermedad
       const distribucionPorParroquia = await sequelize.query(`
         SELECT 
           par.nombre as parroquia,
-          COUNT(DISTINCT CASE WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN p.id_personas END) as personas_con_enfermedades,
+          COUNT(DISTINCT pe.id_persona) as personas_con_enfermedades,
           COUNT(DISTINCT f.id_familia) as familias,
           (
-            SELECT p2.necesidad_enfermo
-            FROM personas p2
-            JOIN familias f2 ON p2.id_familia = f2.id_familia
+            SELECT e.nombre
+            FROM persona_enfermedad pe2
+            INNER JOIN enfermedades e ON pe2.id_enfermedad = e.id
+            INNER JOIN personas p2 ON pe2.id_persona = p2.id_personas
+            INNER JOIN familias f2 ON p2.id_familia_familias = f2.id_familia
             WHERE f2.id_parroquia = par.id_parroquia 
-              AND p2.necesidad_enfermo IS NOT NULL 
-              AND p2.necesidad_enfermo != ''
-            GROUP BY p2.necesidad_enfermo
+              AND pe2.activo = true
+            GROUP BY e.id, e.nombre
             ORDER BY COUNT(*) DESC
             LIMIT 1
           ) as enfermedad_mas_comun
         FROM parroquia par
         LEFT JOIN familias f ON par.id_parroquia = f.id_parroquia
-        LEFT JOIN personas p ON f.id_familia = p.id_familia
+        LEFT JOIN personas p ON f.id_familia = p.id_familia_familias
+        LEFT JOIN persona_enfermedad pe ON p.id_personas = pe.id_persona AND pe.activo = true
         GROUP BY par.id_parroquia, par.nombre
-        HAVING COUNT(DISTINCT CASE WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN p.id_personas END) > 0
+        HAVING COUNT(DISTINCT pe.id_persona) > 0
         ORDER BY personas_con_enfermedades DESC
       `, { type: QueryTypes.SELECT });
 
-      // 6. Distribución por usuario (si existe created_by)
+      // 6. Distribución por usuario (si existe created_by) - usando tabla persona_enfermedad
       let distribucionPorUsuario = [];
       try {
         distribucionPorUsuario = await sequelize.query(`
           SELECT 
             u.nombre_completo as usuario,
             COUNT(DISTINCT p.id_personas) as registros_realizados,
-            COUNT(DISTINCT CASE WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN p.id_personas END) as personas_con_enfermedades_registradas,
+            COUNT(DISTINCT pe.id_persona) as personas_con_enfermedades_registradas,
             MAX(p.created_at) as ultimo_registro
           FROM personas p
+          LEFT JOIN persona_enfermedad pe ON p.id_personas = pe.id_persona AND pe.activo = true
           LEFT JOIN usuarios u ON p.created_by = u.id
           WHERE u.id IS NOT NULL
           GROUP BY u.id, u.nombre_completo
