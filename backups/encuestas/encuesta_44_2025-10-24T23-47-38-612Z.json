@@ -1,0 +1,78 @@
+{
+  "metadata": {
+    "backup_date": "2025-10-24T23:47:38.612Z",
+    "encuesta_id": 44,
+    "user_id": "0c9d5e57-d48a-4c47-89ce-1299acc9e4de",
+    "operation": "DELETE",
+    "backup_version": "1.0"
+  },
+  "familia": {
+    "id_familia": "44",
+    "apellido_familiar": "Test-Delete-1761349658077",
+    "sector": "General",
+    "direccion_familia": "Calle 1761349658077",
+    "numero_contacto": null,
+    "telefono": "3001234567",
+    "email": null,
+    "tamaño_familia": 1,
+    "tipo_vivienda": "Casa",
+    "estado_encuesta": "completed",
+    "numero_encuestas": 1,
+    "fecha_ultima_encuesta": "2025-10-24",
+    "codigo_familia": "FAM_1761349658089_66f5253e",
+    "tutor_responsable": null,
+    "id_municipio": "1",
+    "id_vereda": null,
+    "id_sector": null,
+    "comunionEnCasa": false,
+    "numero_contrato_epm": null,
+    "id_parroquia": "1",
+    "comunionencasa": false,
+    "fecha_encuesta": "2025-08-25",
+    "sustento_familia": null,
+    "observaciones_encuestador": null,
+    "autorizacion_datos": false,
+    "pozo_septico": false,
+    "letrina": false,
+    "campo_abierto": false,
+    "disposicion_recolector": false,
+    "disposicion_quemada": false,
+    "disposicion_enterrada": false,
+    "disposicion_recicla": false,
+    "disposicion_aire_libre": false,
+    "disposicion_no_aplica": false,
+    "id_tipo_vivienda": "1",
+    "id_corregimiento": null,
+    "id_centro_poblado": null,
+    "nombre_municipio": "Abejorral",
+    "nombre_vereda": null,
+    "nombre_sector": null,
+    "nombre_parroquia": "Parroquia San José",
+    "nombre_tipo_vivienda": "Casa"
+  },
+  "personas": [],
+  "difuntos": [],
+  "servicios": {
+    "disposicion_basuras": [],
+    "sistema_acueducto": [
+      {
+        "id_familia": "44",
+        "id_sistema_acueducto": "1",
+        "id": "209",
+        "created_at": "2025-10-24T23:47:38.652Z",
+        "updated_at": "2025-10-24T23:47:38.652Z",
+        "nombre": "Acueducto Público"
+      }
+    ],
+    "aguas_residuales": [],
+    "tipo_vivienda": [
+      {
+        "id_familia": "44",
+        "id_tipo_vivienda": "1",
+        "created_at": "2025-10-24T23:47:38.652Z",
+        "updated_at": "2025-10-24T23:47:38.652Z",
+        "nombre": "Casa"
+      }
+    ]
+  }
+}

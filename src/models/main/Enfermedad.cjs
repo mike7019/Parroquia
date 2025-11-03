@@ -15,14 +15,14 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   Enfermedad.init({
-    id_enfermedad: {
+    id: {
       type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true,
       allowNull: false
     },
     nombre: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(100),
       allowNull: false,
       unique: true,
       validate: {
@@ -33,26 +33,36 @@ module.exports = (sequelize, DataTypes) => {
           msg: 'El nombre de la enfermedad no puede estar vacío'
         },
         len: {
-          args: [2, 255],
-          msg: 'El nombre debe tener entre 2 y 255 caracteres'
+          args: [2, 100],
+          msg: 'El nombre debe tener entre 2 y 100 caracteres'
         }
       }
     },
     descripcion: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    activo: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+      validate: {
+        isBoolean: {
+          msg: 'El campo activo debe ser un valor booleano'
+        }
+      }
     }
   }, {
     sequelize,
     modelName: 'Enfermedad',
     tableName: 'enfermedades',
     timestamps: true,
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
+    underscored: true,
     indexes: [
       {
         unique: true,
-        fields: ['nombre']
+        fields: ['nombre'],
+        name: 'idx_enfermedades_nombre'
       }
     ]
   });

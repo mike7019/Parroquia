@@ -1,6 +1,7 @@
 import { QueryTypes } from 'sequelize';
 import sequelize from '../../../config/sequelize.js';
 import ExcelJS from 'exceljs';
+import personaDetallesHelper from '../helpers/personaDetallesHelper.js';
 
 class FamiliasConsolidadoService {
   
@@ -121,104 +122,63 @@ class FamiliasConsolidadoService {
 
   async obtenerMiembrosFamilia(idFamilia) {
     try {
-        const query = `
-        SELECT
-          -- ID para consultar destrezas
-          p.id_personas,
-          
-          -- Identificación
-          COALESCE(ti.descripcion, 'Cédula') as tipo_identificacion,
-          p.identificacion as numero_identificacion,
-          
-          -- Información personal
-          TRIM(CONCAT(
-            COALESCE(p.primer_nombre, ''), ' ',
-            COALESCE(p.segundo_nombre, ''), ' ', 
-            COALESCE(p.primer_apellido, ''), ' ',
-            COALESCE(p.segundo_apellido, '')
-          )) as nombre_completo,
-          p.telefono as telefono_personal,
-          p.correo_electronico as email_personal,
-          TO_CHAR(p.fecha_nacimiento, 'YYYY-MM-DD') as fecha_nacimiento,
-          EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.fecha_nacimiento))::INTEGER as edad,
-          
-          -- Información demográfica
-          COALESCE(s.nombre, 'No especificado') as sexo,
-          COALESCE(par.nombre, 'Familiar') as parentesco,
-          COALESCE(ec.descripcion, 'No especificado') as situacion_civil,
-          
-          -- Información educativa y laboral
-          COALESCE(p.estudios, '') as estudios,
-          COALESCE(prof.nombre, 'No especificado') as profesion,
-          COALESCE(cc.nombre, 'No especificado') as comunidad_cultural,
-          COALESCE(p.necesidad_enfermo, '') as enfermedades,
-          COALESCE(p.en_que_eres_lider, '') as liderazgo,
-          
-          -- Tallas
-          COALESCE(p.talla_camisa, '') as talla_camisa,
-          COALESCE(p.talla_pantalon, '') as talla_pantalon,
-          COALESCE(p.talla_zapato, '') as talla_zapato,
-          
-          -- Celebraciones
-          COALESCE(p.motivo_celebrar, '') as motivo_celebrar,
-          p.dia_celebrar,
-          p.mes_celebrar
-          
-        FROM personas p
-        LEFT JOIN tipo_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
-        LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
-        LEFT JOIN parentescos par ON p.id_parentesco = par.id_parentesco
-        LEFT JOIN estados_civiles ec ON p.id_estado_civil_estado_civil = ec.id_estado
-        LEFT JOIN profesiones prof ON p.id_profesion = prof.id_profesion
-        LEFT JOIN comunidades_culturales cc ON p.id_comunidad_cultural = cc.id_comunidad_cultural
-        WHERE p.id_familia_familias = $1
-        ORDER BY 
-          CASE 
-            WHEN COALESCE(par.nombre, 'Familiar') LIKE '%Padre%' THEN 1
-            WHEN COALESCE(par.nombre, 'Familiar') LIKE '%Madre%' THEN 2
-            ELSE 3
-          END,
-          p.fecha_nacimiento DESC
-      `;
-      
-      const miembros = await sequelize.query(query, {
-        bind: [idFamilia],
-        type: QueryTypes.SELECT
-      });
+      // Usar el helper para obtener personas completas con celebraciones y enfermedades
+      const miembros = await personaDetallesHelper.obtenerPersonasFamiliaCompletas(idFamilia);
       
       const miembrosConDestrezas = await Promise.all(
         miembros.map(async (miembro) => {
           const destrezas = await this.obtenerDestrezasPersona(miembro.id_personas);
           
+          // Formatear celebraciones desde el array
+          let celebracionPrincipal = {
+            motivo: '',
+            dia: '',
+            mes: ''
+          };
+          
+          // Tomar la primera celebración como principal para compatibilidad
+          if (miembro.celebraciones && miembro.celebraciones.length > 0) {
+            const primeraC = miembro.celebraciones[0];
+            celebracionPrincipal = {
+              motivo: primeraC.motivo || '',
+              dia: primeraC.dia ? primeraC.dia.toString() : '',
+              mes: this.obtenerNombreMes(primeraC.mes) || ''
+            };
+          }
+          
+          // Formatear enfermedades desde el array
+          const enfermedadesTexto = miembro.enfermedades && miembro.enfermedades.length > 0
+            ? miembro.enfermedades.map(e => e.enfermedad_nombre).join(', ')
+            : '';
+          
           return {
-            tipo_identificacio: miembro.tipo_identificacion,
-            numero_identificacion: miembro.numero_identificacion || '',
-            nombre_completo: miembro.nombre_completo,
-            telefono_personal: miembro.telefono_personal || '',
-            email_personal: miembro.email_personal || '',
+            tipo_identificacio: miembro.tipo_id_nombre || 'Cédula',
+            numero_identificacion: miembro.identificacion || '',
+            nombre_completo: `${miembro.primer_nombre || ''} ${miembro.segundo_nombre || ''} ${miembro.primer_apellido || ''} ${miembro.segundo_apellido || ''}`.trim(),
+            telefono_personal: miembro.telefono || '',
+            email_personal: miembro.correo_electronico || '',
             fecha_nacimiento: miembro.fecha_nacimiento,
-            edad: miembro.edad,
-            sexo: miembro.sexo,
-            parentesco: miembro.parentesco,
-            situacion_civil: miembro.situacion_civil,
-            estudios: miembro.estudios,
-            profesion: miembro.profesion,
-            comunidad_cultural: miembro.comunidad_cultural,
-            enfermedades: miembro.enfermedades,
-            liderazgo: miembro.liderazgo,
+            edad: miembro.edad || 0,
+            sexo: miembro.sexo_nombre || 'No especificado',
+            parentesco: miembro.parentesco_nombre || 'Familiar',
+            situacion_civil: miembro.estado_civil_nombre || 'No especificado',
+            estudios: miembro.estudios || '',
+            profesion: miembro.profesion_nombre || 'No especificado',
+            comunidad_cultural: miembro.comunidad_cultural_nombre || 'No especificado',
+            enfermedades: enfermedadesTexto,
+            liderazgo: miembro.en_que_eres_lider || '',
             destrezas: destrezas.length > 0 ? destrezas.join(', ') : '',
-            necesidades_enfermo: miembro.enfermedades, // mismo que enfermedades
+            necesidades_enfermo: enfermedadesTexto,
             comunion_casa: true,
             tallas: {
-              camisa_blusa: miembro.talla_camisa,
-              pantalon: miembro.talla_pantalon,
-              calzado: miembro.talla_zapato
+              camisa_blusa: miembro.talla_camisa || '',
+              pantalon: miembro.talla_pantalon || '',
+              calzado: miembro.talla_zapato || ''
             },
-            celebracion: {
-              motivo: miembro.motivo_celebrar,
-              dia: miembro.dia_celebrar ? miembro.dia_celebrar.toString() : '',
-              mes: this.obtenerNombreMes(miembro.mes_celebrar) || ''
-            }
+            celebracion: celebracionPrincipal,
+            // ⭐ NUEVOS CAMPOS - Arrays completos ⭐
+            todas_las_celebraciones: miembro.celebraciones || [],
+            todas_las_enfermedades: miembro.enfermedades || []
           };
         })
       );

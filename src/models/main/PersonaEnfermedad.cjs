@@ -42,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    fecha_diagnostico: {
+    diagnostico_fecha: {
       type: DataTypes.DATEONLY,
       allowNull: true,
       validate: {
@@ -54,6 +54,16 @@ module.exports = (sequelize, DataTypes) => {
     notas: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    activo: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+      validate: {
+        isBoolean: {
+          msg: 'El campo activo debe ser un valor booleano'
+        }
+      }
     }
   }, {
     sequelize,
@@ -67,7 +77,16 @@ module.exports = (sequelize, DataTypes) => {
         name: 'unique_persona_enfermedad'
       },
       {
-        fields: ['fecha_diagnostico']
+        fields: ['id_persona'],
+        name: 'idx_persona_enfermedad_persona'
+      },
+      {
+        fields: ['id_enfermedad'],
+        name: 'idx_persona_enfermedad_enfermedad'
+      },
+      {
+        fields: ['activo'],
+        name: 'idx_persona_enfermedad_activo'
       }
     ]
   });

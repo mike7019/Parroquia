@@ -973,6 +973,69 @@ const swaggerConfig = {
               nullable: true,
               description: 'Descripción de los roles de liderazgo que desempeña en la comunidad',
               example: 'Líder comunitario del sector, coordinador de actividades deportivas'
+            },
+            profesionMotivoFechaCelebrar: {
+              type: 'object',
+              description: 'Formato v2.0: Profesión y celebraciones anidadas',
+              properties: {
+                profesion: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string', example: '1' },
+                    nombre: { type: 'string', example: 'Agricultor' }
+                  }
+                },
+                celebraciones: {
+                  type: 'array',
+                  description: 'Array de fechas a celebrar (solo se guarda la primera)',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'string', example: 'cb7c21d6-36c9-4420-a49b-d134f0130617' },
+                      motivo: { type: 'string', example: 'Cumpleaños' },
+                      dia: { type: 'string', example: '12' },
+                      mes: { type: 'string', example: '2' }
+                    }
+                  }
+                }
+              }
+            },
+            enfermedades: {
+              type: 'array',
+              description: 'Formato v2.0: Array de enfermedades (solo se guarda la primera)',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string', example: '9' },
+                  nombre: { type: 'string', example: 'Arritmias cardíacas' }
+                }
+              }
+            },
+            necesidadesEnfermo: {
+              type: 'array',
+              description: 'Formato v2.0: Array de necesidades médicas (se unen con comas)',
+              items: {
+                type: 'string'
+              },
+              example: ['Medicina para su enfermedad', 'Silla de ruedas', 'Pasajes para Citas']
+            },
+            enQueEresLider: {
+              type: 'array',
+              description: 'Formato v2.0: Array de liderazgos (se unen con comas)',
+              items: {
+                type: 'string'
+              },
+              example: ['Agricultor', 'Amanzar caballos', 'Líder comunitario']
+            },
+            solicitudComunionCasa: {
+              type: 'boolean',
+              description: 'Formato v2.0: Solicitud de comunión a nivel de miembro (se agrega a nivel familia)',
+              example: true
+            },
+            talla_camisa: {
+              type: 'string',
+              description: 'Formato v2.0 alternativo para talla_camisa/blusa',
+              example: '6'
             }
           },
           required: ['nombres']
@@ -1835,15 +1898,38 @@ const swaggerConfig = {
                   }
                 },
                 disposicion_basuras: {
-                  type: 'object',
-                  properties: {
-                    recolector: { type: 'boolean', example: true },
-                    quemada: { type: 'boolean', example: false },
-                    enterrada: { type: 'boolean', example: false },
-                    recicla: { type: 'boolean', example: true },
-                    aire_libre: { type: 'boolean', example: false },
-                    no_aplica: { type: 'boolean', example: false }
-                  }
+                  description: 'Soporta dos formatos: v1.0 (objeto con booleanos) o v2.0 (array de selecciones)',
+                  oneOf: [
+                    {
+                      type: 'object',
+                      description: 'Formato v1.0: Objeto con propiedades booleanas',
+                      properties: {
+                        recolector: { type: 'boolean', example: true },
+                        quemada: { type: 'boolean', example: false },
+                        enterrada: { type: 'boolean', example: false },
+                        recicla: { type: 'boolean', example: true },
+                        aire_libre: { type: 'boolean', example: false },
+                        no_aplica: { type: 'boolean', example: false }
+                      }
+                    },
+                    {
+                      type: 'array',
+                      description: 'Formato v2.0: Array de objetos con ID y selección',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string', example: '1' },
+                          nombre: { type: 'string', example: 'Recolección Pública' },
+                          seleccionado: { type: 'boolean', example: true }
+                        }
+                      },
+                      example: [
+                        { id: '1', nombre: 'Recolección Pública', seleccionado: true },
+                        { id: '4', nombre: 'Reciclaje', seleccionado: true },
+                        { id: '5', nombre: 'Campo Abierto', seleccionado: false }
+                      ]
+                    }
+                  ]
                 }
               }
             },
@@ -1858,11 +1944,34 @@ const swaggerConfig = {
                   }
                 },
                 aguas_residuales: {
-                  type: 'object',
-                  properties: {
-                    id: { type: 'integer', example: 1 },
-                    nombre: { type: 'string', example: 'Alcantarillado' }
-                  }
+                  description: 'Soporta dos formatos: v1.0 (objeto único) o v2.0 (array de selecciones múltiples)',
+                  oneOf: [
+                    {
+                      type: 'object',
+                      description: 'Formato v1.0: Objeto único',
+                      properties: {
+                        id: { type: 'integer', example: 1 },
+                        nombre: { type: 'string', example: 'Alcantarillado' }
+                      }
+                    },
+                    {
+                      type: 'array',
+                      description: 'Formato v2.0: Array de objetos - se procesan todos los seleccionados',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string', example: '1' },
+                          nombre: { type: 'string', example: 'Alcantarillado Público' },
+                          seleccionado: { type: 'boolean', example: true }
+                        }
+                      },
+                      example: [
+                        { id: '1', nombre: 'Alcantarillado Público', seleccionado: true },
+                        { id: '2', nombre: 'Pozo Séptico', seleccionado: false },
+                        { id: '6', nombre: 'Otro', seleccionado: true }
+                      ]
+                    }
+                  ]
                 },
                 pozo_septico: { type: 'boolean', example: false },
                 letrina: { type: 'boolean', example: false },
@@ -3098,9 +3207,60 @@ const swaggerConfig = {
               example: false
             }
           }
+        },
+        
+        Paginacion: {
+          type: 'object',
+          properties: {
+            paginaActual: {
+              type: 'integer',
+              description: 'Número de página actual',
+              example: 1
+            },
+            totalPaginas: {
+              type: 'integer',
+              description: 'Total de páginas disponibles',
+              example: 5
+            },
+            totalRegistros: {
+              type: 'integer',
+              description: 'Total de registros',
+              example: 48
+            },
+            registrosPorPagina: {
+              type: 'integer',
+              description: 'Número de registros por página',
+              example: 10
+            },
+            hasNext: {
+              type: 'boolean',
+              description: 'Si hay página siguiente',
+              example: true
+            },
+            hasPrev: {
+              type: 'boolean',
+              description: 'Si hay página anterior',
+              example: false
+            }
+          }
         }
       },
       responses: {
+        Unauthorized: {
+          description: 'Token de acceso requerido o inválido',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/ErrorResponse'
+              },
+              example: {
+                status: 'error',
+                message: 'Token de acceso requerido',
+                code: 'UNAUTHORIZED'
+              }
+            }
+          }
+        },
         UnauthorizedError: {
           description: 'Token de acceso requerido o inválido',
           content: {
