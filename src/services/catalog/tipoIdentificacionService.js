@@ -55,11 +55,8 @@ class TipoIdentificacionService {
                 throw new Error('Ya existe un tipo de identificación con ese código');
             }
 
-            // Find the next available ID
-            const nextId = await this.findNextAvailableId();
-
+            // No asignar ID manualmente, dejar que PostgreSQL lo auto-incremente
             const tipoIdentificacion = await TipoIdentificacion.create({
-                id_tipo_identificacion: nextId,
                 nombre,
                 descripcion,
                 codigo

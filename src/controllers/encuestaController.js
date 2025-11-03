@@ -11,6 +11,15 @@ import EncuestaService from '../services/encuestaService.js';
 import personaDetallesHelper from '../services/helpers/personaDetallesHelper.js';
 
 /**
+ * Helper function to safely parse integers and return null if NaN
+ */
+const safeParseInt = (value) => {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = parseInt(value);
+  return isNaN(parsed) ? null : parsed;
+};
+
+/**
  * Helper function to format complete names properly
  */
 const formatearNombreCompleto = (primerNombre, segundoNombre, primerApellido, segundoApellido) => {
@@ -44,7 +53,12 @@ const registrarDisposicionBasuras = async (familiaId, disposicionBasuras, transa
     
     for (const disposicion of disposicionBasuras) {
       if (disposicion.seleccionado) {
-        const disposicionId = parseInt(disposicion.id);
+        const disposicionId = safeParseInt(disposicion.id);
+        
+        if (!disposicionId) {
+          console.log(`  ⚠️ ID inválido para disposición: ${disposicion.nombre}, saltando...`);
+          continue;
+        }
         
         try {
           // Verificar si ya existe antes de insertar
@@ -221,7 +235,12 @@ const registrarAguasResiduales = async (familiaId, aguasResiduales, transaction)
     
     for (const aguaResidual of aguasResiduales) {
       if (aguaResidual.seleccionado) {
-        const aguaResidualId = parseInt(aguaResidual.id);
+        const aguaResidualId = safeParseInt(aguaResidual.id);
+        
+        if (!aguaResidualId) {
+          console.log(`  ⚠️ ID inválido para agua residual: ${aguaResidual.nombre}, saltando...`);
+          continue;
+        }
         
         try {
           // Verificar si ya existe antes de insertar
@@ -1008,26 +1027,46 @@ const procesarMiembrosFallecidos = async (familiaId, deceasedMembers, informacio
  */
 const mapearSexo = (sexo) => {
   if (!sexo) return null;
-  if (typeof sexo === 'object' && sexo.id) return parseInt(sexo.id);
+  if (typeof sexo === 'object' && sexo.id) {
+    const parsed = safeParseInt(sexo.id);
+    if (parsed) return parsed;
+    // Si no es número, intentar mapear por string
+  }
   
   const sexoMapping = {
     'Hombre': 1, 'Mujer': 2, 'Masculino': 1, 'Femenino': 2,
-    'M': 1, 'F': 2, 'O': 3, 'Otro': 3
+    'M': 1, 'F': 2, 'O': 3, 'Otro': 3, '1': 1, '2': 2, '3': 3
   };
-  return sexoMapping[sexo] || null;
+  
+  const sexoValue = typeof sexo === 'object' ? sexo.nombre || sexo.id : sexo;
+  return sexoMapping[sexoValue] || safeParseInt(sexoValue);
 };
 
 const mapearTipoIdentificacion = (tipoId) => {
   if (!tipoId) return null;
-  if (typeof tipoId === 'object' && tipoId.id) return parseInt(tipoId.id);
   
-  const tipoIdMapping = { 'CC': 1, 'TI': 2, 'RC': 3, 'CE': 4, 'PP': 5 };
-  return tipoIdMapping[tipoId] || null;
+  // Si es un objeto, intentar extraer ID
+  if (typeof tipoId === 'object' && tipoId.id) {
+    const parsed = safeParseInt(tipoId.id);
+    if (parsed) return parsed;
+    // Si no es número, es un código como "CC", "TI", etc.
+    // Retornar directamente el código para que se use como string
+    return tipoId.id;
+  }
+  
+  // Si es string o número directo
+  const parsed = safeParseInt(tipoId);
+  if (parsed) return parsed;
+  
+  // Si es un código de texto, retornarlo tal cual
+  return tipoId;
 };
 
 const mapearEstadoCivil = (estadoCivil) => {
   if (!estadoCivil) return null;
-  if (typeof estadoCivil === 'object' && estadoCivil.id) return parseInt(estadoCivil.id);
+  if (typeof estadoCivil === 'object' && estadoCivil.id) {
+    return safeParseInt(estadoCivil.id);
+  }
   
   const estadoCivilMapping = {
     'Soltero': 1, 'Soltera': 1, 'Soltero(a)': 1,
@@ -2487,7 +2526,7 @@ export const crearEncuesta = async (req, res) => {
       tipo_vivienda: (typeof vivienda.tipo_vivienda === 'string') 
         ? vivienda.tipo_vivienda 
         : (vivienda.tipo_vivienda?.nombre || 'Casa'),
-      id_tipo_vivienda: vivienda.tipo_vivienda?.id ? parseInt(vivienda.tipo_vivienda.id) : null, // FK correcta
+      id_tipo_vivienda: vivienda.tipo_vivienda?.id ? safeParseInt(vivienda.tipo_vivienda.id) : null, // FK correcta
       estado_encuesta: 'completed',
       numero_encuestas: 1,
       fecha_ultima_encuesta: new Date().toISOString().split('T')[0],
@@ -2495,11 +2534,12 @@ export const crearEncuesta = async (req, res) => {
       codigo_familia: `FAM_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
       tutor_responsable: null,
       numero_contrato_epm: informacionGeneral.numero_contrato_epm || null,
-      id_municipio: informacionGeneral.municipio?.id ? parseInt(informacionGeneral.municipio.id) : null,
-      id_parroquia: informacionGeneral.parroquia?.id ? parseInt(informacionGeneral.parroquia.id) : null,
-      id_vereda: informacionGeneral.vereda?.id ? parseInt(informacionGeneral.vereda.id) : null,
-      id_sector: informacionGeneral.sector?.id ? parseInt(informacionGeneral.sector.id) : null,
-      id_corregimiento: informacionGeneral.corregimiento?.id ? parseInt(informacionGeneral.corregimiento.id) : null,
+      id_municipio: safeParseInt(informacionGeneral.municipio?.id),
+      id_parroquia: safeParseInt(informacionGeneral.parroquia?.id),
+      id_vereda: safeParseInt(informacionGeneral.vereda?.id),
+      id_sector: safeParseInt(informacionGeneral.sector?.id),
+      id_corregimiento: safeParseInt(informacionGeneral.corregimiento?.id),
+      id_centro_poblado: safeParseInt(informacionGeneral.centro_poblado?.id),
       
       // ⭐ SOPORTE v2.0: comunionEnCasa puede venir en informacionGeneral O en cualquier miembro (solicitudComunionCasa)
       comunionEnCasa: informacionGeneral.comunionEnCasa || 
