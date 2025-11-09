@@ -113,16 +113,17 @@ async function ejecutarMigracion() {
     // Prueba de inserción
     console.log('\n🧪 Ejecutando prueba de inserción...');
     const [testPersona] = await sequelize.query(`
-      SELECT id_persona FROM personas LIMIT 1;
+      SELECT id_personas FROM personas LIMIT 1;
     `);
 
     if (testPersona.length > 0) {
-      const personaId = testPersona[0].id_persona;
+      const personaId = testPersona[0].id_personas;
       console.log(`   Usando persona ID: ${personaId}`);
 
       await sequelize.query(`
-        INSERT INTO persona_celebracion (id_persona, motivo, dia, mes, created_at, updated_at)
+        INSERT INTO persona_celebracion (id_personas, motivo, dia, mes, created_at, updated_at)
         VALUES (${personaId}, 'TEST_MIGRATION', '01', '01', NOW(), NOW())
+        ON CONFLICT (id_personas, motivo, dia, mes) DO NOTHING;
         ON CONFLICT (id_persona, motivo, dia, mes) DO NOTHING;
       `);
       console.log('   ✅ Inserción de prueba exitosa');
