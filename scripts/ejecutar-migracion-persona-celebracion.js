@@ -124,7 +124,6 @@ async function ejecutarMigracion() {
         INSERT INTO persona_celebracion (id_personas, motivo, dia, mes, created_at, updated_at)
         VALUES (${personaId}, 'TEST_MIGRATION', '01', '01', NOW(), NOW())
         ON CONFLICT (id_personas, motivo, dia, mes) DO NOTHING;
-        ON CONFLICT (id_persona, motivo, dia, mes) DO NOTHING;
       `);
       console.log('   ✅ Inserción de prueba exitosa');
 
