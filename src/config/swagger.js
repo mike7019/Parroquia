@@ -2737,77 +2737,72 @@ const swaggerConfig = {
                 municipio: {
                   type: 'object',
                   properties: {
-                    id: { type: 'string', description: 'ID del municipio', example: '001' },
-                    nombre: { type: 'string', description: 'Nombre del municipio', example: 'Medellín' }
+                    id: { type: 'integer', description: 'ID del municipio', example: 1110 },
+                    nombre: { type: 'string', description: 'Nombre del municipio', example: 'Yolombó' }
                   }
                 },
                 parroquia: {
                   type: 'object',
                   properties: {
-                    id: { type: 'string', description: 'ID de la parroquia', example: '002' },
-                    nombre: { type: 'string', description: 'Nombre de la parroquia', example: 'San José' }
+                    id: { type: 'integer', description: 'ID de la parroquia', example: 3 },
+                    nombre: { type: 'string', description: 'Nombre de la parroquia', example: 'Jesús Crucificado' }
                   }
                 },
                 sector: {
                   type: 'object',
                   properties: {
-                    id: { type: 'string', description: 'ID del sector', example: '003' },
-                    nombre: { type: 'string', description: 'Nombre del sector', example: 'Centro' }
+                    id: { type: 'integer', description: 'ID del sector', example: 28 },
+                    nombre: { type: 'string', description: 'Nombre del sector', example: 'CENTRAL 3' }
                   }
                 },
                 vereda: {
                   type: 'object',
                   properties: {
-                    id: { type: 'string', description: 'ID de la vereda', example: '004' },
-                    nombre: { type: 'string', description: 'Nombre de la vereda', example: 'El Carmen' }
+                    id: { type: 'integer', description: 'ID de la vereda', example: 13 },
+                    nombre: { type: 'string', description: 'Nombre de la vereda', example: 'ALTO DE MENDEZ' }
                   }
                 },
                 corregimiento: {
                   type: 'object',
                   description: 'Corregimiento al que pertenece la familia (opcional)',
                   properties: {
-                    id: { type: 'integer', description: 'ID del corregimiento', example: 1 },
-                    nombre: { type: 'string', description: 'Nombre del corregimiento', example: 'El Centro' }
+                    id: { type: 'integer', description: 'ID del corregimiento', example: 6 },
+                    nombre: { type: 'string', description: 'Nombre del corregimiento', example: 'Corregimiento San Mike' }
                   }
                 },
                 centro_poblado: {
                   type: 'object',
                   description: 'Centro poblado al que pertenece la familia (opcional)',
                   properties: {
-                    id: { type: 'integer', description: 'ID del centro poblado', example: 1 },
-                    nombre: { type: 'string', description: 'Nombre del centro poblado', example: 'San Pedro' }
+                    id: { type: 'integer', description: 'ID del centro poblado', example: 7 },
+                    nombre: { type: 'string', description: 'Nombre del centro poblado', example: 'Centro existente' }
                   }
                 },
                 fecha: { 
                   type: 'string', 
                   format: 'date-time',
                   description: 'Fecha de la encuesta',
-                  example: '2025-08-23T03:13:14.017Z'
+                  example: '2025-11-09T03:32:17.404Z'
                 },
                 apellido_familiar: { 
                   type: 'string',
                   description: 'Apellido de la familia',
-                  example: 'García'
+                  example: 'Rodriguez Peña'
                 },
                 direccion: { 
                   type: 'string',
                   description: 'Dirección de la familia',
-                  example: 'Calle 10 # 20-30'
+                  example: 'calle 55 # 32-27'
                 },
                 telefono: { 
                   type: 'string',
                   description: 'Teléfono de contacto',
-                  example: '6041234567'
+                  example: '4339153'
                 },
                 numero_contrato_epm: { 
                   type: 'string',
-                  description: 'Número de contrato EPM',
-                  example: '987654321'
-                },
-                comunionEnCasa: {
-                  type: 'boolean',
-                  description: 'Indica si la familia realiza comunión en casa',
-                  example: false
+                  description: 'Número de contrato EPM (único)',
+                  example: '123490'
                 }
               }
             },
@@ -2817,20 +2812,26 @@ const swaggerConfig = {
                 tipo_vivienda: {
                   type: 'object',
                   properties: {
-                    id: { type: 'string', description: 'ID del tipo de vivienda', example: '01' },
-                    nombre: { type: 'string', description: 'Nombre del tipo de vivienda', example: 'Casa' }
+                    id: { type: 'integer', description: 'ID del tipo de vivienda', example: 2 },
+                    nombre: { type: 'string', description: 'Nombre del tipo de vivienda', example: 'Apartamento' }
                   }
                 },
                 disposicion_basuras: {
-                  type: 'object',
-                  properties: {
-                    recolector: { type: 'boolean', description: 'Recolector público', example: true },
-                    quemada: { type: 'boolean', description: 'Basura quemada', example: false },
-                    enterrada: { type: 'boolean', description: 'Basura enterrada', example: false },
-                    recicla: { type: 'boolean', description: 'Recicla basura', example: true },
-                    aire_libre: { type: 'boolean', description: 'Basura al aire libre', example: false },
-                    no_aplica: { type: 'boolean', description: 'No aplica', example: false }
-                  }
+                  type: 'array',
+                  description: 'Tipos de disposición de basuras (v2.0 - array de objetos con selección)',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'integer', description: 'ID del tipo de disposición', example: 1 },
+                      nombre: { type: 'string', description: 'Nombre del tipo', example: 'Recolección Pública' },
+                      seleccionado: { type: 'boolean', description: 'Si está seleccionado', example: true }
+                    }
+                  },
+                  example: [
+                    { id: 5, nombre: 'Campo Abierto', seleccionado: true },
+                    { id: 2, nombre: 'Quema', seleccionado: true },
+                    { id: 1, nombre: 'Recolección Pública', seleccionado: true }
+                  ]
                 }
               }
             },
@@ -2840,19 +2841,27 @@ const swaggerConfig = {
                 sistema_acueducto: {
                   type: 'object',
                   properties: {
-                    id: { type: 'string', description: 'ID del sistema de acueducto', example: '10' },
-                    nombre: { type: 'string', description: 'Nombre del sistema', example: 'Aguas de Medellín' }
+                    id: { type: 'integer', description: 'ID del sistema de acueducto', example: 1 },
+                    nombre: { type: 'string', description: 'Nombre del sistema', example: 'Acueducto Público' }
                   }
                 },
-                aguas_residuales: { 
-                  type: 'string', 
-                  nullable: true,
-                  description: 'Tipo de tratamiento de aguas residuales',
-                  example: 'Alcantarillado público'
-                },
-                pozo_septico: { type: 'boolean', description: 'Tiene pozo séptico', example: false },
-                letrina: { type: 'boolean', description: 'Tiene letrina', example: false },
-                campo_abierto: { type: 'boolean', description: 'Campo abierto', example: false }
+                aguas_residuales: {
+                  type: 'array',
+                  description: 'Tipos de aguas residuales (v2.0 - array de objetos con selección)',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'integer', description: 'ID del tipo de aguas', example: 1 },
+                      nombre: { type: 'string', description: 'Nombre del tipo', example: 'Alcantarillado Público' },
+                      seleccionado: { type: 'boolean', description: 'Si está seleccionado', example: true }
+                    }
+                  },
+                  example: [
+                    { id: 1, nombre: 'Alcantarillado Público', seleccionado: true },
+                    { id: 2, nombre: 'Pozo Séptico', seleccionado: true },
+                    { id: 6, nombre: 'tipo prueba 8', seleccionado: true }
+                  ]
+                }
               }
             },
             observaciones: {
@@ -2861,12 +2870,12 @@ const swaggerConfig = {
                 sustento_familia: { 
                   type: 'string',
                   description: 'Principal sustento de la familia',
-                  example: 'Agricultura'
+                  example: 'tma nuevo pruiebs'
                 },
                 observaciones_encuestador: { 
                   type: 'string',
                   description: 'Observaciones del encuestador',
-                  example: 'Familia con acceso a servicios básicos'
+                  example: 'completedooo'
                 },
                 autorizacion_datos: { 
                   type: 'boolean',
@@ -2879,7 +2888,148 @@ const swaggerConfig = {
               type: 'array',
               description: 'Lista de miembros vivos de la familia',
               items: {
-                $ref: '#/components/schemas/FamilyMemberInput'
+                type: 'object',
+                properties: {
+                  nombres: { type: 'string', example: 'Raquel Rodriguez' },
+                  fechaNacimiento: { type: 'string', format: 'date-time', example: '2000-11-01T00:00:00.000Z' },
+                  tipoIdentificacion: { 
+                    type: 'object',
+                    properties: {
+                      id: { type: 'integer', example: 1 },
+                      nombre: { type: 'string', example: 'CC - Cédula de Ciudadanía' }
+                    }
+                  },
+                  numeroIdentificacion: { type: 'string', example: '126788444' },
+                  sexo: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'integer', example: 2 },
+                      nombre: { type: 'string', example: 'Femenino' }
+                    }
+                  },
+                  situacionCivil: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'integer', example: 1 },
+                      nombre: { type: 'string', example: 'Soltero(a)' }
+                    }
+                  },
+                  parentesco: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'integer', example: 2 },
+                      nombre: { type: 'string', example: 'Jefa de Hogar' }
+                    }
+                  },
+                  talla_camisa: { type: 'string', example: '12' },
+                  talla_pantalon: { type: 'string', example: '28' },
+                  talla_zapato: { type: 'string', example: '37' },
+                  estudio: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'integer', example: 5 },
+                      nombre: { type: 'string', example: 'Bachillerato Incompleto' }
+                    }
+                  },
+                  comunidadCultural: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'integer', example: 9 },
+                      nombre: { type: 'string', example: 'Afrocolombiano' }
+                    }
+                  },
+                  telefono: { type: 'string', example: '3013445333' },
+                  enQueEresLider: {
+                    type: 'array',
+                    description: 'Array de strings con liderazgos',
+                    items: { type: 'string' },
+                    example: ['mmm', 'todo', 'nada']
+                  },
+                  correoElectronico: { type: 'string', example: 'raquel.1762312461034@gmail.com' },
+                  enfermedades: {
+                    type: 'array',
+                    description: 'Enfermedades de la persona',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'integer', example: 2 },
+                        nombre: { type: 'string', example: 'Diabetes tipo 2' }
+                      }
+                    },
+                    example: [
+                      { id: 2, nombre: 'Diabetes tipo 2' },
+                      { id: 5, nombre: 'Obesidad' }
+                    ]
+                  },
+                  necesidadesEnfermo: {
+                    type: 'array',
+                    description: 'Necesidades del enfermo (array de strings)',
+                    items: { type: 'string' },
+                    example: ['pasajes', 'medicamentos']
+                  },
+                  solicitudComunionCasa: { type: 'boolean', example: true },
+                  profesionMotivoFechaCelebrar: {
+                    type: 'object',
+                    description: 'Profesión y celebraciones de la persona',
+                    properties: {
+                      profesion: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'integer', example: 1 },
+                          nombre: { type: 'string', example: 'Agricultor' }
+                        }
+                      },
+                      celebraciones: {
+                        type: 'array',
+                        description: 'Array de celebraciones',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            motivo: { type: 'string', example: 'Cumpleaños' },
+                            dia: { type: 'string', example: '12' },
+                            mes: { type: 'string', example: '11' }
+                          }
+                        },
+                        example: [
+                          { motivo: 'Cumpleaños', dia: '12', mes: '11' },
+                          { motivo: 'Dia de la madre', dia: '8', mes: '5' }
+                        ]
+                      }
+                    }
+                  },
+                  habilidades: {
+                    type: 'array',
+                    description: 'Habilidades de la persona',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'integer', example: 1 },
+                        nombre: { type: 'string', example: 'Liderazgo' },
+                        nivel: { type: 'string', enum: ['Básico', 'Intermedio', 'Avanzado'], example: 'Avanzado' }
+                      }
+                    },
+                    example: [
+                      { id: 1, nombre: 'Liderazgo', nivel: 'Avanzado' },
+                      { id: 8, nombre: 'Gestión del Tiempo', nivel: 'Avanzado' }
+                    ]
+                  },
+                  destrezas: {
+                    type: 'array',
+                    description: 'Destrezas de la persona',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'integer', example: 9 },
+                        nombre: { type: 'string', example: 'Diseño Gráfico' }
+                      }
+                    },
+                    example: [
+                      { id: 9, nombre: 'Diseño Gráfico' },
+                      { id: 5, nombre: 'Costura' },
+                      { id: 3, nombre: 'Electricidad' }
+                    ]
+                  }
+                }
               }
             },
             deceasedMembers: {
@@ -2891,74 +3041,33 @@ const swaggerConfig = {
                   nombres: { 
                     type: 'string',
                     description: 'Nombres del difunto',
-                    example: 'Pedro Antonio Rodríguez'
+                    example: 'Juan Camilo Valencia Julio'
                   },
                   fechaFallecimiento: { 
                     type: 'string', 
                     format: 'date-time',
                     description: 'Fecha de fallecimiento',
-                    example: '2020-05-15T00:00:00.000Z'
-                  },
-                  fechaAniversario: { 
-                    type: 'string', 
-                    format: 'date-time',
-                    description: 'Fecha de aniversario (alias para fechaFallecimiento)',
-                    example: '2020-05-15T00:00:00.000Z'
+                    example: '2025-11-28T05:00:00.000Z'
                   },
                   sexo: {
-                    oneOf: [
-                      {
-                        type: 'string',
-                        enum: ['Masculino', 'Femenino', 'Otro'],
-                        description: 'Nombre del sexo'
-                      },
-                      {
-                        type: 'object',
-                        properties: {
-                          id: { type: 'integer', description: 'ID del sexo', example: 1 },
-                          nombre: { type: 'string', description: 'Nombre del sexo', example: 'Masculino' }
-                        }
-                      }
-                    ],
-                    description: 'Sexo del difunto (string o objeto)',
-                    example: { id: 1, nombre: 'Masculino' }
+                    type: 'object',
+                    properties: {
+                      id: { type: 'integer', description: 'ID del sexo', example: 1 },
+                      nombre: { type: 'string', description: 'Nombre del sexo', example: 'Masculino' }
+                    }
                   },
                   parentesco: {
-                    oneOf: [
-                      {
-                        type: 'string',
-                        description: 'Relación de parentesco'
-                      },
-                      {
-                        type: 'object',
-                        properties: {
-                          id: { 
-                            oneOf: [
-                              { type: 'integer', example: 2, description: 'ID numérico del parentesco (recomendado): 1=Jefe de Hogar, 2=Padre, 3=Madre, etc.' },
-                              { type: 'string', example: 'PADRE', description: 'String del parentesco (se convierte automáticamente)' }
-                            ]
-                          },
-                          nombre: { type: 'string', description: 'Nombre del parentesco', example: 'Padre' }
-                        }
-                      }
-                    ],
-                    description: 'Parentesco con la familia (string o objeto)',
-                    example: { id: 2, nombre: 'Padre' }
-                  },
-                  eraPadre: { 
-                    type: 'boolean',
-                    description: 'Era padre de familia',
-                    example: false
-                  },
-                  eraMadre: { 
-                    type: 'boolean',
-                    description: 'Era madre de familia',
-                    example: true
+                    type: 'object',
+                    properties: {
+                      id: { type: 'integer', example: 41 },
+                      nombre: { type: 'string', description: 'Nombre del parentesco', example: 'Ahijado' }
+                    },
+                    description: 'Parentesco con la familia'
                   },
                   causaFallecimiento: {
                     type: 'string',
                     description: 'Causa del fallecimiento',
-                    example: 'Enfermedad cardiovascular'
+                    example: 'nmmnmnnmnmnmnmn'
                   }
                 }
               }
@@ -2970,19 +3079,24 @@ const swaggerConfig = {
                   type: 'string', 
                   format: 'date-time',
                   description: 'Marca de tiempo de la encuesta',
-                  example: '2025-08-23T03:13:14.017Z'
+                  example: '2025-11-09T04:06:36.092Z'
                 },
                 completed: { 
                   type: 'boolean',
                   description: 'Encuesta completada',
-                  example: true
+                  example: false
                 },
                 currentStage: { 
                   type: 'integer',
                   description: 'Etapa actual de la encuesta',
-                  example: 1
+                  example: 6
                 }
               }
+            },
+            version: {
+              type: 'string',
+              description: 'Versión del formato de encuesta',
+              example: '2.0'
             }
           }
         },

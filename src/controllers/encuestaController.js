@@ -741,8 +741,8 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         // También guardarla en persona_celebracion para consistencia
         console.log(`    🎉 Guardando celebración v1.0 en tabla intermedia...`);
         
+        const savepointName = `sp_celebracion_v1_${personaId}_${Date.now()}`;
         try {
-          const savepointName = `sp_celebracion_v1_${personaId}_${Date.now()}`;
           await sequelize.query(`SAVEPOINT ${savepointName};`, { transaction });
 
           await sequelize.query(`
