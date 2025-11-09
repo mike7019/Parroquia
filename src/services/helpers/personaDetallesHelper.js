@@ -46,13 +46,12 @@ export async function obtenerEnfermedadesPersona(idPersona, transaction = null) 
       pe.id_enfermedad,
       e.nombre as enfermedad_nombre,
       e.descripcion as enfermedad_descripcion,
-      pe.diagnostico_fecha,
       pe.notas,
       pe.activo,
       pe.created_at,
       pe.updated_at
     FROM persona_enfermedad pe
-    INNER JOIN enfermedades e ON e.id = pe.id_enfermedad
+    INNER JOIN enfermedades e ON e.id_enfermedad = pe.id_enfermedad
     WHERE pe.id_persona = :idPersona
       AND pe.activo = true
     ORDER BY e.nombre ASC
@@ -123,7 +122,6 @@ export async function obtenerEnfermedadesMultiplesPersonas(idsPersonas, transact
       pe.id_enfermedad,
       e.nombre as enfermedad_nombre,
       e.descripcion as enfermedad_descripcion,
-      pe.diagnostico_fecha,
       pe.notas,
       pe.activo,
       pe.created_at,
