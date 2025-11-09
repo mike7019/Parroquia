@@ -171,16 +171,58 @@ export const validateCatalogExists = async (sequelize, catalogName, id, idFieldN
   }
 
   const numericId = validateId(id, catalogName);
+  // Intentar detectar dinámicamente el nombre real de la columna ID en la tabla
+  const detectIdField = async (sequelizeInstance, tblName, preferred) => {
+    // Si el nombre preferido existe, úsalo
+    if (preferred) {
+      const existing = await sequelizeInstance.query(
+        `SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = :table AND column_name = :col LIMIT 1`,
+        { replacements: { table: tblName, col: preferred }, type: sequelizeInstance.QueryTypes.SELECT }
+      );
+      if (existing && existing.length > 0) return preferred;
+    }
 
-  const [result] = await sequelize.query(
-    `SELECT 1 FROM ${tableName} WHERE ${idFieldName} = :id LIMIT 1`,
+    // Buscar columnas que empiecen por id_
+    const candidates = await sequelizeInstance.query(
+      `SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = :table AND column_name LIKE 'id_%'`,
+      { replacements: { table: tblName }, type: sequelizeInstance.QueryTypes.SELECT }
+    );
+
+    if (!candidates || candidates.length === 0) return null;
+
+    if (candidates.length === 1) return candidates[0].column_name;
+
+    // Si hay varias, intentar seleccionar la que contenga el nombre de la tabla (sin plural)
+    const base = tblName.replace(/s$/, '');
+    for (const c of candidates) {
+      if (c.column_name.includes(base)) return c.column_name;
+    }
+
+    // Fallback: devolver la primera candidata
+    return candidates[0].column_name;
+  };
+
+  const realIdField = await detectIdField(sequelize, tableName, idFieldName);
+
+  if (!realIdField) {
+    // No se encontró columna identificadora en la tabla solicitada
+    throw createError(ErrorCodes.NOT_FOUND.NO_RESULTS_FOUND, {
+      catalog: catalogName,
+      id: numericId,
+      table: tableName,
+      reason: `No se pudo determinar la columna ID para la tabla ${tableName}`
+    });
+  }
+
+  const results = await sequelize.query(
+    `SELECT 1 FROM ${tableName} WHERE ${realIdField} = :id LIMIT 1`,
     {
       replacements: { id: numericId },
       type: sequelize.QueryTypes.SELECT
     }
   );
 
-  if (!result) {
+  if (!results || results.length === 0) {
     // Mapear a código de error específico
     const errorMap = {
       'municipios': ErrorCodes.NOT_FOUND.MUNICIPIO_NOT_FOUND,
@@ -212,16 +254,40 @@ export const validateGeographicConsistency = async (sequelize, datosUbicacion) =
   const { id_municipio, id_vereda, id_sector, id_corregimiento, id_centro_poblado } = datosUbicacion;
 
   // Si hay vereda, debe pertenecer al municipio
-  if (id_vereda && id_municipio) {
-    const [result] = await sequelize.query(
-      `SELECT 1 FROM veredas WHERE id_vereda = :id_vereda AND id_municipio_municipios = :id_municipio LIMIT 1`,
-      {
-        replacements: { id_vereda, id_municipio },
-        type: sequelize.QueryTypes.SELECT
-      }
+  // Helper para detectar columnas ID o FK en una tabla
+  const detectColumns = async (tblName, preferredId) => {
+    // Detectar columna ID (candidatas id_*)
+    const idCandidates = await sequelize.query(
+      `SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = :table AND column_name LIKE 'id_%'`,
+      { replacements: { table: tblName }, type: sequelize.QueryTypes.SELECT }
     );
 
-    if (!result) {
+    const idCol = (idCandidates && idCandidates.length > 0)
+      ? (idCandidates.length === 1 ? idCandidates[0].column_name : (idCandidates.find(c => c.column_name === preferredId)?.column_name || idCandidates[0].column_name))
+      : null;
+
+    // Detectar FK a municipio (columnas que contengan 'municipio')
+    const fkCandidates = await sequelize.query(
+      `SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = :table AND column_name ILIKE '%municipio%'`,
+      { replacements: { table: tblName }, type: sequelize.QueryTypes.SELECT }
+    );
+
+    const fkCol = (fkCandidates && fkCandidates.length > 0) ? fkCandidates[0].column_name : null;
+
+    return { idCol, fkCol };
+  };
+
+  if (id_vereda && id_municipio) {
+    const { idCol: veredaIdCol, fkCol: veredaMunicipioFk } = await detectColumns('veredas');
+    const idCol = veredaIdCol || 'id_vereda';
+    const fkCol = veredaMunicipioFk || 'id_municipio_municipios';
+
+    const res = await sequelize.query(
+      `SELECT 1 FROM veredas WHERE ${idCol} = :id_vereda AND ${fkCol} = :id_municipio LIMIT 1`,
+      { replacements: { id_vereda, id_municipio }, type: sequelize.QueryTypes.SELECT }
+    );
+
+    if (!res || res.length === 0) {
       throw createError(ErrorCodes.BUSINESS_LOGIC.GEOGRAPHIC_INCONSISTENCY, {
         field: 'vereda',
         reason: `La vereda con ID ${id_vereda} no pertenece al municipio con ID ${id_municipio}`,
@@ -230,17 +296,17 @@ export const validateGeographicConsistency = async (sequelize, datosUbicacion) =
     }
   }
 
-  // Si hay sector, debe pertenecer al municipio
   if (id_sector && id_municipio) {
-    const [result] = await sequelize.query(
-      `SELECT 1 FROM sectores WHERE id_sector = :id_sector AND id_municipio = :id_municipio LIMIT 1`,
-      {
-        replacements: { id_sector, id_municipio },
-        type: sequelize.QueryTypes.SELECT
-      }
+    const { idCol: sectorIdCol, fkCol: sectorMunicipioFk } = await detectColumns('sectores');
+    const idCol = sectorIdCol || 'id_sector';
+    const fkCol = sectorMunicipioFk || 'id_municipio';
+
+    const res = await sequelize.query(
+      `SELECT 1 FROM sectores WHERE ${idCol} = :id_sector AND ${fkCol} = :id_municipio LIMIT 1`,
+      { replacements: { id_sector, id_municipio }, type: sequelize.QueryTypes.SELECT }
     );
 
-    if (!result) {
+    if (!res || res.length === 0) {
       throw createError(ErrorCodes.BUSINESS_LOGIC.GEOGRAPHIC_INCONSISTENCY, {
         field: 'sector',
         reason: `El sector con ID ${id_sector} no pertenece al municipio con ID ${id_municipio}`,
@@ -249,17 +315,17 @@ export const validateGeographicConsistency = async (sequelize, datosUbicacion) =
     }
   }
 
-  // Si hay corregimiento, debe pertenecer al municipio (verificar nombre de columna en DB)
   if (id_corregimiento && id_municipio) {
-    const [result] = await sequelize.query(
-      `SELECT 1 FROM corregimientos WHERE id_corregimiento = :id_corregimiento AND id_municipio_municipios = :id_municipio LIMIT 1`,
-      {
-        replacements: { id_corregimiento, id_municipio },
-        type: sequelize.QueryTypes.SELECT
-      }
+    const { idCol: corrIdCol, fkCol: corrMunicipioFk } = await detectColumns('corregimientos');
+    const idCol = corrIdCol || 'id_corregimiento';
+    const fkCol = corrMunicipioFk || 'id_municipio_municipios';
+
+    const res = await sequelize.query(
+      `SELECT 1 FROM corregimientos WHERE ${idCol} = :id_corregimiento AND ${fkCol} = :id_municipio LIMIT 1`,
+      { replacements: { id_corregimiento, id_municipio }, type: sequelize.QueryTypes.SELECT }
     );
 
-    if (!result) {
+    if (!res || res.length === 0) {
       throw createError(ErrorCodes.BUSINESS_LOGIC.GEOGRAPHIC_INCONSISTENCY, {
         field: 'corregimiento',
         reason: `El corregimiento con ID ${id_corregimiento} no pertenece al municipio con ID ${id_municipio}`,
@@ -268,17 +334,17 @@ export const validateGeographicConsistency = async (sequelize, datosUbicacion) =
     }
   }
 
-  // Si hay centro poblado, debe pertenecer al municipio
   if (id_centro_poblado && id_municipio) {
-    const [result] = await sequelize.query(
-      `SELECT 1 FROM centros_poblados WHERE id_centro_poblado = :id_centro_poblado AND id_municipio = :id_municipio LIMIT 1`,
-      {
-        replacements: { id_centro_poblado, id_municipio },
-        type: sequelize.QueryTypes.SELECT
-      }
+    const { idCol: cpIdCol, fkCol: cpMunicipioFk } = await detectColumns('centros_poblados');
+    const idCol = cpIdCol || 'id_centro_poblado';
+    const fkCol = cpMunicipioFk || 'id_municipio';
+
+    const res = await sequelize.query(
+      `SELECT 1 FROM centros_poblados WHERE ${idCol} = :id_centro_poblado AND ${fkCol} = :id_municipio LIMIT 1`,
+      { replacements: { id_centro_poblado, id_municipio }, type: sequelize.QueryTypes.SELECT }
     );
 
-    if (!result) {
+    if (!res || res.length === 0) {
       throw createError(ErrorCodes.BUSINESS_LOGIC.GEOGRAPHIC_INCONSISTENCY, {
         field: 'centro_poblado',
         reason: `El centro poblado con ID ${id_centro_poblado} no pertenece al municipio con ID ${id_municipio}`,

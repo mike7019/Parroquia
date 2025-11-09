@@ -65,6 +65,14 @@ const Persona = sequelize.define('Persona', {
       key: 'id_familia'
     }
   },
+  id_familia: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    references: {
+      model: 'familias',
+      key: 'id_familia'
+    }
+  },
   id_estado_civil_estado_civil: {
     type: DataTypes.BIGINT,
     allowNull: true

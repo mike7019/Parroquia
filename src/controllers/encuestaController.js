@@ -460,14 +460,20 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
       const fechaNacimiento = miembro.fechaNacimiento || miembro.fecha_nacimiento;
       const identificacionUnica = await generarIdentificacionUnica('TEMP');
       
-      // ⭐ SOPORTE v2.0: Extraer motivoFechaCelebrar desde profesionMotivoFechaCelebrar.celebraciones[0] o motivoFechaCelebrar
+      // ⭐ SOPORTE v2.0: Extraer motivoFechaCelebrar desde profesionMotivoFechaCelebrar.celebraciones[0] o motivoFechaCelebrar.celebraciones o motivoFechaCelebrar
       let motivoCelebrar = null;
       let diaCelebrar = null;
       let mesCelebrar = null;
       
       if (miembro.profesionMotivoFechaCelebrar?.celebraciones && Array.isArray(miembro.profesionMotivoFechaCelebrar.celebraciones) && miembro.profesionMotivoFechaCelebrar.celebraciones.length > 0) {
-        // Formato v2.0: Array de celebraciones, tomar la primera
+        // Formato v2.0: profesionMotivoFechaCelebrar.celebraciones array
         const primeraCelebracion = miembro.profesionMotivoFechaCelebrar.celebraciones[0];
+        motivoCelebrar = primeraCelebracion.motivo || null;
+        diaCelebrar = primeraCelebracion.dia ? parseInt(primeraCelebracion.dia) : null;
+        mesCelebrar = primeraCelebracion.mes ? parseInt(primeraCelebracion.mes) : null;
+      } else if (miembro.motivoFechaCelebrar?.celebraciones && Array.isArray(miembro.motivoFechaCelebrar.celebraciones) && miembro.motivoFechaCelebrar.celebraciones.length > 0) {
+        // Formato v2.1: motivoFechaCelebrar.celebraciones array (nuevo formato detectado en payload)
+        const primeraCelebracion = miembro.motivoFechaCelebrar.celebraciones[0];
         motivoCelebrar = primeraCelebracion.motivo || null;
         diaCelebrar = primeraCelebracion.dia ? parseInt(primeraCelebracion.dia) : null;
         mesCelebrar = primeraCelebracion.mes ? parseInt(primeraCelebracion.mes) : null;
@@ -519,6 +525,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         identificacion: miembro.numeroIdentificacion || identificacionUnica,
         direccion: informacionGeneral.direccion,
         id_familia_familias: familiaId,
+        id_familia: familiaId, // ⭐ AÑADIDO: Asegurar que id_familia también se llene
         id_sexo: sexoId,
         id_tipo_identificacion_tipo_identificacion: tipoIdentificacionId,
         id_estado_civil_estado_civil: estadoCivilId,
@@ -543,7 +550,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
           fields: [
             'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido',
             'fecha_nacimiento', 'telefono', 'correo_electronico', 'identificacion',
-            'direccion', 'id_familia_familias', 'id_sexo', 
+            'direccion', 'id_familia_familias', 'id_familia', 'id_sexo', 
             'id_tipo_identificacion_tipo_identificacion', 'id_estado_civil_estado_civil',
             'id_parentesco', 'id_profesion', 'id_comunidad_cultural',
             'estudios', 'en_que_eres_lider', 'necesidad_enfermo',
@@ -694,7 +701,13 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
           const mes = celebracion.mes ? parseInt(celebracion.mes) : null;
           
           if (motivo) {
+            // Usar SAVEPOINT para que errores en esta inserción no aborten la
+            // transacción principal (por ejemplo, si la tabla no existe).
+            // Creamos un savepoint por cada celebración.
+            const savepointName = `sp_celebracion_${personaId}_${Date.now()}`;
             try {
+              await sequelize.query(`SAVEPOINT ${savepointName};`, { transaction });
+
               await sequelize.query(`
                 INSERT INTO persona_celebracion (id_persona, motivo, dia, mes, created_at, updated_at)
                 VALUES (:id_persona, :motivo, :dia, :mes, NOW(), NOW())
@@ -708,10 +721,18 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
                 },
                 transaction
               });
-              
+
               console.log(`      ✅ Celebración guardada: ${motivo} - ${dia}/${mes}`);
             } catch (error) {
-              console.error(`      ⚠️ Error guardando celebración "${motivo}": ${error.message}`);
+              // En caso de error, revertir sólo hasta el savepoint y continuar.
+              try {
+                await sequelize.query(`ROLLBACK TO SAVEPOINT ${savepointName};`, { transaction });
+                console.warn(`      ⚠️ Error guardando celebración "${motivo}": ${error.message} — Revertido al savepoint`);
+              } catch (rbErr) {
+                // Si no podemos hacer rollback to savepoint (ej. transacción ya abortada), rethrow
+                console.error(`      ❌ Error al revertir savepoint para celebración "${motivo}": ${rbErr.message}`);
+                throw error;
+              }
             }
           }
         }
@@ -721,6 +742,9 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         console.log(`    🎉 Guardando celebración v1.0 en tabla intermedia...`);
         
         try {
+          const savepointName = `sp_celebracion_v1_${personaId}_${Date.now()}`;
+          await sequelize.query(`SAVEPOINT ${savepointName};`, { transaction });
+
           await sequelize.query(`
             INSERT INTO persona_celebracion (id_persona, motivo, dia, mes, created_at, updated_at)
             VALUES (:id_persona, :motivo, :dia, :mes, NOW(), NOW())
@@ -734,39 +758,68 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
             },
             transaction
           });
-          
+
           console.log(`      ✅ Celebración guardada: ${motivoCelebrar} - ${diaCelebrar}/${mesCelebrar}`);
         } catch (error) {
-          console.error(`      ⚠️ Error guardando celebración v1.0: ${error.message}`);
+          try {
+            await sequelize.query(`ROLLBACK TO SAVEPOINT ${savepointName};`, { transaction });
+            console.warn(`      ⚠️ Error guardando celebración v1.0: ${error.message} — Revertido al savepoint`);
+          } catch (rbErr) {
+            console.error(`      ❌ Error al revertir savepoint v1.0: ${rbErr.message}`);
+            throw error;
+          }
         }
       }
       
       // ========================================================================
       // PROCESAR ENFERMEDADES (tabla intermedia persona_enfermedad)
+      // Con SAVEPOINT para evitar abortar transacción principal
       // ========================================================================
       if (miembro.enfermedades && Array.isArray(miembro.enfermedades) && miembro.enfermedades.length > 0) {
         console.log(`    🏥 Procesando ${miembro.enfermedades.length} enfermedades...`);
         
         for (const enfermedad of miembro.enfermedades) {
-          // Validar y convertir ID de forma segura
-          const enfermedadIdRaw = enfermedad.id ? String(enfermedad.id).trim() : null;
-          const enfermedadId = enfermedadIdRaw && !isNaN(enfermedadIdRaw) ? parseInt(enfermedadIdRaw) : null;
-          const enfermedadNombre = enfermedad.nombre || null;
+          const savepointName = `sp_enfermedad_${personaId}_${Date.now()}`;
           
-          if (enfermedadId && !isNaN(enfermedadId)) {
-            try {
+          try {
+            // Crear SAVEPOINT antes de intentar insertar enfermedad
+            await sequelize.query(`SAVEPOINT ${savepointName};`, { transaction });
+            
+            // Validar y convertir ID de forma segura
+            const enfermedadIdRaw = enfermedad.id ? String(enfermedad.id).trim() : null;
+            const enfermedadId = enfermedadIdRaw && !isNaN(enfermedadIdRaw) ? parseInt(enfermedadIdRaw) : null;
+            const enfermedadNombre = enfermedad.nombre || null;
+            
+            if (enfermedadId && !isNaN(enfermedadId)) {
               // Primero verificar que la enfermedad existe en el catálogo
-              // NOTA: El campo ahora se llama 'id' no 'id_enfermedad'
-              const [enfermedadExiste] = await sequelize.query(`
-                SELECT id FROM enfermedades WHERE id = :id_enfermedad LIMIT 1
+              // Detectar dinámicamente el nombre de la columna ID
+              const columnsInfoResult = await sequelize.query(`
+                SELECT column_name FROM information_schema.columns 
+                WHERE table_schema = 'public' AND table_name = 'enfermedades' 
+                AND column_name IN ('id', 'id_enfermedad') 
+                LIMIT 1
+              `, {
+                type: QueryTypes.SELECT,
+                transaction
+              });
+              
+              const idColumn = (columnsInfoResult && columnsInfoResult.length > 0) 
+                ? columnsInfoResult[0].column_name 
+                : 'id_enfermedad'; // Usar 'id_enfermedad' como fallback seguro
+              
+              const enfermedadExisteResult = await sequelize.query(`
+                SELECT ${idColumn} FROM enfermedades WHERE ${idColumn} = :id_enfermedad LIMIT 1
               `, {
                 replacements: { id_enfermedad: enfermedadId },
                 type: QueryTypes.SELECT,
                 transaction
               });
               
+              const enfermedadExiste = enfermedadExisteResult && enfermedadExisteResult.length > 0 ? enfermedadExisteResult[0] : null;
+              
               if (!enfermedadExiste) {
-                console.error(`      ⚠️ Enfermedad con ID ${enfermedadId} no existe en catálogo, omitiendo...`);
+                console.warn(`      ⚠️ Enfermedad con ID ${enfermedadId} no existe en catálogo, omitiendo...`);
+                await sequelize.query(`ROLLBACK TO SAVEPOINT ${savepointName};`, { transaction });
                 continue;
               }
               
@@ -784,25 +837,33 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
               });
               
               console.log(`      ✅ Enfermedad guardada: ${enfermedadNombre} (ID: ${enfermedadId})`);
-            } catch (error) {
-              if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
-                console.error(`      ⚠️ Enfermedad con ID ${enfermedadId} no existe en catálogo`);
-              } else {
-                console.error(`      ⚠️ Error guardando enfermedad "${enfermedadNombre}": ${error.message}`);
-              }
-            }
-          } else if (enfermedadNombre) {
-            // Si solo viene el nombre, intentar buscar en el catálogo
-            console.log(`      ℹ️ Buscando enfermedad por nombre: "${enfermedadNombre}"`);
-            
-            try {
-              const [enfermedadCatalogo] = await sequelize.query(`
-                SELECT id FROM enfermedades WHERE LOWER(nombre) = LOWER(:nombre) LIMIT 1
+            } else if (enfermedadNombre) {
+              // Si solo viene el nombre, intentar buscar en el catálogo
+              console.log(`      ℹ️ Buscando enfermedad por nombre: "${enfermedadNombre}"`);
+              
+              const columnsInfoResult2 = await sequelize.query(`
+                SELECT column_name FROM information_schema.columns 
+                WHERE table_schema = 'public' AND table_name = 'enfermedades' 
+                AND column_name IN ('id', 'id_enfermedad') 
+                LIMIT 1
+              `, {
+                type: QueryTypes.SELECT,
+                transaction
+              });
+              
+              const idColumn = (columnsInfoResult2 && columnsInfoResult2.length > 0)
+                ? columnsInfoResult2[0].column_name
+                : 'id_enfermedad';
+              
+              const enfermedadCatalogoResult = await sequelize.query(`
+                SELECT ${idColumn} as id FROM enfermedades WHERE LOWER(nombre) = LOWER(:nombre) LIMIT 1
               `, {
                 replacements: { nombre: enfermedadNombre },
                 type: QueryTypes.SELECT,
                 transaction
               });
+              
+              const enfermedadCatalogo = enfermedadCatalogoResult && enfermedadCatalogoResult.length > 0 ? enfermedadCatalogoResult[0] : null;
               
               if (enfermedadCatalogo) {
                 await sequelize.query(`
@@ -835,24 +896,48 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
                 
                 console.log(`      ⚠️ Enfermedad no encontrada en catálogo, guardada como "Otra": ${enfermedadNombre}`);
               }
-            } catch (error) {
-              console.error(`      ⚠️ Error procesando enfermedad "${enfermedadNombre}": ${error.message}`);
+            }
+          } catch (error) {
+            try {
+              await sequelize.query(`ROLLBACK TO SAVEPOINT ${savepointName};`, { transaction });
+              console.warn(`      ⚠️ Error guardando enfermedad: ${error.message} — Revertido al savepoint`);
+            } catch (rbErr) {
+              console.error(`      ❌ Error al revertir savepoint enfermedad: ${rbErr.message}`);
+              throw error;
             }
           }
         }
       } else if (nombreEnfermedad) {
         // Formato v1.0: Una sola enfermedad
         console.log(`    🏥 Procesando enfermedad v1.0: ${nombreEnfermedad}`);
+        const savepointName = `sp_enfermedad_v1_${personaId}_${Date.now()}`;
         
         try {
-          const [enfermedadCatalogo] = await sequelize.query(`
-            SELECT id FROM enfermedades WHERE LOWER(nombre) = LOWER(:nombre) LIMIT 1
+          await sequelize.query(`SAVEPOINT ${savepointName};`, { transaction });
+          
+          const columnsInfoResult3 = await sequelize.query(`
+            SELECT column_name FROM information_schema.columns 
+            WHERE table_schema = 'public' AND table_name = 'enfermedades' 
+            AND column_name IN ('id', 'id_enfermedad') 
+            LIMIT 1
+          `, {
+            type: QueryTypes.SELECT,
+            transaction
+          });
+          
+          const idColumn = (columnsInfoResult3 && columnsInfoResult3.length > 0)
+            ? columnsInfoResult3[0].column_name
+            : 'id_enfermedad';
+          
+          const enfermedadCatalogoResult3 = await sequelize.query(`
+            SELECT ${idColumn} as id FROM enfermedades WHERE LOWER(nombre) = LOWER(:nombre) LIMIT 1
           `, {
             replacements: { nombre: nombreEnfermedad },
             type: QueryTypes.SELECT,
             transaction
           });
           
+          const enfermedadCatalogo = enfermedadCatalogoResult3 && enfermedadCatalogoResult3.length > 0 ? enfermedadCatalogoResult3[0] : null;
           const idEnfermedad = enfermedadCatalogo ? enfermedadCatalogo.id : 14; // 14 = "Otra"
           
           await sequelize.query(`
@@ -870,7 +955,13 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
           
           console.log(`      ✅ Enfermedad v1.0 guardada: ${nombreEnfermedad}`);
         } catch (error) {
-          console.error(`      ⚠️ Error guardando enfermedad v1.0: ${error.message}`);
+          try {
+            await sequelize.query(`ROLLBACK TO SAVEPOINT ${savepointName};`, { transaction });
+            console.warn(`      ⚠️ Error guardando enfermedad v1.0: ${error.message} — Revertido al savepoint`);
+          } catch (rbErr) {
+            console.error(`      ❌ Error al revertir savepoint enfermedad v1.0: ${rbErr.message}`);
+            throw error;
+          }
         }
       }
       
@@ -915,7 +1006,12 @@ const procesarMiembrosFallecidos = async (familiaId, deceasedMembers, informacio
   console.log(`⚰️ Procesando ${deceasedMembers.length} miembros fallecidos...`);
   
   for (const fallecido of deceasedMembers) {
+    const savepointName = `sp_difunto_${familiaId}_${Date.now()}`;
+    
     try {
+      // Crear SAVEPOINT antes de intentar insertar difunto
+      await sequelize.query(`SAVEPOINT ${savepointName};`, { transaction });
+      
       // Separar nombres y apellidos correctamente para fallecidos
       const nombresCompletos = fallecido.nombres.trim().split(' ');
       let primerNombre = '';
@@ -1014,8 +1110,13 @@ const procesarMiembrosFallecidos = async (familiaId, deceasedMembers, informacio
       console.log(`  ⚰️ Persona fallecida registrada: ${primerNombre} (solo en difuntos_familia)`);
       
     } catch (error) {
-      console.error(`  ❌ Error registrando persona fallecida ${fallecido.nombres}:`, error.message);
-      throw error;
+      try {
+        await sequelize.query(`ROLLBACK TO SAVEPOINT ${savepointName};`, { transaction });
+        console.warn(`  ⚠️ Error registrando persona fallecida ${fallecido.nombres}: ${error.message} — Revertido al savepoint`);
+      } catch (rbErr) {
+        console.error(`  ❌ Error al revertir savepoint difunto: ${rbErr.message}`);
+        throw error;
+      }
     }
   }
 
