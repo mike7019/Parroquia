@@ -78,29 +78,29 @@ export async function obtenerCelebracionesMultiplesPersonas(idsPersonas, transac
 
   const celebraciones = await sequelize.query(`
     SELECT 
-      pc.id_persona,
-      pc.id,
+      pc.id_personas,
+      pc.id_persona_celebracion as id,
       pc.motivo,
       pc.dia,
       pc.mes,
       pc.created_at,
       pc.updated_at
     FROM persona_celebracion pc
-    WHERE pc.id_persona IN (:idsPersonas)
-    ORDER BY pc.id_persona ASC, pc.mes ASC, pc.dia ASC
+    WHERE pc.id_personas IN (:idsPersonas)
+    ORDER BY pc.id_personas ASC, pc.mes ASC, pc.dia ASC
   `, {
     replacements: { idsPersonas },
     type: QueryTypes.SELECT,
     transaction
   });
 
-  // Agrupar por id_persona
+  // Agrupar por id_personas
   const celebracionesPorPersona = new Map();
   celebraciones.forEach(cel => {
-    if (!celebracionesPorPersona.has(cel.id_persona)) {
-      celebracionesPorPersona.set(cel.id_persona, []);
+    if (!celebracionesPorPersona.has(cel.id_personas)) {
+      celebracionesPorPersona.set(cel.id_personas, []);
     }
-    celebracionesPorPersona.get(cel.id_persona).push(cel);
+    celebracionesPorPersona.get(cel.id_personas).push(cel);
   });
 
   return celebracionesPorPersona;
@@ -129,7 +129,7 @@ export async function obtenerEnfermedadesMultiplesPersonas(idsPersonas, transact
       pe.created_at,
       pe.updated_at
     FROM persona_enfermedad pe
-    INNER JOIN enfermedades e ON e.id = pe.id_enfermedad
+    INNER JOIN enfermedades e ON e.id_enfermedad = pe.id_enfermedad
     WHERE pe.id_persona IN (:idsPersonas)
       AND pe.activo = true
     ORDER BY pe.id_persona ASC, e.nombre ASC
