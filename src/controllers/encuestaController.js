@@ -709,12 +709,12 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
               await sequelize.query(`SAVEPOINT ${savepointName};`, { transaction });
 
               await sequelize.query(`
-                INSERT INTO persona_celebracion (id_persona, motivo, dia, mes, created_at, updated_at)
-                VALUES (:id_persona, :motivo, :dia, :mes, NOW(), NOW())
-                ON CONFLICT (id_persona, motivo, dia, mes) DO NOTHING
+                INSERT INTO persona_celebracion (id_personas, motivo, dia, mes, created_at, updated_at)
+                VALUES (:id_personas, :motivo, :dia, :mes, NOW(), NOW())
+                ON CONFLICT (id_personas, motivo, dia, mes) DO NOTHING
               `, {
                 replacements: {
-                  id_persona: personaId,
+                  id_personas: personaId,
                   motivo: motivo,
                   dia: dia,
                   mes: mes
@@ -746,12 +746,12 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
           await sequelize.query(`SAVEPOINT ${savepointName};`, { transaction });
 
           await sequelize.query(`
-            INSERT INTO persona_celebracion (id_persona, motivo, dia, mes, created_at, updated_at)
-            VALUES (:id_persona, :motivo, :dia, :mes, NOW(), NOW())
-            ON CONFLICT (id_persona, motivo, dia, mes) DO NOTHING
+            INSERT INTO persona_celebracion (id_personas, motivo, dia, mes, created_at, updated_at)
+            VALUES (:id_personas, :motivo, :dia, :mes, NOW(), NOW())
+            ON CONFLICT (id_personas, motivo, dia, mes) DO NOTHING
           `, {
             replacements: {
-              id_persona: personaId,
+              id_personas: personaId,
               motivo: motivoCelebrar,
               dia: diaCelebrar,
               mes: mesCelebrar

@@ -14,12 +14,12 @@ const PersonaCelebracion = sequelize.define('PersonaCelebracion', {
     allowNull: false,
     comment: 'ID único de la celebración'
   },
-  id_persona: {
+  id_personas: {
     type: DataTypes.BIGINT,
     allowNull: false,
     references: {
       model: 'personas',
-      key: 'id_persona'
+      key: 'id_personas'
     },
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
@@ -69,11 +69,11 @@ const PersonaCelebracion = sequelize.define('PersonaCelebracion', {
   indexes: [
     {
       unique: true,
-      fields: ['id_persona', 'motivo', 'dia', 'mes'],
+      fields: ['id_personas', 'motivo', 'dia', 'mes'],
       name: 'unique_persona_celebracion'
     },
     {
-      fields: ['id_persona'],
+      fields: ['id_personas'],
       name: 'idx_persona_celebracion_persona'
     },
     {

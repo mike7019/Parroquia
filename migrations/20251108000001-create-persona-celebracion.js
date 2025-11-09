@@ -18,12 +18,12 @@ export async function up(queryInterface, Sequelize) {
       allowNull: false,
       comment: 'ID único de la celebración'
     },
-    id_persona: {
+    id_personas: {
       type: DataTypes.BIGINT,
       allowNull: false,
       references: {
         model: 'personas',
-        key: 'id_persona'
+        key: 'id_personas'
       },
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE',
@@ -62,11 +62,11 @@ export async function up(queryInterface, Sequelize) {
   
   // Índice único para evitar duplicados
   await queryInterface.addIndex('persona_celebracion', 
-    ['id_persona', 'motivo', 'dia', 'mes'], 
+    ['id_personas', 'motivo', 'dia', 'mes'], 
     {
       unique: true,
       name: 'unique_persona_celebracion',
-      fields: ['id_persona', 'motivo', 'dia', 'mes']
+      fields: ['id_personas', 'motivo', 'dia', 'mes']
     }
   );
 
@@ -74,7 +74,7 @@ export async function up(queryInterface, Sequelize) {
 
   // Índice para búsquedas por persona
   await queryInterface.addIndex('persona_celebracion', 
-    ['id_persona'], 
+    ['id_personas'], 
     {
       name: 'idx_persona_celebracion_persona'
     }
