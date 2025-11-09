@@ -5,7 +5,7 @@
  * node scripts/ejecutar-migracion-persona-celebracion.js
  */
 
-import sequelize from '../src/config/database.js';
+import sequelize from '../config/sequelize.js';
 import { QueryInterface } from 'sequelize';
 import * as migration from '../migrations/20251108000001-create-persona-celebracion.js';
 
