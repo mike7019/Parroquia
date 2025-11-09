@@ -824,14 +824,13 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
               }
               
               await sequelize.query(`
-                INSERT INTO persona_enfermedad (id_persona, id_enfermedad, notas, activo, created_at, updated_at)
-                VALUES (:id_persona, :id_enfermedad, :notas, true, NOW(), NOW())
+                INSERT INTO persona_enfermedad (id_persona, id_enfermedad, "createdAt", "updatedAt")
+                VALUES (:id_persona, :id_enfermedad, NOW(), NOW())
                 ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
               `, {
                 replacements: {
                   id_persona: personaId,
-                  id_enfermedad: enfermedadId,
-                  notas: enfermedadNombre
+                  id_enfermedad: enfermedadId
                 },
                 transaction
               });
@@ -867,14 +866,13 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
               
               if (enfermedadCatalogo) {
                 await sequelize.query(`
-                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, notas, activo, created_at, updated_at)
-                  VALUES (:id_persona, :id_enfermedad, :notas, true, NOW(), NOW())
+                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, "createdAt", "updatedAt")
+                  VALUES (:id_persona, :id_enfermedad, NOW(), NOW())
                   ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
                 `, {
                   replacements: {
                     id_persona: personaId,
-                    id_enfermedad: enfermedadCatalogo.id,
-                    notas: enfermedadNombre
+                    id_enfermedad: enfermedadCatalogo.id
                   },
                   transaction
                 });
@@ -883,13 +881,12 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
               } else {
                 // Si no existe, usar "Otra" (ID 14)
                 await sequelize.query(`
-                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, notas, activo, created_at, updated_at)
-                  VALUES (:id_persona, 14, :notas, true, NOW(), NOW())
+                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, "createdAt", "updatedAt")
+                  VALUES (:id_persona, 14, NOW(), NOW())
                   ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
                 `, {
                   replacements: {
-                    id_persona: personaId,
-                    notas: enfermedadNombre
+                    id_persona: personaId
                   },
                   transaction
                 });
@@ -941,14 +938,13 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
           const idEnfermedad = enfermedadCatalogo ? enfermedadCatalogo.id : 14; // 14 = "Otra"
           
           await sequelize.query(`
-            INSERT INTO persona_enfermedad (id_persona, id_enfermedad, notas, activo, created_at, updated_at)
-            VALUES (:id_persona, :id_enfermedad, :notas, true, NOW(), NOW())
+            INSERT INTO persona_enfermedad (id_persona, id_enfermedad, "createdAt", "updatedAt")
+            VALUES (:id_persona, :id_enfermedad, NOW(), NOW())
             ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
           `, {
             replacements: {
               id_persona: personaId,
-              id_enfermedad: idEnfermedad,
-              notas: nombreEnfermedad
+              id_enfermedad: idEnfermedad
             },
             transaction
           });
