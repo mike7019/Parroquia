@@ -93,7 +93,7 @@ class PersonasReporteService {
             CASE WHEN p.segundo_apellido IS NOT NULL THEN ' ' || p.segundo_apellido ELSE '' END
           ) as nombre_completo,
           p.fecha_nacimiento,
-          EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
+          COALESCE(EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.fecha_nacimiento)), 0) as edad,
           p.telefono,
           p.correo_electronico as email,
           p.direccion,
@@ -213,12 +213,34 @@ class PersonasReporteService {
           });
         }
         
+        // Obtener habilidades
+        const habilidades = await sequelize.query(`
+          SELECT h.id_habilidad, h.nombre
+          FROM persona_habilidad ph
+          INNER JOIN habilidades h ON ph.id_habilidad = h.id_habilidad
+          WHERE ph.id_persona = :id_persona
+        `, {
+          replacements: { id_persona: persona.id_personas },
+          type: QueryTypes.SELECT
+        });
+        
+        // Obtener enfermedades
+        const enfermedades = await sequelize.query(`
+          SELECT e.id_enfermedad, e.nombre
+          FROM persona_enfermedad pe
+          INNER JOIN enfermedades e ON pe.id_enfermedad = e.id_enfermedad
+          WHERE pe.id_persona = :id_persona AND pe.activo = true
+        `, {
+          replacements: { id_persona: persona.id_personas },
+          type: QueryTypes.SELECT
+        });
+        
         return {
           id_personas: persona.id_personas,
           identificacion: persona.identificacion,
           nombre_completo: persona.nombre_completo,
           fecha_nacimiento: persona.fecha_nacimiento,
-          edad: persona.edad,
+          edad: persona.edad || 0,
           telefono: persona.telefono,
           email: persona.email,
           direccion: persona.direccion,
@@ -240,7 +262,14 @@ class PersonasReporteService {
           estado_civil: persona.estado_civil,
           tipo_identificacion: persona.tipo_identificacion,
           destrezas: destrezas,
-          total_destrezas: destrezas.length
+          destrezas_texto: destrezas.map(d => d.nombre).join(', ') || 'Ninguna',
+          total_destrezas: destrezas.length,
+          habilidades: habilidades,
+          habilidades_texto: habilidades.map(h => h.nombre).join(', ') || 'Ninguna',
+          total_habilidades: habilidades.length,
+          enfermedades: enfermedades,
+          enfermedades_texto: enfermedades.map(e => e.nombre).join(', ') || 'Ninguna',
+          total_enfermedades: enfermedades.length
         };
       }));
       
@@ -326,7 +355,15 @@ class PersonasReporteService {
         // Capacidades y Profesión
         { header: 'Profesión', key: 'profesion', width: 30 },
         { header: 'Estudios', key: 'estudios', width: 30 },
-        { header: 'Liderazgo', key: 'liderazgo', width: 30 },
+        { header: 'Liderazgo', key: 'liderazgo', width: 40 },
+        
+        // Destrezas
+        { header: 'Destrezas', key: 'destrezas_texto', width: 50 },
+        { header: 'Cant. Destrezas', key: 'total_destrezas', width: 15 },
+        
+        // Habilidades
+        { header: 'Habilidades', key: 'habilidades_texto', width: 50 },
+        { header: 'Cant. Habilidades', key: 'total_habilidades', width: 15 },
         
         // Tallas
         { header: 'Talla Camisa', key: 'talla_camisa', width: 12 },
@@ -334,10 +371,9 @@ class PersonasReporteService {
         { header: 'Talla Zapato', key: 'talla_zapatos', width: 12 },
         
         // Salud
-        { header: 'Necesidades de Salud', key: 'necesidad_enfermo', width: 40 },
-        
-        // Destrezas (como texto)
-        { header: 'Cantidad Destrezas', key: 'total_destrezas', width: 15 }
+        { header: 'Enfermedades', key: 'enfermedades_texto', width: 50 },
+        { header: 'Cant. Enfermedades', key: 'total_enfermedades', width: 15 },
+        { header: 'Necesidades de Salud', key: 'necesidad_enfermo', width: 40 }
       ];
       
       // Estilo del encabezado - Azul profesional
