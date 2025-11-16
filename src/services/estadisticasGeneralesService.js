@@ -318,11 +318,11 @@ class EstadisticasGeneralesService {
           COUNT(CASE WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.fecha_nacimiento)) BETWEEN 18 AND 60 THEN 1 END) as entre_18_60,
           COUNT(CASE WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.fecha_nacimiento)) > 60 THEN 1 END) as mayores_60
         FROM persona_enfermedad pe
-        INNER JOIN enfermedades e ON pe.id = e.id
+        INNER JOIN enfermedades e ON pe.id_enfermedad = e.id_enfermedad
         INNER JOIN personas p ON pe.id_persona = p.id_personas
         LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
         WHERE pe.activo = true
-        GROUP BY e.id, e.nombre, e.descripcion
+        GROUP BY e.id_enfermedad, e.nombre, e.descripcion
         ORDER BY total_personas DESC
         LIMIT 20
       `, { type: QueryTypes.SELECT });
