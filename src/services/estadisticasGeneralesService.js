@@ -355,10 +355,10 @@ class EstadisticasGeneralesService {
             SELECT COUNT(DISTINCT id_persona) FROM persona_enfermedad WHERE activo = true
           ), 0), 2) as porcentaje_del_total
         FROM persona_enfermedad pe
-        INNER JOIN enfermedades e ON pe.id = e.id
+        INNER JOIN enfermedades e ON pe.id_enfermedad = e.id_enfermedad
         INNER JOIN personas p ON pe.id_persona = p.id_personas
         WHERE pe.activo = true
-        GROUP BY e.id, e.nombre
+        GROUP BY e.id_enfermedad, e.nombre
         ORDER BY casos DESC
         LIMIT 10
       `, { type: QueryTypes.SELECT });
@@ -372,12 +372,12 @@ class EstadisticasGeneralesService {
           (
             SELECT e.nombre
             FROM persona_enfermedad pe2
-            INNER JOIN enfermedades e ON pe2.id_enfermedad = e.id
+            INNER JOIN enfermedades e ON pe2.id_enfermedad = e.id_enfermedad
             INNER JOIN personas p2 ON pe2.id_persona = p2.id_personas
             INNER JOIN familias f2 ON p2.id_familia_familias = f2.id_familia
             WHERE f2.id_parroquia = par.id_parroquia 
               AND pe2.activo = true
-            GROUP BY e.id, e.nombre
+            GROUP BY e.id_enfermedad, e.nombre
             ORDER BY COUNT(*) DESC
             LIMIT 1
           ) as enfermedad_mas_comun
