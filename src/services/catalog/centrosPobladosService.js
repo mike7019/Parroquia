@@ -195,15 +195,18 @@ class CentrosPobladosService {
         }
       }
 
-      // Verificar nombre duplicado
+      // Verificar nombre duplicado en el MISMO municipio
       const existingCentroPoblado = await CentrosPoblados.findOne({
-        where: { nombre: centroPobladoData.nombre }
+        where: { 
+          nombre: centroPobladoData.nombre,
+          id_municipio_municipios: centroPobladoData.id_municipio_municipios
+        }
       });
 
       if (existingCentroPoblado) {
-        const error = new Error('Ya existe un centro poblado con ese nombre');
+        const error = new Error('Ya existe un centro poblado con ese nombre en este municipio');
         error.statusCode = 409;
-        error.code = 'DUPLICATE_NAME';
+        error.code = 'DUPLICATE_NAME_IN_MUNICIPIO';
         throw error;
       }
 
@@ -257,19 +260,22 @@ class CentrosPobladosService {
         }
       }
 
-      // Verificar nombre duplicado (excluyendo el actual)
+      // Verificar nombre duplicado en el MISMO municipio (excluyendo el actual)
       if (centroPobladoData.nombre && centroPobladoData.nombre !== centro_poblado.nombre) {
+        const municipioTarget = centroPobladoData.id_municipio_municipios || centro_poblado.id_municipio_municipios;
+        
         const existingCentroPoblado = await CentrosPoblados.findOne({
           where: { 
             nombre: centroPobladoData.nombre,
+            id_municipio_municipios: municipioTarget,
             id_centro_poblado: { [Op.ne]: id }
           }
         });
 
         if (existingCentroPoblado) {
-          const error = new Error('Ya existe un centro poblado con ese nombre');
+          const error = new Error('Ya existe un centro poblado con ese nombre en este municipio');
           error.statusCode = 409;
-          error.code = 'DUPLICATE_NAME';
+          error.code = 'DUPLICATE_NAME_IN_MUNICIPIO';
           throw error;
         }
       }
