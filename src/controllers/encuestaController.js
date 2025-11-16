@@ -520,8 +520,17 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         primer_apellido: primerApellido || null,
         segundo_apellido: segundoApellido || null,
         fecha_nacimiento: fechaNacimiento ? new Date(fechaNacimiento) : new Date('1900-01-01'),
-        telefono: miembro.telefono || informacionGeneral.telefono,
-        correo_electronico: `${primerNombre.toLowerCase()}.${Date.now()}.${personasCreadas}@temp.com`,
+  telefono: miembro.telefono || informacionGeneral.telefono,
+  // Intentar usar el correo proporcionado en el payload (soportar varios nombres de campo)
+  // Si no viene ninguno, dejar null para evitar guardar placeholders genéricos
+  correo_electronico: (
+    miembro.correo_electronico || 
+    miembro.correoElectronico || 
+    miembro.email || 
+    informacionGeneral.correo_electronico || 
+    informacionGeneral.correoElectronico || 
+    null
+  ),
         identificacion: miembro.numeroIdentificacion || identificacionUnica,
         direccion: informacionGeneral.direccion,
         id_familia_familias: familiaId,
@@ -533,6 +542,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         id_profesion: profesionId,
         id_comunidad_cultural: comunidadCulturalId,
         estudios: (miembro.estudio && typeof miembro.estudio === 'object') ? miembro.estudio.nombre : (miembro.estudio || null),
+        id_nivel_educativo: (miembro.estudio && typeof miembro.estudio === 'object' && miembro.estudio.id) ? parseInt(miembro.estudio.id) : null,
         en_que_eres_lider: enQueEresLider,
         necesidad_enfermo: necesidadEnfermo,
         motivo_celebrar: motivoCelebrar,
@@ -543,28 +553,52 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         talla_zapato: miembro.talla_zapato || (miembro.talla ? miembro.talla.calzado : null)
       };
 
+      // Construir array de fields dinámicamente, excluyendo correo_electronico si es null
+      const fieldsToCreate = [
+        'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido',
+        'fecha_nacimiento', 'telefono', 'identificacion',
+        'direccion', 'id_familia_familias', 'id_familia', 'id_sexo', 
+        'id_tipo_identificacion_tipo_identificacion', 'id_estado_civil_estado_civil',
+        'id_parentesco', 'id_profesion', 'id_comunidad_cultural',
+        'estudios', 'id_nivel_educativo', 'en_que_eres_lider', 'necesidad_enfermo',
+        'motivo_celebrar', 'dia_celebrar', 'mes_celebrar',
+        'talla_camisa', 'talla_pantalon', 'talla_zapato'
+      ];
+      
+      // Solo incluir correo_electronico si tiene un valor válido
+      if (personaData.correo_electronico) {
+        fieldsToCreate.push('correo_electronico');
+      }
+
       let persona;
       try {
+        console.log(`  🔍 Creando persona con datos:`, {
+          nombre: miembro.nombres,
+          profesionId,
+          comunidadCulturalId,
+          parentescoId,
+          sexoId,
+          estadoCivilId
+        });
         persona = await Persona.create(personaData, { 
           transaction,
-          fields: [
-            'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido',
-            'fecha_nacimiento', 'telefono', 'correo_electronico', 'identificacion',
-            'direccion', 'id_familia_familias', 'id_familia', 'id_sexo', 
-            'id_tipo_identificacion_tipo_identificacion', 'id_estado_civil_estado_civil',
-            'id_parentesco', 'id_profesion', 'id_comunidad_cultural',
-            'estudios', 'en_que_eres_lider', 'necesidad_enfermo',
-            'motivo_celebrar', 'dia_celebrar', 'mes_celebrar',
-            'talla_camisa', 'talla_pantalon', 'talla_zapato'
-          ]
+          fields: fieldsToCreate
         });
       } catch (error) {
+        console.error(`  ❌ Error SQL al crear persona:`, {
+          name: error.name,
+          message: error.message,
+          code: error.original?.code,
+          constraint: error.original?.constraint,
+          detail: error.original?.detail
+        });
+        
         // Detectar violaciones de foreign key y dar mensajes específicos
         if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
           const constraint = error.original?.constraint || '';
           
-          // Determinar qué catálogo falló basado en el constraint name
-          if (constraint.includes('profesion') || profesionId) {
+          // Determinar qué catálogo falló basado SOLO en el constraint name (no en si el ID existe)
+          if (constraint.includes('profesion')) {
             throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
               catalog: 'profesiones',
               invalidId: profesionId,
@@ -574,7 +608,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
             });
           }
           
-          if (constraint.includes('parentesco') || parentescoId) {
+          if (constraint.includes('parentesco')) {
             throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
               catalog: 'parentescos',
               invalidId: parentescoId,
@@ -584,7 +618,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
             });
           }
           
-          if (constraint.includes('comunidad') || comunidadCulturalId) {
+          if (constraint.includes('comunidad')) {
             throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
               catalog: 'comunidades_culturales',
               invalidId: comunidadCulturalId,
@@ -594,10 +628,31 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
             });
           }
           
-          // Si no podemos determinar cuál FK falló, error genérico
+          if (constraint.includes('sexo')) {
+            throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
+              catalog: 'sexos',
+              invalidId: sexoId,
+              person: miembro.nombres,
+              details: `El sexo con ID ${sexoId} no existe en el catálogo`,
+              suggestion: 'Verifique que el ID del sexo sea correcto'
+            });
+          }
+          
+          if (constraint.includes('estado_civil')) {
+            throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
+              catalog: 'estados_civiles',
+              invalidId: estadoCivilId,
+              person: miembro.nombres,
+              details: `El estado civil con ID ${estadoCivilId} no existe en el catálogo`,
+              suggestion: 'Verifique que el ID del estado civil sea correcto'
+            });
+          }
+          
+          // Si no podemos determinar cuál FK falló, error genérico con info del constraint
           throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
             catalog: 'unknown',
             person: miembro.nombres,
+            constraint,
             details: `Error de referencia en catálogo al crear persona: ${error.message}`,
             suggestion: 'Verifique que todos los IDs de catálogos sean válidos'
           });
@@ -709,12 +764,12 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
               await sequelize.query(`SAVEPOINT ${savepointName};`, { transaction });
 
               await sequelize.query(`
-                INSERT INTO persona_celebracion (id_personas, motivo, dia, mes, created_at, updated_at)
-                VALUES (:id_personas, :motivo, :dia, :mes, NOW(), NOW())
-                ON CONFLICT (id_personas, motivo, dia, mes) DO NOTHING
+                INSERT INTO persona_celebracion (id_persona, motivo, dia, mes, created_at, updated_at)
+                VALUES (:id_persona, :motivo, :dia, :mes, NOW(), NOW())
+                ON CONFLICT (id_persona, motivo, dia, mes) DO NOTHING
               `, {
                 replacements: {
-                  id_personas: personaId,
+                  id_persona: personaId,
                   motivo: motivo,
                   dia: dia,
                   mes: mes
@@ -746,12 +801,12 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
           await sequelize.query(`SAVEPOINT ${savepointName};`, { transaction });
 
           await sequelize.query(`
-            INSERT INTO persona_celebracion (id_personas, motivo, dia, mes, created_at, updated_at)
-            VALUES (:id_personas, :motivo, :dia, :mes, NOW(), NOW())
-            ON CONFLICT (id_personas, motivo, dia, mes) DO NOTHING
+            INSERT INTO persona_celebracion (id_persona, motivo, dia, mes, created_at, updated_at)
+            VALUES (:id_persona, :motivo, :dia, :mes, NOW(), NOW())
+            ON CONFLICT (id_persona, motivo, dia, mes) DO NOTHING
           `, {
             replacements: {
-              id_personas: personaId,
+              id_persona: personaId,
               motivo: motivoCelebrar,
               dia: diaCelebrar,
               mes: mesCelebrar
@@ -824,7 +879,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
               }
               
               await sequelize.query(`
-                INSERT INTO persona_enfermedad (id_persona, id_enfermedad, "createdAt", "updatedAt")
+                INSERT INTO persona_enfermedad (id_persona, id_enfermedad, created_at, updated_at)
                 VALUES (:id_persona, :id_enfermedad, NOW(), NOW())
                 ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
               `, {
@@ -866,7 +921,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
               
               if (enfermedadCatalogo) {
                 await sequelize.query(`
-                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, "createdAt", "updatedAt")
+                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, created_at, updated_at)
                   VALUES (:id_persona, :id_enfermedad, NOW(), NOW())
                   ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
                 `, {
@@ -881,7 +936,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
               } else {
                 // Si no existe, usar "Otra" (ID 14)
                 await sequelize.query(`
-                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, "createdAt", "updatedAt")
+                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, created_at, updated_at)
                   VALUES (:id_persona, 14, NOW(), NOW())
                   ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
                 `, {
@@ -938,7 +993,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
           const idEnfermedad = enfermedadCatalogo ? enfermedadCatalogo.id : 14; // 14 = "Otra"
           
           await sequelize.query(`
-            INSERT INTO persona_enfermedad (id_persona, id_enfermedad, "createdAt", "updatedAt")
+            INSERT INTO persona_enfermedad (id_persona, id_enfermedad, created_at, updated_at)
             VALUES (:id_persona, :id_enfermedad, NOW(), NOW())
             ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
           `, {

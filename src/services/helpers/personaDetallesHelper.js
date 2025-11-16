@@ -71,29 +71,29 @@ export async function obtenerCelebracionesMultiplesPersonas(idsPersonas, transac
 
   const celebraciones = await sequelize.query(`
     SELECT 
-      pc.id_personas,
-      pc.id_persona_celebracion as id,
+      pc.id_persona,
+      pc.id,
       pc.motivo,
       pc.dia,
       pc.mes,
       pc.created_at,
       pc.updated_at
     FROM persona_celebracion pc
-    WHERE pc.id_personas IN (:idsPersonas)
-    ORDER BY pc.id_personas ASC, pc.mes ASC, pc.dia ASC
+    WHERE pc.id_persona IN (:idsPersonas)
+    ORDER BY pc.id_persona ASC, pc.mes ASC, pc.dia ASC
   `, {
     replacements: { idsPersonas },
     type: QueryTypes.SELECT,
     transaction
   });
 
-  // Agrupar por id_personas
+  // Agrupar por id_persona
   const celebracionesPorPersona = new Map();
   celebraciones.forEach(cel => {
-    if (!celebracionesPorPersona.has(cel.id_personas)) {
-      celebracionesPorPersona.set(cel.id_personas, []);
+    if (!celebracionesPorPersona.has(cel.id_persona)) {
+      celebracionesPorPersona.set(cel.id_persona, []);
     }
-    celebracionesPorPersona.get(cel.id_personas).push(cel);
+    celebracionesPorPersona.get(cel.id_persona).push(cel);
   });
 
   return celebracionesPorPersona;
