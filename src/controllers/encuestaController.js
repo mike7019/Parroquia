@@ -1782,6 +1782,7 @@ export const obtenerEncuestas = async (req, res) => {
           vereda: veredaInfo,
           parroquia: parroquiaInfo,
           corregimiento: corregimientoInfo,
+          centro_poblado: centroPobladoInfo,
           // Removido: sector_especifico (no lo necesitas según indicaciones)
           
           // *** INFORMACIÓN DE SERVICIOS CON ID Y NOMBRE ***
@@ -2020,6 +2021,15 @@ export const obtenerEncuestaPorId = async (req, res) => {
       corregimientoInfo = {
         id: familiaData.id_corregimiento,
         nombre: familiaData.nombre_corregimiento
+      };
+    }
+
+    // Usar datos de centro poblado ya obtenidos en el JOIN
+    let centroPobladoInfo = null;
+    if (familiaData.id_centro_poblado && familiaData.nombre_centro_poblado) {
+      centroPobladoInfo = {
+        id: familiaData.id_centro_poblado,
+        nombre: familiaData.nombre_centro_poblado
       };
     }
 
@@ -2370,6 +2380,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
       vereda: veredaInfo,
       parroquia: parroquiaInfo,
       corregimiento: corregimientoInfo,
+      centro_poblado: centroPobladoInfo,
       
       // *** INFORMACIÓN DE SERVICIOS CON ID Y NOMBRE ***
       basuras: disposicionBasuras, // Siempre array, nunca null
