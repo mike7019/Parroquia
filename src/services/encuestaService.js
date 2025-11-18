@@ -83,6 +83,7 @@ class EncuestaService {
         s.nombre as nombre_sector,
         p.nombre as nombre_parroquia,
         corr.nombre as nombre_corregimiento,
+        cp.nombre as nombre_centro_poblado,
         tv.nombre as nombre_tipo_vivienda,
         -- Agregación de personas vivas
         COALESCE(
@@ -224,6 +225,7 @@ class EncuestaService {
           s.nombre as nombre_sector,
           p.nombre as nombre_parroquia,
           corr.nombre as nombre_corregimiento,
+          cp.nombre as nombre_centro_poblado,
           tv.nombre as nombre_tipo_vivienda,
           -- Personas vivas con detalles completos
           COALESCE(
