@@ -1906,7 +1906,10 @@ export const obtenerEncuestaPorId = async (req, res) => {
         cp.nombre as nombre_centro_poblado,
         tv.id_tipo_vivienda,
         tv.nombre as nombre_tipo_vivienda,
-        CONCAT(u.primer_nombre, ' ', u.primer_apellido) as nombre_usuario_creador
+        CASE 
+          WHEN u.primer_nombre IS NOT NULL THEN CONCAT(u.primer_nombre, ' ', COALESCE(u.primer_apellido, ''))
+          ELSE NULL 
+        END as nombre_usuario_creador
       FROM familias f
       LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
       LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
