@@ -2648,6 +2648,14 @@ export const crearEncuesta = async (req, res) => {
 
     console.log('✅ Validaciones completadas por middlewares');
     
+    // DEBUG: Verificar usuario autenticado
+    console.log('👤 Usuario autenticado:', {
+      id: req.user?.id,
+      email: req.user?.email,
+      nombre: req.user?.firstName,
+      apellido: req.user?.lastName
+    });
+    
     // VALIDAR INTEGRIDAD DE DATOS ANTES DE INICIAR TRANSACCIÓN
     console.log('🔍 Validando integridad de datos...');
     try {
