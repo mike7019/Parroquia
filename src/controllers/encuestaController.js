@@ -1359,6 +1359,7 @@ export const obtenerEncuestas = async (req, res) => {
         let sectorInfo = null;
         let parroquiaInfo = null;
         let corregimientoInfo = null;
+        let centroPobladoInfo = null;
         let tipoViviendaInfo = null;
 
         // Usar datos de municipio ya obtenidos en el JOIN
@@ -1433,6 +1434,14 @@ export const obtenerEncuestas = async (req, res) => {
           corregimientoInfo = {
             id: familiaData.id_corregimiento,
             nombre: familiaData.nombre_corregimiento
+          };
+        }
+
+        // Usar datos de centro poblado ya obtenidos en el JOIN
+        if (familiaData.id_centro_poblado && familiaData.nombre_centro_poblado) {
+          centroPobladoInfo = {
+            id: familiaData.id_centro_poblado,
+            nombre: familiaData.nombre_centro_poblado
           };
         }
 
