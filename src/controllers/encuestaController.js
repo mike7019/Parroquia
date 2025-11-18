@@ -1803,8 +1803,8 @@ export const obtenerEncuestas = async (req, res) => {
           
           // *** INFORMACIÓN DE SERVICIOS CON ID Y NOMBRE ***
           basuras: disposicionBasuras, // Siempre array, nunca null
-          acueducto: sistemasAcueducto.length > 0 ? sistemasAcueducto[0] : null, // null cuando no hay información
-          aguas_residuales: sistemasAguasResiduales.length > 0 ? sistemasAguasResiduales[0] : null, // null cuando no hay información
+          acueducto: sistemasAcueducto, // Array de sistemas de acueducto
+          aguas_residuales: sistemasAguasResiduales, // Array de sistemas de aguas residuales
           
           // *** INFORMACIÓN RELIGIOSA ***
           comunion_en_casa: familiaData.comunionEnCasa,
@@ -2409,9 +2409,9 @@ export const obtenerEncuestaPorId = async (req, res) => {
       centro_poblado: centroPobladoInfo,
       
       // *** INFORMACIÓN DE SERVICIOS CON ID Y NOMBRE ***
-      basuras: disposicionBasuras, // Siempre array, nunca null
-      acueducto: sistemasAcueducto.length > 0 ? sistemasAcueducto[0] : null, // null cuando no hay información
-      aguas_residuales: sistemasAguasResiduales.length > 0 ? sistemasAguasResiduales[0] : null, // null cuando no hay información
+      basuras: disposicionBasuras, // Array de disposiciones de basura
+      acueducto: sistemasAcueducto, // Array de sistemas de acueducto
+      aguas_residuales: sistemasAguasResiduales, // Array de sistemas de aguas residuales
       
       // *** INFORMACIÓN RELIGIOSA ***
       comunion_en_casa: familiaData.comunionEnCasa,
