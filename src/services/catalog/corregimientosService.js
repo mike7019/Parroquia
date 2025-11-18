@@ -195,13 +195,16 @@ class CorregimientosService {
         }
       }
 
-      // Verificar nombre duplicado
+      // Verificar nombre duplicado en el mismo municipio
       const existingCorregimiento = await Corregimientos.findOne({
-        where: { nombre: corregimientoData.nombre }
+        where: { 
+          nombre: corregimientoData.nombre,
+          id_municipio_municipios: corregimientoData.id_municipio_municipios
+        }
       });
 
       if (existingCorregimiento) {
-        const error = new Error('Ya existe un corregimiento con ese nombre');
+        const error = new Error('Ya existe un corregimiento con ese nombre en este municipio');
         error.statusCode = 409;
         error.code = 'DUPLICATE_NAME';
         throw error;
@@ -262,12 +265,13 @@ class CorregimientosService {
         const existingCorregimiento = await Corregimientos.findOne({
           where: { 
             nombre: corregimientoData.nombre,
+            id_municipio_municipios: corregimientoData.id_municipio_municipios || corregimiento.id_municipio_municipios,
             id_corregimiento: { [Op.ne]: id }
           }
         });
 
         if (existingCorregimiento) {
-          const error = new Error('Ya existe un corregimiento con ese nombre');
+          const error = new Error('Ya existe un corregimiento con ese nombre en este municipio');
           error.statusCode = 409;
           error.code = 'DUPLICATE_NAME';
           throw error;
