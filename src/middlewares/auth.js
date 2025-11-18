@@ -23,6 +23,12 @@ const authMiddleware = {
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       
+      console.log('🔐 Token decodificado:', {
+        userId: decoded.userId,
+        type: decoded.type,
+        email: decoded.email
+      });
+      
       // Check token type
       if (decoded.type !== 'access') {
         return res.status(401).json({
@@ -46,11 +52,18 @@ const authMiddleware = {
         });
         
         if (!user) {
+          console.log('❌ Usuario no encontrado o inactivo. decoded.userId:', decoded.userId);
           return res.status(401).json({
             status: 'error',
             message: 'Invalid token or user not active'
           });
         }
+        
+        console.log('✅ Usuario encontrado en BD:', {
+          id: user.id,
+          correo: user.correo_electronico,
+          activo: user.activo
+        });
 
         // Get user roles
         const userRoles = await user.getUserRoles();
@@ -70,6 +83,13 @@ const authMiddleware = {
           emailVerified: false, // Campo no disponible en la nueva estructura
           lastLoginAt: null // Campo no disponible en la nueva estructura
         };
+        
+        console.log('✅ req.user establecido:', {
+          id: req.user.id,
+          email: req.user.email,
+          firstName: req.user.firstName,
+          lastName: req.user.lastName
+        });
 
         next();
       } catch (dbError) {
