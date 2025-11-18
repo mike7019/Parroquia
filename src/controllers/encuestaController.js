@@ -1296,11 +1296,13 @@ export const obtenerEncuestas = async (req, res) => {
         f.id_sector,
         f.id_parroquia,
         f.id_corregimiento,
+        f.id_centro_poblado,
         m.nombre_municipio,
         v.nombre as nombre_vereda,
         s.nombre as nombre_sector,
         p.nombre as nombre_parroquia,
         corr.nombre as nombre_corregimiento,
+        cp.nombre as nombre_centro_poblado,
         tv.id_tipo_vivienda,
         tv.nombre as nombre_tipo_vivienda
       FROM familias f
@@ -1309,6 +1311,7 @@ export const obtenerEncuestas = async (req, res) => {
       LEFT JOIN sectores s ON f.id_sector = s.id_sector
       LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
       LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
+      LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
       LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
       WHERE ${whereClause}
       ORDER BY f.fecha_ultima_encuesta DESC 
