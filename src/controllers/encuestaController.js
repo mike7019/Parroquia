@@ -1297,6 +1297,7 @@ export const obtenerEncuestas = async (req, res) => {
         f.id_parroquia,
         f.id_corregimiento,
         f.id_centro_poblado,
+        f.id_usuario_creador,
         m.nombre_municipio,
         v.nombre as nombre_vereda,
         s.nombre as nombre_sector,
@@ -1304,7 +1305,8 @@ export const obtenerEncuestas = async (req, res) => {
         corr.nombre as nombre_corregimiento,
         cp.nombre as nombre_centro_poblado,
         tv.id_tipo_vivienda,
-        tv.nombre as nombre_tipo_vivienda
+        tv.nombre as nombre_tipo_vivienda,
+        CONCAT(u.primer_nombre, ' ', u.primer_apellido) as nombre_usuario_creador
       FROM familias f
       LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
       LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
@@ -1313,6 +1315,7 @@ export const obtenerEncuestas = async (req, res) => {
       LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
       LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
       LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
+      LEFT JOIN usuarios u ON f.id_usuario_creador = u.id
       WHERE ${whereClause}
       ORDER BY f.fecha_ultima_encuesta DESC 
       LIMIT :limit OFFSET :offset
@@ -1783,6 +1786,7 @@ export const obtenerEncuestas = async (req, res) => {
           estado_encuesta: familiaData.estado_encuesta,
           numero_encuestas: familiaData.numero_encuestas,
           fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
+          usuario_creador: familiaData.nombre_usuario_creador || null,
           
           // *** INFORMACIÓN DE VIVIENDA CON ID Y NOMBRE ***
           tipo_vivienda: tipoViviendaInfo,
@@ -1893,6 +1897,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
         f.id_parroquia,
         f.id_corregimiento,
         f.id_centro_poblado,
+        f.id_usuario_creador,
         m.nombre_municipio,
         v.nombre as nombre_vereda,
         s.nombre as nombre_sector,
@@ -1900,7 +1905,8 @@ export const obtenerEncuestaPorId = async (req, res) => {
         corr.nombre as nombre_corregimiento,
         cp.nombre as nombre_centro_poblado,
         tv.id_tipo_vivienda,
-        tv.nombre as nombre_tipo_vivienda
+        tv.nombre as nombre_tipo_vivienda,
+        CONCAT(u.primer_nombre, ' ', u.primer_apellido) as nombre_usuario_creador
       FROM familias f
       LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
       LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
@@ -1909,6 +1915,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
       LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
       LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
       LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
+      LEFT JOIN usuarios u ON f.id_usuario_creador = u.id
       WHERE f.id_familia = :familiaId
     `;
     
@@ -2384,6 +2391,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
       estado_encuesta: familiaData.estado_encuesta,
       numero_encuestas: familiaData.numero_encuestas,
       fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
+      usuario_creador: familiaData.nombre_usuario_creador || null,
       
       // *** INFORMACIÓN DE VIVIENDA CON ID Y NOMBRE ***
       tipo_vivienda: tipoViviendaInfo,
@@ -2718,6 +2726,7 @@ export const crearEncuesta = async (req, res) => {
       id_sector: safeParseInt(informacionGeneral.sector?.id),
       id_corregimiento: safeParseInt(informacionGeneral.corregimiento?.id),
       id_centro_poblado: safeParseInt(informacionGeneral.centro_poblado?.id),
+      id_usuario_creador: req.user?.id || null, // ID del usuario que crea la encuesta
       
       // ⭐ SOPORTE v2.0: comunionEnCasa puede venir en informacionGeneral O en cualquier miembro (solicitudComunionCasa)
       comunionEnCasa: informacionGeneral.comunionEnCasa || 

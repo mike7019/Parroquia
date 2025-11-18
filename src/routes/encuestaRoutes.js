@@ -192,79 +192,97 @@ const router = express.Router();
  *             $ref: '#/components/schemas/EncuestaInput'
  *           example:
  *             informacionGeneral:
- *               municipio: { id: 1, nombre: "Medellín" }
- *               parroquia: { id: 1, nombre: "San José" }
- *               sector: { id: 1, nombre: "Centro" }
- *               vereda: { id: 1, nombre: "La Macarena" }
- *               corregimiento: { id: 1, nombre: "El Centro" }
- *               fecha: "2025-08-25"
- *               apellido_familiar: "Rodríguez García"
- *               direccion: "Carrera 45 # 23-67"
- *               telefono: "3001234567"
- *               numero_contrato_epm: "12345678"
- *               comunionEnCasa: false
+ *               municipio: { id: 1110, nombre: "Yolombó" }
+ *               parroquia: { id: 1, nombre: "Parroquia San José" }
+ *               sector: { id: 1, nombre: "Sector San José" }
+ *               vereda: { id: 1, nombre: "El Rubí" }
+ *               corregimiento: { id: 11, nombre: "Corregimiento San Mike" }
+ *               centro_poblado: { id: 3, nombre: "Centro Poblado San Pedro" }
+ *               fecha: "2025-11-09T03:32:17.404Z"
+ *               apellido_familiar: "Rodriguez Peña"
+ *               direccion: "calle 55 # 32-30"
+ *               telefono: "4339153"
+ *               numero_contrato_epm: "55545157"
  *             vivienda:
- *               tipo_vivienda: { id: 1, nombre: "Casa" }
+ *               tipo_vivienda: { id: 2, nombre: "Apartamento" }
  *               disposicion_basuras:
- *                 recolector: true
- *                 quemada: false
- *                 enterrada: false
- *                 recicla: true
- *                 aire_libre: false
- *                 no_aplica: false
+ *                 - id: 5
+ *                   nombre: "Compostaje Mejorado"
+ *                   seleccionado: true
+ *                 - id: 2
+ *                   nombre: "Quema"
+ *                   seleccionado: true
+ *                 - id: 1
+ *                   nombre: "Recolección Pública"
+ *                   seleccionado: true
  *             servicios_agua:
- *               sistema_acueducto: { id: 1, nombre: "Acueducto Público" }
- *               aguas_residuales: { id: 1, nombre: "Alcantarillado" }
- *               pozo_septico: false
- *               letrina: false
- *               campo_abierto: false
+ *               sistema_acueducto: { id: 1, nombre: "Acueducto Municipal" }
+ *               aguas_residuales:
+ *                 - id: 1
+ *                   nombre: "Alcantarillado"
+ *                   seleccionado: true
+ *                 - id: 2
+ *                   nombre: "Pozo Séptico"
+ *                   seleccionado: true
  *             observaciones:
- *               sustento_familia: "Trabajo independiente en ventas"
- *               observaciones_encuestador: "Familia colaborativa, información completa"
+ *               sustento_familia: "tma nuevo pruiebs"
+ *               observaciones_encuestador: "completedooo"
  *               autorizacion_datos: true
  *             familyMembers:
- *               - nombres: "Carlos Andrés Rodríguez García"
- *                 numeroIdentificacion: "12345678"
- *                 tipoIdentificacion: { id: 1, nombre: "Cédula de Ciudadanía" }
- *                 fechaNacimiento: "1985-03-15"
- *                 sexo: { id: 1, nombre: "Masculino" }
- *                 telefono: "32066666666"
- *                 situacionCivil: { id: 1, nombre: "Casado Civil" }
- *                 estudio: { id: 1, nombre: "Universitario" }
- *                 parentesco: { id: 1, nombre: "Jefe de Hogar" }
- *                 comunidadCultural: { id: 1, nombre: "Ninguna" }
- *                 enfermedad: { id: 2, nombre: "Diabetes" }
- *                 "talla_camisa/blusa": "L"
- *                 talla_pantalon: "32"
- *                 talla_zapato: "42"
- *                 profesion: { id: 1, nombre: "Estudiante" }
- *                 motivoFechaCelebrar:
- *                   motivo: "Cumpleaños"
- *                   dia: "15"
- *                   mes: "03"
- *                 destrezas:
- *                   - id: 3
- *                     nombre: "Carpintería"
- *                   - id: 4
- *                     nombre: "Electricidad"
+ *               - nombres: "Raquel Rodriguez Peña"
+ *                 fechaNacimiento: "2000-11-01T00:00:00.000Z"
+ *                 tipoIdentificacion: { id: 3, nombre: "CC - Cédula de Ciudadanía" }
+ *                 numeroIdentificacion: "321654987"
+ *                 sexo: { id: 2, nombre: "Femenino" }
+ *                 situacionCivil: { id: 1, nombre: "Soltero(a)" }
+ *                 parentesco: { id: 25, nombre: "Jefa de Hogar" }
+ *                 talla_camisa: "12"
+ *                 talla_pantalon: "28"
+ *                 talla_zapato: "37"
+ *                 estudio: { id: 3, nombre: "Educación Secundaria" }
+ *                 comunidadCultural: { id: 5, nombre: "Otra" }
+ *                 telefono: "3218820571"
+ *                 enQueEresLider: ["mmm", "todo", "nada"]
+ *                 correo_electronico: "raquel.176@gmail.com"
+ *                 enfermedades:
+ *                   - id: 76
+ *                     nombre: "Anemia"
+ *                   - id: 67
+ *                     nombre: "Acné"
+ *                 necesidadesEnfermo: ["pasajes", "medicamentos"]
+ *                 solicitudComunionCasa: true
+ *                 profesionMotivoFechaCelebrar:
+ *                   profesion: { id: 6, nombre: "Agricultor" }
+ *                   celebraciones:
+ *                     - motivo: "Cumpleaños"
+ *                       dia: "12"
+ *                       mes: "11"
+ *                     - motivo: "Dia de la madre"
+ *                       dia: "8"
+ *                       mes: "5"
  *                 habilidades:
- *                   - id: 1
- *                     nombre: "Comunicación efectiva"
+ *                   - id: 16
+ *                     nombre: "Artesanía"
  *                     nivel: "Avanzado"
- *                   - id: 2
- *                     nombre: "Trabajo en equipo"
- *                     nivel: "Intermedio"
- *                 en_que_eres_lider: "Líder comunitario del sector, coordinador de actividades deportivas"
+ *                   - id: 12
+ *                     nombre: "Cocina"
+ *                     nivel: "Avanzado"
+ *                 destrezas:
+ *                   - id: 19
+ *                     nombre: "Agricultura"
+ *                   - id: 14
+ *                     nombre: "Barbería"
  *             deceasedMembers:
- *               - nombres: "Pedro Antonio Rodríguez"
- *                 fechaFallecimiento: "2020-05-15"
+ *               - nombres: "Juan Camilo Rodriguez Gacha"
+ *                 fechaFallecimiento: "2025-11-28T05:00:00.000Z"
  *                 sexo: { id: 1, nombre: "Masculino" }
- *                 parentesco: { id: 2, nombre: "Padre" }
- *                 causaFallecimiento: "Enfermedad cardiovascular"
+ *                 parentesco: { id: 1, nombre: "Abuelo" }
+ *                 causaFallecimiento: "Natural"
  *             metadata:
- *               timestamp: "2025-08-25T10:30:00.000Z"
- *               completed: true
+ *               timestamp: "2025-11-09T04:06:36.092Z"
+ *               completed: false
  *               currentStage: 6
+ *             version: "2.0"
  *     responses:
  *       200:
  *         description: Encuesta creada exitosamente
