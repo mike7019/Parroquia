@@ -258,17 +258,17 @@ class PersonasReporteService {
           profesion: persona.profesion,
           estudios: persona.estudios,
           necesidad_enfermo: persona.necesidad_enfermo,
-          liderazgo: persona.en_que_eres_lider,
+          liderazgo: persona.en_que_eres_lider || 'No especificado',
           estado_civil: persona.estado_civil,
           tipo_identificacion: persona.tipo_identificacion,
           destrezas: destrezas,
-          destrezas_texto: destrezas.map(d => d.nombre).join(', ') || 'Ninguna',
+          destrezas_texto: destrezas.length > 0 ? destrezas.map(d => d.nombre).join(', ') : 'Ninguna',
           total_destrezas: destrezas.length,
           habilidades: habilidades,
-          habilidades_texto: habilidades.map(h => h.nombre).join(', ') || 'Ninguna',
+          habilidades_texto: habilidades.length > 0 ? habilidades.map(h => h.nombre).join(', ') : 'Ninguna',
           total_habilidades: habilidades.length,
           enfermedades: enfermedades,
-          enfermedades_texto: enfermedades.map(e => e.nombre).join(', ') || 'Ninguna',
+          enfermedades_texto: enfermedades.length > 0 ? enfermedades.map(e => e.nombre).join(', ') : 'Ninguna',
           total_enfermedades: enfermedades.length
         };
       }));
