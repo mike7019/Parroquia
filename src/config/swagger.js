@@ -3186,6 +3186,65 @@ const swaggerConfig = {
             }
           }
         },
+        // Esquemas para API de Difuntos
+        DifuntosFamilia: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              description: 'ID único del registro',
+              example: 1
+            },
+            id_encuesta: {
+              type: 'integer',
+              description: 'ID de la encuesta asociada',
+              example: 123
+            },
+            nombre_completo: {
+              type: 'string',
+              description: 'Nombre completo del difunto',
+              example: 'José María García López'
+            },
+            fecha_fallecimiento: {
+              type: 'string',
+              format: 'date',
+              description: 'Fecha de fallecimiento (YYYY-MM-DD)',
+              example: '2023-01-15'
+            },
+            lugar_fallecimiento: {
+              type: 'string',
+              description: 'Lugar donde ocurrió el fallecimiento',
+              example: 'Hospital San Juan'
+            },
+            causa_fallecimiento: {
+              type: 'string',
+              description: 'Causa del fallecimiento',
+              example: 'Enfermedad cardiovascular'
+            },
+            documentos: {
+              type: 'string',
+              description: 'Documentos relacionados con el fallecimiento',
+              example: 'Certificado de defunción, Acta de inhumación'
+            },
+            parentesco: {
+              type: 'string',
+              description: 'Parentesco con la familia encuestada',
+              example: 'Padre'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación del registro',
+              example: '2023-01-15T10:30:00Z'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización',
+              example: '2023-01-15T10:30:00Z'
+            }
+          }
+        },
         EncuestaDetallada: {
           type: 'object',
           properties: {
@@ -3472,65 +3531,6 @@ const swaggerConfig = {
                 message: 'Error interno del servidor',
                 code: 'INTERNAL_SERVER_ERROR'
               }
-            }
-          }
-        },
-        // Esquemas para API de Difuntos
-        DifuntosFamilia: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'integer',
-              description: 'ID único del registro',
-              example: 1
-            },
-            id_encuesta: {
-              type: 'integer',
-              description: 'ID de la encuesta asociada',
-              example: 123
-            },
-            nombre_completo: {
-              type: 'string',
-              description: 'Nombre completo del difunto',
-              example: 'José María García López'
-            },
-            fecha_fallecimiento: {
-              type: 'string',
-              format: 'date',
-              description: 'Fecha de fallecimiento (YYYY-MM-DD)',
-              example: '2023-01-15'
-            },
-            lugar_fallecimiento: {
-              type: 'string',
-              description: 'Lugar donde ocurrió el fallecimiento',
-              example: 'Hospital San Juan'
-            },
-            causa_fallecimiento: {
-              type: 'string',
-              description: 'Causa del fallecimiento',
-              example: 'Enfermedad cardiovascular'
-            },
-            documentos: {
-              type: 'string',
-              description: 'Documentos relacionados con el fallecimiento',
-              example: 'Certificado de defunción, Acta de inhumación'
-            },
-            parentesco: {
-              type: 'string',
-              description: 'Parentesco con la familia encuestada',
-              example: 'Padre'
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de creación del registro',
-              example: '2023-01-15T10:30:00Z'
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Fecha de última actualización',
-              example: '2023-01-15T10:30:00Z'
             }
           }
         },
