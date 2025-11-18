@@ -386,9 +386,41 @@ class PersonasReporteService {
       sheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
       sheet.getRow(1).height = 20;
       
-      // Agregar los datos
-      reporte.datos.forEach(persona => {
-        sheet.addRow(persona);
+      // Agregar los datos (mapeo explícito para asegurar que todas las columnas se llenen)
+      reporte.datos.forEach(p => {
+        sheet.addRow({
+          id_personas: p.id_personas,
+          identificacion: p.identificacion,
+          tipo_identificacion: p.tipo_identificacion,
+          nombre_completo: p.nombre_completo,
+          fecha_nacimiento: p.fecha_nacimiento,
+          edad: p.edad,
+          sexo: p.sexo,
+          estado_civil: p.estado_civil,
+          telefono: p.telefono,
+          email: p.email,
+          direccion: p.direccion,
+          municipio: p.municipio,
+          sector: p.sector,
+          vereda: p.vereda,
+          corregimiento: p.corregimiento,
+          centro_poblado: p.centro_poblado,
+          parroquia: p.parroquia,
+          familia_apellido: p.familia_apellido,
+          profesion: p.profesion,
+          estudios: p.estudios,
+          liderazgo: p.liderazgo,
+          destrezas_texto: p.destrezas_texto,
+          total_destrezas: p.total_destrezas,
+          habilidades_texto: p.habilidades_texto,
+          total_habilidades: p.total_habilidades,
+          talla_camisa: p.talla_camisa,
+          talla_pantalon: p.talla_pantalon,
+          talla_zapatos: p.talla_zapatos,
+          enfermedades_texto: p.enfermedades_texto,
+          total_enfermedades: p.total_enfermedades,
+          necesidad_enfermo: p.necesidad_enfermo
+        });
       });
       
       // Aplicar formato alternado a las filas (zebra striping)
