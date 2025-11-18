@@ -2816,6 +2816,71 @@ export const crearEncuesta = async (req, res) => {
       }
     }
     
+    // Detectar errores de foreign key y dar detalles específicos
+    if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
+      console.error('❌ Error de integridad referencial:', error.message);
+      
+      // Extraer información del constraint para identificar el campo problemático
+      const constraintMatch = error.message.match(/constraint "([^"]+)"/);
+      const constraint = constraintMatch ? constraintMatch[1] : null;
+      
+      let fieldName = 'desconocido';
+      let tableName = 'desconocida';
+      let suggestion = 'Verifique que todos los IDs seleccionados sean correctos';
+      
+      // Mapear constraints a nombres amigables
+      if (constraint) {
+        if (constraint.includes('id_municipio')) {
+          fieldName = 'Municipio';
+          tableName = 'municipios';
+          suggestion = 'Verifique que el municipio seleccionado exista en el catálogo';
+        } else if (constraint.includes('id_parroquia')) {
+          fieldName = 'Parroquia';
+          tableName = 'parroquia';
+          suggestion = 'Verifique que la parroquia seleccionada exista en el catálogo';
+        } else if (constraint.includes('id_vereda')) {
+          fieldName = 'Vereda';
+          tableName = 'veredas';
+          suggestion = 'Verifique que la vereda seleccionada exista en el catálogo';
+        } else if (constraint.includes('id_sector')) {
+          fieldName = 'Sector';
+          tableName = 'sectores';
+          suggestion = 'Verifique que el sector seleccionado exista en el catálogo';
+        } else if (constraint.includes('id_corregimiento')) {
+          fieldName = 'Corregimiento';
+          tableName = 'corregimientos';
+          suggestion = 'Verifique que el corregimiento seleccionado exista en el catálogo';
+        } else if (constraint.includes('id_centro_poblado')) {
+          fieldName = 'Centro Poblado';
+          tableName = 'centros_poblados';
+          suggestion = 'Verifique que el centro poblado seleccionado exista en el catálogo';
+        } else if (constraint.includes('id_tipo_vivienda')) {
+          fieldName = 'Tipo de Vivienda';
+          tableName = 'tipos_vivienda';
+          suggestion = 'Verifique que el tipo de vivienda seleccionado exista en el catálogo';
+        } else if (constraint.includes('id_sexo')) {
+          fieldName = 'Sexo';
+          tableName = 'sexos';
+          suggestion = 'Verifique que el sexo seleccionado sea válido (M o F)';
+        } else if (constraint.includes('id_tipo_identificacion')) {
+          fieldName = 'Tipo de Identificación';
+          tableName = 'tipo_identificacion';
+          suggestion = 'Verifique que el tipo de identificación seleccionado exista en el catálogo';
+        }
+      }
+      
+      const customError = createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
+        catalog: tableName,
+        field: fieldName,
+        constraint: constraint,
+        details: `El ${fieldName} seleccionado no existe en el catálogo de ${tableName}`,
+        suggestion: suggestion,
+        originalError: error.message
+      });
+      
+      return errorResponse(res, customError);
+    }
+    
     console.error('❌ Error procesando encuesta:', error);
     return errorResponse(res, error);
   }
