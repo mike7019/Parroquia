@@ -1,0 +1,177 @@
+{
+  "metadata": {
+    "backup_date": "2025-11-18T19:18:50.596Z",
+    "encuesta_id": 5,
+    "user_id": "0c9d5e57-d48a-4c47-89ce-1299acc9e4de",
+    "operation": "DELETE",
+    "backup_version": "1.0"
+  },
+  "familia": {
+    "id_familia": "5",
+    "apellido_familiar": "Rodriguez Peña",
+    "sector": "Sector San José",
+    "direccion_familia": "calle 55 # 32-30",
+    "numero_contacto": null,
+    "telefono": "4339153",
+    "email": null,
+    "tamaño_familia": 2,
+    "tipo_vivienda": "Apartamento",
+    "estado_encuesta": "completed",
+    "numero_encuestas": 1,
+    "fecha_ultima_encuesta": "2025-11-18",
+    "codigo_familia": "FAM_1763492847713_60eca694",
+    "tutor_responsable": null,
+    "id_municipio": "1110",
+    "id_vereda": "1",
+    "id_sector": "1",
+    "comunionEnCasa": true,
+    "numero_contrato_epm": "55545157",
+    "id_parroquia": "1",
+    "comunionencasa": false,
+    "fecha_encuesta": "2025-11-08",
+    "sustento_familia": null,
+    "observaciones_encuestador": null,
+    "autorizacion_datos": false,
+    "pozo_septico": false,
+    "letrina": false,
+    "campo_abierto": false,
+    "disposicion_recolector": false,
+    "disposicion_quemada": false,
+    "disposicion_enterrada": false,
+    "disposicion_recicla": false,
+    "disposicion_aire_libre": false,
+    "disposicion_no_aplica": false,
+    "id_tipo_vivienda": "2",
+    "id_corregimiento": "11",
+    "id_centro_poblado": "3",
+    "nombre_municipio": "Yolombó",
+    "nombre_vereda": "El Rubí",
+    "nombre_sector": "Sector San José",
+    "nombre_parroquia": "Parroquia San José",
+    "nombre_tipo_vivienda": "Apartamento"
+  },
+  "personas": [
+    {
+      "id_personas": "3",
+      "primer_nombre": "Raquel",
+      "segundo_nombre": "Rodriguez",
+      "primer_apellido": "Peña",
+      "segundo_apellido": null,
+      "id_tipo_identificacion_tipo_identificacion": "3",
+      "identificacion": "321654987",
+      "telefono": "3218820571",
+      "correo_electronico": "raquel.176@gmail.com",
+      "fecha_nacimiento": "2000-10-31",
+      "direccion": "calle 55 # 32-30",
+      "id_familia_familias": "5",
+      "id_estado_civil_estado_civil": "1",
+      "estudios": "Educación Secundaria",
+      "en_que_eres_lider": "mmm, todo, nada",
+      "necesidad_enfermo": "pasajes, medicamentos",
+      "id_profesion": "6",
+      "id_sexo": "2",
+      "talla_camisa": "12",
+      "talla_pantalon": "28",
+      "talla_zapato": "37",
+      "id_familia": "5",
+      "id_parroquia": null,
+      "id_parentesco": "25",
+      "id_comunidad_cultural": "5",
+      "id_nivel_educativo": null,
+      "motivo_celebrar": "Cumpleaños",
+      "dia_celebrar": 12,
+      "mes_celebrar": 11,
+      "sexo_nombre": null,
+      "tipo_identificacion_nombre": "Cédula de Ciudadanía",
+      "estado_civil_nombre": "Soltero(a)"
+    }
+  ],
+  "difuntos": [
+    {
+      "id_difunto": "3",
+      "nombre_completo": "Juan Camilo Rodriguez Gacha",
+      "fecha_fallecimiento": "2025-11-28",
+      "observaciones": "Natural",
+      "id_familia_familias": "5",
+      "createdAt": "2025-11-18T19:07:27.790Z",
+      "updatedAt": "2025-11-18T19:07:27.791Z",
+      "id_sexo": "1",
+      "id_parentesco": "1",
+      "causa_fallecimiento": "Natural",
+      "sexo_nombre": null,
+      "parentesco_nombre": "Abuelo"
+    }
+  ],
+  "servicios": {
+    "disposicion_basuras": [
+      {
+        "id": "7",
+        "id_familia": "5",
+        "id_tipo_disposicion_basura": "5",
+        "created_at": "2025-11-18T19:07:27.659Z",
+        "updated_at": "2025-11-18T19:07:27.659Z",
+        "nombre": "Compostaje Mejorado"
+      },
+      {
+        "id": "8",
+        "id_familia": "5",
+        "id_tipo_disposicion_basura": "2",
+        "created_at": "2025-11-18T19:07:27.659Z",
+        "updated_at": "2025-11-18T19:07:27.659Z",
+        "nombre": "Quema"
+      },
+      {
+        "id": "9",
+        "id_familia": "5",
+        "id_tipo_disposicion_basura": "1",
+        "created_at": "2025-11-18T19:07:27.659Z",
+        "updated_at": "2025-11-18T19:07:27.659Z",
+        "nombre": "Recolección Pública"
+      }
+    ],
+    "sistema_acueducto": [
+      {
+        "id_familia": "5",
+        "id_sistema_acueducto": "1",
+        "id": "262",
+        "created_at": "2025-11-18T19:07:27.659Z",
+        "updated_at": "2025-11-18T19:07:27.659Z",
+        "nombre": "Acueducto Municipal"
+      }
+    ],
+    "aguas_residuales": [
+      {
+        "id": "5",
+        "id_familia": "5",
+        "id_tipo_aguas_residuales": "1",
+        "created_at": "2025-11-18T19:07:27.659Z",
+        "updated_at": "2025-11-18T19:07:27.659Z",
+        "nombre": "Alcantarillado"
+      },
+      {
+        "id": "6",
+        "id_familia": "5",
+        "id_tipo_aguas_residuales": "2",
+        "created_at": "2025-11-18T19:07:27.659Z",
+        "updated_at": "2025-11-18T19:07:27.659Z",
+        "nombre": "Pozo Séptico"
+      }
+    ],
+    "tipo_vivienda": [
+      {
+        "id_familia": "5",
+        "id_tipo_vivienda": "1",
+        "created_at": "2025-10-24T23:06:20.007Z",
+        "updated_at": "2025-10-24T23:06:20.007Z",
+        "nombre": "Casa"
+      },
+      {
+        "id_familia": "5",
+        "id_tipo_vivienda": "2",
+        "created_at": "2025-11-18T19:07:27.659Z",
+        "updated_at": "2025-11-18T19:07:27.659Z",
+        "nombre": "Apartamento"
+      }
+    ]
+  }
+}
