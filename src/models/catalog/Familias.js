@@ -141,6 +141,15 @@ const Familias = sequelize.define('Familias', {
       key: 'id_parroquia'
     }
   },
+  id_usuario_creador: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: {
+      model: 'usuarios',
+      key: 'id'
+    },
+    comment: 'ID del usuario que creó la encuesta'
+  },
   
   // CAMPOS BOOLEANOS DE SERVICIOS DE AGUA
   pozo_septico: {
@@ -214,6 +223,9 @@ const Familias = sequelize.define('Familias', {
     },
     {
       fields: ['estado_encuesta']
+    },
+    {
+      fields: ['id_usuario_creador']
     }
   ]
 });
@@ -259,6 +271,13 @@ Familias.associate = function(models) {
     Familias.hasMany(models.Persona, {
       foreignKey: 'id_familia_familias',
       as: 'personas'
+    });
+  }
+  
+  if (models.Usuario) {
+    Familias.belongsTo(models.Usuario, {
+      foreignKey: 'id_usuario_creador',
+      as: 'usuario_creador'
     });
   }
 };
