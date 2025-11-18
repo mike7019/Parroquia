@@ -56,13 +56,17 @@ class FamiliasConsolidadoService {
           mun.nombre_municipio as municipio_nombre,
           dep.nombre as departamento_nombre,
           sec.nombre as sector_nombre,
-          ver.nombre as vereda_nombre
+          ver.nombre as vereda_nombre,
+          corr.nombre as corregimiento_nombre,
+          cp.nombre as centro_poblado_nombre
         FROM familias f
         LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia  
         LEFT JOIN municipios mun ON f.id_municipio = mun.id_municipio
         LEFT JOIN departamentos dep ON mun.id_departamento = dep.id_departamento
         LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
         LEFT JOIN veredas ver ON f.id_vereda = ver.id_vereda
+        LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
+        LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
         WHERE ${whereConditions.join(' AND ')}
         ORDER BY f.apellido_familiar
         LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
@@ -85,6 +89,8 @@ class FamiliasConsolidadoService {
         departamento_nombre: familia.departamento_nombre,
         sector_nombre: familia.sector_nombre,
         vereda_nombre: familia.vereda_nombre,
+        corregimiento_nombre: familia.corregimiento_nombre,
+        centro_poblado_nombre: familia.centro_poblado_nombre,
         tipo_vivienda: 'No especificado',
         dispocision_basura: 'No especificado',
         tipos_agua_residuales: 'No especificado',

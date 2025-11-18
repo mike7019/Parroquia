@@ -159,6 +159,12 @@ export async function enriquecerPersonasConDetalles(personas, transaction = null
   // Agregar a cada persona
   return personas.map(persona => ({
     ...persona,
+    // Formatear fecha_nacimiento como string YYYY-MM-DD si existe
+    fecha_nacimiento: persona.fecha_nacimiento 
+      ? (persona.fecha_nacimiento instanceof Date 
+        ? persona.fecha_nacimiento.toISOString().split('T')[0]
+        : persona.fecha_nacimiento)
+      : null,
     celebraciones: celebracionesMap.get(persona.id_personas) || [],
     enfermedades: enfermedadesMap.get(persona.id_personas) || [],
     // DEPRECATED: Mantener para compatibilidad con versiones anteriores
