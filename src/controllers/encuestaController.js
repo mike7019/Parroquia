@@ -1728,11 +1728,7 @@ export const obtenerEncuestas = async (req, res) => {
             // ⭐ NUEVOS CAMPOS - Celebraciones y Enfermedades (arrays) ⭐
             celebraciones: persona.celebraciones || [],
             enfermedades: persona.enfermedades || [],
-            // Campos deprecados - mantener para compatibilidad v1.0
-            motivo_celebrar_deprecated: persona.motivo_celebrar || null,
-            dia_celebrar_deprecated: persona.dia_celebrar || null,
-            mes_celebrar_deprecated: persona.mes_celebrar || null,
-            necesidad_enfermo_deprecated: persona.necesidad_enfermo || null
+            necesidad_enfermo: persona.necesidad_enfermo || null
           };
         }));
 
@@ -2335,11 +2331,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
         // ⭐ NUEVOS CAMPOS - Celebraciones y Enfermedades (arrays) ⭐
         celebraciones: persona.celebraciones || [],
         enfermedades: persona.enfermedades || [],
-        // Campos deprecados - mantener para compatibilidad v1.0
-        motivo_celebrar_deprecated: persona.motivo_celebrar || null,
-        dia_celebrar_deprecated: persona.dia_celebrar || null,
-        mes_celebrar_deprecated: persona.mes_celebrar || null,
-        necesidad_enfermo_deprecated: persona.necesidad_enfermo || null
+        necesidad_enfermo: persona.necesidad_enfermo || null
       };
     }));
 
