@@ -235,6 +235,16 @@ class PersonasReporteService {
           type: QueryTypes.SELECT
         });
         
+        // Obtener celebraciones
+        const celebraciones = await sequelize.query(`
+          SELECT pc.motivo, pc.dia, pc.mes
+          FROM persona_celebracion pc
+          WHERE pc.id_persona = :id_persona
+        `, {
+          replacements: { id_persona: persona.id_personas },
+          type: QueryTypes.SELECT
+        });
+        
         return {
           id_personas: persona.id_personas,
           identificacion: persona.identificacion,
@@ -267,6 +277,8 @@ class PersonasReporteService {
           habilidades: habilidades,
           habilidades_texto: habilidades.length > 0 ? habilidades.map(h => h.nombre).join(', ') : 'Ninguna',
           total_habilidades: habilidades.length,
+          celebraciones: celebraciones,
+          celebraciones_texto: celebraciones.length > 0 ? celebraciones.map(c => `${c.motivo} (${c.dia}/${c.mes})`).join(', ') : 'Ninguna',
           enfermedades: enfermedades,
           enfermedades_texto: enfermedades.length > 0 ? enfermedades.map(e => e.nombre).join(', ') : 'Ninguna',
           total_enfermedades: enfermedades.length
@@ -370,7 +382,8 @@ class PersonasReporteService {
         { header: 'Talla Pantalón', key: 'talla_pantalon', width: 12 },
         { header: 'Talla Zapato', key: 'talla_zapatos', width: 12 },
         
-        // Salud
+        // Salud y Celebraciones
+        { header: 'Celebraciones', key: 'celebraciones_texto', width: 40 },
         { header: 'Enfermedades', key: 'enfermedades_texto', width: 50 },
         { header: 'Cant. Enfermedades', key: 'total_enfermedades', width: 15 },
         { header: 'Necesidades de Salud', key: 'necesidad_enfermo', width: 40 }
@@ -417,6 +430,7 @@ class PersonasReporteService {
           talla_camisa: p.talla_camisa,
           talla_pantalon: p.talla_pantalon,
           talla_zapatos: p.talla_zapatos,
+          celebraciones_texto: p.celebraciones_texto,
           enfermedades_texto: p.enfermedades_texto,
           total_enfermedades: p.total_enfermedades,
           necesidad_enfermo: p.necesidad_enfermo
