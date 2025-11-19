@@ -154,7 +154,7 @@ class FamiliasConsolidadoService {
           
           // Formatear enfermedades desde el array
           const enfermedadesTexto = miembro.enfermedades && miembro.enfermedades.length > 0
-            ? miembro.enfermedades.map(e => e.enfermedad_nombre).join(', ')
+            ? miembro.enfermedades.map(e => e.nombre || e.enfermedad_nombre).join(', ')
             : '';
           
           return {
@@ -470,12 +470,18 @@ class FamiliasConsolidadoService {
       { header: 'Comunidad Cultural', key: 'comunidad', width: 20 },
       { header: 'Destrezas', key: 'destrezas', width: 30 },
       { header: 'Liderazgo', key: 'liderazgo', width: 25 },
+      { header: 'Celebraciones', key: 'celebraciones', width: 40 },
       { header: 'Enfermedades', key: 'enfermedades', width: 30 }
     ];
     
     // Agregar datos de todos los miembros
     familias.forEach(familia => {
       familia.miembros_familia?.forEach(miembro => {
+        // Formatear celebraciones como texto
+        const celebracionesTexto = miembro.todas_las_celebraciones && miembro.todas_las_celebraciones.length > 0
+          ? miembro.todas_las_celebraciones.map(c => `${c.motivo} (${c.dia}/${c.mes})`).join(', ')
+          : '';
+        
         hoja.addRow({
           id_familia: familia.id_familia,
           familia: familia.apellido_familiar,
@@ -494,6 +500,7 @@ class FamiliasConsolidadoService {
           comunidad: miembro.comunidad_cultural,
           destrezas: miembro.destrezas,
           liderazgo: miembro.liderazgo,
+          celebraciones: celebracionesTexto,
           enfermedades: miembro.enfermedades
         });
       });
