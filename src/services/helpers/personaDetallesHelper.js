@@ -42,9 +42,8 @@ export async function obtenerCelebracionesPersona(idPersona, transaction = null)
 export async function obtenerEnfermedadesPersona(idPersona, transaction = null) {
   const enfermedades = await sequelize.query(`
     SELECT 
-      pe.*,
-      e.nombre as enfermedad_nombre,
-      e.descripcion as enfermedad_descripcion
+      pe.id_enfermedad as id,
+      e.nombre
     FROM persona_enfermedad pe
     INNER JOIN enfermedades e ON e.id_enfermedad = pe.id_enfermedad
     WHERE pe.id_persona = :idPersona
@@ -111,10 +110,10 @@ export async function obtenerEnfermedadesMultiplesPersonas(idsPersonas, transact
   }
 
   const enfermedades = await sequelize.query(`
-    SELECT 
-      pe.*,
-      e.nombre as enfermedad_nombre,
-      e.descripcion as enfermedad_descripcion
+    SELECT
+      pe.id_persona,
+      pe.id_enfermedad as id,
+      e.nombre
     FROM persona_enfermedad pe
     INNER JOIN enfermedades e ON e.id_enfermedad = pe.id_enfermedad
     WHERE pe.id_persona IN (:idsPersonas)
