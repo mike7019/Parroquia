@@ -79,6 +79,8 @@ class DifuntosConsolidadoService {
           v.nombre as nombre_vereda,
           p.id_parroquia,
           p.nombre as nombre_parroquia,
+          corr.nombre as corregimiento_nombre,
+          cp.nombre as centro_poblado_nombre,
           -- Usar el parentesco real de la tabla parentescos
           COALESCE(par.nombre, 'Familiar') as parentesco_real,
           df.id_parentesco
@@ -87,6 +89,8 @@ class DifuntosConsolidadoService {
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores s ON f.id_sector = s.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
+        LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
+        LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
         LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
         LEFT JOIN parentescos par ON df.id_parentesco = par.id_parentesco
         ${whereClause}
@@ -149,6 +153,8 @@ class DifuntosConsolidadoService {
           v.nombre as nombre_vereda,
           p.id_parroquia,
           p.nombre as nombre_parroquia,
+          corr.nombre as corregimiento_nombre,
+          cp.nombre as centro_poblado_nombre,
           -- Usar el parentesco real de la tabla parentescos para personas
           COALESCE(par.nombre, 'Familiar') as parentesco_real,
           pe.id_parentesco
@@ -157,6 +163,8 @@ class DifuntosConsolidadoService {
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores s ON f.id_sector = s.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
+        LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
+        LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
         LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
         LEFT JOIN parentescos par ON pe.id_parentesco = par.id_parentesco
         ${whereClausePersonas}
@@ -254,42 +262,88 @@ class DifuntosConsolidadoService {
 
   /**
    * Obtener difuntos próximos a cumplir aniversario
-   * Consulta ambas fuentes de datos
+   * Consulta ambas fuentes de datos (difuntos_familia + personas)
    */
   async obtenerProximosAniversarios(diasAdelante = 30) {
     try {
-      // Query simplificada solo para difuntos_familia con cálculo de aniversarios próximos
+      // Query consolidada para ambas fuentes de datos con cálculo de aniversarios próximos
       const query = `
-        SELECT 
-          df.id_difunto,
-          df.nombre_completo,
-          df.fecha_fallecimiento as fecha_aniversario,
-          df.observaciones,
-          f.apellido_familiar,
-          f.telefono,
-          f.direccion_familia,
-          m.nombre_municipio,
-          s.nombre as nombre_sector,
-          p.nombre as nombre_parroquia,
-          -- Calcular días hasta el próximo aniversario
-          CASE 
-            WHEN EXTRACT(DOY FROM df.fecha_fallecimiento) >= EXTRACT(DOY FROM CURRENT_DATE) 
-            THEN EXTRACT(DOY FROM df.fecha_fallecimiento) - EXTRACT(DOY FROM CURRENT_DATE)
-            ELSE (365 - EXTRACT(DOY FROM CURRENT_DATE)) + EXTRACT(DOY FROM df.fecha_fallecimiento)
-          END as dias_hasta_aniversario
-        FROM difuntos_familia df
-        LEFT JOIN familias f ON df.id_familia_familias = f.id_familia
-        LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
-        LEFT JOIN sectores s ON f.id_sector = s.id_sector
-        LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
-        WHERE df.fecha_fallecimiento IS NOT NULL
-          AND (
+        WITH aniversarios_consolidados AS (
+          -- Aniversarios de la tabla difuntos_familia
+          SELECT 
+            'difuntos_familia' as fuente,
+            df.id_difunto::text as id_difunto,
+            df.nombre_completo,
+            df.fecha_fallecimiento as fecha_aniversario,
+            df.observaciones,
+            f.apellido_familiar,
+            f.telefono,
+            f.direccion_familia,
+            m.nombre_municipio,
+            s.nombre as nombre_sector,
+            v.nombre as nombre_vereda,
+            p.nombre as nombre_parroquia,
+            corr.nombre as corregimiento_nombre,
+            cp.nombre as centro_poblado_nombre,
+            COALESCE(par.nombre, 'Familiar') as parentesco_real,
+            -- Calcular días hasta el próximo aniversario
             CASE 
               WHEN EXTRACT(DOY FROM df.fecha_fallecimiento) >= EXTRACT(DOY FROM CURRENT_DATE) 
               THEN EXTRACT(DOY FROM df.fecha_fallecimiento) - EXTRACT(DOY FROM CURRENT_DATE)
               ELSE (365 - EXTRACT(DOY FROM CURRENT_DATE)) + EXTRACT(DOY FROM df.fecha_fallecimiento)
-            END
-          ) <= $1
+            END as dias_hasta_aniversario
+          FROM difuntos_familia df
+          LEFT JOIN familias f ON df.id_familia_familias = f.id_familia
+          LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
+          LEFT JOIN sectores s ON f.id_sector = s.id_sector
+          LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
+          LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
+          LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
+          LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
+          LEFT JOIN parentescos par ON df.id_parentesco = par.id_parentesco
+          WHERE df.fecha_fallecimiento IS NOT NULL
+          
+          UNION ALL
+          
+          -- Aniversarios de la tabla personas fallecidas
+          SELECT 
+            'personas' as fuente,
+            pe.id_personas::text as id_difunto,
+            TRIM(CONCAT(pe.primer_nombre, ' ', COALESCE(pe.segundo_nombre, ''), ' ', COALESCE(pe.primer_apellido, ''), ' ', COALESCE(pe.segundo_apellido, ''))) as nombre_completo,
+            (pe.estudios::json->>'fecha_aniversario')::date as fecha_aniversario,
+            pe.estudios::json->>'causa_fallecimiento' as observaciones,
+            f.apellido_familiar,
+            f.telefono,
+            f.direccion_familia,
+            m.nombre_municipio,
+            s.nombre as nombre_sector,
+            v.nombre as nombre_vereda,
+            p.nombre as nombre_parroquia,
+            corr.nombre as corregimiento_nombre,
+            cp.nombre as centro_poblado_nombre,
+            COALESCE(par.nombre, 'Familiar') as parentesco_real,
+            -- Calcular días hasta el próximo aniversario
+            CASE 
+              WHEN EXTRACT(DOY FROM (pe.estudios::json->>'fecha_aniversario')::date) >= EXTRACT(DOY FROM CURRENT_DATE) 
+              THEN EXTRACT(DOY FROM (pe.estudios::json->>'fecha_aniversario')::date) - EXTRACT(DOY FROM CURRENT_DATE)
+              ELSE (365 - EXTRACT(DOY FROM CURRENT_DATE)) + EXTRACT(DOY FROM (pe.estudios::json->>'fecha_aniversario')::date)
+            END as dias_hasta_aniversario
+          FROM personas pe
+          LEFT JOIN familias f ON pe.id_familia_familias = f.id_familia
+          LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
+          LEFT JOIN sectores s ON f.id_sector = s.id_sector
+          LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
+          LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
+          LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
+          LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
+          LEFT JOIN parentescos par ON pe.id_parentesco = par.id_parentesco
+          WHERE pe.estudios IS NOT NULL 
+            AND pe.estudios::json->>'es_fallecido' = 'true'
+            AND pe.estudios::json->>'fecha_aniversario' IS NOT NULL
+        )
+        SELECT *
+        FROM aniversarios_consolidados
+        WHERE dias_hasta_aniversario <= $1
         ORDER BY dias_hasta_aniversario ASC
         LIMIT 50
       `;
@@ -298,6 +352,8 @@ class DifuntosConsolidadoService {
         bind: [diasAdelante],
         type: QueryTypes.SELECT
       });
+      
+      console.log(`✅ Próximos aniversarios (${diasAdelante} días): ${resultado.length} encontrados`);
       
       return resultado;
     } catch (error) {
@@ -501,6 +557,8 @@ class DifuntosConsolidadoService {
       { header: 'Municipio', key: 'municipio', width: 20 },
       { header: 'Sector', key: 'sector', width: 18 },
       { header: 'Vereda', key: 'vereda', width: 18 },
+      { header: 'Corregimiento', key: 'corregimiento', width: 25 },
+      { header: 'Centro Poblado', key: 'centro_poblado', width: 25 },
       { header: 'Teléfono', key: 'telefono', width: 15 },
       { header: 'Dirección', key: 'direccion', width: 35 },
       { header: 'Observaciones', key: 'observaciones', width: 40 }
@@ -519,6 +577,8 @@ class DifuntosConsolidadoService {
         municipio: difunto.nombre_municipio,
         sector: difunto.nombre_sector,
         vereda: difunto.nombre_vereda,
+        corregimiento: difunto.corregimiento_nombre,
+        centro_poblado: difunto.centro_poblado_nombre,
         telefono: difunto.telefono,
         direccion: difunto.direccion_familia,
         observaciones: difunto.observaciones
