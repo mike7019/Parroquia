@@ -1084,7 +1084,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"apellido_familiar\": \"Rodríguez García\",\n  \"sector\": \"Centro\",\n  \"direccion_familia\": \"Carrera 45 # 23-67\",\n  \"numero_contacto\": \"3001234567\",\n  \"telefono\": \"3001234567\",\n  \"email\": \"familia@email.com\",\n  \"tamaño_familia\": 4,\n  \"tipo_vivienda\": \"Casa\",\n  \"estado_encuesta\": \"completada\",\n  \"tutor_responsable\": \"Carlos Rodríguez\",\n  \"comunionEnCasa\": false\n}"
+							"raw": "{\n  \"apellido_familiar\": \"Garzon Pinto ACTUALIZADO\",\n  \"sector\": \"Sector San Pedro\",\n  \"direccion_familia\": \"carrera 16b # 7-15 MODIFICADA\",\n  \"numero_contacto\": \"3009876543\",\n  \"telefono\": \"3009876543\",\n  \"email\": \"familia.garzon@email.com\",\n  \"tamaño_familia\": 4,\n  \"tipo_vivienda\": \"Casa\",\n  \"estado_encuesta\": \"completada\",\n  \"tutor_responsable\": \"Michael Garzon\",\n  \"comunionEnCasa\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/encuesta/21",
@@ -1097,7 +1097,7 @@
 								"21"
 							]
 						},
-						"description": "Actualización completa de encuesta. Requiere campos obligatorios: apellido_familiar, sector, direccion_familia"
+						"description": "Actualización completa de la tabla familias. Solo actualiza campos básicos de la familia, NO incluye miembros ni estructura completa. Campos requeridos: apellido_familiar, sector, direccion_familia"
 					},
 					"response": []
 				},
