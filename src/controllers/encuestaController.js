@@ -3097,9 +3097,33 @@ export const actualizarEncuestaCompleta = async (req, res) => {
   
   try {
     const { id } = req.params;
-    const datosCompletos = req.body;
+    let datosCompletos = req.body;
 
     console.log(`🔄 Actualizando encuesta completa ID: ${id}`);
+    
+    // Detectar si viene en formato JSON completo o formato plano
+    let datosPlanos;
+    if (datosCompletos.informacionGeneral) {
+      // Formato JSON completo - extraer campos necesarios
+      console.log('📋 Formato JSON completo detectado, extrayendo campos...');
+      const { informacionGeneral, vivienda, observaciones } = datosCompletos;
+      
+      datosPlanos = {
+        apellido_familiar: informacionGeneral.apellido_familiar,
+        sector: informacionGeneral.sector?.nombre || informacionGeneral.sector,
+        direccion_familia: informacionGeneral.direccion,
+        numero_contacto: informacionGeneral.telefono,
+        telefono: informacionGeneral.telefono,
+        email: informacionGeneral.email || null,
+        tipo_vivienda: vivienda?.tipo_vivienda?.nombre || 'Casa',
+        tutor_responsable: observaciones?.tutor_responsable || null,
+        comunionEnCasa: observaciones?.comunionEnCasa || false
+      };
+    } else {
+      // Formato plano directo
+      console.log('📋 Formato plano detectado');
+      datosPlanos = datosCompletos;
+    }
 
     // Actualizar todos los campos de la familia
     const updateQuery = `
@@ -3114,19 +3138,19 @@ export const actualizarEncuestaCompleta = async (req, res) => {
 
     await sequelize.query(updateQuery, {
       bind: [
-        datosCompletos.apellido_familiar,
-        datosCompletos.sector,
-        datosCompletos.direccion_familia,
-        datosCompletos.numero_contacto || null,
-        datosCompletos.telefono || null,
-        datosCompletos.email || null,
-        datosCompletos.tamaño_familia !== undefined ? datosCompletos.tamaño_familia : 1,
-        datosCompletos.tipo_vivienda || 'Casa',
-        datosCompletos.estado_encuesta || 'pendiente',
-        datosCompletos.comunionEnCasa || false,
-        typeof datosCompletos.tutor_responsable === 'string' ? 
-          datosCompletos.tutor_responsable.trim() !== '' && datosCompletos.tutor_responsable.toLowerCase() !== 'false' : 
-          (datosCompletos.tutor_responsable || false),
+        datosPlanos.apellido_familiar,
+        datosPlanos.sector,
+        datosPlanos.direccion_familia,
+        datosPlanos.numero_contacto || null,
+        datosPlanos.telefono || null,
+        datosPlanos.email || null,
+        datosPlanos.tamaño_familia !== undefined ? datosPlanos.tamaño_familia : 1,
+        datosPlanos.tipo_vivienda || 'Casa',
+        datosPlanos.estado_encuesta || 'pendiente',
+        datosPlanos.comunionEnCasa || false,
+        typeof datosPlanos.tutor_responsable === 'string' ? 
+          datosPlanos.tutor_responsable.trim() !== '' && datosPlanos.tutor_responsable.toLowerCase() !== 'false' : 
+          (datosPlanos.tutor_responsable || false),
         id
       ],
       type: QueryTypes.UPDATE,

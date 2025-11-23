@@ -397,13 +397,28 @@ class EncuestaValidationMiddleware {
     try {
       const datosCompletos = req.body;
       
+      // Verificar si viene en formato JSON completo o plano
+      let datosAValidar;
+      if (datosCompletos.informacionGeneral) {
+        // Formato JSON completo
+        datosAValidar = {
+          apellido_familiar: datosCompletos.informacionGeneral?.apellido_familiar,
+          sector: datosCompletos.informacionGeneral?.sector?.nombre || datosCompletos.informacionGeneral?.sector,
+          direccion_familia: datosCompletos.informacionGeneral?.direccion
+        };
+      } else {
+        // Formato plano
+        datosAValidar = datosCompletos;
+      }
+      
       const camposRequeridos = ['apellido_familiar', 'sector', 'direccion_familia'];
-      const camposFaltantes = camposRequeridos.filter(campo => !datosCompletos[campo]);
+      const camposFaltantes = camposRequeridos.filter(campo => !datosAValidar[campo]);
 
       if (camposFaltantes.length > 0) {
         const errores = camposFaltantes.map(campo => ({
           field: campo,
-          message: `El campo ${campo} es requerido para actualización completa`
+          message: `El campo ${campo} es requerido para actualización completa`,
+          location: 'body'
         }));
         
         return validationErrorResponse(res, errores);
