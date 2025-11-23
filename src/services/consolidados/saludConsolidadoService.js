@@ -50,7 +50,7 @@ class SaludConsolidadoService {
       
       // Filtrar por parroquia (ahora por ID)
       if (filtros.id_parroquia) {
-        whereConditions.push(`p.id_parroquia = :id_parroquia`);
+        whereConditions.push(`f.id_parroquia = :id_parroquia`);
         params.id_parroquia = filtros.id_parroquia;
       }
       

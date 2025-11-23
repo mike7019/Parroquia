@@ -23,27 +23,37 @@ class DifuntosConsolidadoService {
       // Construir condiciones WHERE para filtros por ID
       const whereConditions = [];
       const replacements = {};
-      
+
       if (filtros.id_parroquia) {
         whereConditions.push('p.id_parroquia = :id_parroquia');
         replacements.id_parroquia = filtros.id_parroquia;
       }
-      
+
       if (filtros.id_municipio) {
         whereConditions.push('m.id_municipio = :id_municipio');
         replacements.id_municipio = filtros.id_municipio;
       }
-      
+
       if (filtros.id_sector) {
         whereConditions.push('s.id_sector = :id_sector');
         replacements.id_sector = filtros.id_sector;
       }
-      
+
+      if (filtros.id_corregimiento) {
+        whereConditions.push('corr.id_corregimiento = :id_corregimiento');
+        replacements.id_corregimiento = filtros.id_corregimiento;
+      }
+
+      if (filtros.id_centro_poblado) {
+        whereConditions.push('cp.id_centro_poblado = :id_centro_poblado');
+        replacements.id_centro_poblado = filtros.id_centro_poblado;
+      }
+
       if (filtros.id_parentesco) {
         whereConditions.push('df.id_parentesco = :id_parentesco');
         replacements.id_parentesco = filtros.id_parentesco;
       }
-      
+
       // Filtro de rango de fechas
       if (filtros.fecha_inicio && filtros.fecha_fin) {
         whereConditions.push('df.fecha_fallecimiento BETWEEN :fecha_inicio AND :fecha_fin');
@@ -56,7 +66,7 @@ class DifuntosConsolidadoService {
         whereConditions.push('df.fecha_fallecimiento <= :fecha_fin');
         replacements.fecha_fin = filtros.fecha_fin;
       }
-      
+
       const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
       
       // PASO 1: Consultar difuntos de la tabla difuntos_familia
