@@ -635,6 +635,344 @@ class FamiliasConsolidadoService {
       };
     }
   }
+
+  /**
+   * Consultar solo madres
+   */
+  async consultarMadres(filtros = {}) {
+    try {
+      console.log('🔍 Consultando madres...');
+      
+      const limite = filtros.limite || 100;
+      const offset = filtros.offset || 0;
+      
+      const whereConditions = ['sx.nombre = \'Femenino\'', 'p.id_personas IS NOT NULL'];
+      const bindParams = [];
+      let paramIndex = 1;
+      
+      if (filtros.id_parroquia) {
+        whereConditions.push(`f.id_parroquia = $${paramIndex}`);
+        bindParams.push(filtros.id_parroquia);
+        paramIndex++;
+      }
+      
+      if (filtros.id_municipio) {
+        whereConditions.push(`f.id_municipio = $${paramIndex}`);
+        bindParams.push(filtros.id_municipio);
+        paramIndex++;
+      }
+      
+      if (filtros.id_sector) {
+        whereConditions.push(`f.id_sector = $${paramIndex}`);
+        bindParams.push(filtros.id_sector);
+        paramIndex++;
+      }
+      
+      if (filtros.id_vereda) {
+        whereConditions.push(`f.id_vereda = $${paramIndex}`);
+        bindParams.push(filtros.id_vereda);
+        paramIndex++;
+      }
+      
+      bindParams.push(limite, offset);
+      
+      const query = `
+        SELECT 
+          p.id_personas,
+          CONCAT(p.primer_nombre, ' ', COALESCE(p.segundo_nombre, ''), ' ', p.primer_apellido, ' ', COALESCE(p.segundo_apellido, '')) as nombre_completo,
+          p.identificacion,
+          p.fecha_nacimiento,
+          EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
+          p.telefono,
+          p.correo_electronico as email,
+          sx.nombre as sexo,
+          f.apellido_familiar,
+          f.direccion_familia as direccion,
+          pqa.nombre as parroquia,
+          mun.nombre_municipio as municipio,
+          sec.nombre as sector,
+          ver.nombre as vereda
+        FROM personas p
+        LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
+        LEFT JOIN familias f ON p.id_familia_familias = f.id_familia
+        LEFT JOIN parroquia pqa ON f.id_parroquia = pqa.id_parroquia  
+        LEFT JOIN municipios mun ON f.id_municipio = mun.id_municipio
+        LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
+        LEFT JOIN veredas ver ON f.id_vereda = ver.id_vereda
+        WHERE ${whereConditions.join(' AND ')}
+        ORDER BY p.primer_apellido, p.primer_nombre
+        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+      `;
+      
+      const madres = await sequelize.query(query, {
+        bind: bindParams,
+        type: QueryTypes.SELECT
+      });
+      
+      return {
+        exito: true,
+        mensaje: `Se encontraron ${madres.length} madres`,
+        datos: madres,
+        total: madres.length,
+        filtros_aplicados: filtros
+      };
+      
+    } catch (error) {
+      console.error('❌ Error consultando madres:', error);
+      throw new Error(`Error al consultar madres: ${error.message}`);
+    }
+  }
+
+  /**
+   * Consultar solo padres
+   */
+  async consultarPadres(filtros = {}) {
+    try {
+      console.log('🔍 Consultando padres...');
+      
+      const limite = filtros.limite || 100;
+      const offset = filtros.offset || 0;
+      
+      const whereConditions = ['sx.nombre = \'Masculino\'', 'p.id_personas IS NOT NULL'];
+      const bindParams = [];
+      let paramIndex = 1;
+      
+      if (filtros.id_parroquia) {
+        whereConditions.push(`f.id_parroquia = $${paramIndex}`);
+        bindParams.push(filtros.id_parroquia);
+        paramIndex++;
+      }
+      
+      if (filtros.id_municipio) {
+        whereConditions.push(`f.id_municipio = $${paramIndex}`);
+        bindParams.push(filtros.id_municipio);
+        paramIndex++;
+      }
+      
+      if (filtros.id_sector) {
+        whereConditions.push(`f.id_sector = $${paramIndex}`);
+        bindParams.push(filtros.id_sector);
+        paramIndex++;
+      }
+      
+      if (filtros.id_vereda) {
+        whereConditions.push(`f.id_vereda = $${paramIndex}`);
+        bindParams.push(filtros.id_vereda);
+        paramIndex++;
+      }
+      
+      bindParams.push(limite, offset);
+      
+      const query = `
+        SELECT 
+          p.id_personas,
+          CONCAT(p.primer_nombre, ' ', COALESCE(p.segundo_nombre, ''), ' ', p.primer_apellido, ' ', COALESCE(p.segundo_apellido, '')) as nombre_completo,
+          p.identificacion,
+          p.fecha_nacimiento,
+          EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
+          p.telefono,
+          p.correo_electronico as email,
+          sx.nombre as sexo,
+          f.apellido_familiar,
+          f.direccion_familia as direccion,
+          pqa.nombre as parroquia,
+          mun.nombre_municipio as municipio,
+          sec.nombre as sector,
+          ver.nombre as vereda
+        FROM personas p
+        LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
+        LEFT JOIN familias f ON p.id_familia_familias = f.id_familia
+        LEFT JOIN parroquia pqa ON f.id_parroquia = pqa.id_parroquia  
+        LEFT JOIN municipios mun ON f.id_municipio = mun.id_municipio
+        LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
+        LEFT JOIN veredas ver ON f.id_vereda = ver.id_vereda
+        WHERE ${whereConditions.join(' AND ')}
+        ORDER BY p.primer_apellido, p.primer_nombre
+        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+      `;
+      
+      const padres = await sequelize.query(query, {
+        bind: bindParams,
+        type: QueryTypes.SELECT
+      });
+      
+      return {
+        exito: true,
+        mensaje: `Se encontraron ${padres.length} padres`,
+        datos: padres,
+        total: padres.length,
+        filtros_aplicados: filtros
+      };
+      
+    } catch (error) {
+      console.error('❌ Error consultando padres:', error);
+      throw new Error(`Error al consultar padres: ${error.message}`);
+    }
+  }
+
+  /**
+   * Consultar familias sin padre (sin miembro masculino adulto)
+   */
+  async consultarFamiliasSinPadre(filtros = {}) {
+    try {
+      console.log('🔍 Consultando familias sin padre...');
+      
+      const limite = filtros.limite || 100;
+      const whereConditions = [];
+      const bindParams = [];
+      let paramIndex = 1;
+      
+      if (filtros.id_parroquia) {
+        whereConditions.push(`f.id_parroquia = $${paramIndex}`);
+        bindParams.push(filtros.id_parroquia);
+        paramIndex++;
+      }
+      
+      if (filtros.id_municipio) {
+        whereConditions.push(`f.id_municipio = $${paramIndex}`);
+        bindParams.push(filtros.id_municipio);
+        paramIndex++;
+      }
+      
+      if (filtros.id_sector) {
+        whereConditions.push(`f.id_sector = $${paramIndex}`);
+        bindParams.push(filtros.id_sector);
+        paramIndex++;
+      }
+      
+      const whereClause = whereConditions.length > 0 ? `AND ${whereConditions.join(' AND ')}` : '';
+      bindParams.push(limite);
+      
+      const query = `
+        SELECT 
+          f.id_familia,
+          f.apellido_familiar,
+          f.direccion_familia,
+          f.telefono,
+          pqa.nombre as parroquia,
+          mun.nombre_municipio as municipio,
+          sec.nombre as sector,
+          ver.nombre as vereda,
+          COUNT(p.id_personas) as total_miembros
+        FROM familias f
+        LEFT JOIN parroquia pqa ON f.id_parroquia = pqa.id_parroquia  
+        LEFT JOIN municipios mun ON f.id_municipio = mun.id_municipio
+        LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
+        LEFT JOIN veredas ver ON f.id_vereda = ver.id_vereda
+        LEFT JOIN personas p ON f.id_familia = p.id_familia_familias
+        WHERE f.id_familia NOT IN (
+          SELECT DISTINCT p2.id_familia_familias
+          FROM personas p2
+          LEFT JOIN sexos sx ON p2.id_sexo = sx.id_sexo
+          WHERE sx.nombre = 'Masculino'
+          AND EXTRACT(YEAR FROM AGE(p2.fecha_nacimiento)) >= 18
+        )
+        ${whereClause}
+        GROUP BY f.id_familia, f.apellido_familiar, f.direccion_familia, f.telefono, pqa.nombre, mun.nombre_municipio, sec.nombre, ver.nombre
+        ORDER BY f.apellido_familiar
+        LIMIT $${paramIndex}
+      `;
+      
+      const familias = await sequelize.query(query, {
+        bind: bindParams,
+        type: QueryTypes.SELECT
+      });
+      
+      return {
+        exito: true,
+        mensaje: `Se encontraron ${familias.length} familias sin padre`,
+        datos: familias,
+        total: familias.length,
+        filtros_aplicados: filtros
+      };
+      
+    } catch (error) {
+      console.error('❌ Error consultando familias sin padre:', error);
+      throw new Error(`Error al consultar familias sin padre: ${error.message}`);
+    }
+  }
+
+  /**
+   * Consultar familias sin madre (sin miembro femenino adulto)
+   */
+  async consultarFamiliasSinMadre(filtros = {}) {
+    try {
+      console.log('🔍 Consultando familias sin madre...');
+      
+      const limite = filtros.limite || 100;
+      const whereConditions = [];
+      const bindParams = [];
+      let paramIndex = 1;
+      
+      if (filtros.id_parroquia) {
+        whereConditions.push(`f.id_parroquia = $${paramIndex}`);
+        bindParams.push(filtros.id_parroquia);
+        paramIndex++;
+      }
+      
+      if (filtros.id_municipio) {
+        whereConditions.push(`f.id_municipio = $${paramIndex}`);
+        bindParams.push(filtros.id_municipio);
+        paramIndex++;
+      }
+      
+      if (filtros.id_sector) {
+        whereConditions.push(`f.id_sector = $${paramIndex}`);
+        bindParams.push(filtros.id_sector);
+        paramIndex++;
+      }
+      
+      const whereClause = whereConditions.length > 0 ? `AND ${whereConditions.join(' AND ')}` : '';
+      bindParams.push(limite);
+      
+      const query = `
+        SELECT 
+          f.id_familia,
+          f.apellido_familiar,
+          f.direccion_familia,
+          f.telefono,
+          pqa.nombre as parroquia,
+          mun.nombre_municipio as municipio,
+          sec.nombre as sector,
+          ver.nombre as vereda,
+          COUNT(p.id_personas) as total_miembros
+        FROM familias f
+        LEFT JOIN parroquia pqa ON f.id_parroquia = pqa.id_parroquia  
+        LEFT JOIN municipios mun ON f.id_municipio = mun.id_municipio
+        LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
+        LEFT JOIN veredas ver ON f.id_vereda = ver.id_vereda
+        LEFT JOIN personas p ON f.id_familia = p.id_familia_familias
+        WHERE f.id_familia NOT IN (
+          SELECT DISTINCT p2.id_familia_familias
+          FROM personas p2
+          LEFT JOIN sexos sx ON p2.id_sexo = sx.id_sexo
+          WHERE sx.nombre = 'Femenino'
+          AND EXTRACT(YEAR FROM AGE(p2.fecha_nacimiento)) >= 18
+        )
+        ${whereClause}
+        GROUP BY f.id_familia, f.apellido_familiar, f.direccion_familia, f.telefono, pqa.nombre, mun.nombre_municipio, sec.nombre, ver.nombre
+        ORDER BY f.apellido_familiar
+        LIMIT $${paramIndex}
+      `;
+      
+      const familias = await sequelize.query(query, {
+        bind: bindParams,
+        type: QueryTypes.SELECT
+      });
+      
+      return {
+        exito: true,
+        mensaje: `Se encontraron ${familias.length} familias sin madre`,
+        datos: familias,
+        total: familias.length,
+        filtros_aplicados: filtros
+      };
+      
+    } catch (error) {
+      console.error('❌ Error consultando familias sin madre:', error);
+      throw new Error(`Error al consultar familias sin madre: ${error.message}`);
+    }
+  }
 }
 
 export default new FamiliasConsolidadoService();

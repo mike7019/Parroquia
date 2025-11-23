@@ -136,23 +136,24 @@ class FamiliasConsolidadoController {
   async consultarMadres(req, res) {
     try {
       const filtros = {
-        parentesco: 'Madre',
-        incluir_detalles: req.query.incluir_detalles,
-        parroquia: req.query.parroquia,
-        municipio: req.query.municipio,
-        sector: req.query.sector,
-        limite: req.query.limite ? parseInt(req.query.limite) : 50
+        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
+        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
+        limite: req.query.limite ? parseInt(req.query.limite) : 100,
+        offset: req.query.offset ? parseInt(req.query.offset) : 0
       };
 
-      const resultado = await familiasConsolidadoService.consultarFamilias(filtros);
-
-      res.json({
-        exito: true,
-        mensaje: "Consulta de madres exitosa",
-        datos: resultado.datos,
-        total: resultado.total,
-        estadisticas: resultado.estadisticas
+      // Limpiar filtros undefined
+      Object.keys(filtros).forEach(key => {
+        if (filtros[key] === undefined || filtros[key] === null) {
+          delete filtros[key];
+        }
       });
+
+      const resultado = await familiasConsolidadoService.consultarMadres(filtros);
+
+      res.json(resultado);
 
     } catch (error) {
       console.error('❌ Error en consultarMadres:', error);
@@ -171,23 +172,24 @@ class FamiliasConsolidadoController {
   async consultarPadres(req, res) {
     try {
       const filtros = {
-        parentesco: 'Padre',
-        incluir_detalles: req.query.incluir_detalles,
-        parroquia: req.query.parroquia,
-        municipio: req.query.municipio,
-        sector: req.query.sector,
-        limite: req.query.limite ? parseInt(req.query.limite) : 50
+        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
+        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
+        limite: req.query.limite ? parseInt(req.query.limite) : 100,
+        offset: req.query.offset ? parseInt(req.query.offset) : 0
       };
 
-      const resultado = await familiasConsolidadoService.consultarFamilias(filtros);
-
-      res.json({
-        exito: true,
-        mensaje: "Consulta de padres exitosa",
-        datos: resultado.datos,
-        total: resultado.total,
-        estadisticas: resultado.estadisticas
+      // Limpiar filtros undefined
+      Object.keys(filtros).forEach(key => {
+        if (filtros[key] === undefined || filtros[key] === null) {
+          delete filtros[key];
+        }
       });
+
+      const resultado = await familiasConsolidadoService.consultarPadres(filtros);
+
+      res.json(resultado);
 
     } catch (error) {
       console.error('❌ Error en consultarPadres:', error);
@@ -206,20 +208,22 @@ class FamiliasConsolidadoController {
   async consultarFamiliasSinPadre(req, res) {
     try {
       const filtros = {
-        sinPadre: true,
-        municipio: req.query.municipio,
-        sector: req.query.sector,
-        limite: req.query.limite ? parseInt(req.query.limite) : 50
+        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
+        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        limite: req.query.limite ? parseInt(req.query.limite) : 100
       };
 
-      const resultado = await familiasConsolidadoService.consultarFamilias(filtros);
-
-      res.json({
-        exito: true,
-        mensaje: "Familias sin padre encontradas",
-        datos: resultado.datos,
-        total: resultado.total
+      // Limpiar filtros undefined
+      Object.keys(filtros).forEach(key => {
+        if (filtros[key] === undefined || filtros[key] === null) {
+          delete filtros[key];
+        }
       });
+
+      const resultado = await familiasConsolidadoService.consultarFamiliasSinPadre(filtros);
+
+      res.json(resultado);
 
     } catch (error) {
       console.error('❌ Error en consultarFamiliasSinPadre:', error);
@@ -238,20 +242,22 @@ class FamiliasConsolidadoController {
   async consultarFamiliasSinMadre(req, res) {
     try {
       const filtros = {
-        sinMadre: true,
-        municipio: req.query.municipio,
-        sector: req.query.sector,
-        limite: req.query.limite ? parseInt(req.query.limite) : 50
+        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
+        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        limite: req.query.limite ? parseInt(req.query.limite) : 100
       };
 
-      const resultado = await familiasConsolidadoService.consultarFamilias(filtros);
-
-      res.json({
-        exito: true,
-        mensaje: "Familias sin madre encontradas",
-        datos: resultado.datos,
-        total: resultado.total
+      // Limpiar filtros undefined
+      Object.keys(filtros).forEach(key => {
+        if (filtros[key] === undefined || filtros[key] === null) {
+          delete filtros[key];
+        }
       });
+
+      const resultado = await familiasConsolidadoService.consultarFamiliasSinMadre(filtros);
+
+      res.json(resultado);
 
     } catch (error) {
       console.error('❌ Error en consultarFamiliasSinMadre:', error);

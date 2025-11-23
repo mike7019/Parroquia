@@ -88,6 +88,16 @@ const router = express.Router();
  *           type: integer
  *         description: ID específico del sector
  *       - in: query
+ *         name: id_corregimiento
+ *         schema:
+ *           type: integer
+ *         description: ID específico del corregimiento
+ *       - in: query
+ *         name: id_centro_poblado
+ *         schema:
+ *           type: integer
+ *         description: ID específico del centro poblado
+ *       - in: query
  *         name: id_parentesco
  *         schema:
  *           type: integer
