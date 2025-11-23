@@ -184,19 +184,25 @@ class CorregimientosService {
    */
   async createCorregimiento(corregimientoData) {
     try {
-      // Verificar si el municipio existe
-      if (corregimientoData.id_municipio_municipios) {
-        const municipio = await Municipios.findByPk(corregimientoData.id_municipio_municipios);
-        if (!municipio) {
-          const error = new Error('Municipio no encontrado');
-          error.statusCode = 404;
-          error.code = 'MUNICIPIO_NOT_FOUND';
-          throw error;
-        }
-      }
-
       // Mapear id_municipio a id_municipio_municipios (nombre del campo en la BD)
       const id_municipio = corregimientoData.id_municipio || corregimientoData.id_municipio_municipios;
+
+      // Validar que se proporcione el ID del municipio
+      if (!id_municipio) {
+        const error = new Error('El campo id_municipio es requerido. Debe proporcionar el ID del municipio al que pertenece el corregimiento.');
+        error.statusCode = 400;
+        error.code = 'MISSING_MUNICIPIO_ID';
+        throw error;
+      }
+
+      // Verificar si el municipio existe
+      const municipio = await Municipios.findByPk(id_municipio);
+      if (!municipio) {
+        const error = new Error(`Municipio no encontrado con ID: ${id_municipio}. Verifique que el municipio existe en el catálogo.`);
+        error.statusCode = 404;
+        error.code = 'MUNICIPIO_NOT_FOUND';
+        throw error;
+      }
 
       // Verificar nombre duplicado en el mismo municipio
       const existingCorregimiento = await Corregimientos.findOne({
