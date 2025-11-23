@@ -135,23 +135,6 @@ class FamiliasConsolidadoService {
         miembros.map(async (miembro) => {
           const destrezas = await this.obtenerDestrezasPersona(miembro.id_personas);
           
-          // Formatear celebraciones desde el array
-          let celebracionPrincipal = {
-            motivo: '',
-            dia: '',
-            mes: ''
-          };
-          
-          // Tomar la primera celebración como principal para compatibilidad
-          if (miembro.celebraciones && miembro.celebraciones.length > 0) {
-            const primeraC = miembro.celebraciones[0];
-            celebracionPrincipal = {
-              motivo: primeraC.motivo || '',
-              dia: primeraC.dia ? primeraC.dia.toString() : '',
-              mes: this.obtenerNombreMes(primeraC.mes) || ''
-            };
-          }
-          
           // Formatear enfermedades desde el array
           const enfermedadesTexto = miembro.enfermedades && miembro.enfermedades.length > 0
             ? miembro.enfermedades.map(e => e.nombre || e.enfermedad_nombre).join(', ')
@@ -174,15 +157,16 @@ class FamiliasConsolidadoService {
             enfermedades: enfermedadesTexto,
             liderazgo: miembro.en_que_eres_lider || '',
             destrezas: destrezas.length > 0 ? destrezas.join(', ') : '',
-            necesidades_enfermo: enfermedadesTexto,
+            necesidades_enfermo: miembro.necesidad_enfermo_deprecated || '',
             comunion_casa: true,
             tallas: {
+              id_persona: miembro.id_personas,
+              nombre_completo: `${miembro.primer_nombre || ''} ${miembro.primer_apellido || ''}`.trim(),
               camisa_blusa: miembro.talla_camisa || '',
               pantalon: miembro.talla_pantalon || '',
               calzado: miembro.talla_zapato || ''
             },
-            celebracion: celebracionPrincipal,
-            // ⭐ NUEVOS CAMPOS - Arrays completos ⭐
+            // ⭐ Arrays completos ⭐
             todas_las_celebraciones: miembro.celebraciones || [],
             todas_las_enfermedades: miembro.enfermedades || []
           };
@@ -470,8 +454,12 @@ class FamiliasConsolidadoService {
       { header: 'Comunidad Cultural', key: 'comunidad', width: 20 },
       { header: 'Destrezas', key: 'destrezas', width: 30 },
       { header: 'Liderazgo', key: 'liderazgo', width: 25 },
+      { header: 'Talla Camisa/Blusa', key: 'talla_camisa', width: 15 },
+      { header: 'Talla Pantalón', key: 'talla_pantalon', width: 15 },
+      { header: 'Talla Calzado', key: 'talla_calzado', width: 15 },
       { header: 'Celebraciones', key: 'celebraciones', width: 40 },
-      { header: 'Enfermedades', key: 'enfermedades', width: 30 }
+      { header: 'Enfermedades', key: 'enfermedades', width: 30 },
+      { header: 'Necesidades del Enfermo', key: 'necesidades_enfermo', width: 40 }
     ];
     
     // Agregar datos de todos los miembros
@@ -500,8 +488,12 @@ class FamiliasConsolidadoService {
           comunidad: miembro.comunidad_cultural,
           destrezas: miembro.destrezas,
           liderazgo: miembro.liderazgo,
+          talla_camisa: miembro.tallas?.camisa_blusa || '',
+          talla_pantalon: miembro.tallas?.pantalon || '',
+          talla_calzado: miembro.tallas?.calzado || '',
           celebraciones: celebracionesTexto,
-          enfermedades: miembro.enfermedades
+          enfermedades: miembro.enfermedades,
+          necesidades_enfermo: miembro.necesidades_enfermo || ''
         });
       });
     });

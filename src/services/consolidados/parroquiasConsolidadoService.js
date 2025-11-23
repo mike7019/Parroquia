@@ -111,14 +111,11 @@ class ParroquiasConsolidadoService {
           p.id_parroquia,
           p.nombre as nombre_parroquia,
           m.nombre_municipio as nombre_municipio,
-          d.nombre as nombre_departamento,
-          COUNT(DISTINCT f.id_familia) as total_familias,
-          COUNT(DISTINCT per.id_personas) as total_personas
+          d.nombre as nombre_departamento
         FROM parroquia p
         INNER JOIN municipios m ON p.id_municipio = m.id_municipio
         INNER JOIN departamentos d ON m.id_departamento = d.id_departamento
         LEFT JOIN familias f ON f.id_parroquia = p.id_parroquia
-        LEFT JOIN personas per ON per.id_parroquia = p.id_parroquia
         ${joinsClause}
         ${whereClause}
         GROUP BY p.id_parroquia, p.nombre, m.nombre_municipio, d.nombre
@@ -158,7 +155,7 @@ class ParroquiasConsolidadoService {
         SELECT COUNT(DISTINCT p.id_parroquia) as total
         FROM parroquia p
         INNER JOIN municipios m ON p.id_municipio = m.id_municipio
-        LEFT JOIN familias f ON f.id_municipio = m.id_municipio
+        LEFT JOIN familias f ON f.id_parroquia = p.id_parroquia
         ${joinsClause}
         ${whereClause}
       `;
@@ -170,12 +167,16 @@ class ParroquiasConsolidadoService {
 
       return {
         datos: parroquiasEnriquecidas,
-        total: parseInt(total),
-        pagina: parseInt(pagina),
-        limite: parseInt(limite),
-        total_paginas: Math.ceil(total / limite),
-        filtros_aplicados: filtros,
-        estadisticas_generales: estadisticas
+        estadisticas_generales: estadisticas,
+        meta: {
+          total: parseInt(total),
+          pagina: parseInt(pagina),
+          limite: parseInt(limite),
+          total_paginas: Math.ceil(total / limite),
+          tiene_siguiente: parseInt(pagina) < Math.ceil(total / limite),
+          tiene_anterior: parseInt(pagina) > 1
+        },
+        filtros_aplicados: filtros
       };
 
     } catch (error) {
@@ -200,7 +201,7 @@ class ParroquiasConsolidadoService {
           COUNT(DISTINCT f.id_familia) as total_familias
         FROM parroquia p
         INNER JOIN municipios m ON p.id_municipio = m.id_municipio
-        LEFT JOIN familias f ON f.id_municipio = m.id_municipio
+        LEFT JOIN familias f ON f.id_parroquia = p.id_parroquia
         INNER JOIN familia_tipo_vivienda ftv ON f.id_familia = ftv.id_familia
         INNER JOIN tipos_vivienda tv ON ftv.id_tipo_vivienda = tv.id_tipo_vivienda
         WHERE p.id_parroquia IN (${idsString})
@@ -215,7 +216,7 @@ class ParroquiasConsolidadoService {
           COUNT(DISTINCT f.id_familia) as total_familias
         FROM parroquia p
         INNER JOIN municipios m ON p.id_municipio = m.id_municipio
-        LEFT JOIN familias f ON f.id_municipio = m.id_municipio
+        LEFT JOIN familias f ON f.id_parroquia = p.id_parroquia
         INNER JOIN familia_sistema_acueducto fsa ON f.id_familia = fsa.id_familia
         INNER JOIN sistemas_acueducto sa ON fsa.id_sistema_acueducto = sa.id_sistema_acueducto
         WHERE p.id_parroquia IN (${idsString})
@@ -223,14 +224,14 @@ class ParroquiasConsolidadoService {
         ORDER BY total_familias DESC
       `, { type: QueryTypes.SELECT });
 
-      // Estadísticas de aguas residuales
+      // Tipos de aguas residuales
       const aguasResiduales = await sequelize.query(`
         SELECT 
           tar.nombre as tipo_aguas_residuales,
           COUNT(DISTINCT f.id_familia) as total_familias
         FROM parroquia p
         INNER JOIN municipios m ON p.id_municipio = m.id_municipio
-        LEFT JOIN familias f ON f.id_municipio = m.id_municipio
+        LEFT JOIN familias f ON f.id_parroquia = p.id_parroquia
         INNER JOIN familia_sistema_aguas_residuales fsar ON f.id_familia = fsar.id_familia
         INNER JOIN tipos_aguas_residuales tar ON fsar.id_tipo_aguas_residuales = tar.id_tipo_aguas_residuales
         WHERE p.id_parroquia IN (${idsString})
@@ -238,14 +239,14 @@ class ParroquiasConsolidadoService {
         ORDER BY total_familias DESC
       `, { type: QueryTypes.SELECT });
 
-      // Estadísticas de disposición de basura
+      // Tipos de disposición de basura
       const disposicionBasura = await sequelize.query(`
         SELECT 
           tdb.nombre as tipo_disposicion_basura,
           COUNT(DISTINCT f.id_familia) as total_familias
         FROM parroquia p
         INNER JOIN municipios m ON p.id_municipio = m.id_municipio
-        LEFT JOIN familias f ON f.id_municipio = m.id_municipio
+        LEFT JOIN familias f ON f.id_parroquia = p.id_parroquia
         INNER JOIN familia_disposicion_basura fdb ON f.id_familia = fdb.id_familia
         INNER JOIN tipos_disposicion_basura tdb ON fdb.id_tipo_disposicion_basura = tdb.id_tipo_disposicion_basura
         WHERE p.id_parroquia IN (${idsString})
@@ -281,7 +282,7 @@ class ParroquiasConsolidadoService {
           ROUND(AVG(f.tamaño_familia), 2) as promedio_miembros_familia
         FROM parroquia p
         INNER JOIN municipios m ON p.id_municipio = m.id_municipio
-        LEFT JOIN familias f ON f.id_municipio = m.id_municipio
+        LEFT JOIN familias f ON f.id_parroquia = p.id_parroquia
         LEFT JOIN personas per ON per.id_familia_familias = f.id_familia
         WHERE p.id_parroquia = :idParroquia
       `, {
@@ -296,7 +297,7 @@ class ParroquiasConsolidadoService {
           COUNT(DISTINCT f.id_familia) as total
         FROM parroquia p
         INNER JOIN municipios m ON p.id_municipio = m.id_municipio
-        LEFT JOIN familias f ON f.id_municipio = m.id_municipio
+        LEFT JOIN familias f ON f.id_parroquia = p.id_parroquia
         INNER JOIN familia_tipo_vivienda ftv ON f.id_familia = ftv.id_familia
         INNER JOIN tipos_vivienda tv ON ftv.id_tipo_vivienda = tv.id_tipo_vivienda
         WHERE p.id_parroquia = :idParroquia
@@ -382,7 +383,7 @@ class ParroquiasConsolidadoService {
         FROM parroquia p
         LEFT JOIN municipios m ON p.id_municipio = m.id_municipio
         LEFT JOIN departamentos d ON m.id_departamento = d.id_departamento
-        LEFT JOIN familias f ON f.id_municipio = m.id_municipio
+        LEFT JOIN familias f ON f.id_parroquia = p.id_parroquia
         LEFT JOIN personas per ON per.id_familia_familias = f.id_familia
       `, { type: QueryTypes.SELECT });
 

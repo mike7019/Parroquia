@@ -280,6 +280,92 @@ router.get('/reporte/excel', authMiddleware.authenticateToken, saludConsolidadoC
 
 /**
  * @swagger
+ * /api/personas/salud/reporte/json:
+ *   get:
+ *     summary: Generar reporte de salud en formato JSON
+ *     description: Genera un reporte completo de salud de personas en formato JSON con todos los campos disponibles
+ *     tags: [Salud Consolidado]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: enfermedad
+ *         schema:
+ *           type: string
+ *         description: Filtrar por enfermedad (búsqueda parcial en necesidad_enfermo)
+ *       - in: query
+ *         name: edad_min
+ *         schema:
+ *           type: integer
+ *         description: Edad mínima
+ *       - in: query
+ *         name: edad_max
+ *         schema:
+ *           type: integer
+ *         description: Edad máxima
+ *       - in: query
+ *         name: id_sexo
+ *         schema:
+ *           type: integer
+ *         description: ID del sexo
+ *       - in: query
+ *         name: id_parroquia
+ *         schema:
+ *           type: integer
+ *         description: ID de la parroquia
+ *       - in: query
+ *         name: id_municipio
+ *         schema:
+ *           type: integer
+ *         description: ID del municipio
+ *       - in: query
+ *         name: id_sector
+ *         schema:
+ *           type: integer
+ *         description: ID del sector
+ *       - in: query
+ *         name: id_enfermedad
+ *         schema:
+ *           type: integer
+ *         description: ID de enfermedad específica de catálogo
+ *       - in: query
+ *         name: limite
+ *         schema:
+ *           type: integer
+ *           default: 5000
+ *         description: Límite de registros
+ *     responses:
+ *       200:
+ *         description: Reporte JSON generado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 exito:
+ *                   type: boolean
+ *                 mensaje:
+ *                   type: string
+ *                 datos:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 total:
+ *                   type: integer
+ *                 filtros_aplicados:
+ *                   type: object
+ *                 fecha_generacion:
+ *                   type: string
+ *                   format: date-time
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error generando el reporte
+ */
+router.get('/reporte/json', authMiddleware.authenticateToken, saludConsolidadoController.generarReporteJSON);
+
+/**
+ * @swagger
  * /api/personas/salud/parroquia/{id}:
  *   get:
  *     summary: Obtener resumen de salud por parroquia

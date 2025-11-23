@@ -89,20 +89,30 @@ class SaludConsolidadoService {
             ELSE false
           END as tiene_enfermedades,
           s.nombre as sexo,
+          f.apellido_familiar,
           f.sector as sector_familia,
           f.telefono as telefono_familia,
           f.direccion_familia,
           m.nombre_municipio,
           sec.nombre as nombre_sector,
           v.nombre as nombre_vereda,
-          pr.nombre as nombre_parroquia
+          corr.nombre as corregimiento_nombre,
+          cp.nombre as centro_poblado_nombre,
+          pr.nombre as nombre_parroquia,
+          -- Obtener enfermedades de la tabla relacional
+          (SELECT STRING_AGG(e.nombre, ', ')
+           FROM persona_enfermedad pe
+           LEFT JOIN enfermedades e ON pe.id_enfermedad = e.id_enfermedad
+           WHERE pe.id_persona = p.id_personas) as enfermedades_texto
         FROM personas p
         LEFT JOIN familias f ON p.id_familia_familias = f.id_familia
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
+        LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
+        LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
         LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
-        LEFT JOIN parroquia pr ON p.id_parroquia = pr.id_parroquia
+        LEFT JOIN parroquia pr ON f.id_parroquia = pr.id_parroquia
         ${whereClause}
         ORDER BY p.primer_apellido, p.primer_nombre
         LIMIT :limite
@@ -144,16 +154,18 @@ class SaludConsolidadoService {
           sexo: persona.sexo,
           telefono: persona.telefono,
           fecha_nacimiento: persona.fecha_nacimiento,
+          apellido_familiar: persona.apellido_familiar,
           municipio: persona.nombre_municipio,
           sector: persona.nombre_sector || persona.sector_familia,
           vereda: persona.nombre_vereda,
+          corregimiento: persona.corregimiento_nombre,
+          centro_poblado: persona.centro_poblado_nombre,
           parroquia: persona.nombre_parroquia,
           direccion: persona.direccion_familia,
           telefono_familia: persona.telefono_familia,
           salud: {
-            enfermedades: persona.necesidad_enfermo ? 
-              persona.necesidad_enfermo.split(',').map(e => e.trim()) : [],
-            necesidades_medicas: persona.necesidad_enfermo,
+            enfermedades: persona.enfermedades_texto || '', // De la tabla persona_enfermedad
+            necesidades_medicas: persona.necesidad_enfermo, // Del campo necesidad_enfermo
             tiene_enfermedades: persona.tiene_enfermedades
           }
         };
@@ -419,9 +431,12 @@ class SaludConsolidadoService {
         { header: 'Sexo', key: 'sexo', width: 12 },
         { header: 'Teléfono', key: 'telefono', width: 15 },
         { header: 'Fecha Nacimiento', key: 'fecha_nacimiento', width: 18 },
+        { header: 'Familia', key: 'apellido_familiar', width: 25 },
         { header: 'Municipio', key: 'municipio', width: 20 },
         { header: 'Sector', key: 'sector', width: 20 },
         { header: 'Vereda', key: 'vereda', width: 25 },
+        { header: 'Corregimiento', key: 'corregimiento', width: 25 },
+        { header: 'Centro Poblado', key: 'centro_poblado', width: 25 },
         { header: 'Parroquia', key: 'parroquia', width: 25 },
         { header: 'Dirección', key: 'direccion', width: 30 },
         { header: 'Teléfono Familia', key: 'telefono_familia', width: 15 },
@@ -450,13 +465,16 @@ class SaludConsolidadoService {
           sexo: persona.sexo || '',
           telefono: persona.telefono || '',
           fecha_nacimiento: persona.fecha_nacimiento || '',
+          apellido_familiar: persona.apellido_familiar || '',
           municipio: persona.municipio || '',
           sector: persona.sector || '',
           vereda: persona.vereda || '',
+          corregimiento: persona.corregimiento || '',
+          centro_poblado: persona.centro_poblado || '',
           parroquia: persona.parroquia || '',
           direccion: persona.direccion || '',
           telefono_familia: persona.telefono_familia || '',
-          enfermedades: persona.salud.enfermedades.join(', ') || '',
+          enfermedades: persona.salud.enfermedades || '',
           necesidades_medicas: persona.salud.necesidades_medicas || '',
           tiene_enfermedades: persona.salud.tiene_enfermedades ? 'Sí' : 'No'
         });
@@ -482,10 +500,10 @@ class SaludConsolidadoService {
         });
       });
 
-      // Agregar autofiltro
+      // Agregar autofiltro (ahora son 19 columnas)
       worksheet.autoFilter = {
         from: 'A1',
-        to: `P1`
+        to: `S1`
       };
 
       // Congelar primera fila

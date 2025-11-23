@@ -907,7 +907,7 @@ class DifuntosConsolidadoService {
   }
 
   /**
-   * Generar contenido del PDF
+   * Generar contenido del PDF con información completa
    */
   generarContenidoPDF(doc, difuntos, filtros) {
     const fechaReporte = new Date().toLocaleDateString('es-ES');
@@ -915,7 +915,7 @@ class DifuntosConsolidadoService {
     // Encabezado
     doc.fontSize(20)
        .fillColor('#8B4513')
-       .text('Reporte de Difuntos - Parroquia', { align: 'center' });
+       .text('Reporte Consolidado de Difuntos - Parroquia', { align: 'center' });
     
     doc.fontSize(12)
        .fillColor('black')
@@ -932,7 +932,8 @@ class DifuntosConsolidadoService {
       
       Object.entries(filtros).forEach(([key, value]) => {
         if (value) {
-          doc.text(`• ${key.replace('_', ' ')}: ${value}`);
+          const keyFormatted = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          doc.text(`• ${keyFormatted}: ${value}`);
         }
       });
       doc.moveDown();
@@ -946,7 +947,21 @@ class DifuntosConsolidadoService {
        .fillColor('black');
     
     doc.text(`Total de difuntos: ${difuntos.length}`)
-       .moveDown();
+       .moveDown(0.5);
+    
+    // Análisis por fuente de datos
+    const porFuente = {};
+    difuntos.forEach(difunto => {
+      const fuente = difunto.fuente === 'difuntos_familia' ? 'Registro Difuntos' : 'Registro Personas';
+      porFuente[fuente] = (porFuente[fuente] || 0) + 1;
+    });
+    
+    doc.text('Distribución por fuente de datos:');
+    Object.entries(porFuente).forEach(([fuente, total]) => {
+      const porcentaje = ((total / difuntos.length) * 100).toFixed(1);
+      doc.text(`  • ${fuente}: ${total} (${porcentaje}%)`);
+    });
+    doc.moveDown(0.5);
     
     // Análisis por parentesco
     const porParentesco = {};
@@ -956,63 +971,211 @@ class DifuntosConsolidadoService {
     });
     
     doc.text('Distribución por parentesco:');
-    Object.entries(porParentesco).forEach(([parentesco, total]) => {
-      const porcentaje = ((total / difuntos.length) * 100).toFixed(1);
-      doc.text(`  • ${parentesco}: ${total} (${porcentaje}%)`);
-    });
+    Object.entries(porParentesco)
+       .sort(([,a], [,b]) => b - a)
+       .slice(0, 10)
+       .forEach(([parentesco, total]) => {
+         const porcentaje = ((total / difuntos.length) * 100).toFixed(1);
+         doc.text(`  • ${parentesco}: ${total} (${porcentaje}%)`);
+       });
     
     doc.moveDown();
     
-    // Lista detallada (paginada)
+    // Lista detallada (paginada) con TODA la información
     doc.fontSize(14)
        .fillColor('#8B4513')
-       .text('Listado Detallado', { underline: true })
-       .fontSize(9)
-       .fillColor('black');
+       .text('Listado Detallado Completo', { underline: true })
+       .fontSize(8)
+       .fillColor('black')
+       .moveDown(0.5);
     
     let yPosition = doc.y;
     const pageHeight = doc.page.height - 100;
+    const margen = 50;
     
     difuntos.forEach((difunto, index) => {
+      // Calcular espacio necesario para este registro (mínimo 120 puntos)
+      const espacioNecesario = 150;
+      
       // Verificar si necesitamos nueva página
-      if (yPosition > pageHeight - 150) {
+      if (yPosition > pageHeight - espacioNecesario) {
         doc.addPage();
         yPosition = 50;
+        doc.y = yPosition;
       }
       
-      // Información del difunto
+      // Recuadro para cada difunto
+      const boxTop = doc.y;
+      const boxHeight = espacioNecesario - 10;
+      
+      // Fondo alternado (zebra)
+      if (index % 2 === 0) {
+        doc.rect(margen - 5, boxTop - 5, doc.page.width - 2 * margen + 10, boxHeight)
+           .fillColor('#F5F5F5')
+           .fill();
+      }
+      
+      doc.fillColor('black');
+      
+      // Número y nombre (encabezado del registro)
       doc.fontSize(10)
+         .font('Helvetica-Bold')
          .fillColor('#8B4513')
-         .text(`${index + 1}. ${difunto.nombre_completo || 'Sin nombre'}`, { continued: false })
-         .fontSize(9)
+         .text(`${index + 1}. ${difunto.nombre_completo || 'Sin nombre'}`, margen, boxTop, { continued: false })
+         .font('Helvetica')
+         .fontSize(8)
          .fillColor('black');
       
-      if (difunto.apellido_familiar) {
-        doc.text(`   Familia: ${difunto.apellido_familiar}`);
-      }
+      let currentY = boxTop + 15;
+      let currentYRight = boxTop + 15;
       
-      if (difunto.fecha_aniversario) {
-        doc.text(`   Fecha: ${new Date(difunto.fecha_aniversario).toLocaleDateString('es-ES')}`);
+      // COLUMNA IZQUIERDA: Información personal y familiar
+      const colIzq = margen;
+      const colDer = margen + 270;
+      
+      // Fuente del registro
+      if (difunto.fuente) {
+        const fuenteTexto = difunto.fuente === 'difuntos_familia' ? 'Registro Difuntos' : 'Registro Personas';
+        doc.fontSize(7)
+           .fillColor('#666666')
+           .text(`[${fuenteTexto}]`, colIzq, currentY);
+      }
+      currentY += 10;
+      
+      // Información personal
+      if (difunto.apellido_familiar) {
+        doc.fontSize(8).fillColor('black')
+           .text('Familia: ', colIzq, currentY, { continued: true })
+           .font('Helvetica-Bold')
+           .text(difunto.apellido_familiar)
+           .font('Helvetica');
+        currentY += 12;
       }
       
       if (difunto.parentesco_real) {
-        doc.text(`   Parentesco: ${difunto.parentesco_real}`);
+        doc.text('Parentesco: ', colIzq, currentY, { continued: true })
+           .font('Helvetica-Bold')
+           .text(difunto.parentesco_real)
+           .font('Helvetica');
+        currentY += 12;
       }
       
-      if (difunto.municipio || difunto.nombre_sector) {
-        doc.text(`   Ubicación: ${difunto.municipio || 'N/A'} - ${difunto.nombre_sector || 'N/A'}`);
+      if (difunto.fecha_aniversario) {
+        const fechaFormateada = new Date(difunto.fecha_aniversario).toLocaleDateString('es-ES', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric'
+        });
+        doc.text('Fecha Fallecimiento: ', colIzq, currentY, { continued: true })
+           .font('Helvetica-Bold')
+           .text(fechaFormateada)
+           .font('Helvetica');
+        currentY += 12;
       }
       
-      doc.moveDown(0.5);
-      yPosition = doc.y;
+      // Información de contacto (inmediatamente después de fecha)
+      if (difunto.telefono) {
+        doc.text('Teléfono: ', colIzq, currentY, { continued: true })
+           .font('Helvetica-Bold')
+           .text(difunto.telefono)
+           .font('Helvetica');
+        currentY += 12;
+      }
+      
+      if (difunto.direccion_familia) {
+        doc.text('Dirección: ', colIzq, currentY, { continued: true })
+           .font('Helvetica-Bold')
+           .text(difunto.direccion_familia, { width: 200 })
+           .font('Helvetica');
+        currentY += 12;
+      }
+      
+      // Resetear currentYRight para columna derecha
+      currentYRight = boxTop + 25;
+      
+      // COLUMNA DERECHA: Información geográfica
+      if (difunto.nombre_parroquia) {
+        doc.text('Parroquia: ', colDer, currentYRight, { continued: true })
+           .font('Helvetica-Bold')
+           .text(difunto.nombre_parroquia, { width: 200 })
+           .font('Helvetica');
+        currentYRight += 12;
+      }
+      
+      if (difunto.nombre_municipio) {
+        doc.text('Municipio: ', colDer, currentYRight, { continued: true })
+           .font('Helvetica-Bold')
+           .text(difunto.nombre_municipio)
+           .font('Helvetica');
+        currentYRight += 12;
+      }
+      
+      if (difunto.nombre_sector) {
+        doc.text('Sector: ', colDer, currentYRight, { continued: true })
+           .font('Helvetica-Bold')
+           .text(difunto.nombre_sector, { width: 200 })
+           .font('Helvetica');
+        currentYRight += 12;
+      }
+      
+      if (difunto.nombre_vereda) {
+        doc.text('Vereda: ', colDer, currentYRight, { continued: true })
+           .font('Helvetica-Bold')
+           .text(difunto.nombre_vereda, { width: 200 })
+           .font('Helvetica');
+        currentYRight += 12;
+      }
+      
+      if (difunto.corregimiento_nombre) {
+        doc.text('Corregimiento: ', colDer, currentYRight, { continued: true })
+           .font('Helvetica-Bold')
+           .text(difunto.corregimiento_nombre, { width: 200 })
+           .font('Helvetica');
+        currentYRight += 12;
+      }
+      
+      if (difunto.centro_poblado_nombre) {
+        doc.text('Centro Poblado: ', colDer, currentYRight, { continued: true })
+           .font('Helvetica-Bold')
+           .text(difunto.centro_poblado_nombre, { width: 200 })
+           .font('Helvetica');
+        currentYRight += 12;
+      }
+      
+      // Sincronizar ambas columnas antes de observaciones
+      currentY = Math.max(currentY, currentYRight) + 3;
+      
+      // Observaciones/Causa (si existe)
+      if (difunto.observaciones) {
+        doc.fontSize(7)
+           .fillColor('#666666')
+           .text('Observaciones: ', margen, currentY, { continued: true })
+           .text(difunto.observaciones.substring(0, 150) + (difunto.observaciones.length > 150 ? '...' : ''), 
+                 { width: doc.page.width - 2 * margen - 100 })
+           .fillColor('black')
+           .fontSize(8);
+      }
+      
+      // Línea separadora
+      doc.strokeColor('#CCCCCC')
+         .lineWidth(0.5)
+         .moveTo(margen, boxTop + boxHeight - 5)
+         .lineTo(doc.page.width - margen, boxTop + boxHeight - 5)
+         .stroke();
+      
+      yPosition = boxTop + boxHeight + 5;
+      doc.y = yPosition;
     });
     
-    // Pie de página
-    const totalPages = Math.ceil(difuntos.length / 20) + 1;
-    doc.fontSize(8)
-       .fillColor('gray')
-       .text(`Reporte generado el ${fechaReporte} - Total de registros: ${difuntos.length}`,
-             50, doc.page.height - 30, { align: 'center' });
+    // Pie de página en todas las páginas
+    const range = doc.bufferedPageRange();
+    for (let i = range.start; i < range.start + range.count; i++) {
+      doc.switchToPage(i);
+      doc.fontSize(8)
+         .fillColor('gray')
+         .text(`Reporte generado el ${fechaReporte} - Total de registros: ${difuntos.length} - Página ${i + 1} de ${range.count}`,
+               50, doc.page.height - 30, { align: 'center', width: doc.page.width - 100 });
+    }
   }
 }
 

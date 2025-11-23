@@ -47,26 +47,21 @@ class ParroquiasConsolidadoController {
 
       const resultado = await parroquiasConsolidadoService.consultarParroquias(filtros);
 
-      // Preparar respuesta
+      // Preparar respuesta con orden: datos, estadísticas, meta, filtros
       const response = {
         exito: true,
-        mensaje: `Consulta de parroquias completada. ${resultado.total} registros encontrados.`,
-        datos: resultado.datos,
-        meta: {
-          total: resultado.total,
-          pagina: resultado.pagina,
-          limite: resultado.limite,
-          total_paginas: resultado.total_paginas,
-          tiene_siguiente: resultado.pagina < resultado.total_paginas,
-          tiene_anterior: resultado.pagina > 1
-        },
-        filtros_aplicados: resultado.filtros_aplicados
+        mensaje: `Consulta de parroquias completada. ${resultado.meta.total} registros encontrados.`,
+        datos: resultado.datos
       };
 
       // Incluir estadísticas generales si se solicitan
       if (filtros.incluir_estadisticas && resultado.estadisticas_generales) {
         response.estadisticas_generales = resultado.estadisticas_generales;
       }
+
+      // Agregar meta y filtros al final
+      response.meta = resultado.meta;
+      response.filtros_aplicados = resultado.filtros_aplicados;
 
       console.log(`✅ Consulta exitosa: ${resultado.datos.length} parroquias devueltas`);
 

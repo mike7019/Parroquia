@@ -234,6 +234,57 @@ class DifuntosConsolidadoController {
       }
     }
   }
+
+  /**
+   * Generar reporte JSON completo de difuntos
+   * GET /api/difuntos/reporte/json
+   */
+  async generarReporteJSON(req, res) {
+    try {
+      const filtros = {
+        // Filtros por ID
+        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
+        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_parentesco: req.query.id_parentesco ? parseInt(req.query.id_parentesco) : undefined,
+        
+        // Filtros adicionales
+        fecha_inicio: req.query.fecha_inicio,
+        fecha_fin: req.query.fecha_fin
+      };
+
+      // Limpiar filtros vacíos
+      Object.keys(filtros).forEach(key => {
+        if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '' || 
+            (typeof filtros[key] === 'number' && isNaN(filtros[key]))) {
+          delete filtros[key];
+        }
+      });
+
+      console.log('📊 Generando reporte JSON de difuntos con filtros:', filtros);
+
+      const resultado = await difuntosConsolidadoService.consultarDifuntos(filtros);
+
+      res.json({
+        exito: true,
+        mensaje: `Reporte de difuntos generado: ${resultado.total} registros encontrados`,
+        datos: resultado.datos,
+        total: resultado.total,
+        estadisticas: resultado.estadisticas,
+        filtros_aplicados: resultado.filtros_aplicados || filtros,
+        fecha_generacion: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error('❌ Error generando reporte JSON de difuntos:', error);
+      res.status(500).json({
+        exito: false,
+        status: "error",
+        mensaje: `Error al generar reporte JSON: ${error.message}`,
+        code: "REPORTE_JSON_DIFUNTOS_ERROR"
+      });
+    }
+  }
 }
 
 export default new DifuntosConsolidadoController();

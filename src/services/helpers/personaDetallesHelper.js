@@ -76,8 +76,10 @@ export async function obtenerCelebracionesMultiplesPersonas(idsPersonas, transac
       pc.dia,
       pc.mes,
       pc.created_at,
-      pc.updated_at
+      pc.updated_at,
+      CONCAT(p.primer_nombre, ' ', p.primer_apellido) as nombre_completo
     FROM persona_celebracion pc
+    LEFT JOIN personas p ON pc.id_persona = p.id_personas
     WHERE pc.id_persona IN (:idsPersonas)
     ORDER BY pc.id_persona ASC, pc.mes ASC, pc.dia ASC
   `, {
@@ -113,9 +115,11 @@ export async function obtenerEnfermedadesMultiplesPersonas(idsPersonas, transact
     SELECT
       pe.id_persona,
       pe.id_enfermedad as id,
-      e.nombre
+      e.nombre,
+      CONCAT(p.primer_nombre, ' ', p.primer_apellido) as nombre_completo
     FROM persona_enfermedad pe
     INNER JOIN enfermedades e ON e.id_enfermedad = pe.id_enfermedad
+    LEFT JOIN personas p ON pe.id_persona = p.id_personas
     WHERE pe.id_persona IN (:idsPersonas)
     ORDER BY pe.id_persona ASC, e.nombre ASC
   `, {
@@ -194,6 +198,7 @@ export async function obtenerPersonasFamiliaCompletas(idFamilia, transaction = n
       p.telefono,
       p.correo_electronico,
       p.fecha_nacimiento,
+      EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
       p.direccion,
       p.estudios,
       p.en_que_eres_lider,

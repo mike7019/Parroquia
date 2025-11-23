@@ -83,20 +83,19 @@ class PersonasCapacidadesService {
       const query = `
         SELECT DISTINCT
           p.id_personas,
-          p.primer_nombre,
-          p.segundo_nombre,
-          p.primer_apellido,
-          p.segundo_apellido,
+          TRIM(CONCAT(p.primer_nombre, ' ', COALESCE(p.segundo_nombre, ''))) as nombres,
+          TRIM(CONCAT(p.primer_apellido, ' ', COALESCE(p.segundo_apellido, ''))) as apellidos,
           p.identificacion as numero_identificacion,
           p.fecha_nacimiento,
           EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
-          sx.descripcion as sexo,
+          sx.nombre as sexo,
           d.nombre as nombre_destreza,
           d.nombre as destreza_descripcion,
           m.nombre_municipio,
           s.nombre as nombre_sector,
           v.nombre as nombre_vereda,
-          f.apellido_familiar as codigo_familia
+          f.apellido_familiar as codigo_familia,
+          pqa.nombre as parroquia
         FROM personas p
         LEFT JOIN persona_destreza pd ON p.id_personas = pd.id_personas_personas
         LEFT JOIN destrezas d ON pd.id_destrezas_destrezas = d.id_destreza
@@ -104,9 +103,10 @@ class PersonasCapacidadesService {
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores s ON f.id_sector = s.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
+        LEFT JOIN parroquia pqa ON f.id_parroquia = pqa.id_parroquia
         LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
         ${whereClause}
-        ORDER BY p.primer_apellido, p.primer_nombre
+        ORDER BY apellidos, nombres
         LIMIT :limite OFFSET :offset
       `;
 
@@ -184,8 +184,8 @@ class PersonasCapacidadesService {
           m.nombre_municipio,
           COUNT(DISTINCT f.id_familia) as total_familias,
           COUNT(DISTINCT p.id_personas) as total_personas,
-          COUNT(DISTINCT CASE WHEN sx.descripcion = 'Masculino' THEN p.id_personas END) as hombres,
-          COUNT(DISTINCT CASE WHEN sx.descripcion = 'Femenino' THEN p.id_personas END) as mujeres,
+          COUNT(DISTINCT CASE WHEN sx.nombre = 'Masculino' THEN p.id_personas END) as hombres,
+          COUNT(DISTINCT CASE WHEN sx.nombre = 'Femenino' THEN p.id_personas END) as mujeres,
           ROUND(AVG(EXTRACT(YEAR FROM AGE(p.fecha_nacimiento))), 1) as edad_promedio
         FROM sectores s
         INNER JOIN municipios m ON s.id_municipio = m.id_municipio
@@ -211,12 +211,12 @@ class PersonasCapacidadesService {
           m.nombre_municipio,
           COUNT(DISTINCT f.id_familia) as total_familias,
           COUNT(DISTINCT p.id_personas) as total_personas,
-          COUNT(DISTINCT CASE WHEN sx.descripcion = 'Masculino' THEN p.id_personas END) as hombres,
-          COUNT(DISTINCT CASE WHEN sx.descripcion = 'Femenino' THEN p.id_personas END) as mujeres
+          COUNT(DISTINCT CASE WHEN sx.nombre = 'Masculino' THEN p.id_personas END) as hombres,
+          COUNT(DISTINCT CASE WHEN sx.nombre = 'Femenino' THEN p.id_personas END) as mujeres
         FROM veredas v
-        INNER JOIN sectores s ON v.id_sector = s.id_sector
-        INNER JOIN municipios m ON s.id_municipio = m.id_municipio
         LEFT JOIN familias f ON v.id_vereda = f.id_vereda
+        LEFT JOIN sectores s ON f.id_sector = s.id_sector
+        LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN personas p ON f.id_familia = p.id_familia_familias
         LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
         ${whereClause}
@@ -297,13 +297,11 @@ class PersonasCapacidadesService {
       const query = `
         SELECT 
           p.id_personas,
-          p.primer_nombre,
-          p.segundo_nombre,
-          p.primer_apellido,
-          p.segundo_apellido,
+          TRIM(CONCAT(p.primer_nombre, ' ', COALESCE(p.segundo_nombre, ''))) as nombres,
+          TRIM(CONCAT(p.primer_apellido, ' ', COALESCE(p.segundo_apellido, ''))) as apellidos,
           p.identificacion as numero_identificacion,
           EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
-          sx.descripcion as sexo,
+          sx.nombre as sexo,
           pr.nombre as nombre_profesion,
           pr.descripcion as profesion_descripcion,
           m.nombre_municipio,
@@ -317,7 +315,7 @@ class PersonasCapacidadesService {
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
         LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
         ${whereClause}
-        ORDER BY pr.nombre, p.primer_apellido, p.primer_nombre
+        ORDER BY pr.nombre, apellidos, nombres
         LIMIT :limite OFFSET :offset
       `;
 
@@ -334,8 +332,8 @@ class PersonasCapacidadesService {
         SELECT 
           pr.nombre as nombre_profesion,
           COUNT(*) as total_personas,
-          COUNT(CASE WHEN sx.descripcion = 'Masculino' THEN 1 END) as hombres,
-          COUNT(CASE WHEN sx.descripcion = 'Femenino' THEN 1 END) as mujeres,
+          COUNT(CASE WHEN sx.nombre = 'Masculino' THEN 1 END) as hombres,
+          COUNT(CASE WHEN sx.nombre = 'Femenino' THEN 1 END) as mujeres,
           ROUND(AVG(EXTRACT(YEAR FROM AGE(p.fecha_nacimiento))), 1) as edad_promedio
         FROM personas p
         LEFT JOIN profesiones pr ON p.id_profesion = pr.id_profesion
@@ -394,19 +392,31 @@ class PersonasCapacidadesService {
         type: QueryTypes.SELECT
       });
 
+      // Consultar personas por comunidad
+      const estadisticas = [];
+      for (const cc of comunidades) {
+        const personasQuery = `
+          SELECT p.id_personas
+          FROM personas p
+          WHERE p.id_comunidad_cultural = :comunidad_id
+        `;
+        const personas = await sequelize.query(personasQuery, {
+          replacements: { comunidad_id: cc.id_comunidad_cultural },
+          type: QueryTypes.SELECT
+        });
+        if (personas.length > 0) {
+          estadisticas.push({
+            id_comunidad_cultural: cc.id_comunidad_cultural,
+            nombre_comunidad: cc.nombre_comunidad,
+            total_personas: personas.length
+            // Si necesitas total_familias, hombres, mujeres, puedes agregarlos aquí
+          });
+        }
+      }
       return {
-        estadisticas_comunidades: comunidades.map(cc => ({
-          id_comunidad_cultural: cc.id_comunidad_cultural,
-          nombre_comunidad: cc.nombre_comunidad,
-          descripcion: cc.descripcion,
-          total_personas: 0, // Placeholder - relación no implementada
-          total_familias: 0,  // Placeholder - relación no implementada
-          hombres: 0,         // Placeholder - relación no implementada
-          mujeres: 0,         // Placeholder - relación no implementada
-          edad_promedio: null // Placeholder - relación no implementada
-        })),
-        personas: incluir_personas ? [] : null, // Placeholder - relación no implementada
-        total: comunidades.length
+        estadisticas_comunidades: estadisticas,
+        personas: incluir_personas ? [] : null,
+        total: estadisticas.length
       };
 
     } catch (error) {
@@ -428,14 +438,14 @@ class PersonasCapacidadesService {
           d.nombre as nombre_destreza,
           d.nombre as descripcion,
           COUNT(pd.id_personas_personas) as total_personas,
-          COUNT(CASE WHEN sx.descripcion = 'Masculino' THEN 1 END) as hombres,
-          COUNT(CASE WHEN sx.descripcion = 'Femenino' THEN 1 END) as mujeres,
-          ROUND(AVG(EXTRACT(YEAR FROM AGE(p.fecha_nacimiento))), 1) as edad_promedio
+          COUNT(CASE WHEN sx.nombre = 'Masculino' THEN 1 END) as hombres,
+          COUNT(CASE WHEN sx.nombre = 'Femenino' THEN 1 END) as mujeres
         FROM destrezas d
-        LEFT JOIN persona_destreza pd ON d.id_destreza = pd.id_destrezas_destrezas
+        INNER JOIN persona_destreza pd ON d.id_destreza = pd.id_destrezas_destrezas
         LEFT JOIN personas p ON pd.id_personas_personas = p.id_personas
         LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
         GROUP BY d.id_destreza, d.nombre
+        HAVING COUNT(pd.id_personas_personas) > 0
         ORDER BY total_personas DESC
       `;
 
@@ -496,14 +506,14 @@ class PersonasCapacidadesService {
           d.nombre as nombre_destreza,
           d.nombre as descripcion,
           COUNT(pd.id_personas_personas) as total_personas,
-          COUNT(CASE WHEN sx.descripcion = 'Masculino' THEN 1 END) as hombres,
-          COUNT(CASE WHEN sx.descripcion = 'Femenino' THEN 1 END) as mujeres,
-          ROUND(AVG(EXTRACT(YEAR FROM AGE(p.fecha_nacimiento))), 1) as edad_promedio
+          COUNT(CASE WHEN sx.nombre = 'Masculino' THEN 1 END) as hombres,
+          COUNT(CASE WHEN sx.nombre = 'Femenino' THEN 1 END) as mujeres
         FROM destrezas d
-        LEFT JOIN persona_destreza pd ON d.id_destreza = pd.id_destrezas_destrezas
+        INNER JOIN persona_destreza pd ON d.id_destreza = pd.id_destrezas_destrezas
         LEFT JOIN personas p ON pd.id_personas_personas = p.id_personas
         LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
         GROUP BY d.id_destreza, d.nombre
+        HAVING COUNT(pd.id_personas_personas) > 0
         ORDER BY total_personas DESC
       `;
 
@@ -561,10 +571,12 @@ class PersonasCapacidadesService {
 
       // Veredas disponibles
       const veredas = await sequelize.query(`
-        SELECT v.id_vereda, v.nombre as nombre_vereda, s.nombre as nombre_sector, m.nombre_municipio
+        SELECT DISTINCT v.id_vereda, v.nombre as nombre_vereda, s.nombre as nombre_sector, m.nombre_municipio
         FROM veredas v
-        INNER JOIN sectores s ON v.id_sector = s.id_sector
-        INNER JOIN municipios m ON s.id_municipio = m.id_municipio
+        LEFT JOIN familias f ON v.id_vereda = f.id_vereda
+        LEFT JOIN sectores s ON f.id_sector = s.id_sector
+        LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
+        WHERE f.id_familia IS NOT NULL
         ORDER BY m.nombre_municipio, s.nombre, v.nombre
       `, { type: QueryTypes.SELECT });
 
@@ -584,3 +596,5 @@ class PersonasCapacidadesService {
 }
 
 export default new PersonasCapacidadesService();
+
+

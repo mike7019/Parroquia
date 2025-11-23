@@ -33,11 +33,11 @@ class PersonasCapacidadesController {
         exito: true,
         mensaje: 'Consulta de personas por destrezas realizada exitosamente',
         datos: resultado.personas,
+        estadisticas: resultado.estadisticas || null,
         total: resultado.total,
         pagina: resultado.pagina,
         limite: resultado.limite,
-        total_paginas: resultado.total_paginas,
-        estadisticas: resultado.estadisticas || null
+        total_paginas: resultado.total_paginas
       });
 
     } catch (error) {

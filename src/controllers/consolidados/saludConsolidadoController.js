@@ -171,6 +171,54 @@ class SaludConsolidadoController {
       });
     }
   }
+
+  /**
+   * Generar reporte de salud en JSON
+   * GET /api/personas/salud/reporte/json
+   */
+  async generarReporteJSON(req, res) {
+    try {
+      const filtros = {
+        enfermedad: req.query.enfermedad,
+        edad_min: req.query.edad_min,
+        edad_max: req.query.edad_max,
+        id_sexo: req.query.id_sexo ? parseInt(req.query.id_sexo) : undefined,
+        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
+        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_enfermedad: req.query.id_enfermedad ? parseInt(req.query.id_enfermedad) : undefined,
+        limite: req.query.limite ? parseInt(req.query.limite) : 5000 // Límite más alto para reporte
+      };
+
+      // Remover filtros undefined
+      Object.keys(filtros).forEach(key => {
+        if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '') {
+          delete filtros[key];
+        }
+      });
+
+      console.log('📊 Generando reporte JSON de salud con filtros:', filtros);
+
+      const resultado = await saludConsolidadoService.consultarSalud(filtros);
+
+      res.json({
+        exito: true,
+        mensaje: `Reporte de salud generado: ${resultado.total} personas encontradas`,
+        datos: resultado.datos,
+        total: resultado.total,
+        filtros_aplicados: resultado.filtros_aplicados,
+        fecha_generacion: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error('❌ Error generando reporte JSON:', error);
+      res.status(500).json({
+        status: "error",
+        message: error.message,
+        code: "REPORTE_JSON_ERROR"
+      });
+    }
+  }
 }
 
 export default new SaludConsolidadoController();
