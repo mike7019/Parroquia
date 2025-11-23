@@ -38,12 +38,24 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    if (response.accessToken) {",
-									"        pm.collectionVariables.set('access_token', response.accessToken);",
-									"        console.log('Token guardado:', response.accessToken);",
-									"    }",
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test('Response has accessToken', function () {",
+									"    pm.expect(jsonData.data).to.have.property('accessToken');",
+									"});",
+									"",
+									"if (jsonData && jsonData.data && jsonData.data.accessToken) {",
+									"    pm.collectionVariables.set('access_token', jsonData.data.accessToken);",
+									"    console.log('✅ Token guardado exitosamente');",
+									"    console.log('Token preview:', jsonData.data.accessToken.substring(0, 30) + '...');",
+									"    console.log('Variable set:', pm.collectionVariables.get('access_token').substring(0, 30) + '...');",
+									"} else {",
+									"    console.error('❌ No se pudo extraer el token');",
+									"    console.log('Response:', JSON.stringify(jsonData, null, 2));",
 									"}"
 								],
 								"type": "text/javascript"
@@ -63,7 +75,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"admin@parroquia.com\",\n  \"password\": \"admin123\"\n}"
+							"raw": "{\n  \"correo_electronico\": \"admin@parroquia.com\",\n  \"contrasena\": \"admin123\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/login",
