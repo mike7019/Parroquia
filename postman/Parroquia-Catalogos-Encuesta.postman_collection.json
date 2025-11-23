@@ -1,32 +1,11 @@
 {
 	"info": {
-		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"_postman_id": "2e9c1270-bc53-40da-baa4-50cfc6c7000e",
 		"name": "Parroquia - Catálogos y Encuesta",
 		"description": "Colección completa de endpoints para catálogos geográficos y gestión de encuestas del sistema parroquial",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23157254"
 	},
-	"auth": {
-		"type": "bearer",
-		"bearer": [
-			{
-				"key": "token",
-				"value": "{{access_token}}",
-				"type": "string"
-			}
-		]
-	},
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:3000",
-			"type": "string"
-		},
-		{
-			"key": "access_token",
-			"value": "",
-			"type": "string"
-		}
-	],
 	"item": [
 		{
 			"name": "Autenticación",
@@ -49,7 +28,7 @@
 									"});",
 									"",
 									"if (jsonData && jsonData.data && jsonData.data.accessToken) {",
-									"    pm.collectionVariables.set('access_token', jsonData.data.accessToken);",
+									"    pm.environment.set(\"access_token\", jsonData.data.accessToken);",
 									"    console.log('✅ Token guardado exitosamente');",
 									"    console.log('Token preview:', jsonData.data.accessToken.substring(0, 30) + '...');",
 									"    console.log('Variable set:', pm.collectionVariables.get('access_token').substring(0, 30) + '...');",
@@ -58,7 +37,9 @@
 									"    console.log('Response:', JSON.stringify(jsonData, null, 2));",
 									"}"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						}
 					],
@@ -75,7 +56,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"correo_electronico\": \"admin@parroquia.com\",\n  \"contrasena\": \"admin123\"\n}"
+							"raw": "{\n  \"correo_electronico\": \"admin@parroquia.com\",\n  \"contrasena\": \"Admin123!\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/login",
@@ -88,7 +69,8 @@
 								"login"
 							]
 						}
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -129,7 +111,8 @@
 										}
 									]
 								}
-							}
+							},
+							"response": []
 						},
 						{
 							"name": "Obtener Departamento por ID",
@@ -148,7 +131,8 @@
 										"1"
 									]
 								}
-							}
+							},
+							"response": []
 						},
 						{
 							"name": "Crear Departamento",
@@ -175,7 +159,8 @@
 										"departamentos"
 									]
 								}
-							}
+							},
+							"response": []
 						},
 						{
 							"name": "Actualizar Departamento",
@@ -203,7 +188,8 @@
 										"1"
 									]
 								}
-							}
+							},
+							"response": []
 						},
 						{
 							"name": "Eliminar Departamento",
@@ -222,7 +208,8 @@
 										"1"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				},
@@ -265,7 +252,8 @@
 										}
 									]
 								}
-							}
+							},
+							"response": []
 						},
 						{
 							"name": "Obtener Municipio por ID",
@@ -284,7 +272,8 @@
 										"1110"
 									]
 								}
-							}
+							},
+							"response": []
 						},
 						{
 							"name": "Crear Municipio",
@@ -311,7 +300,8 @@
 										"municipios"
 									]
 								}
-							}
+							},
+							"response": []
 						},
 						{
 							"name": "Actualizar Municipio",
@@ -339,7 +329,8 @@
 										"1110"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				},
@@ -377,7 +368,8 @@
 										}
 									]
 								}
-							}
+							},
+							"response": []
 						},
 						{
 							"name": "Obtener Parroquia por ID",
@@ -396,7 +388,8 @@
 										"1"
 									]
 								}
-							}
+							},
+							"response": []
 						},
 						{
 							"name": "Crear Parroquia",
@@ -423,7 +416,8 @@
 										"parroquias"
 									]
 								}
-							}
+							},
+							"response": []
 						},
 						{
 							"name": "Actualizar Parroquia",
@@ -451,7 +445,8 @@
 										"1"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				},
@@ -489,7 +484,8 @@
 										}
 									]
 								}
-							}
+							},
+							"response": []
 						},
 						{
 							"name": "Crear Sector",
@@ -516,7 +512,8 @@
 										"sectores"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				},
@@ -554,7 +551,8 @@
 										}
 									]
 								}
-							}
+							},
+							"response": []
 						},
 						{
 							"name": "Crear Vereda",
@@ -568,7 +566,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"nombre\": \"El Rubí\",\n  \"id_municipio\": \"1110\",\n  \"activo\": true\n}"
+									"raw": "{\n  \"nombre\": \"El Rubí\",\n  \"id_municipio\": \"1110\"\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/api/catalog/veredas",
@@ -581,7 +579,8 @@
 										"veredas"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				},
@@ -619,7 +618,8 @@
 										}
 									]
 								}
-							}
+							},
+							"response": []
 						},
 						{
 							"name": "Crear Corregimiento",
@@ -646,7 +646,8 @@
 										"corregimientos"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				},
@@ -684,7 +685,8 @@
 										}
 									]
 								}
-							}
+							},
+							"response": []
 						},
 						{
 							"name": "Crear Centro Poblado",
@@ -711,7 +713,8 @@
 										"centros-poblados"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				}
@@ -739,7 +742,8 @@
 										"tipos-vivienda"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				},
@@ -762,7 +766,8 @@
 										"sistemas-acueducto"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				},
@@ -785,7 +790,8 @@
 										"disposicion-basuras"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				},
@@ -808,7 +814,8 @@
 										"sexos"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				},
@@ -831,7 +838,8 @@
 										"tipos-identificacion"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				},
@@ -854,7 +862,8 @@
 										"estados-civiles"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				},
@@ -877,7 +886,8 @@
 										"parentescos"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				},
@@ -900,7 +910,8 @@
 										"profesiones"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				},
@@ -923,7 +934,8 @@
 										"enfermedades"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				},
@@ -946,7 +958,8 @@
 										"destrezas"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				},
@@ -969,7 +982,8 @@
 										"habilidades"
 									]
 								}
-							}
+							},
+							"response": []
 						}
 					]
 				}
@@ -990,20 +1004,21 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"informacionGeneral\": {\n    \"municipio\": {\n      \"id\": \"1110\",\n      \"nombre\": \"Yolombó\"\n    },\n    \"parroquia\": {\n      \"id\": 1,\n      \"nombre\": \"Parroquia San José\"\n    },\n    \"sector\": {\n      \"id\": 1,\n      \"nombre\": \"Sector San José\"\n    },\n    \"vereda\": {\n      \"id\": 1,\n      \"nombre\": \"El Rubí\"\n    },\n    \"corregimiento\": {\n      \"id\": 1,\n      \"nombre\": \"Corregimiento San Mike\"\n    },\n    \"centro_poblado\": {\n      \"id\": 1,\n      \"nombre\": \"Centro Poblado San Pedro\"\n    },\n    \"fecha\": \"2025-11-23\",\n    \"apellido_familiar\": \"Pérez García\",\n    \"direccion\": \"Calle 50 # 32-10\",\n    \"telefono\": \"3001234567\",\n    \"numero_contrato_epm\": \"12345678\",\n    \"comunionEnCasa\": true\n  },\n  \"vivienda\": {\n    \"tipo_vivienda\": {\n      \"id\": 1,\n      \"nombre\": \"Casa\"\n    },\n    \"disposicion_basuras\": {\n      \"recolector\": true,\n      \"quemada\": false,\n      \"enterrada\": false,\n      \"recicla\": true,\n      \"aire_libre\": false,\n      \"no_aplica\": false\n    }\n  },\n  \"servicios_agua\": {\n    \"sistema_acueducto\": {\n      \"id\": 1,\n      \"nombre\": \"Acueducto Municipal\"\n    },\n    \"aguas_residuales\": \"alcantarillado\",\n    \"pozo_septico\": false,\n    \"letrina\": false,\n    \"campo_abierto\": false\n  },\n  \"observaciones\": {\n    \"sustento_familia\": \"Agricultura y comercio\",\n    \"observaciones_encuestador\": \"Familia colaboradora\",\n    \"autorizacion_datos\": true\n  },\n  \"familyMembers\": [\n    {\n      \"nombres\": \"Juan Carlos\",\n      \"apellidos\": \"Pérez\",\n      \"tipoIdentificacion\": {\n        \"id\": 1,\n        \"nombre\": \"Cédula de Ciudadanía\"\n      },\n      \"numeroIdentificacion\": \"1234567890\",\n      \"fechaNacimiento\": \"1980-05-15\",\n      \"telefono\": \"3001234567\",\n      \"email\": \"juan@ejemplo.com\",\n      \"direccion\": \"Calle 50 # 32-10\",\n      \"sexo\": {\n        \"id\": 1,\n        \"nombre\": \"Masculino\"\n      },\n      \"estadoCivil\": {\n        \"id\": 2,\n        \"nombre\": \"Casado(a)\"\n      },\n      \"profesion\": {\n        \"id\": 1,\n        \"nombre\": \"Agricultor\"\n      },\n      \"estudios\": \"Bachillerato\",\n      \"talla_camisa\": \"M\",\n      \"talla_pantalon\": \"32\",\n      \"talla_zapatos\": \"41\",\n      \"necesidad_enfermo\": \"Ninguna\",\n      \"liderazgo\": \"Presidente de la JAC\",\n      \"enfermedades\": [1, 2],\n      \"destrezas\": [1, 2],\n      \"habilidades\": [1],\n      \"celebraciones\": [\n        {\n          \"motivo\": \"Cumpleaños\",\n          \"dia\": 15,\n          \"mes\": 5\n        }\n      ]\n    }\n  ],\n  \"deceasedMembers\": [\n    {\n      \"nombres\": \"María\",\n      \"apellidos\": \"Pérez\",\n      \"fechaFallecimiento\": \"2020-03-10\",\n      \"sexo\": {\n        \"id\": 2,\n        \"nombre\": \"Femenino\"\n      },\n      \"causaFallecimiento\": \"Enfermedad\"\n    }\n  ]\n}"
+							"raw": "{\n  \"informacionGeneral\": {\n    \"municipio\": {\n      \"id\": 905,\n      \"nombre\": \"Santa Marta\"\n    },\n    \"parroquia\": {\n      \"id\": 4,\n      \"nombre\": \"Parroquia Santa Ana\"\n    },\n    \"sector\": {\n      \"id\": 2,\n      \"nombre\": \"Sector Cartagena\"\n    },\n    \"vereda\": {\n      \"id\": 2,\n      \"nombre\": \"Chucunchaca\"\n    },\n    \"corregimiento\": {\n      \"id\": 12,\n      \"nombre\": \"Corregimiento Bonda\"\n    },\n    \"centro_poblado\": {\n      \"id\": 4,\n      \"nombre\": \"Centro Poblado Santa Ana\"\n    },\n    \"fecha\": \"2025-11-09T03:32:17.404Z\",\n    \"apellido_familiar\": \"Garzon Rodriguez\",\n    \"direccion\": \"carrera 16b # 7-14\",\n    \"telefono\": \"4339153\",\n    \"numero_contrato_epm\": \"253614789\"\n  },\n  \"vivienda\": {\n    \"tipo_vivienda\": {\n      \"id\": 2,\n      \"nombre\": \"Apartamento\"\n    },\n    \"disposicion_basuras\": [\n      {\n        \"id\": 5,\n        \"nombre\": \"Compostaje Mejorado\",\n        \"seleccionado\": true\n      },\n      {\n        \"id\": 2,\n        \"nombre\": \"Quema\",\n        \"seleccionado\": true\n      },\n      {\n        \"id\": 1,\n        \"nombre\": \"Recolección Pública\",\n        \"seleccionado\": true\n      }\n    ]\n  },\n  \"servicios_agua\": {\n    \"sistema_acueducto\": {\n      \"id\": 1,\n      \"nombre\": \"Acueducto Municipal\"\n    },\n    \"aguas_residuales\": [\n      {\n        \"id\": 1,\n        \"nombre\": \"Alcantarillado\",\n        \"seleccionado\": true\n      },\n      {\n        \"id\": 2,\n        \"nombre\": \"Pozo Séptico\",\n        \"seleccionado\": true\n      }\n    ]\n  },\n  \"observaciones\": {\n    \"sustento_familia\": \"oficios varios\",\n    \"observaciones_encuestador\": \"ninguna\",\n    \"autorizacion_datos\": true\n  },\n  \"familyMembers\": [\n    {\n      \"nombres\": \"Michael Garzon Rodriguez\",\n      \"fechaNacimiento\": \"2000-11-01T00:00:00.000Z\",\n      \"tipoIdentificacion\": {\n        \"id\": 3,\n        \"nombre\": \"CC - Cédula de Ciudadanía\"\n      },\n      \"numeroIdentificacion\": \"1082968374\",\n      \"sexo\": {\n        \"id\": 1,\n        \"nombre\": \"Masculino\"\n      },\n      \"situacionCivil\": {\n        \"id\": 1,\n        \"nombre\": \"Soltero(a)\"\n      },\n      \"parentesco\": {\n        \"id\": 26,\n        \"nombre\": \"Jefe de Hogar\"\n      },\n      \"talla_camisa\": \"12\",\n      \"talla_pantalon\": \"28\",\n      \"talla_zapato\": \"37\",\n      \"estudio\": {\n        \"id\": 3,\n        \"nombre\": \"Educación Secundaria\"\n      },\n      \"comunidadCultural\": {\n        \"id\": 5,\n        \"nombre\": \"Otra\"\n      },\n      \"telefono\": \"3218820571\",\n      \"enQueEresLider\": [\n        \"Belleza\"\n      ],\n      \"correo_electronico\": \"raquisrod@gmail.com\",\n      \"enfermedades\": [\n        {\n          \"id\": 76,\n          \"nombre\": \"Anemia\"\n        }\n      ],\n      \"necesidadesEnfermo\": [\n        \"pasajes\"\n      ],\n      \"solicitudComunionCasa\": true,\n      \"profesionMotivoFechaCelebrar\": {\n        \"profesion\": {\n          \"id\": 6,\n          \"nombre\": \"Agricultor\"\n        },\n        \"celebraciones\": [\n          {\n            \"motivo\": \"Cumpleaños\",\n            \"dia\": \"12\",\n            \"mes\": \"11\"\n          },\n          {\n            \"motivo\": \"Dia de la madre\",\n            \"dia\": \"8\",\n            \"mes\": \"5\"\n          }\n        ]\n      },\n      \"habilidades\": [\n        {\n          \"id\": 16,\n          \"nombre\": \"Artesanía\",\n          \"nivel\": \"Avanzado\"\n        },\n        {\n          \"id\": 12,\n          \"nombre\": \"Cocina\",\n          \"nivel\": \"Avanzado\"\n        }\n      ],\n      \"destrezas\": [\n        {\n          \"id\": 19,\n          \"nombre\": \"Agricultura\"\n        },\n        {\n          \"id\": 14,\n          \"nombre\": \"Barbería\"\n        }\n      ]\n    }\n  ],\n  \"deceasedMembers\": [\n    {\n      \"nombres\": \"Emilia Pinto\",\n      \"fechaFallecimiento\": \"2025-11-28T05:00:00.000Z\",\n      \"sexo\": {\n        \"id\": 2,\n        \"nombre\": \"Femenino\"\n      },\n      \"parentesco\": {\n        \"id\": 8,\n        \"nombre\": \"Abuela\"\n      },\n      \"causaFallecimiento\": \"Natural\"\n    }\n  ],\n  \"metadata\": {\n    \"timestamp\": \"2025-11-09T04:06:36.092Z\",\n    \"completed\": false,\n    \"currentStage\": 6\n  },\n  \"version\": \"2.0\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/encuestas",
+							"raw": "{{base_url}}/api/encuesta",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
-								"encuestas"
+								"encuesta"
 							]
 						},
 						"description": "Crea una encuesta completa con toda la información de la familia"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Listar Encuestas",
@@ -1011,13 +1026,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/encuestas?page=1&limit=10",
+							"raw": "{{base_url}}/api/encuesta?page=1&limit=10",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
-								"encuestas"
+								"encuesta"
 							],
 							"query": [
 								{
@@ -1025,17 +1040,18 @@
 									"value": "1"
 								},
 								{
-									"key": "limit",
-									"value": "10"
-								},
-								{
 									"key": "apellido_familiar",
 									"value": "Pérez",
 									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10"
 								}
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Obtener Encuesta por ID",
@@ -1043,20 +1059,21 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/encuestas/1",
+							"raw": "{{base_url}}/api/encuesta/21",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
-								"encuestas",
-								"1"
+								"encuesta",
+								"21"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
-					"name": "Actualizar Encuesta",
+					"name": "Actualizar Encuesta Completa (PUT)",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -1067,20 +1084,51 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"informacionGeneral\": {\n    \"telefono\": \"3009876543\",\n    \"direccion\": \"Calle 51 # 33-11\"\n  }\n}"
+							"raw": "{\n  \"apellido_familiar\": \"Rodríguez García\",\n  \"sector\": \"Centro\",\n  \"direccion_familia\": \"Carrera 45 # 23-67\",\n  \"numero_contacto\": \"3001234567\",\n  \"telefono\": \"3001234567\",\n  \"email\": \"familia@email.com\",\n  \"tamaño_familia\": 4,\n  \"tipo_vivienda\": \"Casa\",\n  \"estado_encuesta\": \"completada\",\n  \"tutor_responsable\": \"Carlos Rodríguez\",\n  \"comunionEnCasa\": false\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/encuestas/1",
+							"raw": "{{base_url}}/api/encuesta/21",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
-								"encuestas",
-								"1"
+								"encuesta",
+								"21"
 							]
-						}
-					}
+						},
+						"description": "Actualización completa de encuesta. Requiere campos obligatorios: apellido_familiar, sector, direccion_familia"
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Campos Específicos (PATCH)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"telefono\": \"3009876543\",\n  \"email\": \"nuevoemail@familia.com\",\n  \"estado_encuesta\": \"completada\",\n  \"comunionEnCasa\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/encuesta/21",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"encuesta",
+								"21"
+							]
+						},
+						"description": "Actualización parcial de encuesta. Solo actualiza los campos enviados."
+					},
+					"response": []
 				},
 				{
 					"name": "Eliminar Encuesta",
@@ -1098,7 +1146,8 @@
 								"1"
 							]
 						}
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1120,9 +1169,32 @@
 								"dashboard"
 							]
 						}
-					}
+					},
+					"response": []
 				}
 			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
 		}
 	]
 }
