@@ -195,11 +195,14 @@ class CorregimientosService {
         }
       }
 
+      // Mapear id_municipio a id_municipio_municipios (nombre del campo en la BD)
+      const id_municipio = corregimientoData.id_municipio || corregimientoData.id_municipio_municipios;
+
       // Verificar nombre duplicado en el mismo municipio
       const existingCorregimiento = await Corregimientos.findOne({
         where: { 
           nombre: corregimientoData.nombre,
-          id_municipio_municipios: corregimientoData.id_municipio_municipios
+          id_municipio_municipios: id_municipio
         }
       });
 
@@ -220,7 +223,7 @@ class CorregimientosService {
         id_corregimiento: nextId,
         codigo_corregimiento: codigoAutomatico,
         nombre: corregimientoData.nombre,
-        id_municipio_municipios: corregimientoData.id_municipio_municipios
+        id_municipio_municipios: id_municipio
       });
       
       logger.info('Corregimiento creado exitosamente', {
