@@ -593,6 +593,22 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
           detail: error.original?.detail
         });
         
+        // Detectar violaciones de unique constraint (ID duplicado)
+        if (error.name === 'SequelizeUniqueConstraintError' || error.original?.code === '23505') {
+          const detail = error.original?.detail || '';
+          const idMatch = detail.match(/\(id_personas\)=\((\d+)\)/);
+          const duplicatedId = idMatch ? idMatch[1] : 'desconocido';
+          
+          throw createError(ErrorCodes.DATABASE.DUPLICATE_KEY, {
+            table: 'personas',
+            field: 'id_personas',
+            value: duplicatedId,
+            person: miembro.nombres,
+            details: `El ID ${duplicatedId} ya existe en la tabla de personas. Esto indica un problema con la secuencia de IDs.`,
+            suggestion: 'Ejecute el script fix-sequences.js para corregir las secuencias de la base de datos: node fix-sequences.js'
+          });
+        }
+        
         // Detectar violaciones de foreign key y dar mensajes específicos
         if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
           const constraint = error.original?.constraint || '';

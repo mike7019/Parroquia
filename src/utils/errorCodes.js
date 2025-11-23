@@ -256,6 +256,13 @@ export const ErrorCodes = {
       userMessage: 'Error al eliminar la información',
       technicalMessage: 'Fallo en operación DELETE',
       suggestion: 'No se pudo eliminar. Intente nuevamente'
+    },
+    DUPLICATE_KEY: {
+      code: 'DB_DUPLICATE_KEY',
+      httpStatus: 500,
+      userMessage: 'Error de clave duplicada en la base de datos',
+      technicalMessage: 'El ID auto-generado ya existe - problema con secuencia de PostgreSQL',
+      suggestion: 'Ejecute el script de corrección de secuencias: node fix-sequences.js'
     }
   },
 

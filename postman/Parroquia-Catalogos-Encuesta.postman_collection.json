@@ -1,0 +1,1116 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "Parroquia - Catálogos y Encuesta",
+		"description": "Colección completa de endpoints para catálogos geográficos y gestión de encuestas del sistema parroquial",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Autenticación",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.accessToken) {",
+									"        pm.collectionVariables.set('access_token', response.accessToken);",
+									"        console.log('Token guardado:', response.accessToken);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@parroquia.com\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Catálogos Geográficos",
+			"item": [
+				{
+					"name": "Departamentos",
+					"item": [
+						{
+							"name": "Listar Departamentos",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/departamentos?pagina=1&limite=10",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"departamentos"
+									],
+									"query": [
+										{
+											"key": "pagina",
+											"value": "1"
+										},
+										{
+											"key": "limite",
+											"value": "10"
+										},
+										{
+											"key": "buscar",
+											"value": "Antioquia",
+											"disabled": true
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Obtener Departamento por ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/departamentos/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"departamentos",
+										"1"
+									]
+								}
+							}
+						},
+						{
+							"name": "Crear Departamento",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"codigo\": \"05\",\n  \"nombre\": \"Antioquia\",\n  \"activo\": true\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/catalog/departamentos",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"departamentos"
+									]
+								}
+							}
+						},
+						{
+							"name": "Actualizar Departamento",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nombre\": \"Antioquia\",\n  \"activo\": true\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/catalog/departamentos/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"departamentos",
+										"1"
+									]
+								}
+							}
+						},
+						{
+							"name": "Eliminar Departamento",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/departamentos/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"departamentos",
+										"1"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Municipios",
+					"item": [
+						{
+							"name": "Listar Municipios",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/municipios?pagina=1&limite=20",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"municipios"
+									],
+									"query": [
+										{
+											"key": "pagina",
+											"value": "1"
+										},
+										{
+											"key": "limite",
+											"value": "20"
+										},
+										{
+											"key": "id_departamento",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "buscar",
+											"value": "Medellín",
+											"disabled": true
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Obtener Municipio por ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/municipios/1110",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"municipios",
+										"1110"
+									]
+								}
+							}
+						},
+						{
+							"name": "Crear Municipio",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"id_municipio\": \"1110\",\n  \"codigo_municipio\": \"1110\",\n  \"nombre_municipio\": \"Yolombó\",\n  \"id_departamento\": 1,\n  \"activo\": true\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/catalog/municipios",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"municipios"
+									]
+								}
+							}
+						},
+						{
+							"name": "Actualizar Municipio",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nombre_municipio\": \"Yolombó\",\n  \"activo\": true\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/catalog/municipios/1110",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"municipios",
+										"1110"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Parroquias",
+					"item": [
+						{
+							"name": "Listar Parroquias",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/parroquias?pagina=1&limite=20",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"parroquias"
+									],
+									"query": [
+										{
+											"key": "pagina",
+											"value": "1"
+										},
+										{
+											"key": "limite",
+											"value": "20"
+										},
+										{
+											"key": "id_municipio",
+											"value": "1110",
+											"disabled": true
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Obtener Parroquia por ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/parroquias/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"parroquias",
+										"1"
+									]
+								}
+							}
+						},
+						{
+							"name": "Crear Parroquia",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nombre\": \"Parroquia San José\",\n  \"id_municipio\": \"1110\",\n  \"direccion\": \"Calle 50 # 45-30\",\n  \"telefono\": \"3001234567\",\n  \"email\": \"parroquia@ejemplo.com\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/catalog/parroquias",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"parroquias"
+									]
+								}
+							}
+						},
+						{
+							"name": "Actualizar Parroquia",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nombre\": \"Parroquia San José\",\n  \"direccion\": \"Calle 50 # 45-30\",\n  \"telefono\": \"3001234567\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/catalog/parroquias/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"parroquias",
+										"1"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Sectores",
+					"item": [
+						{
+							"name": "Listar Sectores",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/sectores?pagina=1&limite=20",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"sectores"
+									],
+									"query": [
+										{
+											"key": "pagina",
+											"value": "1"
+										},
+										{
+											"key": "limite",
+											"value": "20"
+										},
+										{
+											"key": "id_municipio",
+											"value": "1110",
+											"disabled": true
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Crear Sector",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nombre\": \"Sector San José\",\n  \"id_municipio\": \"1110\",\n  \"activo\": true\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/catalog/sectores",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"sectores"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Veredas",
+					"item": [
+						{
+							"name": "Listar Veredas",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/veredas?pagina=1&limite=20",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"veredas"
+									],
+									"query": [
+										{
+											"key": "pagina",
+											"value": "1"
+										},
+										{
+											"key": "limite",
+											"value": "20"
+										},
+										{
+											"key": "id_municipio",
+											"value": "1110",
+											"disabled": true
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Crear Vereda",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nombre\": \"El Rubí\",\n  \"id_municipio\": \"1110\",\n  \"activo\": true\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/catalog/veredas",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"veredas"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Corregimientos",
+					"item": [
+						{
+							"name": "Listar Corregimientos",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/corregimientos?pagina=1&limite=20",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"corregimientos"
+									],
+									"query": [
+										{
+											"key": "pagina",
+											"value": "1"
+										},
+										{
+											"key": "limite",
+											"value": "20"
+										},
+										{
+											"key": "id_municipio",
+											"value": "1110",
+											"disabled": true
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Crear Corregimiento",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nombre\": \"Corregimiento San Mike\",\n  \"id_municipio\": \"1110\",\n  \"activo\": true\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/catalog/corregimientos",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"corregimientos"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Centros Poblados",
+					"item": [
+						{
+							"name": "Listar Centros Poblados",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/centros-poblados?pagina=1&limite=20",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"centros-poblados"
+									],
+									"query": [
+										{
+											"key": "pagina",
+											"value": "1"
+										},
+										{
+											"key": "limite",
+											"value": "20"
+										},
+										{
+											"key": "id_municipio",
+											"value": "1110",
+											"disabled": true
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Crear Centro Poblado",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nombre\": \"Centro Poblado San Pedro\",\n  \"id_municipio\": \"1110\",\n  \"activo\": true\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/catalog/centros-poblados",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"centros-poblados"
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Catálogos Generales",
+			"item": [
+				{
+					"name": "Tipos de Vivienda",
+					"item": [
+						{
+							"name": "Listar Tipos de Vivienda",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/tipos-vivienda",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"tipos-vivienda"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Sistemas Acueducto",
+					"item": [
+						{
+							"name": "Listar Sistemas Acueducto",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/sistemas-acueducto",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"sistemas-acueducto"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Disposición Basuras",
+					"item": [
+						{
+							"name": "Listar Disposición Basuras",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/disposicion-basuras",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"disposicion-basuras"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Sexos",
+					"item": [
+						{
+							"name": "Listar Sexos",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/sexos",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"sexos"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Tipos Identificación",
+					"item": [
+						{
+							"name": "Listar Tipos Identificación",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/tipos-identificacion",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"tipos-identificacion"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Estados Civiles",
+					"item": [
+						{
+							"name": "Listar Estados Civiles",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/estados-civiles",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"estados-civiles"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Parentescos",
+					"item": [
+						{
+							"name": "Listar Parentescos",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/parentescos",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"parentescos"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Profesiones",
+					"item": [
+						{
+							"name": "Listar Profesiones",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/profesiones",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"profesiones"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Enfermedades",
+					"item": [
+						{
+							"name": "Listar Enfermedades",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/enfermedades",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"enfermedades"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Destrezas",
+					"item": [
+						{
+							"name": "Listar Destrezas",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/destrezas",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"destrezas"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Habilidades",
+					"item": [
+						{
+							"name": "Listar Habilidades",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/catalog/habilidades",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"catalog",
+										"habilidades"
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Encuestas",
+			"item": [
+				{
+					"name": "Crear Encuesta Completa",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"informacionGeneral\": {\n    \"municipio\": {\n      \"id\": \"1110\",\n      \"nombre\": \"Yolombó\"\n    },\n    \"parroquia\": {\n      \"id\": 1,\n      \"nombre\": \"Parroquia San José\"\n    },\n    \"sector\": {\n      \"id\": 1,\n      \"nombre\": \"Sector San José\"\n    },\n    \"vereda\": {\n      \"id\": 1,\n      \"nombre\": \"El Rubí\"\n    },\n    \"corregimiento\": {\n      \"id\": 1,\n      \"nombre\": \"Corregimiento San Mike\"\n    },\n    \"centro_poblado\": {\n      \"id\": 1,\n      \"nombre\": \"Centro Poblado San Pedro\"\n    },\n    \"fecha\": \"2025-11-23\",\n    \"apellido_familiar\": \"Pérez García\",\n    \"direccion\": \"Calle 50 # 32-10\",\n    \"telefono\": \"3001234567\",\n    \"numero_contrato_epm\": \"12345678\",\n    \"comunionEnCasa\": true\n  },\n  \"vivienda\": {\n    \"tipo_vivienda\": {\n      \"id\": 1,\n      \"nombre\": \"Casa\"\n    },\n    \"disposicion_basuras\": {\n      \"recolector\": true,\n      \"quemada\": false,\n      \"enterrada\": false,\n      \"recicla\": true,\n      \"aire_libre\": false,\n      \"no_aplica\": false\n    }\n  },\n  \"servicios_agua\": {\n    \"sistema_acueducto\": {\n      \"id\": 1,\n      \"nombre\": \"Acueducto Municipal\"\n    },\n    \"aguas_residuales\": \"alcantarillado\",\n    \"pozo_septico\": false,\n    \"letrina\": false,\n    \"campo_abierto\": false\n  },\n  \"observaciones\": {\n    \"sustento_familia\": \"Agricultura y comercio\",\n    \"observaciones_encuestador\": \"Familia colaboradora\",\n    \"autorizacion_datos\": true\n  },\n  \"familyMembers\": [\n    {\n      \"nombres\": \"Juan Carlos\",\n      \"apellidos\": \"Pérez\",\n      \"tipoIdentificacion\": {\n        \"id\": 1,\n        \"nombre\": \"Cédula de Ciudadanía\"\n      },\n      \"numeroIdentificacion\": \"1234567890\",\n      \"fechaNacimiento\": \"1980-05-15\",\n      \"telefono\": \"3001234567\",\n      \"email\": \"juan@ejemplo.com\",\n      \"direccion\": \"Calle 50 # 32-10\",\n      \"sexo\": {\n        \"id\": 1,\n        \"nombre\": \"Masculino\"\n      },\n      \"estadoCivil\": {\n        \"id\": 2,\n        \"nombre\": \"Casado(a)\"\n      },\n      \"profesion\": {\n        \"id\": 1,\n        \"nombre\": \"Agricultor\"\n      },\n      \"estudios\": \"Bachillerato\",\n      \"talla_camisa\": \"M\",\n      \"talla_pantalon\": \"32\",\n      \"talla_zapatos\": \"41\",\n      \"necesidad_enfermo\": \"Ninguna\",\n      \"liderazgo\": \"Presidente de la JAC\",\n      \"enfermedades\": [1, 2],\n      \"destrezas\": [1, 2],\n      \"habilidades\": [1],\n      \"celebraciones\": [\n        {\n          \"motivo\": \"Cumpleaños\",\n          \"dia\": 15,\n          \"mes\": 5\n        }\n      ]\n    }\n  ],\n  \"deceasedMembers\": [\n    {\n      \"nombres\": \"María\",\n      \"apellidos\": \"Pérez\",\n      \"fechaFallecimiento\": \"2020-03-10\",\n      \"sexo\": {\n        \"id\": 2,\n        \"nombre\": \"Femenino\"\n      },\n      \"causaFallecimiento\": \"Enfermedad\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/encuestas",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"encuestas"
+							]
+						},
+						"description": "Crea una encuesta completa con toda la información de la familia"
+					}
+				},
+				{
+					"name": "Listar Encuestas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/encuestas?page=1&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"encuestas"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "apellido_familiar",
+									"value": "Pérez",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obtener Encuesta por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/encuestas/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"encuestas",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Actualizar Encuesta",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"informacionGeneral\": {\n    \"telefono\": \"3009876543\",\n    \"direccion\": \"Calle 51 # 33-11\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/encuestas/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"encuestas",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Eliminar Encuesta",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/encuestas/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"encuestas",
+								"1"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Estadísticas",
+			"item": [
+				{
+					"name": "Dashboard General",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"dashboard"
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}
