@@ -1,0 +1,171 @@
+{
+  "metadata": {
+    "backup_date": "2025-11-23T21:50:39.496Z",
+    "encuesta_id": 21,
+    "user_id": "0c9d5e57-d48a-4c47-89ce-1299acc9e4de",
+    "operation": "DELETE",
+    "backup_version": "1.0"
+  },
+  "familia": {
+    "id_familia": "21",
+    "apellido_familiar": "Garzon Pinto ACTUALIZADO",
+    "sector": "Sector San Pedro",
+    "direccion_familia": "carrera 16b # 7-15 MODIFICADA",
+    "numero_contacto": "3009876543",
+    "telefono": "3009876543",
+    "email": "familia.garzon@email.com",
+    "tamaño_familia": 4,
+    "tipo_vivienda": "Casa",
+    "estado_encuesta": "completada",
+    "numero_encuestas": 1,
+    "fecha_ultima_encuesta": "2025-11-23",
+    "codigo_familia": "FAM_1763931471284_f58f224c",
+    "tutor_responsable": true,
+    "id_municipio": "905",
+    "id_vereda": "2",
+    "id_sector": "2",
+    "comunionEnCasa": true,
+    "numero_contrato_epm": "253614789",
+    "id_parroquia": "4",
+    "comunionencasa": false,
+    "fecha_encuesta": "2025-11-08",
+    "sustento_familia": null,
+    "observaciones_encuestador": null,
+    "autorizacion_datos": false,
+    "pozo_septico": false,
+    "letrina": false,
+    "campo_abierto": false,
+    "disposicion_recolector": false,
+    "disposicion_quemada": false,
+    "disposicion_enterrada": false,
+    "disposicion_recicla": false,
+    "disposicion_aire_libre": false,
+    "disposicion_no_aplica": false,
+    "id_tipo_vivienda": "2",
+    "id_corregimiento": "12",
+    "id_centro_poblado": "4",
+    "id_usuario_creador": "0c9d5e57-d48a-4c47-89ce-1299acc9e4de",
+    "nombre_municipio": "Santa Marta",
+    "nombre_vereda": "Chucunchaca",
+    "nombre_sector": "Sector Cartagena",
+    "nombre_parroquia": null,
+    "nombre_tipo_vivienda": "Apartamento"
+  },
+  "personas": [
+    {
+      "id_personas": "17",
+      "primer_nombre": "Michael",
+      "segundo_nombre": "Garzon",
+      "primer_apellido": "Rodriguez",
+      "segundo_apellido": null,
+      "id_tipo_identificacion_tipo_identificacion": "3",
+      "identificacion": "1082968374",
+      "telefono": "3218820571",
+      "correo_electronico": "raquisrod@gmail.com",
+      "fecha_nacimiento": "2000-10-31",
+      "direccion": "carrera 16b # 7-14",
+      "id_familia_familias": "21",
+      "id_estado_civil_estado_civil": "1",
+      "estudios": "Educación Secundaria",
+      "en_que_eres_lider": "Belleza",
+      "necesidad_enfermo": "pasajes",
+      "id_profesion": "6",
+      "id_sexo": "1",
+      "talla_camisa": "12",
+      "talla_pantalon": "28",
+      "talla_zapato": "37",
+      "id_familia": "21",
+      "id_parroquia": null,
+      "id_parentesco": "26",
+      "id_comunidad_cultural": "5",
+      "id_nivel_educativo": null,
+      "motivo_celebrar": "Cumpleaños",
+      "dia_celebrar": 12,
+      "mes_celebrar": 11,
+      "sexo_nombre": null,
+      "tipo_identificacion_nombre": "Cédula de Ciudadanía",
+      "estado_civil_nombre": "Soltero(a)"
+    }
+  ],
+  "difuntos": [
+    {
+      "id_difunto": "17",
+      "nombre_completo": "Emilia Pinto",
+      "fecha_fallecimiento": "2025-11-28",
+      "observaciones": "Natural",
+      "id_familia_familias": "21",
+      "createdAt": "2025-11-23T20:57:51.350Z",
+      "updatedAt": "2025-11-23T20:57:51.350Z",
+      "id_sexo": "2",
+      "id_parentesco": "8",
+      "causa_fallecimiento": "Natural",
+      "sexo_nombre": null,
+      "parentesco_nombre": "Abuela"
+    }
+  ],
+  "servicios": {
+    "disposicion_basuras": [
+      {
+        "id": "47",
+        "id_familia": "21",
+        "id_tipo_disposicion_basura": "1",
+        "created_at": "2025-11-23T20:57:51.288Z",
+        "updated_at": "2025-11-23T20:57:51.288Z",
+        "nombre": "Recolección Pública"
+      },
+      {
+        "id": "46",
+        "id_familia": "21",
+        "id_tipo_disposicion_basura": "2",
+        "created_at": "2025-11-23T20:57:51.288Z",
+        "updated_at": "2025-11-23T20:57:51.288Z",
+        "nombre": "Quema"
+      },
+      {
+        "id": "45",
+        "id_familia": "21",
+        "id_tipo_disposicion_basura": "5",
+        "created_at": "2025-11-23T20:57:51.288Z",
+        "updated_at": "2025-11-23T20:57:51.288Z",
+        "nombre": "Compostaje Mejorado"
+      }
+    ],
+    "sistema_acueducto": [
+      {
+        "id_familia": "21",
+        "id_sistema_acueducto": "1",
+        "id": "275",
+        "created_at": "2025-11-23T20:57:51.288Z",
+        "updated_at": "2025-11-23T20:57:51.288Z",
+        "nombre": "Acueducto Municipal"
+      }
+    ],
+    "aguas_residuales": [
+      {
+        "id": "30",
+        "id_familia": "21",
+        "id_tipo_aguas_residuales": "1",
+        "created_at": "2025-11-23T20:57:51.288Z",
+        "updated_at": "2025-11-23T20:57:51.288Z",
+        "nombre": "Alcantarillado"
+      },
+      {
+        "id": "31",
+        "id_familia": "21",
+        "id_tipo_aguas_residuales": "2",
+        "created_at": "2025-11-23T20:57:51.288Z",
+        "updated_at": "2025-11-23T20:57:51.288Z",
+        "nombre": "Pozo Séptico"
+      }
+    ],
+    "tipo_vivienda": [
+      {
+        "id_familia": "21",
+        "id_tipo_vivienda": "2",
+        "created_at": "2025-11-23T20:57:51.288Z",
+        "updated_at": "2025-11-23T20:57:51.288Z",
+        "nombre": "Apartamento"
+      }
+    ]
+  }
+}

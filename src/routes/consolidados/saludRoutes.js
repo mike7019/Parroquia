@@ -145,6 +145,18 @@ const router = express.Router();
  *         description: Filtrar por ID de sector
  *         example: 1
  *       - in: query
+ *         name: id_corregimiento
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de corregimiento
+ *         example: 1
+ *       - in: query
+ *         name: id_centro_poblado
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de centro poblado
+ *         example: 1
+ *       - in: query
  *         name: limite
  *         schema:
  *           type: integer

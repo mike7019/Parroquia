@@ -66,6 +66,18 @@ class SaludConsolidadoService {
         params.id_sector = filtros.id_sector;
       }
       
+      // Filtrar por corregimiento (ahora por ID)
+      if (filtros.id_corregimiento) {
+        whereConditions.push(`f.id_corregimiento = :id_corregimiento`);
+        params.id_corregimiento = filtros.id_corregimiento;
+      }
+      
+      // Filtrar por centro poblado (ahora por ID)
+      if (filtros.id_centro_poblado) {
+        whereConditions.push(`f.id_centro_poblado = :id_centro_poblado`);
+        params.id_centro_poblado = filtros.id_centro_poblado;
+      }
+      
       const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
       
       const limite = filtros.limite || 100;

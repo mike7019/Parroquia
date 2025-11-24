@@ -184,22 +184,31 @@ class CentrosPobladosService {
    */
   async createCentroPoblado(centroPobladoData) {
     try {
+      // Mapear id_municipio a id_municipio_municipios (nombre del campo en la BD)
+      const id_municipio = centroPobladoData.id_municipio || centroPobladoData.id_municipio_municipios;
+
+      // Validar que se proporcione el ID del municipio
+      if (!id_municipio) {
+        const error = new Error('El campo id_municipio es requerido. Debe proporcionar el ID del municipio al que pertenece el centro poblado.');
+        error.statusCode = 400;
+        error.code = 'MISSING_MUNICIPIO_ID';
+        throw error;
+      }
+
       // Verificar si el municipio existe
-      if (centroPobladoData.id_municipio_municipios) {
-        const municipio = await Municipios.findByPk(centroPobladoData.id_municipio_municipios);
-        if (!municipio) {
-          const error = new Error('Municipio no encontrado');
-          error.statusCode = 404;
-          error.code = 'MUNICIPIO_NOT_FOUND';
-          throw error;
-        }
+      const municipio = await Municipios.findByPk(id_municipio);
+      if (!municipio) {
+        const error = new Error(`Municipio no encontrado con ID: ${id_municipio}. Verifique que el municipio existe en el catálogo.`);
+        error.statusCode = 404;
+        error.code = 'MUNICIPIO_NOT_FOUND';
+        throw error;
       }
 
       // Verificar nombre duplicado en el MISMO municipio
       const existingCentroPoblado = await CentrosPoblados.findOne({
         where: { 
           nombre: centroPobladoData.nombre,
-          id_municipio_municipios: centroPobladoData.id_municipio_municipios
+          id_municipio_municipios: id_municipio
         }
       });
 
@@ -220,7 +229,7 @@ class CentrosPobladosService {
         id_centro_poblado: nextId,
         codigo_centro_poblado: codigoAutomatico,
         nombre: centroPobladoData.nombre,
-        id_municipio_municipios: centroPobladoData.id_municipio_municipios
+        id_municipio_municipios: id_municipio
       });
       
       logger.info('Centro poblado creado exitosamente', {
@@ -249,11 +258,14 @@ class CentrosPobladosService {
         throw error;
       }
 
+      // Mapear id_municipio a id_municipio_municipios para actualización
+      const id_municipio = centroPobladoData.id_municipio || centroPobladoData.id_municipio_municipios;
+
       // Verificar municipio si se proporciona
-      if (centroPobladoData.id_municipio_municipios) {
-        const municipio = await Municipios.findByPk(centroPobladoData.id_municipio_municipios);
+      if (id_municipio) {
+        const municipio = await Municipios.findByPk(id_municipio);
         if (!municipio) {
-          const error = new Error('Municipio no encontrado');
+          const error = new Error(`Municipio no encontrado con ID: ${id_municipio}. Verifique que el municipio existe en el catálogo.`);
           error.statusCode = 404;
           error.code = 'MUNICIPIO_NOT_FOUND';
           throw error;
@@ -262,7 +274,7 @@ class CentrosPobladosService {
 
       // Verificar nombre duplicado en el MISMO municipio (excluyendo el actual)
       if (centroPobladoData.nombre && centroPobladoData.nombre !== centro_poblado.nombre) {
-        const municipioTarget = centroPobladoData.id_municipio_municipios || centro_poblado.id_municipio_municipios;
+        const municipioTarget = id_municipio || centro_poblado.id_municipio_municipios;
         
         const existingCentroPoblado = await CentrosPoblados.findOne({
           where: { 
@@ -283,7 +295,7 @@ class CentrosPobladosService {
       // Actualizar el centro poblado (código NO se puede actualizar)
       await centro_poblado.update({
         nombre: centroPobladoData.nombre || centro_poblado.nombre,
-        id_municipio_municipios: centroPobladoData.id_municipio_municipios || centro_poblado.id_municipio_municipios
+        id_municipio_municipios: id_municipio || centro_poblado.id_municipio_municipios
       });
       
       logger.info('Centro poblado actualizado exitosamente', {

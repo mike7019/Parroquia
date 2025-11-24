@@ -258,11 +258,14 @@ class CorregimientosService {
         throw error;
       }
 
+      // Mapear id_municipio a id_municipio_municipios para actualización
+      const id_municipio = corregimientoData.id_municipio || corregimientoData.id_municipio_municipios;
+
       // Verificar municipio si se proporciona
-      if (corregimientoData.id_municipio_municipios) {
-        const municipio = await Municipios.findByPk(corregimientoData.id_municipio_municipios);
+      if (id_municipio) {
+        const municipio = await Municipios.findByPk(id_municipio);
         if (!municipio) {
-          const error = new Error('Municipio no encontrado');
+          const error = new Error(`Municipio no encontrado con ID: ${id_municipio}. Verifique que el municipio existe en el catálogo.`);
           error.statusCode = 404;
           error.code = 'MUNICIPIO_NOT_FOUND';
           throw error;
@@ -271,10 +274,12 @@ class CorregimientosService {
 
       // Verificar nombre duplicado (excluyendo el actual)
       if (corregimientoData.nombre && corregimientoData.nombre !== corregimiento.nombre) {
+        const municipioTarget = id_municipio || corregimiento.id_municipio_municipios;
+        
         const existingCorregimiento = await Corregimientos.findOne({
           where: { 
             nombre: corregimientoData.nombre,
-            id_municipio_municipios: corregimientoData.id_municipio_municipios || corregimiento.id_municipio_municipios,
+            id_municipio_municipios: municipioTarget,
             id_corregimiento: { [Op.ne]: id }
           }
         });
@@ -290,7 +295,7 @@ class CorregimientosService {
       // Actualizar el corregimiento (código NO se puede actualizar)
       await corregimiento.update({
         nombre: corregimientoData.nombre || corregimiento.nombre,
-        id_municipio_municipios: corregimientoData.id_municipio_municipios || corregimiento.id_municipio_municipios
+        id_municipio_municipios: id_municipio || corregimiento.id_municipio_municipios
       });
       
       logger.info('Corregimiento actualizado exitosamente', {
