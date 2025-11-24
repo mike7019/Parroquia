@@ -105,12 +105,6 @@ const router = express.Router();
  *         description: Filtrar por ID de enfermedad específica (tabla enfermedades)
  *         example: 1
  *       - in: query
- *         name: enfermedad
- *         schema:
- *           type: string
- *         description: Filtrar por texto en necesidades médicas (búsqueda parcial)
- *         example: "diabetes"
- *       - in: query
  *         name: edad_min
  *         schema:
  *           type: integer
@@ -234,12 +228,6 @@ router.get('/estadisticas', authMiddleware.authenticateToken, saludConsolidadoCo
  *         description: Filtrar por ID de enfermedad específica
  *         example: 1
  *       - in: query
- *         name: enfermedad
- *         schema:
- *           type: string
- *         description: Filtrar por texto en necesidades médicas
- *         example: "diabetes"
- *       - in: query
  *         name: edad_min
  *         schema:
  *           type: integer
@@ -300,11 +288,6 @@ router.get('/reporte/excel', authMiddleware.authenticateToken, saludConsolidadoC
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: query
- *         name: enfermedad
- *         schema:
- *           type: string
- *         description: Filtrar por enfermedad (búsqueda parcial en necesidad_enfermo)
  *       - in: query
  *         name: edad_min
  *         schema:
