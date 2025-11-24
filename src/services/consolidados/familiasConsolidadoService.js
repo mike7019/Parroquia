@@ -41,6 +41,18 @@ class FamiliasConsolidadoService {
         paramIndex++;
       }
       
+      if (filtros.id_corregimiento) {
+        whereConditions.push(`f.id_corregimiento = $${paramIndex}`);
+        bindParams.push(filtros.id_corregimiento);
+        paramIndex++;
+      }
+      
+      if (filtros.id_centro_poblado) {
+        whereConditions.push(`f.id_centro_poblado = $${paramIndex}`);
+        bindParams.push(filtros.id_centro_poblado);
+        paramIndex++;
+      }
+      
       // Add limite and offset to bind params
       bindParams.push(limite, offset);
       

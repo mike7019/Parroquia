@@ -8,6 +8,8 @@ class FamiliasConsolidadoController {
    * @param {number} req.query.id_municipio - ID del municipio
    * @param {number} req.query.id_sector - ID del sector
    * @param {number} req.query.id_vereda - ID de la vereda
+   * @param {number} req.query.id_corregimiento - ID del corregimiento
+   * @param {number} req.query.id_centro_poblado - ID del centro poblado
    * @param {number} req.query.limite - Límite de resultados
    * @param {number} req.query.offset - Offset para paginación
    */
@@ -19,6 +21,8 @@ class FamiliasConsolidadoController {
         id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
         id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
         id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
+        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
+        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
         
         // Paginación
         limite: req.query.limite ? parseInt(req.query.limite) : 100,
@@ -61,6 +65,8 @@ class FamiliasConsolidadoController {
         id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
         id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
         id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
+        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
+        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
         
         // Sin límite para reporte completo
         limite: 10000
