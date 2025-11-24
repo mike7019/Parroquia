@@ -8,13 +8,15 @@ class SaludConsolidadoController {
   async consultarSalud(req, res) {
     try {
       const filtros = {
-        enfermedad: req.query.enfermedad,
+        id_enfermedad: req.query.id_enfermedad ? parseInt(req.query.id_enfermedad) : undefined,
         edad_min: req.query.edad_min,
         edad_max: req.query.edad_max,
         id_sexo: req.query.id_sexo ? parseInt(req.query.id_sexo) : undefined,
         id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
         id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
         id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
+        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
         limite: req.query.limite ? parseInt(req.query.limite) : 100
       };
 
@@ -130,14 +132,15 @@ class SaludConsolidadoController {
   async generarReporteExcel(req, res) {
     try {
       const filtros = {
-        enfermedad: req.query.enfermedad,
+        id_enfermedad: req.query.id_enfermedad ? parseInt(req.query.id_enfermedad) : undefined,
         edad_min: req.query.edad_min,
         edad_max: req.query.edad_max,
         id_sexo: req.query.id_sexo ? parseInt(req.query.id_sexo) : undefined,
         id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
         id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
         id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_enfermedad: req.query.id_enfermedad ? parseInt(req.query.id_enfermedad) : undefined,
+        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
+        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
         limite: req.query.limite ? parseInt(req.query.limite) : 5000 // Límite más alto para Excel
       };
 
@@ -179,14 +182,15 @@ class SaludConsolidadoController {
   async generarReporteJSON(req, res) {
     try {
       const filtros = {
-        enfermedad: req.query.enfermedad,
+        id_enfermedad: req.query.id_enfermedad ? parseInt(req.query.id_enfermedad) : undefined,
         edad_min: req.query.edad_min,
         edad_max: req.query.edad_max,
         id_sexo: req.query.id_sexo ? parseInt(req.query.id_sexo) : undefined,
         id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
         id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
         id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_enfermedad: req.query.id_enfermedad ? parseInt(req.query.id_enfermedad) : undefined,
+        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
+        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
         limite: req.query.limite ? parseInt(req.query.limite) : 5000 // Límite más alto para reporte
       };
 
