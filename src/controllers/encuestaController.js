@@ -35,6 +35,64 @@ const formatearNombreCompleto = (primerNombre, segundoNombre, primerApellido, se
  */
 
 /**
+ * Convertir disposición de basuras v2 (array) a valores booleanos v1
+ * @param {Array|Object} disposicionBasuras - Formato v1 o v2
+ * @returns {Object} Objeto con valores booleanos { recolector, quemada, enterrada, recicla, aire_libre }
+ */
+const convertirDisposicionBasurasABooleanos = (disposicionBasuras) => {
+  // Si no hay datos, retornar todo en false
+  if (!disposicionBasuras) {
+    return {
+      recolector: false,
+      quemada: false,
+      enterrada: false,
+      recicla: false,
+      aire_libre: false
+    };
+  }
+
+  // Si es formato v1 (objeto), retornar directamente
+  if (!Array.isArray(disposicionBasuras)) {
+    return {
+      recolector: disposicionBasuras.recolector || false,
+      quemada: disposicionBasuras.quemada || false,
+      enterrada: disposicionBasuras.enterrada || false,
+      recicla: disposicionBasuras.recicla || false,
+      aire_libre: disposicionBasuras.aire_libre || false
+    };
+  }
+
+  // Formato v2 (array): convertir a booleanos
+  const resultado = {
+    recolector: false,
+    quemada: false,
+    enterrada: false,
+    recicla: false,
+    aire_libre: false
+  };
+
+  // Mapeo de IDs a campos booleanos (basado en catálogo tipo_disposicion_basura)
+  const mapeoDisposicion = {
+    '1': 'recolector',      // Recolector de basura
+    '2': 'quemada',         // Quemada
+    '3': 'enterrada',       // Enterrada
+    '4': 'recicla',         // Reciclaje
+    '5': 'aire_libre'       // Al aire libre / Campo abierto
+  };
+
+  for (const disposicion of disposicionBasuras) {
+    if (disposicion.seleccionado) {
+      const campo = mapeoDisposicion[disposicion.id];
+      if (campo) {
+        resultado[campo] = true;
+      }
+    }
+  }
+
+  return resultado;
+};
+
+/**
  * Registrar disposición de basuras
  * Soporta dos formatos:
  * - Formato v1: { recolector: true, quemada: false, ... }
@@ -2757,12 +2815,17 @@ export const crearEncuesta = async (req, res) => {
       letrina: servicios_agua?.letrina || false,
       campo_abierto: servicios_agua?.campo_abierto || false,
       
-      // CAMPOS BOOLEANOS DE DISPOSICIÓN DE BASURAS
-      disposicion_recolector: vivienda?.disposicion_basuras?.recolector || false,
-      disposicion_quemada: vivienda?.disposicion_basuras?.quemada || false,
-      disposicion_enterrada: vivienda?.disposicion_basuras?.enterrada || false,
-      disposicion_recicla: vivienda?.disposicion_basuras?.recicla || false,
-      disposicion_aire_libre: vivienda?.disposicion_basuras?.aire_libre || false
+      // CAMPOS BOOLEANOS DE DISPOSICIÓN DE BASURAS (soporta formato v1 y v2)
+      ...(() => {
+        const disposicionBooleanos = convertirDisposicionBasurasABooleanos(vivienda?.disposicion_basuras);
+        return {
+          disposicion_recolector: disposicionBooleanos.recolector,
+          disposicion_quemada: disposicionBooleanos.quemada,
+          disposicion_enterrada: disposicionBooleanos.enterrada,
+          disposicion_recicla: disposicionBooleanos.recicla,
+          disposicion_aire_libre: disposicionBooleanos.aire_libre
+        };
+      })()
     };
 
     const familia = await Familias.create(familiaData, { transaction });
@@ -3103,10 +3166,23 @@ export const actualizarEncuestaCompleta = async (req, res) => {
     
     // Detectar si viene en formato JSON completo o formato plano
     let datosPlanos;
+    let disposicionBasurasBooleanos = {
+      recolector: false,
+      quemada: false,
+      enterrada: false,
+      recicla: false,
+      aire_libre: false
+    };
+    
     if (datosCompletos.informacionGeneral) {
       // Formato JSON completo - extraer campos necesarios
       console.log('📋 Formato JSON completo detectado, extrayendo campos...');
       const { informacionGeneral, vivienda, observaciones } = datosCompletos;
+      
+      // Convertir disposición de basuras si viene en vivienda
+      if (vivienda?.disposicion_basuras) {
+        disposicionBasurasBooleanos = convertirDisposicionBasurasABooleanos(vivienda.disposicion_basuras);
+      }
       
       datosPlanos = {
         apellido_familiar: informacionGeneral.apellido_familiar,
@@ -3117,7 +3193,13 @@ export const actualizarEncuestaCompleta = async (req, res) => {
         email: informacionGeneral.email || null,
         tipo_vivienda: vivienda?.tipo_vivienda?.nombre || 'Casa',
         tutor_responsable: observaciones?.tutor_responsable || null,
-        comunionEnCasa: observaciones?.comunionEnCasa || false
+        comunionEnCasa: observaciones?.comunionEnCasa || false,
+        // Campos booleanos de disposición
+        disposicion_recolector: disposicionBasurasBooleanos.recolector,
+        disposicion_quemada: disposicionBasurasBooleanos.quemada,
+        disposicion_enterrada: disposicionBasurasBooleanos.enterrada,
+        disposicion_recicla: disposicionBasurasBooleanos.recicla,
+        disposicion_aire_libre: disposicionBasurasBooleanos.aire_libre
       };
     } else {
       // Formato plano directo
@@ -3132,8 +3214,11 @@ export const actualizarEncuestaCompleta = async (req, res) => {
         numero_contacto = $4, telefono = $5, email = $6,
         "tamaño_familia" = $7, tipo_vivienda = $8, estado_encuesta = $9,
         "comunionEnCasa" = $10, tutor_responsable = $11,
+        disposicion_recolector = $12, disposicion_quemada = $13,
+        disposicion_enterrada = $14, disposicion_recicla = $15,
+        disposicion_aire_libre = $16,
         fecha_ultima_encuesta = NOW()
-      WHERE id_familia = $12
+      WHERE id_familia = $17
     `;
 
     await sequelize.query(updateQuery, {
@@ -3151,6 +3236,11 @@ export const actualizarEncuestaCompleta = async (req, res) => {
         typeof datosPlanos.tutor_responsable === 'string' ? 
           datosPlanos.tutor_responsable.trim() !== '' && datosPlanos.tutor_responsable.toLowerCase() !== 'false' : 
           (datosPlanos.tutor_responsable || false),
+        datosPlanos.disposicion_recolector !== undefined ? datosPlanos.disposicion_recolector : false,
+        datosPlanos.disposicion_quemada !== undefined ? datosPlanos.disposicion_quemada : false,
+        datosPlanos.disposicion_enterrada !== undefined ? datosPlanos.disposicion_enterrada : false,
+        datosPlanos.disposicion_recicla !== undefined ? datosPlanos.disposicion_recicla : false,
+        datosPlanos.disposicion_aire_libre !== undefined ? datosPlanos.disposicion_aire_libre : false,
         id
       ],
       type: QueryTypes.UPDATE,
