@@ -121,6 +121,18 @@ const router = express.Router();
  *         description: ID de la vereda
  *         example: 1
  *       - in: query
+ *         name: id_corregimiento
+ *         schema:
+ *           type: integer
+ *         description: ID del corregimiento
+ *         example: 1
+ *       - in: query
+ *         name: id_centro_poblado
+ *         schema:
+ *           type: integer
+ *         description: ID del centro poblado
+ *         example: 1
+ *       - in: query
  *         name: page
  *         schema:
  *           type: integer
@@ -472,6 +484,16 @@ router.get('/edad', authMiddleware.authenticateToken, personasController.consult
  *         schema:
  *           type: integer
  *         description: ID de la vereda
+ *       - in: query
+ *         name: id_corregimiento
+ *         schema:
+ *           type: integer
+ *         description: ID del corregimiento
+ *       - in: query
+ *         name: id_centro_poblado
+ *         schema:
+ *           type: integer
+ *         description: ID del centro poblado
  *       - in: query
  *         name: apellido_familiar
  *         schema:

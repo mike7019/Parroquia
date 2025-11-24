@@ -27,6 +27,8 @@ class PersonasService {
         id_parroquia,
         id_sector,
         id_vereda,
+        id_corregimiento,
+        id_centro_poblado,
 
         // Familia y vivienda
         apellido_familiar,
@@ -82,6 +84,16 @@ class PersonasService {
       if (id_vereda) {
         whereConditions.push('f.id_vereda = :id_vereda');
         params.id_vereda = id_vereda;
+      }
+
+      if (id_corregimiento) {
+        whereConditions.push('f.id_corregimiento = :id_corregimiento');
+        params.id_corregimiento = id_corregimiento;
+      }
+
+      if (id_centro_poblado) {
+        whereConditions.push('f.id_centro_poblado = :id_centro_poblado');
+        params.id_centro_poblado = id_centro_poblado;
       }
 
       // FILTROS DE FAMILIA

@@ -18,7 +18,9 @@ class PersonasController {
         id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
         id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
         id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined
+        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
+        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
+        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined
       };
 
       Object.keys(filtros).forEach(key => {
@@ -264,6 +266,8 @@ class PersonasController {
         id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
         id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
         id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
+        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
+        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
         
         // Familia
         apellido_familiar: req.query.apellido_familiar,
