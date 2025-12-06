@@ -1,4 +1,4 @@
-import sequelize from './config/sequelize.js';
+import sequelize from '../config/sequelize.js';
 
 /**
  * Seeder específico para veredas
@@ -34,7 +34,7 @@ async function seedVeredas() {
     // Crear veredas para cada municipio
     const veredasPorMunicipio = [
       'Centro Rural',
-      'La Esperanza', 
+      'La Esperanza',
       'El Progreso',
       'San José',
       'La Paz',
@@ -51,18 +51,18 @@ async function seedVeredas() {
     for (const municipio of municipios.slice(0, 5)) { // Solo primeros 5 municipios
       for (const [index, nombreBase] of veredasPorMunicipio.entries()) {
         if (index >= 3) break; // Solo 3 veredas por municipio
-        
+
         const nombreVereda = `${nombreBase} - ${municipio.nombre}`;
-        
+
         try {
           // Verificar si la vereda ya existe
           const [existente] = await sequelize.query(`
             SELECT id FROM veredas 
             WHERE nombre = :nombre AND id_municipio_municipios = :municipio_id
           `, {
-            replacements: { 
+            replacements: {
               nombre: nombreVereda,
-              municipio_id: municipio.codigo 
+              municipio_id: municipio.codigo
             }
           });
 
@@ -76,7 +76,7 @@ async function seedVeredas() {
                 municipio_id: municipio.codigo
               }
             });
-            
+
             console.log(`   ✅ ${nombreVereda}`);
             veredasInsertadas++;
           } else {
@@ -90,7 +90,7 @@ async function seedVeredas() {
 
     // Obtener estadísticas finales
     const [totalVeredas] = await sequelize.query(`SELECT COUNT(*) as count FROM veredas`);
-    
+
     console.log('\n📊 RESUMEN DE VEREDAS:');
     console.log(`   ✅ Veredas insertadas en esta ejecución: ${veredasInsertadas}`);
     console.log(`   📄 Total veredas en la base de datos: ${totalVeredas[0].count}`);

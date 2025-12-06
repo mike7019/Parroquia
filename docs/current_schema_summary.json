@@ -1,0 +1,648 @@
+{
+  "SequelizeMeta": {
+    "columns": [
+      "name"
+    ],
+    "foreignKeys": []
+  },
+  "centros_poblados": {
+    "columns": [
+      "id_centro_poblado",
+      "nombre",
+      "codigo_centro_poblado",
+      "id_municipio_municipios",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": [
+      {
+        "column": "id_municipio_municipios",
+        "references": "municipios.id_municipio"
+      }
+    ]
+  },
+  "comunidades_culturales": {
+    "columns": [
+      "id_comunidad_cultural",
+      "nombre",
+      "descripcion",
+      "activo",
+      "createdAt",
+      "updatedAt"
+    ],
+    "foreignKeys": []
+  },
+  "corregimientos": {
+    "columns": [
+      "id_corregimiento",
+      "nombre",
+      "codigo_corregimiento",
+      "id_municipio_municipios",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": [
+      {
+        "column": "id_municipio_municipios",
+        "references": "municipios.id_municipio"
+      }
+    ]
+  },
+  "departamentos": {
+    "columns": [
+      "id_departamento",
+      "nombre",
+      "codigo_dane",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": []
+  },
+  "destrezas": {
+    "columns": [
+      "id_destreza",
+      "nombre",
+      "createdAt",
+      "updatedAt"
+    ],
+    "foreignKeys": []
+  },
+  "difuntos_familia": {
+    "columns": [
+      "id_difunto",
+      "nombre_completo",
+      "fecha_fallecimiento",
+      "observaciones",
+      "id_familia_familias",
+      "createdAt",
+      "updatedAt",
+      "id_sexo",
+      "id_parentesco",
+      "causa_fallecimiento"
+    ],
+    "foreignKeys": [
+      {
+        "column": "id_familia_familias",
+        "references": "familias.id_familia"
+      },
+      {
+        "column": "id_parentesco",
+        "references": "parentescos.id_parentesco"
+      },
+      {
+        "column": "id_sexo",
+        "references": "sexos.id_sexo"
+      }
+    ]
+  },
+  "encuestas": {
+    "columns": [
+      "id_encuesta",
+      "id_parroquia",
+      "id_municipio",
+      "fecha",
+      "id_sector",
+      "id_vereda",
+      "observaciones",
+      "tratamiento_datos",
+      "firma",
+      "createdAt",
+      "updatedAt"
+    ],
+    "foreignKeys": []
+  },
+  "enfermedades": {
+    "columns": [
+      "id_enfermedad",
+      "nombre",
+      "descripcion",
+      "createdAt",
+      "updatedAt"
+    ],
+    "foreignKeys": []
+  },
+  "estados_civiles": {
+    "columns": [
+      "id_estado",
+      "descripcion",
+      "activo",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": []
+  },
+  "familia_disposicion_basura": {
+    "columns": [
+      "id",
+      "id_familia",
+      "id_tipo_disposicion_basura",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": [
+      {
+        "column": "id_familia",
+        "references": "familias.id_familia"
+      },
+      {
+        "column": "id_tipo_disposicion_basura",
+        "references": "tipos_disposicion_basura.id_tipo_disposicion_basura"
+      }
+    ]
+  },
+  "familia_sistema_acueducto": {
+    "columns": [
+      "id_familia",
+      "id_sistema_acueducto",
+      "id",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": [
+      {
+        "column": "id_sistema_acueducto",
+        "references": "sistemas_acueducto.id_sistema_acueducto"
+      }
+    ]
+  },
+  "familia_sistema_aguas_residuales": {
+    "columns": [
+      "id",
+      "id_familia",
+      "id_tipo_aguas_residuales",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": [
+      {
+        "column": "id_familia",
+        "references": "familias.id_familia"
+      },
+      {
+        "column": "id_tipo_aguas_residuales",
+        "references": "tipos_aguas_residuales.id_tipo_aguas_residuales"
+      }
+    ]
+  },
+  "familia_tipo_vivienda": {
+    "columns": [
+      "id_familia",
+      "id_tipo_vivienda",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": []
+  },
+  "familias": {
+    "columns": [
+      "id_familia",
+      "apellido_familiar",
+      "sector",
+      "direccion_familia",
+      "numero_contacto",
+      "telefono",
+      "email",
+      "tamaño_familia",
+      "tipo_vivienda",
+      "estado_encuesta",
+      "numero_encuestas",
+      "fecha_ultima_encuesta",
+      "codigo_familia",
+      "tutor_responsable",
+      "id_municipio",
+      "id_vereda",
+      "id_sector",
+      "comunionEnCasa",
+      "numero_contrato_epm",
+      "id_parroquia",
+      "comunionencasa",
+      "fecha_encuesta",
+      "sustento_familia",
+      "observaciones_encuestador",
+      "autorizacion_datos",
+      "pozo_septico",
+      "letrina",
+      "campo_abierto",
+      "disposicion_recolector",
+      "disposicion_quemada",
+      "disposicion_enterrada",
+      "disposicion_recicla",
+      "disposicion_aire_libre",
+      "disposicion_no_aplica",
+      "id_tipo_vivienda",
+      "id_corregimiento",
+      "id_centro_poblado",
+      "id_usuario_creador"
+    ],
+    "foreignKeys": [
+      {
+        "column": "id_centro_poblado",
+        "references": "centros_poblados.id_centro_poblado"
+      },
+      {
+        "column": "id_municipio",
+        "references": "municipios.id_municipio"
+      },
+      {
+        "column": "id_sector",
+        "references": "sectores.id_sector"
+      },
+      {
+        "column": "id_vereda",
+        "references": "veredas.id_vereda"
+      },
+      {
+        "column": "id_corregimiento",
+        "references": "corregimientos.id_corregimiento"
+      },
+      {
+        "column": "id_usuario_creador",
+        "references": "usuarios.id"
+      },
+      {
+        "column": "id_tipo_vivienda",
+        "references": "tipos_vivienda.id_tipo_vivienda"
+      }
+    ]
+  },
+  "habilidades": {
+    "columns": [
+      "id_habilidad",
+      "nombre",
+      "descripcion",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": []
+  },
+  "municipios": {
+    "columns": [
+      "id_municipio",
+      "nombre_municipio",
+      "codigo_dane",
+      "id_departamento",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": [
+      {
+        "column": "id_departamento",
+        "references": "departamentos.id_departamento"
+      }
+    ]
+  },
+  "niveles_educativos": {
+    "columns": [
+      "id_niveles_educativos",
+      "nivel",
+      "descripcion",
+      "orden_nivel",
+      "activo",
+      "createdAt",
+      "updatedAt",
+      "deletedAt"
+    ],
+    "foreignKeys": []
+  },
+  "parentescos": {
+    "columns": [
+      "id_parentesco",
+      "nombre",
+      "descripcion",
+      "activo",
+      "createdAt",
+      "updatedAt"
+    ],
+    "foreignKeys": []
+  },
+  "parroquia": {
+    "columns": [
+      "id_parroquia",
+      "nombre",
+      "id_municipio",
+      "direccion",
+      "telefono",
+      "email",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": [
+      {
+        "column": "id_municipio",
+        "references": "municipios.id_municipio"
+      }
+    ]
+  },
+  "persona_celebracion": {
+    "columns": [
+      "id",
+      "id_persona",
+      "motivo",
+      "dia",
+      "mes",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": [
+      {
+        "column": "id_persona",
+        "references": "personas.id_personas"
+      }
+    ]
+  },
+  "persona_destreza": {
+    "columns": [
+      "createdAt",
+      "updatedAt",
+      "id_destrezas_destrezas",
+      "id_personas_personas"
+    ],
+    "foreignKeys": [
+      {
+        "column": "id_destrezas_destrezas",
+        "references": "destrezas.id_destreza"
+      },
+      {
+        "column": "id_personas_personas",
+        "references": "personas.id_personas"
+      }
+    ]
+  },
+  "persona_enfermedad": {
+    "columns": [
+      "id_persona",
+      "id_enfermedad",
+      "created_at",
+      "updated_at",
+      "id",
+      "diagnostico_fecha",
+      "notas",
+      "activo"
+    ],
+    "foreignKeys": []
+  },
+  "persona_habilidad": {
+    "columns": [
+      "id_persona_habilidad",
+      "id_persona",
+      "id_habilidad",
+      "nivel",
+      "createdAt",
+      "updatedAt"
+    ],
+    "foreignKeys": [
+      {
+        "column": "id_persona",
+        "references": "personas.id_personas"
+      }
+    ]
+  },
+  "personas": {
+    "columns": [
+      "id_personas",
+      "primer_nombre",
+      "segundo_nombre",
+      "primer_apellido",
+      "segundo_apellido",
+      "id_tipo_identificacion_tipo_identificacion",
+      "identificacion",
+      "telefono",
+      "correo_electronico",
+      "fecha_nacimiento",
+      "direccion",
+      "id_familia_familias",
+      "id_estado_civil_estado_civil",
+      "estudios",
+      "en_que_eres_lider",
+      "necesidad_enfermo",
+      "id_profesion",
+      "id_sexo",
+      "talla_camisa",
+      "talla_pantalon",
+      "talla_zapato",
+      "id_familia",
+      "id_parroquia",
+      "id_parentesco",
+      "id_comunidad_cultural",
+      "id_nivel_educativo",
+      "motivo_celebrar",
+      "dia_celebrar",
+      "mes_celebrar"
+    ],
+    "foreignKeys": [
+      {
+        "column": "id_comunidad_cultural",
+        "references": "comunidades_culturales.id_comunidad_cultural"
+      },
+      {
+        "column": "id_nivel_educativo",
+        "references": "niveles_educativos.id_niveles_educativos"
+      },
+      {
+        "column": "id_parentesco",
+        "references": "parentescos.id_parentesco"
+      },
+      {
+        "column": "id_familia_familias",
+        "references": "familias.id_familia"
+      },
+      {
+        "column": "id_parroquia",
+        "references": "parroquia.id_parroquia"
+      },
+      {
+        "column": "id_sexo",
+        "references": "sexos.id_sexo"
+      },
+      {
+        "column": "id_tipo_identificacion_tipo_identificacion",
+        "references": "tipos_identificacion.id_tipo_identificacion"
+      }
+    ]
+  },
+  "profesiones": {
+    "columns": [
+      "id_profesion",
+      "nombre",
+      "descripcion",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": []
+  },
+  "roles": {
+    "columns": [
+      "id",
+      "nombre",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": []
+  },
+  "sectores": {
+    "columns": [
+      "id_sector",
+      "nombre",
+      "id_municipio",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": [
+      {
+        "column": "id_municipio",
+        "references": "municipios.id_municipio"
+      }
+    ]
+  },
+  "sexos": {
+    "columns": [
+      "id_sexo",
+      "nombre",
+      "descripcion",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": []
+  },
+  "sistemas_acueducto": {
+    "columns": [
+      "id_sistema_acueducto",
+      "nombre",
+      "descripcion",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": []
+  },
+  "situaciones_civiles": {
+    "columns": [
+      "id_situacion_civil",
+      "nombre",
+      "descripcion",
+      "codigo",
+      "orden",
+      "activo",
+      "createdAt",
+      "updatedAt",
+      "fechaEliminacion"
+    ],
+    "foreignKeys": []
+  },
+  "tallas": {
+    "columns": [
+      "id_talla",
+      "tipo_prenda",
+      "talla",
+      "descripcion",
+      "genero",
+      "equivalencia_numerica",
+      "activo",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": []
+  },
+  "tipos_aguas_residuales": {
+    "columns": [
+      "id_tipo_aguas_residuales",
+      "nombre",
+      "descripcion",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": []
+  },
+  "tipos_disposicion_basura": {
+    "columns": [
+      "id_tipo_disposicion_basura",
+      "nombre",
+      "descripcion",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": []
+  },
+  "tipos_identificacion": {
+    "columns": [
+      "id_tipo_identificacion",
+      "nombre",
+      "codigo",
+      "descripcion",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": []
+  },
+  "tipos_vivienda": {
+    "columns": [
+      "id_tipo_vivienda",
+      "nombre",
+      "descripcion",
+      "activo",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": []
+  },
+  "usuarios": {
+    "columns": [
+      "id",
+      "correo_electronico",
+      "contrasena",
+      "primer_nombre",
+      "segundo_nombre",
+      "primer_apellido",
+      "segundo_apellido",
+      "numero_documento",
+      "telefono",
+      "activo",
+      "fecha_ultimo_acceso",
+      "intentos_fallidos",
+      "bloqueado_hasta",
+      "token_recuperacion",
+      "token_expiracion",
+      "email_verificado",
+      "token_verificacion_email",
+      "fecha_verificacion_email",
+      "expira_token_reset",
+      "refresh_token",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": []
+  },
+  "usuarios_roles": {
+    "columns": [
+      "id_usuarios",
+      "id_roles",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": [
+      {
+        "column": "id_roles",
+        "references": "roles.id"
+      },
+      {
+        "column": "id_usuarios",
+        "references": "usuarios.id"
+      }
+    ]
+  },
+  "veredas": {
+    "columns": [
+      "id_vereda",
+      "nombre",
+      "codigo_vereda",
+      "id_municipio_municipios",
+      "created_at",
+      "updated_at"
+    ],
+    "foreignKeys": [
+      {
+        "column": "id_municipio_municipios",
+        "references": "municipios.id_municipio"
+      }
+    ]
+  }
+}

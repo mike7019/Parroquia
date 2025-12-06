@@ -5,23 +5,23 @@
  * Incluyendo el nuevo seeder dinámico de departamentos y municipios
  */
 
-import { 
+import {
   runConfigSeeders
-} from './src/seeders/configSeeder.js';
+} from '../src/seeders/configSeeder.js';
 
 async function runAllSeeders() {
   console.log('🌱 Iniciando ejecución de todos los seeders de configuración...\n');
-  
+
   try {
     const results = await runConfigSeeders();
-    
+
     console.log('\n🏁 Ejecución de seeders completada');
     console.log(`📊 Resumen: ${results.success}/${results.total} exitosos, ${results.errors} errores`);
-    
+
     if (results.errors > 0) {
       process.exit(1);
     }
-    
+
   } catch (error) {
     console.error('💥 Error crítico:', error);
     process.exit(1);
