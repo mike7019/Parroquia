@@ -18,6 +18,7 @@ El proyecto está construido con tecnologías modernas de backend, asegurando es
 *   **Runtime**: [Node.js](https://nodejs.org/)
 *   **Framework**: [Express.js](https://expressjs.com/)
 *   **Base de Datos**: [PostgreSQL](https://www.postgresql.org/)
+*   **Cliente Postgres**: [DBeaver](https://dbeaver.io/)
 *   **ORM**: [Sequelize](https://sequelize.org/)
 *   **Contenedores**: [Docker](https://www.docker.com/)
 
@@ -43,12 +44,31 @@ Asegúrate de tener instalado lo siguiente antes de comenzar:
 3.  **Configurar Variables de Entorno**
     Crea un archivo `.env` en la raíz del proyecto basándote en el siguiente ejemplo:
     ```env
+    NODE_ENV=development
     PORT=3000
+    DB_HOST=localhost
     DB_PORT=5432
     DB_NAME=parroquia_db
     DB_USER=parroquia_user
     DB_PASSWORD=ParroquiaSecure2025
+    BCRYPT_ROUNDS=12
     JWT_SECRET=your-super-secret-jwt-key-change-in-production
+    JWT_REFRESH_SECRET=your-refresh-secret-key-change-in-production
+    JWT_EXPIRES_IN=12h
+    JWT_REFRESH_EXPIRES_IN=7d
+    FRONTEND_URL=http://localhost:8080
+    EMAIL_HOST=smtp.gmail.com
+    EMAIL_PORT=587  
+    EMAIL_USER=sistemaparroquia17@gmail.com
+    EMAIL_PASS=ykgg ogoc infr bjgl
+    EMAIL_FROM=noreply@parroquia.com
+    SEND_REAL_EMAILS=true
+    SMTP_HOST=smtp.gmail.com
+    SMTP_PORT=587
+    SMTP_USER=sistemaparroquia17@gmail.com
+    SMTP_PASS=ykgg ogoc infr bjgl
+    SMTP_FROM_EMAIL=noreply@parroquia.com
+    VERBOSE_LOGGING=true
     ```
 
 4.  **Inicializar Base de Datos**

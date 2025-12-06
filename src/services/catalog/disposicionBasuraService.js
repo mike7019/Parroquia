@@ -5,7 +5,7 @@ import { Op } from 'sequelize';
 import logger from '../../utils/logger.js';
 
 class DisposicionBasuraService {
-  
+
   /**
    * Función para encontrar el próximo ID disponible reutilizando gaps
    */
@@ -26,8 +26,8 @@ class DisposicionBasuraService {
       // Buscar el primer gap en la secuencia
       for (let i = 0; i < existingIds.length; i++) {
         const expectedId = i + 1;
-        const actualId = existingIds[i].id_tipo_disposicion_basura;
-        
+        const actualId = Number(existingIds[i].id_tipo_disposicion_basura);
+
         if (actualId !== expectedId) {
           return expectedId;
         }
@@ -73,7 +73,7 @@ class DisposicionBasuraService {
   async getTipoById(id) {
     try {
       const tipo = await TipoDisposicionBasura.findByPk(id);
-      
+
       if (!tipo) {
         const error = new Error('Tipo de disposición de basura no encontrado');
         error.statusCode = 404;
@@ -100,7 +100,7 @@ class DisposicionBasuraService {
         id_tipo_disposicion_basura: nextId,
         ...tipoData
       });
-      
+
       logger.info('Tipo de disposición de basura creado exitosamente', {
         id: nuevoTipo.id_tipo_disposicion_basura,
         nombre: nuevoTipo.nombre
@@ -119,7 +119,7 @@ class DisposicionBasuraService {
   async updateTipo(id, tipoData) {
     try {
       const tipo = await TipoDisposicionBasura.findByPk(id);
-      
+
       if (!tipo) {
         const error = new Error('Tipo de disposición de basura no encontrado');
         error.statusCode = 404;
@@ -130,7 +130,7 @@ class DisposicionBasuraService {
       // Verificar si hay otro tipo con el mismo nombre (excluyendo el actual)
       if (tipoData.nombre && tipoData.nombre !== tipo.nombre) {
         const existingTipo = await TipoDisposicionBasura.findOne({
-          where: { 
+          where: {
             nombre: tipoData.nombre,
             id_tipo_disposicion_basura: { [Op.ne]: id }
           }
@@ -145,7 +145,7 @@ class DisposicionBasuraService {
       }
 
       await tipo.update(tipoData);
-      
+
       logger.info('Tipo de disposición de basura actualizado exitosamente', {
         id: tipo.id_tipo_disposicion_basura,
         nombre: tipo.nombre
@@ -164,7 +164,7 @@ class DisposicionBasuraService {
   async deleteTipo(id) {
     try {
       const tipo = await TipoDisposicionBasura.findByPk(id);
-      
+
       if (!tipo) {
         const error = new Error('Tipo de disposición de basura no encontrado');
         error.statusCode = 404;
@@ -185,7 +185,7 @@ class DisposicionBasuraService {
       }
 
       await tipo.destroy();
-      
+
       logger.info('Tipo de disposición de basura eliminado exitosamente', {
         id: id,
         nombre: tipo.nombre
