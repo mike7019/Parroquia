@@ -46,9 +46,28 @@ class EncuestaService {
         limitClause += ' OFFSET :offset';
       }
 
+      // Filtro de búsqueda general (q o buscar) - OR entre apellido_familiar, nombre_encuestador y parroquia
+      if (sanitizedFilters.q || sanitizedFilters.buscar) {
+        const searchTerm = sanitizedFilters.q || sanitizedFilters.buscar;
+        whereClause += ` AND (
+          f.apellido_familiar ILIKE :searchTerm OR 
+          f.nombre_encuestador ILIKE :searchTerm OR 
+          p.nombre ILIKE :searchTerm
+        )`;
+        replacements.searchTerm = `%${searchTerm}%`;
+      }
+
+      // Filtro específico por sector
       if (sanitizedFilters.sector) {
         whereClause += ' AND f.sector ILIKE :sector';
         replacements.sector = `%${sanitizedFilters.sector}%`;
+      }
+
+      // Filtro específico por encuestador_id
+      if (sanitizedFilters.encuestador_id) {
+        whereClause += ' AND (f.id_encuestador = :encuestador_id OR f.nombre_encuestador ILIKE :encuestador_nombre)';
+        replacements.encuestador_id = sanitizedFilters.encuestador_id;
+        replacements.encuestador_nombre = `%${sanitizedFilters.encuestador_id}%`;
       }
 
       if (sanitizedFilters.apellido_familiar) {

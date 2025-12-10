@@ -51,10 +51,25 @@ const router = express.Router();
  *           default: 10
  *         description: Número de elementos por página
  *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Búsqueda general (OR) en apellido_familiar, nombre_encuestador o parroquia (case-insensitive)
+ *       - in: query
+ *         name: buscar
+ *         schema:
+ *           type: string
+ *         description: Alias de 'q' - Búsqueda general (OR) en apellido_familiar, nombre_encuestador o parroquia
+ *       - in: query
  *         name: sector
  *         schema:
  *           type: string
- *         description: Filtrar por sector (búsqueda parcial)
+ *         description: Filtrar específicamente por sector (búsqueda parcial, case-insensitive)
+ *       - in: query
+ *         name: encuestador_id
+ *         schema:
+ *           type: string
+ *         description: Filtrar por ID o nombre del encuestador (búsqueda exacta por ID o parcial por nombre)
  *       - in: query
  *         name: municipio
  *         schema:
@@ -124,10 +139,25 @@ const router = express.Router();
  *           default: 10
  *         description: Número de elementos por página
  *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Búsqueda general (OR) en apellido_familiar, nombre_encuestador o parroquia (case-insensitive)
+ *       - in: query
+ *         name: buscar
+ *         schema:
+ *           type: string
+ *         description: Alias de 'q' - Búsqueda general (OR) en apellido_familiar, nombre_encuestador o parroquia
+ *       - in: query
  *         name: sector
  *         schema:
  *           type: string
- *         description: Filtrar por sector (búsqueda parcial)
+ *         description: Filtrar específicamente por sector (búsqueda parcial, case-insensitive)
+ *       - in: query
+ *         name: encuestador_id
+ *         schema:
+ *           type: string
+ *         description: Filtrar por ID o nombre del encuestador (búsqueda exacta por ID o parcial por nombre)
  *       - in: query
  *         name: municipio
  *         schema:

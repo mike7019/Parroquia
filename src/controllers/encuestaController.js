@@ -35,64 +35,6 @@ const formatearNombreCompleto = (primerNombre, segundoNombre, primerApellido, se
  */
 
 /**
- * Convertir disposición de basuras v2 (array) a valores booleanos v1
- * @param {Array|Object} disposicionBasuras - Formato v1 o v2
- * @returns {Object} Objeto con valores booleanos { recolector, quemada, enterrada, recicla, aire_libre }
- */
-const convertirDisposicionBasurasABooleanos = (disposicionBasuras) => {
-  // Si no hay datos, retornar todo en false
-  if (!disposicionBasuras) {
-    return {
-      recolector: false,
-      quemada: false,
-      enterrada: false,
-      recicla: false,
-      aire_libre: false
-    };
-  }
-
-  // Si es formato v1 (objeto), retornar directamente
-  if (!Array.isArray(disposicionBasuras)) {
-    return {
-      recolector: disposicionBasuras.recolector || false,
-      quemada: disposicionBasuras.quemada || false,
-      enterrada: disposicionBasuras.enterrada || false,
-      recicla: disposicionBasuras.recicla || false,
-      aire_libre: disposicionBasuras.aire_libre || false
-    };
-  }
-
-  // Formato v2 (array): convertir a booleanos
-  const resultado = {
-    recolector: false,
-    quemada: false,
-    enterrada: false,
-    recicla: false,
-    aire_libre: false
-  };
-
-  // Mapeo de IDs a campos booleanos (basado en catálogo tipo_disposicion_basura)
-  const mapeoDisposicion = {
-    '1': 'recolector',      // Recolector de basura
-    '2': 'quemada',         // Quemada
-    '3': 'enterrada',       // Enterrada
-    '4': 'recicla',         // Reciclaje
-    '5': 'aire_libre'       // Al aire libre / Campo abierto
-  };
-
-  for (const disposicion of disposicionBasuras) {
-    if (disposicion.seleccionado) {
-      const campo = mapeoDisposicion[disposicion.id];
-      if (campo) {
-        resultado[campo] = true;
-      }
-    }
-  }
-
-  return resultado;
-};
-
-/**
  * Registrar disposición de basuras
  * Soporta dos formatos:
  * - Formato v1: { recolector: true, quemada: false, ... }
@@ -578,17 +520,8 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         primer_apellido: primerApellido || null,
         segundo_apellido: segundoApellido || null,
         fecha_nacimiento: fechaNacimiento ? new Date(fechaNacimiento) : new Date('1900-01-01'),
-  telefono: miembro.telefono || informacionGeneral.telefono,
-  // Intentar usar el correo proporcionado en el payload (soportar varios nombres de campo)
-  // Si no viene ninguno, dejar null para evitar guardar placeholders genéricos
-  correo_electronico: (
-    miembro.correo_electronico || 
-    miembro.correoElectronico || 
-    miembro.email || 
-    informacionGeneral.correo_electronico || 
-    informacionGeneral.correoElectronico || 
-    null
-  ),
+        telefono: miembro.telefono || informacionGeneral.telefono,
+        correo_electronico: `${primerNombre.toLowerCase()}.${Date.now()}.${personasCreadas}@temp.com`,
         identificacion: miembro.numeroIdentificacion || identificacionUnica,
         direccion: informacionGeneral.direccion,
         id_familia_familias: familiaId,
@@ -600,7 +533,6 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         id_profesion: profesionId,
         id_comunidad_cultural: comunidadCulturalId,
         estudios: (miembro.estudio && typeof miembro.estudio === 'object') ? miembro.estudio.nombre : (miembro.estudio || null),
-        id_nivel_educativo: (miembro.estudio && typeof miembro.estudio === 'object' && miembro.estudio.id) ? parseInt(miembro.estudio.id) : null,
         en_que_eres_lider: enQueEresLider,
         necesidad_enfermo: necesidadEnfermo,
         motivo_celebrar: motivoCelebrar,
@@ -611,68 +543,28 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         talla_zapato: miembro.talla_zapato || (miembro.talla ? miembro.talla.calzado : null)
       };
 
-      // Construir array de fields dinámicamente, excluyendo correo_electronico si es null
-      const fieldsToCreate = [
-        'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido',
-        'fecha_nacimiento', 'telefono', 'identificacion',
-        'direccion', 'id_familia_familias', 'id_familia', 'id_sexo', 
-        'id_tipo_identificacion_tipo_identificacion', 'id_estado_civil_estado_civil',
-        'id_parentesco', 'id_profesion', 'id_comunidad_cultural',
-        'estudios', 'id_nivel_educativo', 'en_que_eres_lider', 'necesidad_enfermo',
-        'motivo_celebrar', 'dia_celebrar', 'mes_celebrar',
-        'talla_camisa', 'talla_pantalon', 'talla_zapato'
-      ];
-      
-      // Solo incluir correo_electronico si tiene un valor válido
-      if (personaData.correo_electronico) {
-        fieldsToCreate.push('correo_electronico');
-      }
-
       let persona;
       try {
-        console.log(`  🔍 Creando persona con datos:`, {
-          nombre: miembro.nombres,
-          profesionId,
-          comunidadCulturalId,
-          parentescoId,
-          sexoId,
-          estadoCivilId
-        });
         persona = await Persona.create(personaData, { 
           transaction,
-          fields: fieldsToCreate
+          fields: [
+            'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido',
+            'fecha_nacimiento', 'telefono', 'correo_electronico', 'identificacion',
+            'direccion', 'id_familia_familias', 'id_familia', 'id_sexo', 
+            'id_tipo_identificacion_tipo_identificacion', 'id_estado_civil_estado_civil',
+            'id_parentesco', 'id_profesion', 'id_comunidad_cultural',
+            'estudios', 'en_que_eres_lider', 'necesidad_enfermo',
+            'motivo_celebrar', 'dia_celebrar', 'mes_celebrar',
+            'talla_camisa', 'talla_pantalon', 'talla_zapato'
+          ]
         });
       } catch (error) {
-        console.error(`  ❌ Error SQL al crear persona:`, {
-          name: error.name,
-          message: error.message,
-          code: error.original?.code,
-          constraint: error.original?.constraint,
-          detail: error.original?.detail
-        });
-        
-        // Detectar violaciones de unique constraint (ID duplicado)
-        if (error.name === 'SequelizeUniqueConstraintError' || error.original?.code === '23505') {
-          const detail = error.original?.detail || '';
-          const idMatch = detail.match(/\(id_personas\)=\((\d+)\)/);
-          const duplicatedId = idMatch ? idMatch[1] : 'desconocido';
-          
-          throw createError(ErrorCodes.DATABASE.DUPLICATE_KEY, {
-            table: 'personas',
-            field: 'id_personas',
-            value: duplicatedId,
-            person: miembro.nombres,
-            details: `El ID ${duplicatedId} ya existe en la tabla de personas. Esto indica un problema con la secuencia de IDs.`,
-            suggestion: 'Ejecute el script fix-sequences.js para corregir las secuencias de la base de datos: node fix-sequences.js'
-          });
-        }
-        
         // Detectar violaciones de foreign key y dar mensajes específicos
         if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
           const constraint = error.original?.constraint || '';
           
-          // Determinar qué catálogo falló basado SOLO en el constraint name (no en si el ID existe)
-          if (constraint.includes('profesion')) {
+          // Determinar qué catálogo falló basado en el constraint name
+          if (constraint.includes('profesion') || profesionId) {
             throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
               catalog: 'profesiones',
               invalidId: profesionId,
@@ -682,7 +574,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
             });
           }
           
-          if (constraint.includes('parentesco')) {
+          if (constraint.includes('parentesco') || parentescoId) {
             throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
               catalog: 'parentescos',
               invalidId: parentescoId,
@@ -692,7 +584,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
             });
           }
           
-          if (constraint.includes('comunidad')) {
+          if (constraint.includes('comunidad') || comunidadCulturalId) {
             throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
               catalog: 'comunidades_culturales',
               invalidId: comunidadCulturalId,
@@ -702,31 +594,10 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
             });
           }
           
-          if (constraint.includes('sexo')) {
-            throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
-              catalog: 'sexos',
-              invalidId: sexoId,
-              person: miembro.nombres,
-              details: `El sexo con ID ${sexoId} no existe en el catálogo`,
-              suggestion: 'Verifique que el ID del sexo sea correcto'
-            });
-          }
-          
-          if (constraint.includes('estado_civil')) {
-            throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
-              catalog: 'estados_civiles',
-              invalidId: estadoCivilId,
-              person: miembro.nombres,
-              details: `El estado civil con ID ${estadoCivilId} no existe en el catálogo`,
-              suggestion: 'Verifique que el ID del estado civil sea correcto'
-            });
-          }
-          
-          // Si no podemos determinar cuál FK falló, error genérico con info del constraint
+          // Si no podemos determinar cuál FK falló, error genérico
           throw createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
             catalog: 'unknown',
             person: miembro.nombres,
-            constraint,
             details: `Error de referencia en catálogo al crear persona: ${error.message}`,
             suggestion: 'Verifique que todos los IDs de catálogos sean válidos'
           });
@@ -838,12 +709,12 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
               await sequelize.query(`SAVEPOINT ${savepointName};`, { transaction });
 
               await sequelize.query(`
-                INSERT INTO persona_celebracion (id_persona, motivo, dia, mes, created_at, updated_at)
-                VALUES (:id_persona, :motivo, :dia, :mes, NOW(), NOW())
-                ON CONFLICT (id_persona, motivo, dia, mes) DO NOTHING
+                INSERT INTO persona_celebracion (id_personas, motivo, dia, mes, created_at, updated_at)
+                VALUES (:id_personas, :motivo, :dia, :mes, NOW(), NOW())
+                ON CONFLICT (id_personas, motivo, dia, mes) DO NOTHING
               `, {
                 replacements: {
-                  id_persona: personaId,
+                  id_personas: personaId,
                   motivo: motivo,
                   dia: dia,
                   mes: mes
@@ -875,12 +746,12 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
           await sequelize.query(`SAVEPOINT ${savepointName};`, { transaction });
 
           await sequelize.query(`
-            INSERT INTO persona_celebracion (id_persona, motivo, dia, mes, created_at, updated_at)
-            VALUES (:id_persona, :motivo, :dia, :mes, NOW(), NOW())
-            ON CONFLICT (id_persona, motivo, dia, mes) DO NOTHING
+            INSERT INTO persona_celebracion (id_personas, motivo, dia, mes, created_at, updated_at)
+            VALUES (:id_personas, :motivo, :dia, :mes, NOW(), NOW())
+            ON CONFLICT (id_personas, motivo, dia, mes) DO NOTHING
           `, {
             replacements: {
-              id_persona: personaId,
+              id_personas: personaId,
               motivo: motivoCelebrar,
               dia: diaCelebrar,
               mes: mesCelebrar
@@ -953,7 +824,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
               }
               
               await sequelize.query(`
-                INSERT INTO persona_enfermedad (id_persona, id_enfermedad, created_at, updated_at)
+                INSERT INTO persona_enfermedad (id_persona, id_enfermedad, "createdAt", "updatedAt")
                 VALUES (:id_persona, :id_enfermedad, NOW(), NOW())
                 ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
               `, {
@@ -995,7 +866,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
               
               if (enfermedadCatalogo) {
                 await sequelize.query(`
-                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, created_at, updated_at)
+                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, "createdAt", "updatedAt")
                   VALUES (:id_persona, :id_enfermedad, NOW(), NOW())
                   ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
                 `, {
@@ -1010,7 +881,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
               } else {
                 // Si no existe, usar "Otra" (ID 14)
                 await sequelize.query(`
-                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, created_at, updated_at)
+                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, "createdAt", "updatedAt")
                   VALUES (:id_persona, 14, NOW(), NOW())
                   ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
                 `, {
@@ -1067,7 +938,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
           const idEnfermedad = enfermedadCatalogo ? enfermedadCatalogo.id : 14; // 14 = "Otra"
           
           await sequelize.query(`
-            INSERT INTO persona_enfermedad (id_persona, id_enfermedad, created_at, updated_at)
+            INSERT INTO persona_enfermedad (id_persona, id_enfermedad, "createdAt", "updatedAt")
             VALUES (:id_persona, :id_enfermedad, NOW(), NOW())
             ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
           `, {
@@ -1320,18 +1191,40 @@ export const obtenerEncuestas = async (req, res) => {
     const cursor = req.query.cursor;
 
     // Parámetros de filtros opcionales
-    const { sector, municipio, apellido_familiar } = req.query;
+    const { q, buscar, sector, municipio, apellido_familiar, encuestador_id } = req.query;
 
     // Construir condiciones WHERE usando SQL directo
     let whereClause = '1=1';
     let replacements = { limit, offset };
     
+    // Filtro de búsqueda general (q o buscar) - OR entre apellido_familiar, nombre_encuestador y parroquia
+    if (q || buscar) {
+      const searchTerm = q || buscar;
+      whereClause += ` AND (
+        f.apellido_familiar ILIKE :searchTerm OR 
+        f.nombre_encuestador ILIKE :searchTerm OR 
+        p.nombre ILIKE :searchTerm
+      )`;
+      replacements.searchTerm = `%${searchTerm}%`;
+    }
+    
+    // Filtro específico por sector
     if (sector) {
-      whereClause += ' AND sector ILIKE :sector';
+      whereClause += ' AND f.sector ILIKE :sector';
       replacements.sector = `%${sector}%`;
     }
+    
+    // Filtro específico por encuestador_id
+    if (encuestador_id) {
+      whereClause += ' AND (f.id_encuestador = :encuestador_id OR f.nombre_encuestador ILIKE :encuestador_nombre)';
+      // Intentar parsear como número, si falla usar como texto
+      const parsedId = parseInt(encuestador_id);
+      replacements.encuestador_id = isNaN(parsedId) ? null : parsedId;
+      replacements.encuestador_nombre = `%${encuestador_id}%`;
+    }
+    
     if (apellido_familiar) {
-      whereClause += ' AND apellido_familiar ILIKE :apellido_familiar';
+      whereClause += ' AND f.apellido_familiar ILIKE :apellido_familiar';
       replacements.apellido_familiar = `%${apellido_familiar}%`;
     }
 
@@ -1370,26 +1263,20 @@ export const obtenerEncuestas = async (req, res) => {
         f.id_sector,
         f.id_parroquia,
         f.id_corregimiento,
-        f.id_centro_poblado,
-        f.id_usuario_creador,
         m.nombre_municipio,
         v.nombre as nombre_vereda,
         s.nombre as nombre_sector,
         p.nombre as nombre_parroquia,
         corr.nombre as nombre_corregimiento,
-        cp.nombre as nombre_centro_poblado,
         tv.id_tipo_vivienda,
-        tv.nombre as nombre_tipo_vivienda,
-        CONCAT(u.primer_nombre, ' ', u.primer_apellido) as nombre_usuario_creador
+        tv.nombre as nombre_tipo_vivienda
       FROM familias f
       LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
       LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
       LEFT JOIN sectores s ON f.id_sector = s.id_sector
       LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
       LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
-      LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
       LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
-      LEFT JOIN usuarios u ON f.id_usuario_creador = u.id
       WHERE ${whereClause}
       ORDER BY f.fecha_ultima_encuesta DESC 
       LIMIT :limit OFFSET :offset
@@ -1439,7 +1326,6 @@ export const obtenerEncuestas = async (req, res) => {
         let sectorInfo = null;
         let parroquiaInfo = null;
         let corregimientoInfo = null;
-        let centroPobladoInfo = null;
         let tipoViviendaInfo = null;
 
         // Usar datos de municipio ya obtenidos en el JOIN
@@ -1514,14 +1400,6 @@ export const obtenerEncuestas = async (req, res) => {
           corregimientoInfo = {
             id: familiaData.id_corregimiento,
             nombre: familiaData.nombre_corregimiento
-          };
-        }
-
-        // Usar datos de centro poblado ya obtenidos en el JOIN
-        if (familiaData.id_centro_poblado && familiaData.nombre_centro_poblado) {
-          centroPobladoInfo = {
-            id: familiaData.id_centro_poblado,
-            nombre: familiaData.nombre_centro_poblado
           };
         }
 
@@ -1802,7 +1680,11 @@ export const obtenerEncuestas = async (req, res) => {
             // ⭐ NUEVOS CAMPOS - Celebraciones y Enfermedades (arrays) ⭐
             celebraciones: persona.celebraciones || [],
             enfermedades: persona.enfermedades || [],
-            necesidad_enfermo: persona.necesidad_enfermo || null
+            // Campos deprecados - mantener para compatibilidad v1.0
+            motivo_celebrar_deprecated: persona.motivo_celebrar || null,
+            dia_celebrar_deprecated: persona.dia_celebrar || null,
+            mes_celebrar_deprecated: persona.mes_celebrar || null,
+            necesidad_enfermo_deprecated: persona.necesidad_enfermo || null
           };
         }));
 
@@ -1856,7 +1738,6 @@ export const obtenerEncuestas = async (req, res) => {
           estado_encuesta: familiaData.estado_encuesta,
           numero_encuestas: familiaData.numero_encuestas,
           fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
-          usuario_creador: familiaData.nombre_usuario_creador || null,
           
           // *** INFORMACIÓN DE VIVIENDA CON ID Y NOMBRE ***
           tipo_vivienda: tipoViviendaInfo,
@@ -1868,13 +1749,12 @@ export const obtenerEncuestas = async (req, res) => {
           vereda: veredaInfo,
           parroquia: parroquiaInfo,
           corregimiento: corregimientoInfo,
-          centro_poblado: centroPobladoInfo,
           // Removido: sector_especifico (no lo necesitas según indicaciones)
           
           // *** INFORMACIÓN DE SERVICIOS CON ID Y NOMBRE ***
           basuras: disposicionBasuras, // Siempre array, nunca null
-          acueducto: sistemasAcueducto, // Array de sistemas de acueducto
-          aguas_residuales: sistemasAguasResiduales, // Array de sistemas de aguas residuales
+          acueducto: sistemasAcueducto.length > 0 ? sistemasAcueducto[0] : null, // null cuando no hay información
+          aguas_residuales: sistemasAguasResiduales.length > 0 ? sistemasAguasResiduales[0] : null, // null cuando no hay información
           
           // *** INFORMACIÓN RELIGIOSA ***
           comunion_en_casa: familiaData.comunionEnCasa,
@@ -1966,29 +1846,20 @@ export const obtenerEncuestaPorId = async (req, res) => {
         f.id_sector,
         f.id_parroquia,
         f.id_corregimiento,
-        f.id_centro_poblado,
-        f.id_usuario_creador,
         m.nombre_municipio,
         v.nombre as nombre_vereda,
         s.nombre as nombre_sector,
         p.nombre as nombre_parroquia,
         corr.nombre as nombre_corregimiento,
-        cp.nombre as nombre_centro_poblado,
         tv.id_tipo_vivienda,
-        tv.nombre as nombre_tipo_vivienda,
-        CASE 
-          WHEN u.primer_nombre IS NOT NULL THEN CONCAT(u.primer_nombre, ' ', COALESCE(u.primer_apellido, ''))
-          ELSE NULL 
-        END as nombre_usuario_creador
+        tv.nombre as nombre_tipo_vivienda
       FROM familias f
       LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
       LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
       LEFT JOIN sectores s ON f.id_sector = s.id_sector
       LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
       LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
-      LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
       LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
-      LEFT JOIN usuarios u ON f.id_usuario_creador = u.id
       WHERE f.id_familia = :familiaId
     `;
     
@@ -2116,15 +1987,6 @@ export const obtenerEncuestaPorId = async (req, res) => {
       corregimientoInfo = {
         id: familiaData.id_corregimiento,
         nombre: familiaData.nombre_corregimiento
-      };
-    }
-
-    // Usar datos de centro poblado ya obtenidos en el JOIN
-    let centroPobladoInfo = null;
-    if (familiaData.id_centro_poblado && familiaData.nombre_centro_poblado) {
-      centroPobladoInfo = {
-        id: familiaData.id_centro_poblado,
-        nombre: familiaData.nombre_centro_poblado
       };
     }
 
@@ -2405,7 +2267,11 @@ export const obtenerEncuestaPorId = async (req, res) => {
         // ⭐ NUEVOS CAMPOS - Celebraciones y Enfermedades (arrays) ⭐
         celebraciones: persona.celebraciones || [],
         enfermedades: persona.enfermedades || [],
-        necesidad_enfermo: persona.necesidad_enfermo || null
+        // Campos deprecados - mantener para compatibilidad v1.0
+        motivo_celebrar_deprecated: persona.motivo_celebrar || null,
+        dia_celebrar_deprecated: persona.dia_celebrar || null,
+        mes_celebrar_deprecated: persona.mes_celebrar || null,
+        necesidad_enfermo_deprecated: persona.necesidad_enfermo || null
       };
     }));
 
@@ -2460,7 +2326,6 @@ export const obtenerEncuestaPorId = async (req, res) => {
       estado_encuesta: familiaData.estado_encuesta,
       numero_encuestas: familiaData.numero_encuestas,
       fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
-      usuario_creador: familiaData.nombre_usuario_creador || null,
       
       // *** INFORMACIÓN DE VIVIENDA CON ID Y NOMBRE ***
       tipo_vivienda: tipoViviendaInfo,
@@ -2472,12 +2337,11 @@ export const obtenerEncuestaPorId = async (req, res) => {
       vereda: veredaInfo,
       parroquia: parroquiaInfo,
       corregimiento: corregimientoInfo,
-      centro_poblado: centroPobladoInfo,
       
       // *** INFORMACIÓN DE SERVICIOS CON ID Y NOMBRE ***
-      basuras: disposicionBasuras, // Array de disposiciones de basura
-      acueducto: sistemasAcueducto, // Array de sistemas de acueducto
-      aguas_residuales: sistemasAguasResiduales, // Array de sistemas de aguas residuales
+      basuras: disposicionBasuras, // Siempre array, nunca null
+      acueducto: sistemasAcueducto.length > 0 ? sistemasAcueducto[0] : null, // null cuando no hay información
+      aguas_residuales: sistemasAguasResiduales.length > 0 ? sistemasAguasResiduales[0] : null, // null cuando no hay información
       
       // *** INFORMACIÓN RELIGIOSA ***
       comunion_en_casa: familiaData.comunionEnCasa,
@@ -2714,14 +2578,6 @@ export const crearEncuesta = async (req, res) => {
 
     console.log('✅ Validaciones completadas por middlewares');
     
-    // DEBUG: Verificar usuario autenticado
-    console.log('👤 Usuario autenticado:', {
-      id: req.user?.id,
-      email: req.user?.email,
-      nombre: req.user?.firstName,
-      apellido: req.user?.lastName
-    });
-    
     // VALIDAR INTEGRIDAD DE DATOS ANTES DE INICIAR TRANSACCIÓN
     console.log('🔍 Validando integridad de datos...');
     try {
@@ -2803,7 +2659,6 @@ export const crearEncuesta = async (req, res) => {
       id_sector: safeParseInt(informacionGeneral.sector?.id),
       id_corregimiento: safeParseInt(informacionGeneral.corregimiento?.id),
       id_centro_poblado: safeParseInt(informacionGeneral.centro_poblado?.id),
-      id_usuario_creador: req.user?.id || null, // ID del usuario que crea la encuesta
       
       // ⭐ SOPORTE v2.0: comunionEnCasa puede venir en informacionGeneral O en cualquier miembro (solicitudComunionCasa)
       comunionEnCasa: informacionGeneral.comunionEnCasa || 
@@ -2815,17 +2670,12 @@ export const crearEncuesta = async (req, res) => {
       letrina: servicios_agua?.letrina || false,
       campo_abierto: servicios_agua?.campo_abierto || false,
       
-      // CAMPOS BOOLEANOS DE DISPOSICIÓN DE BASURAS (soporta formato v1 y v2)
-      ...(() => {
-        const disposicionBooleanos = convertirDisposicionBasurasABooleanos(vivienda?.disposicion_basuras);
-        return {
-          disposicion_recolector: disposicionBooleanos.recolector,
-          disposicion_quemada: disposicionBooleanos.quemada,
-          disposicion_enterrada: disposicionBooleanos.enterrada,
-          disposicion_recicla: disposicionBooleanos.recicla,
-          disposicion_aire_libre: disposicionBooleanos.aire_libre
-        };
-      })()
+      // CAMPOS BOOLEANOS DE DISPOSICIÓN DE BASURAS
+      disposicion_recolector: vivienda?.disposicion_basuras?.recolector || false,
+      disposicion_quemada: vivienda?.disposicion_basuras?.quemada || false,
+      disposicion_enterrada: vivienda?.disposicion_basuras?.enterrada || false,
+      disposicion_recicla: vivienda?.disposicion_basuras?.recicla || false,
+      disposicion_aire_libre: vivienda?.disposicion_basuras?.aire_libre || false
     };
 
     const familia = await Familias.create(familiaData, { transaction });
@@ -2905,71 +2755,6 @@ export const crearEncuesta = async (req, res) => {
       } catch (rollbackError) {
         console.error('❌ Error durante rollback:', rollbackError.message);
       }
-    }
-    
-    // Detectar errores de foreign key y dar detalles específicos
-    if (error.name === 'SequelizeForeignKeyConstraintError' || error.original?.code === '23503') {
-      console.error('❌ Error de integridad referencial:', error.message);
-      
-      // Extraer información del constraint para identificar el campo problemático
-      const constraintMatch = error.message.match(/constraint "([^"]+)"/);
-      const constraint = constraintMatch ? constraintMatch[1] : null;
-      
-      let fieldName = 'desconocido';
-      let tableName = 'desconocida';
-      let suggestion = 'Verifique que todos los IDs seleccionados sean correctos';
-      
-      // Mapear constraints a nombres amigables
-      if (constraint) {
-        if (constraint.includes('id_municipio')) {
-          fieldName = 'Municipio';
-          tableName = 'municipios';
-          suggestion = 'Verifique que el municipio seleccionado exista en el catálogo';
-        } else if (constraint.includes('id_parroquia')) {
-          fieldName = 'Parroquia';
-          tableName = 'parroquia';
-          suggestion = 'Verifique que la parroquia seleccionada exista en el catálogo';
-        } else if (constraint.includes('id_vereda')) {
-          fieldName = 'Vereda';
-          tableName = 'veredas';
-          suggestion = 'Verifique que la vereda seleccionada exista en el catálogo';
-        } else if (constraint.includes('id_sector')) {
-          fieldName = 'Sector';
-          tableName = 'sectores';
-          suggestion = 'Verifique que el sector seleccionado exista en el catálogo';
-        } else if (constraint.includes('id_corregimiento')) {
-          fieldName = 'Corregimiento';
-          tableName = 'corregimientos';
-          suggestion = 'Verifique que el corregimiento seleccionado exista en el catálogo';
-        } else if (constraint.includes('id_centro_poblado')) {
-          fieldName = 'Centro Poblado';
-          tableName = 'centros_poblados';
-          suggestion = 'Verifique que el centro poblado seleccionado exista en el catálogo';
-        } else if (constraint.includes('id_tipo_vivienda')) {
-          fieldName = 'Tipo de Vivienda';
-          tableName = 'tipos_vivienda';
-          suggestion = 'Verifique que el tipo de vivienda seleccionado exista en el catálogo';
-        } else if (constraint.includes('id_sexo')) {
-          fieldName = 'Sexo';
-          tableName = 'sexos';
-          suggestion = 'Verifique que el sexo seleccionado sea válido (M o F)';
-        } else if (constraint.includes('id_tipo_identificacion')) {
-          fieldName = 'Tipo de Identificación';
-          tableName = 'tipo_identificacion';
-          suggestion = 'Verifique que el tipo de identificación seleccionado exista en el catálogo';
-        }
-      }
-      
-      const customError = createError(ErrorCodes.VALIDATION.INVALID_CATALOG_REFERENCE, {
-        catalog: tableName,
-        field: fieldName,
-        constraint: constraint,
-        details: `El ${fieldName} seleccionado no existe en el catálogo de ${tableName}`,
-        suggestion: suggestion,
-        originalError: error.message
-      });
-      
-      return errorResponse(res, customError);
     }
     
     console.error('❌ Error procesando encuesta:', error);
@@ -3160,52 +2945,9 @@ export const actualizarEncuestaCompleta = async (req, res) => {
   
   try {
     const { id } = req.params;
-    let datosCompletos = req.body;
+    const datosCompletos = req.body;
 
     console.log(`🔄 Actualizando encuesta completa ID: ${id}`);
-    
-    // Detectar si viene en formato JSON completo o formato plano
-    let datosPlanos;
-    let disposicionBasurasBooleanos = {
-      recolector: false,
-      quemada: false,
-      enterrada: false,
-      recicla: false,
-      aire_libre: false
-    };
-    
-    if (datosCompletos.informacionGeneral) {
-      // Formato JSON completo - extraer campos necesarios
-      console.log('📋 Formato JSON completo detectado, extrayendo campos...');
-      const { informacionGeneral, vivienda, observaciones } = datosCompletos;
-      
-      // Convertir disposición de basuras si viene en vivienda
-      if (vivienda?.disposicion_basuras) {
-        disposicionBasurasBooleanos = convertirDisposicionBasurasABooleanos(vivienda.disposicion_basuras);
-      }
-      
-      datosPlanos = {
-        apellido_familiar: informacionGeneral.apellido_familiar,
-        sector: informacionGeneral.sector?.nombre || informacionGeneral.sector,
-        direccion_familia: informacionGeneral.direccion,
-        numero_contacto: informacionGeneral.telefono,
-        telefono: informacionGeneral.telefono,
-        email: informacionGeneral.email || null,
-        tipo_vivienda: vivienda?.tipo_vivienda?.nombre || 'Casa',
-        tutor_responsable: observaciones?.tutor_responsable || null,
-        comunionEnCasa: observaciones?.comunionEnCasa || false,
-        // Campos booleanos de disposición
-        disposicion_recolector: disposicionBasurasBooleanos.recolector,
-        disposicion_quemada: disposicionBasurasBooleanos.quemada,
-        disposicion_enterrada: disposicionBasurasBooleanos.enterrada,
-        disposicion_recicla: disposicionBasurasBooleanos.recicla,
-        disposicion_aire_libre: disposicionBasurasBooleanos.aire_libre
-      };
-    } else {
-      // Formato plano directo
-      console.log('📋 Formato plano detectado');
-      datosPlanos = datosCompletos;
-    }
 
     // Actualizar todos los campos de la familia
     const updateQuery = `
@@ -3214,33 +2956,25 @@ export const actualizarEncuestaCompleta = async (req, res) => {
         numero_contacto = $4, telefono = $5, email = $6,
         "tamaño_familia" = $7, tipo_vivienda = $8, estado_encuesta = $9,
         "comunionEnCasa" = $10, tutor_responsable = $11,
-        disposicion_recolector = $12, disposicion_quemada = $13,
-        disposicion_enterrada = $14, disposicion_recicla = $15,
-        disposicion_aire_libre = $16,
         fecha_ultima_encuesta = NOW()
-      WHERE id_familia = $17
+      WHERE id_familia = $12
     `;
 
     await sequelize.query(updateQuery, {
       bind: [
-        datosPlanos.apellido_familiar,
-        datosPlanos.sector,
-        datosPlanos.direccion_familia,
-        datosPlanos.numero_contacto || null,
-        datosPlanos.telefono || null,
-        datosPlanos.email || null,
-        datosPlanos.tamaño_familia !== undefined ? datosPlanos.tamaño_familia : 1,
-        datosPlanos.tipo_vivienda || 'Casa',
-        datosPlanos.estado_encuesta || 'pendiente',
-        datosPlanos.comunionEnCasa || false,
-        typeof datosPlanos.tutor_responsable === 'string' ? 
-          datosPlanos.tutor_responsable.trim() !== '' && datosPlanos.tutor_responsable.toLowerCase() !== 'false' : 
-          (datosPlanos.tutor_responsable || false),
-        datosPlanos.disposicion_recolector !== undefined ? datosPlanos.disposicion_recolector : false,
-        datosPlanos.disposicion_quemada !== undefined ? datosPlanos.disposicion_quemada : false,
-        datosPlanos.disposicion_enterrada !== undefined ? datosPlanos.disposicion_enterrada : false,
-        datosPlanos.disposicion_recicla !== undefined ? datosPlanos.disposicion_recicla : false,
-        datosPlanos.disposicion_aire_libre !== undefined ? datosPlanos.disposicion_aire_libre : false,
+        datosCompletos.apellido_familiar,
+        datosCompletos.sector,
+        datosCompletos.direccion_familia,
+        datosCompletos.numero_contacto || null,
+        datosCompletos.telefono || null,
+        datosCompletos.email || null,
+        datosCompletos.tamaño_familia !== undefined ? datosCompletos.tamaño_familia : 1,
+        datosCompletos.tipo_vivienda || 'Casa',
+        datosCompletos.estado_encuesta || 'pendiente',
+        datosCompletos.comunionEnCasa || false,
+        typeof datosCompletos.tutor_responsable === 'string' ? 
+          datosCompletos.tutor_responsable.trim() !== '' && datosCompletos.tutor_responsable.toLowerCase() !== 'false' : 
+          (datosCompletos.tutor_responsable || false),
         id
       ],
       type: QueryTypes.UPDATE,
