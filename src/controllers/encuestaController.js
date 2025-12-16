@@ -1751,6 +1751,13 @@ export const obtenerEncuestas = async (req, res) => {
           numero_encuestas: familiaData.numero_encuestas,
           fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
           
+          // *** INFORMACIÓN DEL ENCUESTADOR ***
+          id_usuario_creador: familiaData.id_usuario_creador,
+          encuestador: {
+            id: familiaData.encuestador_id,
+            nombre: familiaData.nombre_encuestador
+          },
+          
           // *** INFORMACIÓN DE VIVIENDA CON ID Y NOMBRE ***
           tipo_vivienda: tipoViviendaInfo,
           tamaño_familia: familiaData.tamaño_familia,
@@ -2342,6 +2349,13 @@ export const obtenerEncuestaPorId = async (req, res) => {
       estado_encuesta: familiaData.estado_encuesta,
       numero_encuestas: familiaData.numero_encuestas,
       fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
+      
+      // *** INFORMACIÓN DEL ENCUESTADOR ***
+      id_usuario_creador: familiaData.id_usuario_creador,
+      encuestador: {
+        id: familiaData.encuestador_id,
+        nombre: familiaData.nombre_encuestador
+      },
       
       // *** INFORMACIÓN DE VIVIENDA CON ID Y NOMBRE ***
       tipo_vivienda: tipoViviendaInfo,
