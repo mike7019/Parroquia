@@ -2669,6 +2669,7 @@ export const crearEncuesta = async (req, res) => {
       codigo_familia: `FAM_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
       tutor_responsable: null,
       numero_contrato_epm: informacionGeneral.numero_contrato_epm || null,
+      id_usuario_creador: req.user?.id || null, // ID del usuario que crea la encuesta
       id_municipio: safeParseInt(informacionGeneral.municipio?.id),
       id_parroquia: safeParseInt(informacionGeneral.parroquia?.id),
       id_vereda: safeParseInt(informacionGeneral.vereda?.id),
