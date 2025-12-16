@@ -26,6 +26,12 @@ module.exports = (sequelize, DataTypes) => {
         as: 'vereda'
       });
 
+      // Relación con Usuario (encuestador)
+      Familia.belongsTo(models.Usuario, {
+        foreignKey: 'id_usuario_creador',
+        as: 'encuestador'
+      });
+
       // Nuevas relaciones muchos a muchos
       Familia.belongsToMany(models.TipoVivienda, {
         through: 'familia_tipo_vivienda',
@@ -188,6 +194,14 @@ module.exports = (sequelize, DataTypes) => {
     observaciones_encuestador: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    id_usuario_creador: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'usuarios',
+        key: 'id'
+      }
     },
     autorizacion_datos: {
       type: DataTypes.BOOLEAN,
