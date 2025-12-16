@@ -1231,7 +1231,8 @@ export const obtenerEncuestas = async (req, res) => {
     // Obtener total de registros usando SQL directo
     const countQuery = `
       SELECT COUNT(*) as total 
-      FROM familias 
+      FROM familias f
+      LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
       WHERE ${whereClause}
     `;
     const [{ total }] = await sequelize.query(countQuery, {
