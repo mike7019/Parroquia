@@ -709,12 +709,12 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
               await sequelize.query(`SAVEPOINT ${savepointName};`, { transaction });
 
               await sequelize.query(`
-                INSERT INTO persona_celebracion (id_personas, motivo, dia, mes, created_at, updated_at)
-                VALUES (:id_personas, :motivo, :dia, :mes, NOW(), NOW())
-                ON CONFLICT (id_personas, motivo, dia, mes) DO NOTHING
+                INSERT INTO persona_celebracion (id_persona, motivo, dia, mes, created_at, updated_at)
+                VALUES (:id_persona, :motivo, :dia, :mes, NOW(), NOW())
+                ON CONFLICT (id_persona, motivo, dia, mes) DO NOTHING
               `, {
                 replacements: {
-                  id_personas: personaId,
+                  id_persona: personaId,
                   motivo: motivo,
                   dia: dia,
                   mes: mes
@@ -746,12 +746,12 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
           await sequelize.query(`SAVEPOINT ${savepointName};`, { transaction });
 
           await sequelize.query(`
-            INSERT INTO persona_celebracion (id_personas, motivo, dia, mes, created_at, updated_at)
-            VALUES (:id_personas, :motivo, :dia, :mes, NOW(), NOW())
-            ON CONFLICT (id_personas, motivo, dia, mes) DO NOTHING
+            INSERT INTO persona_celebracion (id_persona, motivo, dia, mes, created_at, updated_at)
+            VALUES (:id_persona, :motivo, :dia, :mes, NOW(), NOW())
+            ON CONFLICT (id_persona, motivo, dia, mes) DO NOTHING
           `, {
             replacements: {
-              id_personas: personaId,
+              id_persona: personaId,
               motivo: motivoCelebrar,
               dia: diaCelebrar,
               mes: mesCelebrar
@@ -824,7 +824,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
               }
               
               await sequelize.query(`
-                INSERT INTO persona_enfermedad (id_persona, id_enfermedad, "createdAt", "updatedAt")
+                INSERT INTO persona_enfermedad (id_persona, id_enfermedad, created_at, updated_at)
                 VALUES (:id_persona, :id_enfermedad, NOW(), NOW())
                 ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
               `, {
@@ -866,7 +866,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
               
               if (enfermedadCatalogo) {
                 await sequelize.query(`
-                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, "createdAt", "updatedAt")
+                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, created_at, updated_at)
                   VALUES (:id_persona, :id_enfermedad, NOW(), NOW())
                   ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
                 `, {
@@ -881,7 +881,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
               } else {
                 // Si no existe, usar "Otra" (ID 14)
                 await sequelize.query(`
-                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, "createdAt", "updatedAt")
+                  INSERT INTO persona_enfermedad (id_persona, id_enfermedad, created_at, updated_at)
                   VALUES (:id_persona, 14, NOW(), NOW())
                   ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
                 `, {
@@ -938,7 +938,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
           const idEnfermedad = enfermedadCatalogo ? enfermedadCatalogo.id : 14; // 14 = "Otra"
           
           await sequelize.query(`
-            INSERT INTO persona_enfermedad (id_persona, id_enfermedad, "createdAt", "updatedAt")
+            INSERT INTO persona_enfermedad (id_persona, id_enfermedad, created_at, updated_at)
             VALUES (:id_persona, :id_enfermedad, NOW(), NOW())
             ON CONFLICT (id_persona, id_enfermedad) DO NOTHING
           `, {
