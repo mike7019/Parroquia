@@ -69,7 +69,7 @@ const router = express.Router();
  *         name: municipio
  *         schema:
  *           type: string
- *         description: Filtrar por municipio (búsqueda parcial)
+ *         description: Filtrar específicamente por ID del municipio
  *       - in: query
  *         name: apellido_familiar
  *         schema:
@@ -152,7 +152,7 @@ const router = express.Router();
  *         name: municipio
  *         schema:
  *           type: string
- *         description: Filtrar por municipio (búsqueda parcial)
+ *         description: Filtrar específicamente por ID del municipio
  *       - in: query
  *         name: apellido_familiar
  *         schema:

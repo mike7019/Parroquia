@@ -1215,6 +1215,12 @@ export const obtenerEncuestas = async (req, res) => {
       replacements.sector = parseInt(sector);
     }
     
+    // Filtro específico por ID de municipio
+    if (municipio) {
+      whereClause += ' AND f.id_municipio = :municipio';
+      replacements.municipio = parseInt(municipio);
+    }
+    
     // Filtro específico por encuestador_id - Nota: columnas id_encuestador y nombre_encuestador no existen en tabla familias
     // TODO: Implementar relación con tabla de usuarios/encuestadores si es necesaria
     if (encuestador_id) {
