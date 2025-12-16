@@ -1197,12 +1197,11 @@ export const obtenerEncuestas = async (req, res) => {
     let whereClause = '1=1';
     let replacements = { limit, offset };
     
-    // Filtro de búsqueda general (q o buscar) - OR entre apellido_familiar, nombre_encuestador y parroquia
+    // Filtro de búsqueda general (q o buscar) - OR entre apellido_familiar y parroquia
     if (q || buscar) {
       const searchTerm = q || buscar;
       whereClause += ` AND (
         f.apellido_familiar ILIKE :searchTerm OR 
-        f.nombre_encuestador ILIKE :searchTerm OR 
         p.nombre ILIKE :searchTerm
       )`;
       replacements.searchTerm = `%${searchTerm}%`;
@@ -1214,13 +1213,11 @@ export const obtenerEncuestas = async (req, res) => {
       replacements.sector = `%${sector}%`;
     }
     
-    // Filtro específico por encuestador_id
+    // Filtro específico por encuestador_id - Nota: columnas id_encuestador y nombre_encuestador no existen en tabla familias
+    // TODO: Implementar relación con tabla de usuarios/encuestadores si es necesaria
     if (encuestador_id) {
-      whereClause += ' AND (f.id_encuestador = :encuestador_id OR f.nombre_encuestador ILIKE :encuestador_nombre)';
-      // Intentar parsear como número, si falla usar como texto
-      const parsedId = parseInt(encuestador_id);
-      replacements.encuestador_id = isNaN(parsedId) ? null : parsedId;
-      replacements.encuestador_nombre = `%${encuestador_id}%`;
+      // Por ahora ignoramos este filtro hasta que se implemente la relación correcta
+      console.warn('⚠️ Filtro encuestador_id ignorado - columna no existe en tabla familias');
     }
     
     if (apellido_familiar) {
