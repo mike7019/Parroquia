@@ -54,17 +54,12 @@ const router = express.Router();
  *         name: q
  *         schema:
  *           type: string
- *         description: Búsqueda general (OR) en apellido_familiar, nombre_encuestador o parroquia (case-insensitive)
- *       - in: query
- *         name: buscar
- *         schema:
- *           type: string
- *         description: Alias de 'q' - Búsqueda general (OR) en apellido_familiar, nombre_encuestador o parroquia
+ *         description: Búsqueda general (OR) en apellido_familiar, parroquia, sector o municipio (case-insensitive)
  *       - in: query
  *         name: sector
  *         schema:
- *           type: string
- *         description: Filtrar específicamente por sector (búsqueda parcial, case-insensitive)
+ *           type: integer
+ *         description: Filtrar específicamente por ID del sector
  *       - in: query
  *         name: encuestador_id
  *         schema:
@@ -142,17 +137,12 @@ const router = express.Router();
  *         name: q
  *         schema:
  *           type: string
- *         description: Búsqueda general (OR) en apellido_familiar, nombre_encuestador o parroquia (case-insensitive)
- *       - in: query
- *         name: buscar
- *         schema:
- *           type: string
- *         description: Alias de 'q' - Búsqueda general (OR) en apellido_familiar, nombre_encuestador o parroquia
+ *         description: Búsqueda general (OR) en apellido_familiar, parroquia, sector o municipio (case-insensitive)
  *       - in: query
  *         name: sector
  *         schema:
- *           type: string
- *         description: Filtrar específicamente por sector (búsqueda parcial, case-insensitive)
+ *           type: integer
+ *         description: Filtrar específicamente por ID del sector
  *       - in: query
  *         name: encuestador_id
  *         schema:
@@ -1050,3 +1040,5 @@ router.put('/:id',
 );
 
 export default router;
+
+

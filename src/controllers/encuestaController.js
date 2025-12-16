@@ -1191,26 +1191,28 @@ export const obtenerEncuestas = async (req, res) => {
     const cursor = req.query.cursor;
 
     // Parámetros de filtros opcionales
-    const { q, buscar, sector, municipio, apellido_familiar, encuestador_id } = req.query;
+    const { q, sector, municipio, apellido_familiar, encuestador_id } = req.query;
 
     // Construir condiciones WHERE usando SQL directo
     let whereClause = '1=1';
     let replacements = { limit, offset };
     
-    // Filtro de búsqueda general (q o buscar) - OR entre apellido_familiar y parroquia
-    if (q || buscar) {
-      const searchTerm = q || buscar;
+    // Filtro de búsqueda general (q) - OR entre apellido_familiar, parroquia, sector y municipio
+    if (q) {
+      const searchTerm = q;
       whereClause += ` AND (
         f.apellido_familiar ILIKE :searchTerm OR 
-        p.nombre ILIKE :searchTerm
+        p.nombre ILIKE :searchTerm OR
+        s.nombre ILIKE :searchTerm OR
+        m.nombre_municipio ILIKE :searchTerm
       )`;
       replacements.searchTerm = `%${searchTerm}%`;
     }
     
-    // Filtro específico por sector
+    // Filtro específico por ID de sector
     if (sector) {
-      whereClause += ' AND f.sector ILIKE :sector';
-      replacements.sector = `%${sector}%`;
+      whereClause += ' AND f.id_sector = :sector';
+      replacements.sector = parseInt(sector);
     }
     
     // Filtro específico por encuestador_id - Nota: columnas id_encuestador y nombre_encuestador no existen en tabla familias
@@ -1230,6 +1232,8 @@ export const obtenerEncuestas = async (req, res) => {
       SELECT COUNT(*) as total 
       FROM familias f
       LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
+      LEFT JOIN sectores s ON f.id_sector = s.id_sector
+      LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
       WHERE ${whereClause}
     `;
     const [{ total }] = await sequelize.query(countQuery, {

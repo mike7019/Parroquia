@@ -46,13 +46,14 @@ class EncuestaService {
         limitClause += ' OFFSET :offset';
       }
 
-      // Filtro de búsqueda general (q o buscar) - OR entre apellido_familiar, nombre_encuestador y parroquia
+      // Filtro de búsqueda general (q o buscar) - OR entre apellido_familiar, parroquia, sector y municipio
       if (sanitizedFilters.q || sanitizedFilters.buscar) {
         const searchTerm = sanitizedFilters.q || sanitizedFilters.buscar;
         whereClause += ` AND (
           f.apellido_familiar ILIKE :searchTerm OR 
-          f.nombre_encuestador ILIKE :searchTerm OR 
-          p.nombre ILIKE :searchTerm
+          p.nombre ILIKE :searchTerm OR
+          s.nombre ILIKE :searchTerm OR
+          m.nombre_municipio ILIKE :searchTerm
         )`;
         replacements.searchTerm = `%${searchTerm}%`;
       }
