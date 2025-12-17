@@ -2708,7 +2708,12 @@ export const crearEncuesta = async (req, res) => {
       disposicion_quemada: vivienda?.disposicion_basuras?.quemada || false,
       disposicion_enterrada: vivienda?.disposicion_basuras?.enterrada || false,
       disposicion_recicla: vivienda?.disposicion_basuras?.recicla || false,
-      disposicion_aire_libre: vivienda?.disposicion_basuras?.aire_libre || false
+      disposicion_aire_libre: vivienda?.disposicion_basuras?.aire_libre || false,
+      
+      // ⭐ CAMPOS DE OBSERVACIONES
+      sustento_familia: observaciones?.sustento_familia || null,
+      observaciones_encuestador: observaciones?.observaciones_encuestador || null,
+      autorizacion_datos: observaciones?.autorizacion_datos || false
     };
 
     const familia = await Familias.create(familiaData, { transaction });
