@@ -1862,6 +1862,9 @@ export const obtenerEncuestaPorId = async (req, res) => {
         f.id_parroquia,
         f.id_corregimiento,
         f.id_usuario_creador,
+        f.sustento_familia,
+        f.observaciones_encuestador,
+        f.autorizacion_datos,
         m.nombre_municipio,
         v.nombre as nombre_vereda,
         s.nombre as nombre_sector,
@@ -2370,6 +2373,13 @@ export const obtenerEncuestaPorId = async (req, res) => {
       
       // *** INFORMACIÓN DE SERVICIOS PÚBLICOS ***
       numero_contrato_epm: familiaData.numero_contrato_epm || null,
+      
+      // *** OBSERVACIONES ***
+      observaciones: {
+        sustento_familia: familiaData.sustento_familia || "",
+        observaciones_encuestador: familiaData.observaciones_encuestador || "",
+        autorizacion_datos: familiaData.autorizacion_datos || false
+      },
       
       // Información de personas/miembros de familia - SEPARADOS CORRECTAMENTE
       miembros_familia: {
