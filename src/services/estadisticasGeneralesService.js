@@ -709,25 +709,26 @@ class EstadisticasGeneralesService {
       // Distribución por sistema de acueducto
       const distribucionAcueducto = await sequelize.query(`
         SELECT 
-          sa.descripcion as sistema_acueducto,
+          sa.nombre as sistema_acueducto,
           COUNT(DISTINCT fsa.id_familia) as total_familias,
-          ROUND(COUNT(DISTINCT fsa.id_familia) * 100.0 / NULLIF((SELECT COUNT(DISTINCT id_familia) FROM familia_sistema_acueductos), 0), 2) as porcentaje
-        FROM sistemas_acueductos sa
-        LEFT JOIN familia_sistema_acueductos fsa ON sa.id_sistema = fsa.id_sistema_acueducto
+          ROUND(COUNT(DISTINCT fsa.id_familia) * 100.0 / NULLIF((SELECT COUNT(DISTINCT id_familia) FROM familia_sistema_acueducto), 0), 2) as porcentaje
+        FROM sistemas_acueducto sa
+        LEFT JOIN familia_sistema_acueducto fsa ON sa.id_sistema_acueducto = fsa.id_sistema_acueducto
         WHERE sa.activo = true
-        GROUP BY sa.id_sistema, sa.descripcion
+        GROUP BY sa.id_sistema_acueducto, sa.nombre
         ORDER BY total_familias DESC
       `, { type: QueryTypes.SELECT });
 
-      // Distribución por disposición de basura (usando el campo 'disposicion' en la tabla relacional)
+      // Distribución por disposición de basura
       const distribucionBasura = await sequelize.query(`
         SELECT 
-          fdb.disposicion as tipo_disposicion,
+          tdb.nombre as tipo_disposicion,
           COUNT(DISTINCT fdb.id_familia) as total_familias,
-          ROUND(COUNT(DISTINCT fdb.id_familia) * 100.0 / NULLIF((SELECT COUNT(DISTINCT id_familia) FROM familia_disposicion_basuras), 0), 2) as porcentaje
-        FROM familia_disposicion_basuras fdb
-        WHERE fdb.disposicion IS NOT NULL AND fdb.disposicion != ''
-        GROUP BY fdb.disposicion
+          ROUND(COUNT(DISTINCT fdb.id_familia) * 100.0 / NULLIF((SELECT COUNT(DISTINCT id_familia) FROM familia_disposicion_basura), 0), 2) as porcentaje
+        FROM familia_disposicion_basura fdb
+        LEFT JOIN tipos_disposicion_basura tdb ON fdb.id_tipo_disposicion_basura = tdb.id_tipo_disposicion_basura
+        WHERE tdb.activo = true
+        GROUP BY tdb.nombre
         ORDER BY total_familias DESC
       `, { type: QueryTypes.SELECT });
 
