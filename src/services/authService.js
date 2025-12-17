@@ -77,8 +77,8 @@ class AuthService {
       await user.addRole(userRole, { transaction });
 
       // Generate tokens
-      const accessToken = this.generateAccessToken(user.id);
-      const refreshToken = this.generateRefreshToken(user.id);
+      const accessToken = this.generateAccessToken(user.id, user.correo_electronico);
+      const refreshToken = this.generateRefreshToken(user.id, user.correo_electronico);
 
       // Commit transaction before attempting to send email
       await transaction.commit();
@@ -162,8 +162,8 @@ class AuthService {
     }
 
     // Generate tokens
-    const accessToken = this.generateAccessToken(user.id);
-    const refreshToken = this.generateRefreshToken(user.id);
+    const accessToken = this.generateAccessToken(user.id, user.correo_electronico);
+    const refreshToken = this.generateRefreshToken(user.id, user.correo_electronico);
 
     // Update last login only (don't store refresh token in database)
     await user.update({
@@ -218,7 +218,7 @@ class AuthService {
       }
 
       // Generate new access token
-      const newAccessToken = this.generateAccessToken(user.id);
+      const newAccessToken = this.generateAccessToken(user.id, user.correo_electronico);
 
       console.log('✅ Refresh token successful for user:', decoded.userId);
 
@@ -491,25 +491,27 @@ class AuthService {
 
   /**
    * Generates access token
-   * @param {number} userId - User ID
+   * @param {string} userId - User ID
+   * @param {string} email - User email
    * @returns {string} JWT access token
    */
-  generateAccessToken(userId) {
+  generateAccessToken(userId, email) {
     return jwt.sign(
-      { userId, type: 'access' },
+      { userId, email, type: 'access' },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
     );
   }
 
   /**
    * Generates refresh token
-   * @param {number} userId - User ID
+   * @param {string} userId - User ID
+   * @param {string} email - User email
    * @returns {string} JWT refresh token
    */
-  generateRefreshToken(userId) {
+  generateRefreshToken(userId, email) {
     return jwt.sign(
-      { userId, type: 'refresh' },
+      { userId, email, type: 'refresh' },
       process.env.JWT_REFRESH_SECRET,
       { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
     );
