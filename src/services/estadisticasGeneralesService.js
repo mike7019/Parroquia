@@ -726,7 +726,7 @@ class EstadisticasGeneralesService {
           ROUND(COUNT(DISTINCT fdb.id_familia) * 100.0 / NULLIF((SELECT COUNT(DISTINCT id_familia) FROM familia_disposicion_basura), 0), 2) as porcentaje
         FROM familia_disposicion_basura fdb
         LEFT JOIN tipos_disposicion_basura tdb ON fdb.id_tipo_disposicion_basura = tdb.id_tipo_disposicion_basura
-        WHERE tdb.activo = true
+        WHERE tdb.nombre IS NOT NULL
         GROUP BY tdb.nombre
         ORDER BY total_familias DESC
       `, { type: QueryTypes.SELECT });
