@@ -260,8 +260,8 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BIGINT,
       allowNull: true,
       references: {
-        model: 'tipos_viviendas',
-        key: 'id_tipo'
+        model: 'tipos_vivienda',
+        key: 'id_tipo_vivienda'
       }
     }
   }, {

@@ -169,12 +169,7 @@ export async function enriquecerPersonasConDetalles(personas, transaction = null
         : persona.fecha_nacimiento)
       : null,
     celebraciones: celebracionesMap.get(persona.id_personas) || [],
-    enfermedades: enfermedadesMap.get(persona.id_personas) || [],
-    // DEPRECATED: Mantener para compatibilidad con versiones anteriores
-    motivo_celebrar_deprecated: persona.motivo_celebrar,
-    dia_celebrar_deprecated: persona.dia_celebrar,
-    mes_celebrar_deprecated: persona.mes_celebrar,
-    necesidad_enfermo_deprecated: persona.necesidad_enfermo
+    enfermedades: enfermedadesMap.get(persona.id_personas) || []
   }));
 }
 
@@ -211,10 +206,6 @@ export async function obtenerPersonasFamiliaCompletas(idFamilia, transaction = n
       p.id_comunidad_cultural,
       p.id_tipo_identificacion_tipo_identificacion,
       p.id_estado_civil_estado_civil,
-      -- Campos antiguos para compatibilidad (marcados como deprecated)
-      p.motivo_celebrar,
-      p.dia_celebrar,
-      p.mes_celebrar,
       p.necesidad_enfermo,
       -- Información de catálogos
       s.id_sexo as sexo_id,
