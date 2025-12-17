@@ -2608,6 +2608,7 @@ export const crearEncuesta = async (req, res) => {
       metadata = {}
     } = req.body;
 
+    console.log('🔍 DEBUG observaciones recibidas:', JSON.stringify(observaciones, null, 2));
     console.log('✅ Validaciones completadas por middlewares');
     
     // VALIDAR INTEGRIDAD DE DATOS ANTES DE INICIAR TRANSACCIÓN
@@ -2715,6 +2716,10 @@ export const crearEncuesta = async (req, res) => {
       observaciones_encuestador: observaciones?.observaciones_encuestador || null,
       autorizacion_datos: observaciones?.autorizacion_datos || false
     };
+
+    console.log('🔍 DEBUG familiaData.sustento_familia:', familiaData.sustento_familia);
+    console.log('🔍 DEBUG familiaData.observaciones_encuestador:', familiaData.observaciones_encuestador);
+    console.log('🔍 DEBUG familiaData.autorizacion_datos:', familiaData.autorizacion_datos);
 
     const familia = await Familias.create(familiaData, { transaction });
     console.log(`✅ Familia creada con ID: ${familia.id_familia}`);
