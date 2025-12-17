@@ -714,7 +714,6 @@ class EstadisticasGeneralesService {
           ROUND(COUNT(DISTINCT fsa.id_familia) * 100.0 / NULLIF((SELECT COUNT(DISTINCT id_familia) FROM familia_sistema_acueducto), 0), 2) as porcentaje
         FROM sistemas_acueducto sa
         LEFT JOIN familia_sistema_acueducto fsa ON sa.id_sistema_acueducto = fsa.id_sistema_acueducto
-        WHERE sa.activo = true
         GROUP BY sa.id_sistema_acueducto, sa.nombre
         ORDER BY total_familias DESC
       `, { type: QueryTypes.SELECT });
