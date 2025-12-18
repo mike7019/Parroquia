@@ -1272,6 +1272,9 @@ export const obtenerEncuestas = async (req, res) => {
         f.id_parroquia,
         f.id_corregimiento,
         f.id_usuario_creador,
+        f.sustento_familia,
+        f.observaciones_encuestador,
+        f.autorizacion_datos,
         m.nombre_municipio,
         v.nombre as nombre_vereda,
         s.nombre as nombre_sector,
@@ -1748,11 +1751,7 @@ export const obtenerEncuestas = async (req, res) => {
           fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
           
           // *** INFORMACIÓN DEL ENCUESTADOR ***
-          id_usuario_creador: familiaData.id_usuario_creador,
-          encuestador: {
-            id: familiaData.encuestador_id,
-            nombre: familiaData.nombre_encuestador
-          },
+          encuestador: familiaData.nombre_encuestador || null,
           
           // *** INFORMACIÓN DE VIVIENDA CON ID Y NOMBRE ***
           tipo_vivienda: tipoViviendaInfo,
@@ -1776,6 +1775,13 @@ export const obtenerEncuestas = async (req, res) => {
           
           // *** INFORMACIÓN DE SERVICIOS PÚBLICOS ***
           numero_contrato_epm: familiaData.numero_contrato_epm || null,
+          
+          // *** OBSERVACIONES ***
+          observaciones: {
+            sustento_familia: familiaData.sustento_familia || '',
+            observaciones_encuestador: familiaData.observaciones_encuestador || '',
+            autorizacion_datos: familiaData.autorizacion_datos || false
+          },
           
           // Información de personas/miembros de familia - SEPARADOS CORRECTAMENTE
           miembros_familia: {
@@ -2346,11 +2352,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
       fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
       
       // *** INFORMACIÓN DEL ENCUESTADOR ***
-      id_usuario_creador: familiaData.id_usuario_creador,
-      encuestador: {
-        id: familiaData.encuestador_id,
-        nombre: familiaData.nombre_encuestador
-      },
+      encuestador: familiaData.nombre_encuestador || null,
       
       // *** INFORMACIÓN DE VIVIENDA CON ID Y NOMBRE ***
       tipo_vivienda: tipoViviendaInfo,

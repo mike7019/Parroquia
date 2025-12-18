@@ -18,9 +18,7 @@ export async function obtenerCelebracionesPersona(idPersona, transaction = null)
       pc.id,
       pc.motivo,
       pc.dia,
-      pc.mes,
-      pc.created_at,
-      pc.updated_at
+      pc.mes
     FROM persona_celebracion pc
     WHERE pc.id_persona = :idPersona
     ORDER BY pc.mes ASC, pc.dia ASC
@@ -74,12 +72,8 @@ export async function obtenerCelebracionesMultiplesPersonas(idsPersonas, transac
       pc.id,
       pc.motivo,
       pc.dia,
-      pc.mes,
-      pc.created_at,
-      pc.updated_at,
-      CONCAT(p.primer_nombre, ' ', p.primer_apellido) as nombre_completo
+      pc.mes
     FROM persona_celebracion pc
-    LEFT JOIN personas p ON pc.id_persona = p.id_personas
     WHERE pc.id_persona IN (:idsPersonas)
     ORDER BY pc.id_persona ASC, pc.mes ASC, pc.dia ASC
   `, {
@@ -94,7 +88,13 @@ export async function obtenerCelebracionesMultiplesPersonas(idsPersonas, transac
     if (!celebracionesPorPersona.has(cel.id_persona)) {
       celebracionesPorPersona.set(cel.id_persona, []);
     }
-    celebracionesPorPersona.get(cel.id_persona).push(cel);
+    // Solo incluir campos necesarios: id, motivo, dia, mes
+    celebracionesPorPersona.get(cel.id_persona).push({
+      id: cel.id,
+      motivo: cel.motivo,
+      dia: cel.dia,
+      mes: cel.mes
+    });
   });
 
   return celebracionesPorPersona;
@@ -115,11 +115,9 @@ export async function obtenerEnfermedadesMultiplesPersonas(idsPersonas, transact
     SELECT
       pe.id_persona,
       pe.id_enfermedad as id,
-      e.nombre,
-      CONCAT(p.primer_nombre, ' ', p.primer_apellido) as nombre_completo
+      e.nombre
     FROM persona_enfermedad pe
     INNER JOIN enfermedades e ON e.id_enfermedad = pe.id_enfermedad
-    LEFT JOIN personas p ON pe.id_persona = p.id_personas
     WHERE pe.id_persona IN (:idsPersonas)
     ORDER BY pe.id_persona ASC, e.nombre ASC
   `, {
@@ -134,7 +132,11 @@ export async function obtenerEnfermedadesMultiplesPersonas(idsPersonas, transact
     if (!enfermedadesPorPersona.has(enf.id_persona)) {
       enfermedadesPorPersona.set(enf.id_persona, []);
     }
-    enfermedadesPorPersona.get(enf.id_persona).push(enf);
+    // Solo incluir campos necesarios: id, nombre
+    enfermedadesPorPersona.get(enf.id_persona).push({
+      id: enf.id,
+      nombre: enf.nombre
+    });
   });
 
   return enfermedadesPorPersona;

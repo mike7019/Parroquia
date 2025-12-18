@@ -1,0 +1,196 @@
+{
+  "informacionGeneral": {
+    "municipio": {
+      "id": 1110,
+      "nombre": "Yolombó"
+    },
+    "parroquia": {
+      "id": 1,
+      "nombre": "Parroquia San José"
+    },
+    "sector": {
+      "id": 1,
+      "nombre": "Sector San José"
+    },
+    "vereda": {
+      "id": 1,
+      "nombre": "El Rubí"
+    },
+    "corregimiento": {
+      "id": 11,
+      "nombre": "Corregimiento San Mike"
+    },
+    "centro_poblado": {
+      "id": 3,
+      "nombre": "Centro Poblado San Pedro"
+    },
+    "fecha": "2025-11-09T03:32:17.404Z",
+    "apellido_familiar": "TEST OBSERVACIONES API",
+    "direccion": "calle 55 # 32-30",
+    "telefono": "4339153",
+    "numero_contrato_epm": "TEST-API-12345678"
+  },
+  "vivienda": {
+    "tipo_vivienda": {
+      "id": 2,
+      "nombre": "Apartamento"
+    },
+    "disposicion_basuras": [
+      {
+        "id": 5,
+        "nombre": "Compostaje Mejorado",
+        "seleccionado": true
+      },
+      {
+        "id": 2,
+        "nombre": "Quema",
+        "seleccionado": true
+      },
+      {
+        "id": 1,
+        "nombre": "Recolección Pública",
+        "seleccionado": true
+      }
+    ]
+  },
+  "servicios_agua": {
+    "sistema_acueducto": {
+      "id": 1,
+      "nombre": "Acueducto Municipal"
+    },
+    "aguas_residuales": [
+      {
+        "id": 1,
+        "nombre": "Alcantarillado",
+        "seleccionado": true
+      },
+      {
+        "id": 2,
+        "nombre": "Pozo Séptico",
+        "seleccionado": true
+      }
+    ]
+  },
+  "observaciones": {
+    "sustento_familia": "tma nuevo pruiebs",
+    "observaciones_encuestador": "completedooo",
+    "autorizacion_datos": true
+  },
+  "familyMembers": [
+    {
+      "nombres": "Raquel Rodriguez Gonzales",
+      "fechaNacimiento": "2000-11-01T00:00:00.000Z",
+      "tipoIdentificacion": {
+        "id": 3,
+        "nombre": "CC - Cédula de Ciudadanía"
+      },
+      "numeroIdentificacion": "321657787",
+      "sexo": {
+        "id": 2,
+        "nombre": "Femenino"
+      },
+      "situacionCivil": {
+        "id": 1,
+        "nombre": "Soltero(a)"
+      },
+      "parentesco": {
+        "id": 25,
+        "nombre": "Jefa de Hogar"
+      },
+      "talla_camisa": "12",
+      "talla_pantalon": "28",
+      "talla_zapato": "37",
+      "estudio": {
+        "id": 3,
+        "nombre": "Educación Secundaria"
+      },
+      "comunidadCultural": {
+        "id": 5,
+        "nombre": "Otra"
+      },
+      "telefono": "3218820571",
+      "enQueEresLider": [
+        "mmm",
+        "todo",
+        "nada"
+      ],
+      "correo_electronico": "raquel.176@gmail.com",
+      "enfermedades": [
+        {
+          "id": 76,
+          "nombre": "Anemia"
+        },
+        {
+          "id": 67,
+          "nombre": "Acné"
+        }
+      ],
+      "necesidadesEnfermo": [
+        "pasajes",
+        "medicamentos"
+      ],
+      "solicitudComunionCasa": true,
+      "profesionMotivoFechaCelebrar": {
+        "profesion": {
+          "id": 6,
+          "nombre": "Agricultor"
+        },
+        "celebraciones": [
+          {
+            "motivo": "Cumpleaños",
+            "dia": "12",
+            "mes": "11"
+          },
+          {
+            "motivo": "Dia de la madre",
+            "dia": "8",
+            "mes": "5"
+          }
+        ]
+      },
+      "habilidades": [
+        {
+          "id": 16,
+          "nombre": "Artesanía",
+          "nivel": "Avanzado"
+        },
+        {
+          "id": 12,
+          "nombre": "Cocina",
+          "nivel": "Avanzado"
+        }
+      ],
+      "destrezas": [
+        {
+          "id": 19,
+          "nombre": "Agricultura"
+        },
+        {
+          "id": 14,
+          "nombre": "Barbería"
+        }
+      ]
+    }
+  ],
+  "deceasedMembers": [
+    {
+      "nombres": "Juan Camilo Rodriguez Gacha",
+      "fechaFallecimiento": "2025-11-28T05:00:00.000Z",
+      "sexo": {
+        "id": 1,
+        "nombre": "Masculino"
+      },
+      "parentesco": {
+        "id": 1,
+        "nombre": "Abuelo"
+      },
+      "causaFallecimiento": "Natural"
+    }
+  ],
+  "metadata": {
+    "timestamp": "2025-11-09T04:06:36.092Z",
+    "completed": false,
+    "currentStage": 6
+  },
+  "version": "2.0"
+}
