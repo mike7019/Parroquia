@@ -130,9 +130,12 @@ class DifuntosConsolidadoController {
         id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
         id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
         id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
+        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
         
         // Filtros adicionales
         id_parentesco: req.query.id_parentesco ? parseInt(req.query.id_parentesco) : undefined,
+        parentesco: req.query.parentesco, // Filtro por nombre de parentesco (texto)
         fecha_inicio: req.query.fecha_inicio,
         fecha_fin: req.query.fecha_fin
       };
@@ -188,9 +191,12 @@ class DifuntosConsolidadoController {
         id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
         id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
         id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
+        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
         
         // Filtros adicionales
-        parentesco: req.query.parentesco,
+        id_parentesco: req.query.id_parentesco ? parseInt(req.query.id_parentesco) : undefined,
+        parentesco: req.query.parentesco, // Filtro por nombre de parentesco (texto)
         fecha_inicio: req.query.fecha_inicio,
         fecha_fin: req.query.fecha_fin
       };
@@ -246,9 +252,12 @@ class DifuntosConsolidadoController {
         id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
         id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
         id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
+        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
         id_parentesco: req.query.id_parentesco ? parseInt(req.query.id_parentesco) : undefined,
         
         // Filtros adicionales
+        parentesco: req.query.parentesco, // Filtro por nombre de parentesco (texto)
         fecha_inicio: req.query.fecha_inicio,
         fecha_fin: req.query.fecha_fin
       };

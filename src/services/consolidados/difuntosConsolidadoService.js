@@ -54,6 +54,12 @@ class DifuntosConsolidadoService {
         replacements.id_parentesco = filtros.id_parentesco;
       }
 
+      // Filtro por nombre de parentesco (texto)
+      if (filtros.parentesco) {
+        whereConditions.push('LOWER(par.nombre) LIKE LOWER(:parentesco)');
+        replacements.parentesco = `%${filtros.parentesco}%`;
+      }
+
       // Filtro de rango de fechas
       if (filtros.fecha_inicio && filtros.fecha_fin) {
         whereConditions.push('df.fecha_fallecimiento BETWEEN :fecha_inicio AND :fecha_fin');
@@ -130,6 +136,11 @@ class DifuntosConsolidadoService {
       
       if (filtros.id_parentesco) {
         whereConditionsPersonas.push('pe.id_parentesco = :id_parentesco');
+      }
+
+      // Filtro por nombre de parentesco (texto)
+      if (filtros.parentesco) {
+        whereConditionsPersonas.push('LOWER(par.nombre) LIKE LOWER(:parentesco)');
       }
       
       // Filtro de rango de fechas para personas
