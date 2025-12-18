@@ -1769,7 +1769,7 @@ export const obtenerEncuestas = async (req, res) => {
           // *** INFORMACIÓN DE SERVICIOS CON ID Y NOMBRE ***
           basuras: disposicionBasuras, // Siempre array, nunca null
           acueducto: sistemasAcueducto.length > 0 ? sistemasAcueducto[0] : null, // null cuando no hay información
-          aguas_residuales: sistemasAguasResiduales.length > 0 ? sistemasAguasResiduales[0] : null, // null cuando no hay información
+          aguas_residuales: sistemasAguasResiduales, // Siempre array, igual que basuras
           
           // *** INFORMACIÓN RELIGIOSA ***
           comunion_en_casa: familiaData.comunionEnCasa,
@@ -2366,7 +2366,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
       // *** INFORMACIÓN DE SERVICIOS CON ID Y NOMBRE ***
       basuras: disposicionBasuras, // Siempre array, nunca null
       acueducto: sistemasAcueducto.length > 0 ? sistemasAcueducto[0] : null, // null cuando no hay información
-      aguas_residuales: sistemasAguasResiduales.length > 0 ? sistemasAguasResiduales[0] : null, // null cuando no hay información
+      aguas_residuales: sistemasAguasResiduales, // Siempre array, igual que basuras
       
       // *** INFORMACIÓN RELIGIOSA ***
       comunion_en_casa: familiaData.comunionEnCasa,
@@ -2484,7 +2484,13 @@ export const obtenerEncuestaPorId = async (req, res) => {
  *                     properties:
  *                       id: { type: string }
  *                       nombre: { type: string }
- *                   aguas_residuales: { type: string, nullable: true }
+ *                   aguas_residuales:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         id: { type: string }
+ *                         nombre: { type: string }
  *                   pozo_septico: { type: boolean }
  *                   letrina: { type: boolean }
  *                   campo_abierto: { type: boolean }
@@ -2735,6 +2741,24 @@ export const crearEncuesta = async (req, res) => {
         }
       );
       console.log(`✅ id_parroquia actualizado a: ${familiaData.id_parroquia}`);
+    }
+
+    // FIX TEMPORAL: Sequelize no está guardando campos de observaciones en el create, forzar con UPDATE directo
+    if (familiaData.sustento_familia || familiaData.observaciones_encuestador || familiaData.autorizacion_datos !== undefined) {
+      console.log('🔧 FIX: Actualizando campos de observaciones manualmente...');
+      await sequelize.query(
+        'UPDATE familias SET sustento_familia = $1, observaciones_encuestador = $2, autorizacion_datos = $3 WHERE id_familia = $4',
+        {
+          bind: [
+            familiaData.sustento_familia || null,
+            familiaData.observaciones_encuestador || null,
+            familiaData.autorizacion_datos || false,
+            familia.id_familia
+          ],
+          transaction
+        }
+      );
+      console.log(`✅ Observaciones actualizadas: sustento="${familiaData.sustento_familia?.substring(0, 30)}...", obs="${familiaData.observaciones_encuestador?.substring(0, 30)}...", auth=${familiaData.autorizacion_datos}`);
     }
     
     if (!familia.id_familia) {
