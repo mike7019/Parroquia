@@ -22,6 +22,66 @@ services:
       retries: 5
       start_period: 10s
 
+  # Node.js API Application
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: parroquia-api
+    restart: unless-stopped
+    environment:
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      
+      # Server
+      NODE_ENV: production
+      PORT: 3000
+      
+      # JWT Secrets
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      
+      # Email Configuration
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      EMAIL_FROM: ${EMAIL_FROM}
+      
+      # Frontend URL
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
+      
+      # CORS
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      
+      # PM2
+      PM2_PUBLIC_KEY: ${PM2_PUBLIC_KEY:-}
+      PM2_SECRET_KEY: ${PM2_SECRET_KEY:-}
+    ports:
+      - "${API_PORT:-3000}:3000"
+    volumes:
+      - ./logs:/app/logs
+      - ./uploads:/app/uploads
+      - ./temp:/app/temp
+    networks:
+      - parroquia-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
 volumes:
   postgres_data:
     driver: local
