@@ -111,14 +111,356 @@ npm start
 
 ```
 
-### Usando Docker
+## 🐳 Despliegue con Docker
 
-Para levantar la aplicación y la base de datos usando Docker Compose:
+La aplicación está completamente containerizada usando Docker Compose, facilitando el despliegue en cualquier entorno.
+
+### Requisitos Previos para Docker
+
+- Docker Engine 20.10+
+- Docker Compose 2.0+
+
+### Configuración Inicial
+
+#### 1. Configurar Variables de Entorno
+
+Copia el archivo `.env.example` y renómbralo a `.env`:
 
 ```bash
+cp .env.example .env
+```
+
+Edita el archivo `.env` y configura las variables necesarias:
+
+**Variables críticas:**
+- `DB_HOST=postgres` (⚠️ en Docker usar nombre del servicio, no localhost)
+- `DB_PASSWORD` - Contraseña segura para PostgreSQL
+- `JWT_SECRET` - Mínimo 32 caracteres (generar con `openssl rand -base64 32`)
+- `JWT_REFRESH_SECRET` - Diferente al JWT_SECRET
+- Configuración SMTP si usas email (Gmail requiere App Password)
+
+#### 2. Inicio Rápido
+
+**Opción A: Usando scripts automatizados**
+
+```bash
+# En Windows PowerShell
+.\docker-start.ps1
+
+# En Linux/Mac
+chmod +x docker-start.sh
+./docker-start.sh
+```
+
+**Opción B: Comandos manuales**
+
+```bash
+# Construir las imágenes
+docker-compose build
+
+# Iniciar los servicios
+docker-compose up -d
+
+# Ver logs en tiempo real
+docker-compose logs -f
+```
+
+#### 3. Acceso a la Aplicación
+
+Una vez iniciados los contenedores, la aplicación estará disponible en:
+
+- **API**: http://localhost:3000/api
+- **Swagger Documentation**: http://localhost:3000/api-docs
+- **Health Check**: http://localhost:3000/api/health
+
+### Comandos Útiles de Docker
+
+#### Ver el estado de los contenedores
+
+```bash
+docker-compose ps
+```
+
+#### Ver logs
+
+```bash
+# Todos los servicios
+docker-compose logs -f
+
+# Solo API
+docker-compose logs -f api
+
+# Solo PostgreSQL
+docker-compose logs -f postgres
+```
+
+#### Reiniciar servicios
+
+```bash
+# Reiniciar todo
+docker-compose restart
+
+# Reiniciar solo API
+docker-compose restart api
+```
+
+#### Detener y limpiar
+
+```bash
+# Detener servicios
+docker-compose down
+
+# Detener y eliminar volúmenes (⚠️ Borra la base de datos)
+docker-compose down -v
+
+# Detener y eliminar todo (imágenes, volúmenes, redes)
+docker-compose down -v --rmi all
+```
+
+### Gestión de Base de Datos en Docker
+
+#### Ejecutar migraciones/seeders
+
+```bash
+# Acceder al contenedor de la API
+docker-compose exec api sh
+
+# Dentro del contenedor
+npm run db:sync:complete
+npm run db:seed:config
+npm run admin:create
+```
+
+#### Backup y restauración de PostgreSQL
+
+```bash
+# Crear backup
+docker-compose exec postgres pg_dump -U parroquia_user parroquia_db > backup_$(date +%Y%m%d_%H%M%S).sql
+
+# Restaurar backup
+docker-compose exec -T postgres psql -U parroquia_user parroquia_db < backup_20250101_120000.sql
+
+# Conectar a PostgreSQL directamente
+docker-compose exec postgres psql -U parroquia_user -d parroquia_db
+```
+
+### Troubleshooting Docker
+
+#### El contenedor de la API no inicia
+
+1. Verificar logs: `docker-compose logs api`
+2. Verificar que PostgreSQL esté healthy: `docker-compose ps postgres`
+3. Verificar variables de entorno en `.env`
+
+#### Error de conexión a la base de datos
+
+1. Asegurarse de que `DB_HOST=postgres` en el `.env` (no `localhost`)
+2. Verificar que el contenedor postgres esté corriendo: `docker-compose ps postgres`
+3. Revisar logs de PostgreSQL: `docker-compose logs postgres`
+
+#### Reconstruir después de cambios en el código
+
+```bash
+docker-compose build --no-cache api
+docker-compose up -d
+```
+
+### Estructura de Volúmenes
+
+Los siguientes directorios se montan como volúmenes para persistencia de datos:
+
+- `postgres_data/` - Datos de PostgreSQL (volumen Docker persistente)
+- `./logs/` - Logs de la aplicación (montado desde host)
+- `./uploads/` - Archivos subidos (montado desde host)
+- `./temp/` - Archivos temporales (montado desde host)
+- `./backups/` - Backups de PostgreSQL (montado desde host)
+
+### Producción con Docker
+
+Para despliegue en producción, asegúrate de:
+
+1. Configurar `NODE_ENV=production` en `.env`
+2. Usar contraseñas seguras para DB y JWT
+3. Configurar `CORS_ORIGIN` con el dominio específico
+4. Configurar un reverse proxy (Nginx/Apache) para SSL/TLS
+5. Implementar backups automáticos de la base de datos
+6. Monitorear logs con herramientas como ELK Stack o Prometheus
+
+### Configuración Inicial
+
+#### 1. Configurar Variables de Entorno
+
+Copia el archivo `.env.example` y renómbralo a `.env`:
+
+```bash
+cp .env.example .env
+
+```
+
+Edita el archivo `.env` y configura las variables necesarias:
+
+**Variables críticas:**
+- `DB_HOST=postgres` (en Docker usar nombre del servicio)
+- `DB_PASSWORD` - Contraseña segura para PostgreSQL
+- `JWT_SECRET` - Mínimo 32 caracteres (generar con `openssl rand -base64 32`)
+- `JWT_REFRESH_SECRET` - Diferente al JWT_SECRET
+- Configuración SMTP si usas email (Gmail requiere App Password)
+
+#### 2. Inicio Rápido
+
+**Opción A: Usando scripts automatizados**
+
+```bash
+# En Windows PowerShell
+.\docker-start.ps1
+
+# En Linux/Mac
+chmod +x docker-start.sh
+./docker-start.sh
+
+```
+
+**Opción B: Comandos manuales**
+
+```bash
+# Construir las imágenes
+docker-compose build
+
+# Iniciar los servicios
+docker-compose up -d
+
+# Ver logs en tiempo real
+docker-compose logs -f
+
+```
+
+#### 3. Acceso a la Aplicación Containerizada
+
+Una vez iniciados los contenedores, la aplicación estará disponible en:
+
+- **API**: http://localhost:3000/api
+- **Swagger Documentation**: http://localhost:3000/api-docs
+- **Health Check**: http://localhost:3000/api/health
+
+### Comandos Útiles de Docker
+
+#### Ver el estado de los contenedores
+
+```bash
+docker-compose ps
+
+```
+
+#### Ver logs
+
+```bash
+# Todos los servicios
+docker-compose logs -f
+
+# Solo API
+docker-compose logs -f api
+
+# Solo PostgreSQL
+docker-compose logs -f postgres
+
+```
+
+#### Reiniciar servicios
+
+```bash
+# Reiniciar todo
+docker-compose restart
+
+# Reiniciar solo API
+docker-compose restart api
+
+```
+
+#### Detener y limpiar
+
+```bash
+# Detener servicios
+docker-compose down
+
+# Detener y eliminar volúmenes (⚠️ Borra la base de datos)
+docker-compose down -v
+
+# Detener y eliminar todo (imágenes, volúmenes, redes)
+docker-compose down -v --rmi all
+
+```
+
+### Gestión de Base de Datos en Docker
+
+#### Ejecutar migraciones/seeders
+
+```bash
+# Acceder al contenedor de la API
+docker-compose exec api sh
+
+# Dentro del contenedor
+npm run db:sync:complete
+npm run db:seed:config
+npm run admin:create
+
+```
+
+#### Backup y restauración de PostgreSQL
+
+```bash
+# Crear backup
+docker-compose exec postgres pg_dump -U parroquia_user parroquia_db > backup_$(date +%Y%m%d_%H%M%S).sql
+
+# Restaurar backup
+docker-compose exec -T postgres psql -U parroquia_user parroquia_db < backup_20250101_120000.sql
+
+# Conectar a PostgreSQL directamente
+docker-compose exec postgres psql -U parroquia_user -d parroquia_db
+
+```
+
+### Troubleshooting Docker
+
+#### El contenedor de la API no inicia
+
+1. Verificar logs: `docker-compose logs api`
+2. Verificar que PostgreSQL esté healthy: `docker-compose ps postgres`
+3. Verificar variables de entorno en `.env`
+
+#### Error de conexión a la base de datos
+
+1. Asegurarse de que `DB_HOST=postgres` en el `.env` (no `localhost`)
+2. Verificar que el contenedor postgres esté corriendo: `docker-compose ps postgres`
+3. Revisar logs de PostgreSQL: `docker-compose logs postgres`
+
+#### Reconstruir después de cambios en el código
+
+```bash
+docker-compose build --no-cache api
 docker-compose up -d
 
 ```
+
+### Estructura de Volúmenes
+
+Los siguientes directorios se montan como volúmenes para persistencia de datos:
+
+- `postgres_data/` - Datos de PostgreSQL (volumen Docker persistente)
+- `./logs/` - Logs de la aplicación (montado desde host)
+- `./uploads/` - Archivos subidos (montado desde host)
+- `./temp/` - Archivos temporales (montado desde host)
+- `./backups/` - Backups de PostgreSQL (montado desde host)
+
+### Producción con Docker
+
+Para despliegue en producción, asegúrate de:
+
+1. Configurar `NODE_ENV=production` en `.env`
+2. Usar contraseñas seguras para DB y JWT
+3. Configurar `CORS_ORIGIN` con el dominio específico
+4. Configurar un reverse proxy (Nginx/Apache) para SSL/TLS
+5. Implementar backups automáticos de la base de datos
+6. Monitorear logs con herramientas como ELK Stack o Prometheus
 
 ## Estructura del Proyecto
 
