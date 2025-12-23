@@ -2976,6 +2976,7 @@ export const actualizarCamposEncuesta = async (req, res) => {
   try {
     const { id } = req.params;
     const camposValidos = req.camposValidos; // Viene del middleware
+    const bodyCompleto = req.bodyCompleto || req.body; // Body completo para relaciones
 
     console.log(`🔄 Actualizando campos específicos de encuesta ID: ${id}`);
     console.log('📝 Campos a actualizar:', Object.keys(camposValidos));
@@ -2988,12 +2989,80 @@ export const actualizarCamposEncuesta = async (req, res) => {
       WHERE id_familia = :id
     `;
 
-    // Ejecutar actualización
+    // Ejecutar actualización de campos básicos
     await sequelize.query(updateQuery, {
       replacements: { ...camposValidos, id },
       type: QueryTypes.UPDATE,
       transaction
     });
+
+    // Actualizar relaciones many-to-many si vienen en el body
+    
+    // 1. Actualizar disposición de basuras
+    if (bodyCompleto.vivienda?.disposicion_basuras) {
+      const basurasSeleccionadas = bodyCompleto.vivienda.disposicion_basuras
+        .filter(b => b.seleccionado)
+        .map(b => b.id);
+      
+      if (basurasSeleccionadas.length > 0) {
+        // Eliminar registros existentes
+        await sequelize.query(
+          'DELETE FROM familia_disposicion_basura WHERE id_familia = :id',
+          { replacements: { id }, type: QueryTypes.DELETE, transaction }
+        );
+        
+        // Insertar nuevos registros
+        for (const idBasura of basurasSeleccionadas) {
+          await sequelize.query(
+            'INSERT INTO familia_disposicion_basura (id_familia, id_tipo_disposicion_basura) VALUES (:id, :idBasura)',
+            { replacements: { id, idBasura }, type: QueryTypes.INSERT, transaction }
+          );
+        }
+        console.log('✅ Disposición de basuras actualizada');
+      }
+    }
+
+    // 2. Actualizar sistema de acueducto
+    if (bodyCompleto.servicios_agua?.sistema_acueducto?.id) {
+      const idAcueducto = bodyCompleto.servicios_agua.sistema_acueducto.id;
+      
+      // Eliminar registros existentes
+      await sequelize.query(
+        'DELETE FROM familia_sistema_acueducto WHERE id_familia = :id',
+        { replacements: { id }, type: QueryTypes.DELETE, transaction }
+      );
+      
+      // Insertar nuevo registro
+      await sequelize.query(
+        'INSERT INTO familia_sistema_acueducto (id_familia, id_sistema_acueducto) VALUES (:id, :idAcueducto)',
+        { replacements: { id, idAcueducto }, type: QueryTypes.INSERT, transaction }
+      );
+      console.log('✅ Sistema de acueducto actualizado');
+    }
+
+    // 3. Actualizar aguas residuales
+    if (bodyCompleto.servicios_agua?.aguas_residuales) {
+      const aguasSeleccionadas = bodyCompleto.servicios_agua.aguas_residuales
+        .filter(a => a.seleccionado)
+        .map(a => a.id);
+      
+      if (aguasSeleccionadas.length > 0) {
+        // Eliminar registros existentes
+        await sequelize.query(
+          'DELETE FROM familia_sistema_aguas_residuales WHERE id_familia = :id',
+          { replacements: { id }, type: QueryTypes.DELETE, transaction }
+        );
+        
+        // Insertar nuevos registros
+        for (const idAgua of aguasSeleccionadas) {
+          await sequelize.query(
+            'INSERT INTO familia_sistema_aguas_residuales (id_familia, id_tipo_aguas_residuales) VALUES (:id, :idAgua)',
+            { replacements: { id, idAgua }, type: QueryTypes.INSERT, transaction }
+          );
+        }
+        console.log('✅ Aguas residuales actualizada');
+      }
+    }
 
     // Obtener los datos actualizados
     const familiaActualizada = await sequelize.query(
@@ -3001,7 +3070,8 @@ export const actualizarCamposEncuesta = async (req, res) => {
         id_familia, apellido_familiar, sector, direccion_familia,
         numero_contacto, telefono, email, "tamaño_familia",
         tipo_vivienda, estado_encuesta, tutor_responsable,
-        "comunionEnCasa", fecha_ultima_encuesta
+        "comunionEnCasa", fecha_ultima_encuesta, sustento_familia,
+        observaciones_encuestador, autorizacion_datos
       FROM familias 
       WHERE id_familia = :id`,
       {
@@ -3012,10 +3082,10 @@ export const actualizarCamposEncuesta = async (req, res) => {
     );
 
     await transaction.commit();
-    console.log('✅ Campos actualizados exitosamente');
+    console.log('✅ Encuesta actualizada exitosamente');
 
     return successResponse(res, {
-      message: 'Campos de encuesta actualizados exitosamente',
+      message: 'Encuesta actualizada exitosamente',
       data: familiaActualizada[0],
       metadata: {
         campos_actualizados: Object.keys(camposValidos),
@@ -3027,7 +3097,7 @@ export const actualizarCamposEncuesta = async (req, res) => {
 
   } catch (error) {
     await transaction.rollback();
-    console.error('❌ Error actualizando campos de encuesta:', error);
+    console.error('❌ Error actualizando encuesta:', error);
     return errorResponse(res, error);
   }
 };

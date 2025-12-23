@@ -339,7 +339,7 @@ class EncuestaValidationMiddleware {
    */
   static validarCamposActualizacion(req, res, next) {
     try {
-      const camposActualizar = req.body;
+      const body = req.body;
       
       // Campos permitidos para actualizar en la tabla familias
       const camposPermitidos = [
@@ -353,8 +353,71 @@ class EncuestaValidationMiddleware {
         'tipo_vivienda',
         'estado_encuesta',
         'tutor_responsable',
-        'comunionEnCasa'
+        'comunionEnCasa',
+        'numero_contrato_epm',
+        'sustento_familia',
+        'observaciones_encuestador',
+        'autorizacion_datos',
+        'id_sector',
+        'id_municipio',
+        'id_vereda',
+        'id_parroquia',
+        'id_corregimiento',
+        'id_centro_poblado'
       ];
+
+      // Extraer campos desde JSON estructurado (v2.0) o plano
+      let camposActualizar = {};
+      
+      // Si viene en formato estructurado v2.0
+      if (body.informacionGeneral || body.vivienda || body.observaciones) {
+        // Extraer campos de informacionGeneral
+        if (body.informacionGeneral) {
+          const info = body.informacionGeneral;
+          if (info.apellido_familiar) camposActualizar.apellido_familiar = info.apellido_familiar;
+          if (info.direccion) camposActualizar.direccion_familia = info.direccion;
+          if (info.telefono) camposActualizar.telefono = info.telefono;
+          if (info.email) camposActualizar.email = info.email;
+          if (info.numero_contacto) camposActualizar.numero_contacto = info.numero_contacto;
+          if (info.numero_contrato_epm) camposActualizar.numero_contrato_epm = info.numero_contrato_epm;
+          
+          // Mapear IDs de catálogos
+          if (info.sector?.id) camposActualizar.id_sector = info.sector.id;
+          if (info.municipio?.id) camposActualizar.id_municipio = info.municipio.id;
+          if (info.vereda?.id) camposActualizar.id_vereda = info.vereda.id;
+          if (info.parroquia?.id) camposActualizar.id_parroquia = info.parroquia.id;
+          if (info.corregimiento?.id) camposActualizar.id_corregimiento = info.corregimiento.id;
+          if (info.centro_poblado?.id) camposActualizar.id_centro_poblado = info.centro_poblado.id;
+        }
+        
+        // Extraer campos de vivienda
+        if (body.vivienda) {
+          if (body.vivienda.tipo_vivienda?.id) {
+            camposActualizar.tipo_vivienda = body.vivienda.tipo_vivienda.id;
+          }
+        }
+        
+        // Extraer campos de observaciones
+        if (body.observaciones) {
+          if (body.observaciones.sustento_familia !== undefined) {
+            camposActualizar.sustento_familia = body.observaciones.sustento_familia;
+          }
+          if (body.observaciones.observaciones_encuestador !== undefined) {
+            camposActualizar.observaciones_encuestador = body.observaciones.observaciones_encuestador;
+          }
+          if (body.observaciones.autorizacion_datos !== undefined) {
+            camposActualizar.autorizacion_datos = body.observaciones.autorizacion_datos;
+          }
+        }
+        
+        // Extraer estado_encuesta de metadata si existe
+        if (body.metadata?.completed !== undefined) {
+          camposActualizar.estado_encuesta = body.metadata.completed ? 'COMPLETADA' : 'EN_PROGRESO';
+        }
+      } else {
+        // Formato plano tradicional
+        camposActualizar = body;
+      }
 
       // Filtrar solo campos permitidos
       const camposValidos = {};
@@ -382,6 +445,9 @@ class EncuestaValidationMiddleware {
         });
       }
 
+      // Guardar el body completo para usarlo en el controlador
+      req.bodyCompleto = body;
+      
       // Agregar campos válidos al request
       req.camposValidos = camposValidos;
       next();
