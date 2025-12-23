@@ -1271,6 +1271,7 @@ export const obtenerEncuestas = async (req, res) => {
         f.id_sector,
         f.id_parroquia,
         f.id_corregimiento,
+        f.id_centro_poblado,
         f.id_usuario_creador,
         f.sustento_familia,
         f.observaciones_encuestador,
@@ -1280,6 +1281,7 @@ export const obtenerEncuestas = async (req, res) => {
         s.nombre as nombre_sector,
         p.nombre as nombre_parroquia,
         corr.nombre as nombre_corregimiento,
+        cp.nombre as nombre_centro_poblado,
         tv.id_tipo_vivienda,
         tv.nombre as nombre_tipo_vivienda,
         u.id as encuestador_id,
@@ -1290,6 +1292,7 @@ export const obtenerEncuestas = async (req, res) => {
       LEFT JOIN sectores s ON f.id_sector = s.id_sector
       LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
       LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
+      LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
       LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
       LEFT JOIN usuarios u ON f.id_usuario_creador = u.id
       WHERE ${whereClause}
@@ -1415,6 +1418,15 @@ export const obtenerEncuestas = async (req, res) => {
           corregimientoInfo = {
             id: familiaData.id_corregimiento,
             nombre: familiaData.nombre_corregimiento
+          };
+        }
+
+        // Usar datos de centro poblado ya obtenidos en el JOIN
+        let centroPobladoInfo = null;
+        if (familiaData.id_centro_poblado && familiaData.nombre_centro_poblado) {
+          centroPobladoInfo = {
+            id: familiaData.id_centro_poblado,
+            nombre: familiaData.nombre_centro_poblado
           };
         }
 
@@ -1763,6 +1775,7 @@ export const obtenerEncuestas = async (req, res) => {
           vereda: veredaInfo,
           parroquia: parroquiaInfo,
           corregimiento: corregimientoInfo,
+          centro_poblado: centroPobladoInfo,
           // Removido: sector_especifico (no lo necesitas según indicaciones)
           
           // *** INFORMACIÓN DE SERVICIOS CON ID Y NOMBRE ***
@@ -1867,6 +1880,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
         f.id_sector,
         f.id_parroquia,
         f.id_corregimiento,
+        f.id_centro_poblado,
         f.id_usuario_creador,
         f.sustento_familia,
         f.observaciones_encuestador,
@@ -1876,6 +1890,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
         s.nombre as nombre_sector,
         p.nombre as nombre_parroquia,
         corr.nombre as nombre_corregimiento,
+        cp.nombre as nombre_centro_poblado,
         tv.id_tipo_vivienda,
         tv.nombre as nombre_tipo_vivienda,
         u.id as encuestador_id,
@@ -1886,6 +1901,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
       LEFT JOIN sectores s ON f.id_sector = s.id_sector
       LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
       LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
+      LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
       LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
       LEFT JOIN usuarios u ON f.id_usuario_creador = u.id
       WHERE f.id_familia = :familiaId
@@ -1941,6 +1957,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
     let sectorInfo = null;
     let parroquiaInfo = null;
     let corregimientoInfo = null;
+    let centroPobladoInfo = null;
     let tipoViviendaInfo = null;
 
     // Usar datos de municipio ya obtenidos en el JOIN
@@ -2015,6 +2032,14 @@ export const obtenerEncuestaPorId = async (req, res) => {
       corregimientoInfo = {
         id: familiaData.id_corregimiento,
         nombre: familiaData.nombre_corregimiento
+      };
+    }
+
+    // Usar datos de centro poblado ya obtenidos en el JOIN
+    if (familiaData.id_centro_poblado && familiaData.nombre_centro_poblado) {
+      centroPobladoInfo = {
+        id: familiaData.id_centro_poblado,
+        nombre: familiaData.nombre_centro_poblado
       };
     }
 
@@ -2364,6 +2389,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
       vereda: veredaInfo,
       parroquia: parroquiaInfo,
       corregimiento: corregimientoInfo,
+      centro_poblado: centroPobladoInfo,
       
       // *** INFORMACIÓN DE SERVICIOS CON ID Y NOMBRE ***
       basuras: disposicionBasuras, // Siempre array, nunca null
