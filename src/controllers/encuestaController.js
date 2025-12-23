@@ -3064,6 +3064,197 @@ export const actualizarCamposEncuesta = async (req, res) => {
       }
     }
 
+    // 4. Actualizar personas (familyMembers) si vienen en el body
+    if (bodyCompleto.familyMembers && Array.isArray(bodyCompleto.familyMembers)) {
+      console.log(`📋 Actualizando ${bodyCompleto.familyMembers.length} personas...`);
+      
+      for (const miembro of bodyCompleto.familyMembers) {
+        // Buscar si la persona ya existe por identificación
+        const personaExistente = await sequelize.query(
+          `SELECT id_personas FROM personas 
+           WHERE identificacion = :identificacion AND id_familia_familias = :idFamilia`,
+          {
+            replacements: { 
+              identificacion: miembro.numeroIdentificacion,
+              idFamilia: id 
+            },
+            type: QueryTypes.SELECT,
+            transaction
+          }
+        );
+
+        if (personaExistente.length > 0) {
+          // ACTUALIZAR persona existente
+          const idPersona = personaExistente[0].id_personas;
+          
+          await sequelize.query(`
+            UPDATE personas SET
+              primer_nombre = :primerNombre,
+              primer_apellido = :primerApellido,
+              fecha_nacimiento = :fechaNacimiento,
+              id_sexo = :idSexo,
+              telefono = :telefono,
+              correo_electronico = :correo,
+              direccion = :direccion,
+              id_estado_civil = :idEstadoCivil,
+              id_estudios = :idEstudios,
+              id_parentesco = :idParentesco,
+              id_comunidad_cultural = :idComunidadCultural,
+              id_profesion = :idProfesion,
+              talla_camisa = :tallaCamisa,
+              talla_pantalon = :tallaPantalon,
+              talla_zapato = :tallaZapato,
+              en_que_eres_lider = :enQueEresLider,
+              necesidad_enfermo = :necesidadEnfermo
+            WHERE id_personas = :idPersona
+          `, {
+            replacements: {
+              idPersona,
+              primerNombre: miembro.nombres?.split(' ')[0] || '',
+              primerApellido: miembro.nombres?.split(' ').slice(-1)[0] || '',
+              fechaNacimiento: miembro.fechaNacimiento || null,
+              idSexo: miembro.sexo?.id || null,
+              telefono: miembro.telefono || null,
+              correo: miembro.correo_electronico || null,
+              direccion: null,
+              idEstadoCivil: miembro.situacionCivil?.id || null,
+              idEstudios: miembro.estudio?.id || null,
+              idParentesco: miembro.parentesco?.id || null,
+              idComunidadCultural: miembro.comunidadCultural?.id || null,
+              idProfesion: miembro.profesionMotivoFechaCelebrar?.profesion?.id || null,
+              tallaCamisa: miembro.talla_camisa || null,
+              tallaPantalon: miembro.talla_pantalon || null,
+              tallaZapato: miembro.talla_zapato || null,
+              enQueEresLider: miembro.enQueEresLider ? JSON.stringify(miembro.enQueEresLider) : null,
+              necesidadEnfermo: miembro.necesidadesEnfermo ? JSON.stringify(miembro.necesidadesEnfermo) : null
+            },
+            type: QueryTypes.UPDATE,
+            transaction
+          });
+
+          // Actualizar habilidades
+          if (miembro.habilidades && Array.isArray(miembro.habilidades)) {
+            await sequelize.query(
+              'DELETE FROM persona_habilidades WHERE id_persona = :idPersona',
+              { replacements: { idPersona }, type: QueryTypes.DELETE, transaction }
+            );
+            
+            for (const habilidad of miembro.habilidades) {
+              await sequelize.query(
+                'INSERT INTO persona_habilidades (id_persona, id_habilidad, nivel) VALUES (:idPersona, :idHabilidad, :nivel)',
+                { 
+                  replacements: { 
+                    idPersona, 
+                    idHabilidad: habilidad.id,
+                    nivel: habilidad.nivel || 'Básico'
+                  }, 
+                  type: QueryTypes.INSERT, 
+                  transaction 
+                }
+              );
+            }
+          }
+
+          // Actualizar destrezas
+          if (miembro.destrezas && Array.isArray(miembro.destrezas)) {
+            await sequelize.query(
+              'DELETE FROM persona_destrezas WHERE id_persona = :idPersona',
+              { replacements: { idPersona }, type: QueryTypes.DELETE, transaction }
+            );
+            
+            for (const destreza of miembro.destrezas) {
+              await sequelize.query(
+                'INSERT INTO persona_destrezas (id_persona, id_destreza) VALUES (:idPersona, :idDestreza)',
+                { 
+                  replacements: { idPersona, idDestreza: destreza.id }, 
+                  type: QueryTypes.INSERT, 
+                  transaction 
+                }
+              );
+            }
+          }
+
+          // Actualizar celebraciones
+          if (miembro.profesionMotivoFechaCelebrar?.celebraciones && Array.isArray(miembro.profesionMotivoFechaCelebrar.celebraciones)) {
+            await sequelize.query(
+              'DELETE FROM persona_celebraciones WHERE id_persona = :idPersona',
+              { replacements: { idPersona }, type: QueryTypes.DELETE, transaction }
+            );
+            
+            for (const celebracion of miembro.profesionMotivoFechaCelebrar.celebraciones) {
+              await sequelize.query(
+                'INSERT INTO persona_celebraciones (id_persona, motivo_celebracion, dia, mes) VALUES (:idPersona, :motivo, :dia, :mes)',
+                { 
+                  replacements: { 
+                    idPersona,
+                    motivo: celebracion.motivo,
+                    dia: celebracion.dia,
+                    mes: celebracion.mes
+                  }, 
+                  type: QueryTypes.INSERT, 
+                  transaction 
+                }
+              );
+            }
+          }
+
+          // Actualizar enfermedades
+          if (miembro.enfermedades && Array.isArray(miembro.enfermedades)) {
+            await sequelize.query(
+              'DELETE FROM persona_enfermedades WHERE id_persona = :idPersona',
+              { replacements: { idPersona }, type: QueryTypes.DELETE, transaction }
+            );
+            
+            for (const enfermedad of miembro.enfermedades) {
+              await sequelize.query(
+                'INSERT INTO persona_enfermedades (id_persona, id_enfermedad) VALUES (:idPersona, :idEnfermedad)',
+                { 
+                  replacements: { idPersona, idEnfermedad: enfermedad.id }, 
+                  type: QueryTypes.INSERT, 
+                  transaction 
+                }
+              );
+            }
+          }
+
+          console.log(`  ✅ Persona actualizada: ${miembro.nombres} (ID: ${idPersona})`);
+        }
+        // Si no existe, no la creamos en PATCH (solo actualizamos)
+      }
+    }
+
+    // 5. Actualizar difuntos (deceasedMembers) si vienen en el body
+    if (bodyCompleto.deceasedMembers && Array.isArray(bodyCompleto.deceasedMembers)) {
+      console.log(`⚰️  Actualizando ${bodyCompleto.deceasedMembers.length} difuntos...`);
+      
+      // Eliminar difuntos existentes y recrearlos (más simple que buscar por nombre)
+      await sequelize.query(
+        'DELETE FROM difuntos_familia WHERE id_familia_familias = :id',
+        { replacements: { id }, type: QueryTypes.DELETE, transaction }
+      );
+      
+      for (const difunto of bodyCompleto.deceasedMembers) {
+        await sequelize.query(`
+          INSERT INTO difuntos_familia 
+          (id_familia_familias, nombre_completo, fecha_fallecimiento, id_sexo, id_parentesco, causa_fallecimiento)
+          VALUES (:idFamilia, :nombre, :fechaFallecimiento, :idSexo, :idParentesco, :causa)
+        `, {
+          replacements: {
+            idFamilia: id,
+            nombre: difunto.nombres,
+            fechaFallecimiento: difunto.fechaFallecimiento || null,
+            idSexo: difunto.sexo?.id || null,
+            idParentesco: difunto.parentesco?.id || null,
+            causa: difunto.causaFallecimiento || null
+          },
+          type: QueryTypes.INSERT,
+          transaction
+        });
+      }
+      
+      console.log('  ✅ Difuntos actualizados');
+    }
+
     // Obtener los datos actualizados
     const familiaActualizada = await sequelize.query(
       `SELECT 
@@ -3084,15 +3275,37 @@ export const actualizarCamposEncuesta = async (req, res) => {
     await transaction.commit();
     console.log('✅ Encuesta actualizada exitosamente');
 
+    // Construir metadata de lo que se actualizó
+    const metadata = {
+      campos_actualizados: Object.keys(camposValidos),
+      timestamp: new Date().toISOString(),
+      operacion: 'PATCH',
+      registros_afectados: 1
+    };
+
+    if (bodyCompleto.familyMembers) {
+      metadata.personas_actualizadas = bodyCompleto.familyMembers.length;
+    }
+    if (bodyCompleto.deceasedMembers) {
+      metadata.difuntos_actualizados = bodyCompleto.deceasedMembers.length;
+    }
+    if (bodyCompleto.vivienda?.disposicion_basuras) {
+      metadata.relaciones_actualizadas = metadata.relaciones_actualizadas || [];
+      metadata.relaciones_actualizadas.push('disposicion_basuras');
+    }
+    if (bodyCompleto.servicios_agua?.sistema_acueducto) {
+      metadata.relaciones_actualizadas = metadata.relaciones_actualizadas || [];
+      metadata.relaciones_actualizadas.push('sistema_acueducto');
+    }
+    if (bodyCompleto.servicios_agua?.aguas_residuales) {
+      metadata.relaciones_actualizadas = metadata.relaciones_actualizadas || [];
+      metadata.relaciones_actualizadas.push('aguas_residuales');
+    }
+
     return successResponse(res, {
       message: 'Encuesta actualizada exitosamente',
       data: familiaActualizada[0],
-      metadata: {
-        campos_actualizados: Object.keys(camposValidos),
-        timestamp: new Date().toISOString(),
-        operacion: 'PATCH',
-        registros_afectados: 1
-      }
+      metadata
     });
 
   } catch (error) {
