@@ -1760,8 +1760,8 @@ export const obtenerEncuestas = async (req, res) => {
           // *** INFORMACIÓN DE LA ENCUESTA ***
           estado_encuesta: familiaData.estado_encuesta,
           numero_encuestas: familiaData.numero_encuestas,
-          fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
           
+          fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
           // *** INFORMACIÓN DEL ENCUESTADOR ***
           encuestador: familiaData.nombre_encuestador || null,
           
@@ -3095,9 +3095,8 @@ export const actualizarCamposEncuesta = async (req, res) => {
               id_sexo = :idSexo,
               telefono = :telefono,
               correo_electronico = :correo,
-              direccion = :direccion,
               id_estado_civil = :idEstadoCivil,
-              id_estudios = :idEstudios,
+              estudios = :estudios,
               id_parentesco = :idParentesco,
               id_comunidad_cultural = :idComunidadCultural,
               id_profesion = :idProfesion,
@@ -3116,9 +3115,8 @@ export const actualizarCamposEncuesta = async (req, res) => {
               idSexo: miembro.sexo?.id || null,
               telefono: miembro.telefono || null,
               correo: miembro.correo_electronico || null,
-              direccion: null,
               idEstadoCivil: miembro.situacionCivil?.id || null,
-              idEstudios: miembro.estudio?.id || null,
+              estudios: miembro.estudio?.nombre || miembro.estudio?.id || null,
               idParentesco: miembro.parentesco?.id || null,
               idComunidadCultural: miembro.comunidadCultural?.id || null,
               idProfesion: miembro.profesionMotivoFechaCelebrar?.profesion?.id || null,
@@ -3135,13 +3133,13 @@ export const actualizarCamposEncuesta = async (req, res) => {
           // Actualizar habilidades
           if (miembro.habilidades && Array.isArray(miembro.habilidades)) {
             await sequelize.query(
-              'DELETE FROM persona_habilidades WHERE id_persona = :idPersona',
+              'DELETE FROM persona_habilidad WHERE id_persona = :idPersona',
               { replacements: { idPersona }, type: QueryTypes.DELETE, transaction }
             );
             
             for (const habilidad of miembro.habilidades) {
               await sequelize.query(
-                'INSERT INTO persona_habilidades (id_persona, id_habilidad, nivel) VALUES (:idPersona, :idHabilidad, :nivel)',
+                'INSERT INTO persona_habilidad (id_persona, id_habilidad, nivel) VALUES (:idPersona, :idHabilidad, :nivel)',
                 { 
                   replacements: { 
                     idPersona, 
@@ -3158,13 +3156,13 @@ export const actualizarCamposEncuesta = async (req, res) => {
           // Actualizar destrezas
           if (miembro.destrezas && Array.isArray(miembro.destrezas)) {
             await sequelize.query(
-              'DELETE FROM persona_destrezas WHERE id_persona = :idPersona',
+              'DELETE FROM persona_destreza WHERE id_persona = :idPersona',
               { replacements: { idPersona }, type: QueryTypes.DELETE, transaction }
             );
             
             for (const destreza of miembro.destrezas) {
               await sequelize.query(
-                'INSERT INTO persona_destrezas (id_persona, id_destreza) VALUES (:idPersona, :idDestreza)',
+                'INSERT INTO persona_destreza (id_personas_personas, id_destrezas_destrezas) VALUES (:idPersona, :idDestreza)',
                 { 
                   replacements: { idPersona, idDestreza: destreza.id }, 
                   type: QueryTypes.INSERT, 
@@ -3177,13 +3175,13 @@ export const actualizarCamposEncuesta = async (req, res) => {
           // Actualizar celebraciones
           if (miembro.profesionMotivoFechaCelebrar?.celebraciones && Array.isArray(miembro.profesionMotivoFechaCelebrar.celebraciones)) {
             await sequelize.query(
-              'DELETE FROM persona_celebraciones WHERE id_persona = :idPersona',
+              'DELETE FROM persona_celebracion WHERE id_persona = :idPersona',
               { replacements: { idPersona }, type: QueryTypes.DELETE, transaction }
             );
             
             for (const celebracion of miembro.profesionMotivoFechaCelebrar.celebraciones) {
               await sequelize.query(
-                'INSERT INTO persona_celebraciones (id_persona, motivo_celebracion, dia, mes) VALUES (:idPersona, :motivo, :dia, :mes)',
+                'INSERT INTO persona_celebracion (id_persona, motivo_celebracion, dia, mes) VALUES (:idPersona, :motivo, :dia, :mes)',
                 { 
                   replacements: { 
                     idPersona,
@@ -3201,13 +3199,13 @@ export const actualizarCamposEncuesta = async (req, res) => {
           // Actualizar enfermedades
           if (miembro.enfermedades && Array.isArray(miembro.enfermedades)) {
             await sequelize.query(
-              'DELETE FROM persona_enfermedades WHERE id_persona = :idPersona',
+              'DELETE FROM persona_enfermedad WHERE id_persona = :idPersona',
               { replacements: { idPersona }, type: QueryTypes.DELETE, transaction }
             );
             
             for (const enfermedad of miembro.enfermedades) {
               await sequelize.query(
-                'INSERT INTO persona_enfermedades (id_persona, id_enfermedad) VALUES (:idPersona, :idEnfermedad)',
+                'INSERT INTO persona_enfermedad (id_persona, id_enfermedad) VALUES (:idPersona, :idEnfermedad)',
                 { 
                   replacements: { idPersona, idEnfermedad: enfermedad.id }, 
                   type: QueryTypes.INSERT, 
