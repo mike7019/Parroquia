@@ -58,12 +58,75 @@ export const errorResponse = (res, error) => {
   }
 
   if (error.name === 'SequelizeDatabaseError') {
-    return res.status(500).json({
+    let mensajeUsuario = 'Error en la base de datos';
+    let detallesError = 'Error al procesar los datos';
+    let codigoError = 'DB_ERROR';
+    
+    // Obtener el error original de PostgreSQL
+    const dbError = error.original || error.parent;
+    
+    if (dbError) {
+      // NOT NULL constraint violation
+      if (dbError.code === '23502') {
+        const campo = dbError.column || 'desconocido';
+        const tabla = dbError.table || 'desconocida';
+        mensajeUsuario = 'Falta información requerida';
+        detallesError = `El campo "${campo}" en la tabla "${tabla}" es obligatorio`;
+        codigoError = 'MISSING_REQUIRED_FIELD';
+      }
+      // FOREIGN KEY constraint violation
+      else if (dbError.code === '23503') {
+        const detalle = dbError.detail || '';
+        mensajeUsuario = 'Referencia inválida';
+        detallesError = 'El ID proporcionado no existe en el catálogo. Verifique los valores de municipio, sector, vereda, etc.';
+        codigoError = 'INVALID_REFERENCE';
+        
+        // Intentar extraer qué tabla falla
+        if (detalle.includes('municipios')) detallesError = 'El municipio seleccionado no existe';
+        else if (detalle.includes('sectores')) detallesError = 'El sector seleccionado no existe';
+        else if (detalle.includes('veredas')) detallesError = 'La vereda seleccionada no existe';
+        else if (detalle.includes('parroquias')) detallesError = 'La parroquia seleccionada no existe';
+        else if (detalle.includes('corregimientos')) detallesError = 'El corregimiento seleccionado no existe';
+        else if (detalle.includes('centros_poblados')) detallesError = 'El centro poblado seleccionado no existe';
+      }
+      // UNIQUE constraint violation
+      else if (dbError.code === '23505') {
+        mensajeUsuario = 'Registro duplicado';
+        detallesError = 'Ya existe un registro con estos datos. Verifique la información e intente nuevamente';
+        codigoError = 'DUPLICATE_ENTRY';
+      }
+      // Invalid text representation (tipo de dato incorrecto)
+      else if (dbError.code === '22P02') {
+        mensajeUsuario = 'Formato de dato incorrecto';
+        detallesError = 'Uno de los valores tiene un formato inválido (ejemplo: texto donde se espera número)';
+        codigoError = 'INVALID_DATA_FORMAT';
+      }
+      // Numeric value out of range
+      else if (dbError.code === '22003') {
+        mensajeUsuario = 'Valor numérico fuera de rango';
+        detallesError = 'Uno de los números proporcionados es demasiado grande o pequeño';
+        codigoError = 'NUMBER_OUT_OF_RANGE';
+      }
+      // String data right truncation (texto demasiado largo)
+      else if (dbError.code === '22001') {
+        mensajeUsuario = 'Texto demasiado largo';
+        detallesError = 'Uno de los campos de texto excede el tamaño máximo permitido';
+        codigoError = 'TEXT_TOO_LONG';
+      }
+      // En desarrollo, mostrar el mensaje original
+      else if (process.env.NODE_ENV === 'development') {
+        detallesError = dbError.message || error.message;
+      }
+    } else if (process.env.NODE_ENV === 'development') {
+      detallesError = error.message;
+    }
+    
+    return res.status(400).json({
       status: 'error',
-      code: 'DB_ERROR',
-      message: 'Error en la base de datos',
-      details: process.env.NODE_ENV === 'development' ? error.message : 'Error al procesar los datos',
-      suggestion: 'Intente nuevamente. Si persiste, contacte soporte'
+      code: codigoError,
+      message: mensajeUsuario,
+      details: detallesError,
+      suggestion: 'Revise los datos enviados y vuelva a intentar. Si el problema persiste, contacte soporte técnico'
     });
   }
 

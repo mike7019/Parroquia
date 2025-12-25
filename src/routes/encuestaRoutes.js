@@ -716,29 +716,29 @@ router.delete('/:id',
  * @swagger
  * /api/encuesta/{id}:
  *   patch:
- *     summary: Actualizar campos específicos de una encuesta
+ *     summary: Actualizar encuesta con JSON estructurado v2.0
  *     description: |
- *       Permite actualizar uno o varios campos específicos de una encuesta familiar
- *       sin afectar el resto de la información. Ideal para actualizaciones parciales.
+ *       Permite actualizar una encuesta completa usando el formato JSON estructurado v2.0.
+ *       Soporta actualización de familia, personas, difuntos y todas las relaciones many-to-many.
  *       
- *       **Campos permitidos para actualizar:**
- *       - apellido_familiar
- *       - sector
- *       - direccion_familia
- *       - numero_contacto
- *       - telefono
- *       - email
- *       - tamaño_familia
- *       - tipo_vivienda
- *       - estado_encuesta
- *       - tutor_responsable
- *       - comunionEnCasa
+ *       **Secciones del JSON:**
+ *       - `informacionGeneral`: Datos básicos de la familia y ubicación
+ *       - `vivienda`: Tipo de vivienda y disposición de basuras
+ *       - `servicios_agua`: Sistema de acueducto y aguas residuales
+ *       - `observaciones`: Sustento, observaciones y autorización
+ *       - `familyMembers`: Array de miembros de la familia (actualiza por identificación)
+ *       - `deceasedMembers`: Array de personas fallecidas
+ *       - `metadata`: Información de estado y versión
  *       
- *       **Características:**
- *       - Solo se actualizarán los campos enviados en el body
- *       - Actualización automática de fecha_ultima_encuesta
- *       - Validación de campos permitidos
- *       - Operación transaccional con rollback automático
+ *       **Características importantes:**
+ *       - Las personas se identifican por `numeroIdentificacion` (solo actualiza existentes)
+ *       - Los difuntos se eliminan y recrean completamente
+ *       - Las relaciones many-to-many (basuras, acueducto, aguas) se recrean
+ *       - Arrays con `seleccionado: true` indican los elementos activos
+ *       - Operación completamente transaccional con rollback automático
+ *       
+ *       **Formato híbrido:**
+ *       También acepta el formato plano tradicional para compatibilidad hacia atrás.
  *     tags: [Encuestas]
  *     security:
  *       - bearerAuth: []
@@ -756,91 +756,209 @@ router.delete('/:id',
  *           schema:
  *             type: object
  *             properties:
- *               apellido_familiar:
+ *               informacionGeneral:
+ *                 type: object
+ *                 description: Información general de la familia y ubicación geográfica
+ *               vivienda:
+ *                 type: object
+ *                 description: Información de vivienda y disposición de basuras
+ *               servicios_agua:
+ *                 type: object
+ *                 description: Sistemas de acueducto y aguas residuales
+ *               observaciones:
+ *                 type: object
+ *                 description: Sustento, observaciones del encuestador y autorización
+ *               familyMembers:
+ *                 type: array
+ *                 description: Array de miembros de la familia (identificados por numeroIdentificacion)
+ *               deceasedMembers:
+ *                 type: array
+ *                 description: Array de personas fallecidas de la familia
+ *               metadata:
+ *                 type: object
+ *                 description: Metadata de estado y versión de la encuesta
+ *               version:
  *                 type: string
- *                 description: Apellido de la familia
- *                 example: "Rodríguez García"
- *               sector:
- *                 type: string
- *                 description: Sector donde vive la familia
- *                 example: "Centro"
- *               direccion_familia:
- *                 type: string
- *                 description: Dirección de residencia
- *                 example: "Carrera 45 # 23-67"
- *               numero_contacto:
- *                 type: string
- *                 description: Número de contacto principal
- *                 example: "3001234567"
- *               telefono:
- *                 type: string
- *                 description: Teléfono de la familia
- *                 example: "3001234567"
- *               email:
- *                 type: string
- *                 format: email
- *                 description: Correo electrónico de la familia
- *                 example: "familia@email.com"
- *               tamaño_familia:
- *                 type: integer
- *                 description: Número de miembros en la familia
- *                 example: 4
- *               tipo_vivienda:
- *                 type: string
- *                 description: Tipo de vivienda
- *                 example: "Casa"
- *               estado_encuesta:
- *                 type: string
- *                 enum: [pendiente, completada, verificada]
- *                 description: Estado actual de la encuesta
- *                 example: "completada"
- *               tutor_responsable:
- *                 type: string
- *                 description: Nombre del tutor o responsable
- *                 example: "Carlos Rodríguez"
- *               comunionEnCasa:
- *                 type: boolean
- *                 description: Si la familia realiza comunión en casa
- *                 example: true
+ *                 description: Versión del formato JSON
  *           example:
- *             telefono: "3009876543"
- *             email: "nuevoemail@familia.com"
- *             estado_encuesta: "completada"
- *             comunionEnCasa: true
+ *             informacionGeneral:
+ *               municipio:
+ *                 id: 1110
+ *                 nombre: "Yolombó"
+ *               parroquia:
+ *                 id: 1
+ *                 nombre: "Parroquia San José"
+ *               sector:
+ *                 id: 1
+ *                 nombre: "Sector San José"
+ *               vereda:
+ *                 id: 1
+ *                 nombre: "V. El Rubí"
+ *               corregimiento:
+ *                 id: 11
+ *                 nombre: "Corregimiento San Mike"
+ *               centro_poblado:
+ *                 id: 3
+ *                 nombre: "Centro Poblado San Pedro"
+ *               fecha: "2025-12-17"
+ *               apellido_familiar: "Rodríguez García"
+ *               direccion: "Calle 45 # 23-67"
+ *               telefono: "3001234567"
+ *               numero_contrato_epm: "123456"
+ *             vivienda:
+ *               tipo_vivienda:
+ *                 id: 2
+ *                 nombre: "Apartamento"
+ *               disposicion_basuras:
+ *                 - id: 1
+ *                   nombre: "Recolección Pública"
+ *                   seleccionado: true
+ *                 - id: 2
+ *                   nombre: "Quema"
+ *                   seleccionado: false
+ *             servicios_agua:
+ *               sistema_acueducto:
+ *                 id: 1
+ *                 nombre: "Acueducto Municipal"
+ *               aguas_residuales:
+ *                 - id: 1
+ *                   nombre: "Alcantarillado"
+ *                   seleccionado: true
+ *                 - id: 2
+ *                   nombre: "Pozo Séptico"
+ *                   seleccionado: false
+ *             observaciones:
+ *               sustento_familia: "Agricultura"
+ *               observaciones_encuestador: "Familia colaboradora"
+ *               autorizacion_datos: true
+ *             familyMembers:
+ *               - nombres: "María Rodríguez"
+ *                 numeroIdentificacion: "123456789"
+ *                 tipoIdentificacion:
+ *                   id: 3
+ *                   nombre: "Cédula de Ciudadanía"
+ *                 fechaNacimiento: "1985-05-15"
+ *                 sexo:
+ *                   id: 2
+ *                   nombre: "Femenino"
+ *                 telefono: "3001234567"
+ *                 correo_electronico: "maria@email.com"
+ *                 situacionCivil:
+ *                   id: 1
+ *                   nombre: "Soltero(a)"
+ *                 estudio:
+ *                   id: 3
+ *                   nombre: "Educación Secundaria"
+ *                 parentesco:
+ *                   id: 25
+ *                   nombre: "Jefa de Hogar"
+ *                 comunidadCultural:
+ *                   id: 5
+ *                   nombre: "Otra"
+ *                 talla_camisa: "M"
+ *                 talla_pantalon: "32"
+ *                 talla_zapato: "38"
+ *                 enQueEresLider: ["Comunitario"]
+ *                 necesidadesEnfermo: []
+ *                 solicitudComunionCasa: false
+ *                 profesionMotivoFechaCelebrar:
+ *                   profesion:
+ *                     id: 6
+ *                     nombre: "Agricultor"
+ *                   celebraciones:
+ *                     - motivo: "Cumpleaños"
+ *                       dia: "15"
+ *                       mes: "5"
+ *                 habilidades:
+ *                   - id: "12"
+ *                     nombre: "Cocina"
+ *                     nivel: "Avanzado"
+ *                 destrezas:
+ *                   - id: "19"
+ *                     nombre: "Agricultura"
+ *                 enfermedades:
+ *                   - id: "67"
+ *                     nombre: "Ninguna"
+ *             deceasedMembers:
+ *               - nombres: "Juan Rodríguez"
+ *                 fechaFallecimiento: "2024-01-15"
+ *                 sexo:
+ *                   id: 1
+ *                   nombre: "Masculino"
+ *                 parentesco:
+ *                   id: 1
+ *                   nombre: "Abuelo"
+ *                 causaFallecimiento: "Natural"
+ *             metadata:
+ *               timestamp: "2025-12-25T12:00:00.000Z"
+ *               completed: true
+ *               currentStage: 6
+ *             version: "2.0"
  *     responses:
  *       200:
- *         description: Campos actualizados exitosamente
+ *         description: Encuesta actualizada exitosamente
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 exito:
- *                   type: boolean
- *                   example: true
- *                 mensaje:
+ *                 status:
  *                   type: string
- *                   example: "Campos de encuesta actualizados exitosamente"
- *                 datos:
+ *                   example: "success"
+ *                 message:
+ *                   type: string
+ *                   example: "Encuesta actualizada exitosamente"
+ *                 data:
  *                   type: object
  *                   description: Datos actualizados de la familia
- *                 campos_actualizados:
- *                   type: array
- *                   items:
- *                     type: string
- *                   example: ["telefono", "email", "estado_encuesta", "comunionEnCasa"]
+ *                   properties:
+ *                     id_familia:
+ *                       type: string
+ *                       example: "26"
+ *                     apellido_familiar:
+ *                       type: string
+ *                       example: "Rodríguez García"
+ *                     direccion_familia:
+ *                       type: string
+ *                       example: "Calle 45 # 23-67"
+ *                     telefono:
+ *                       type: string
+ *                       example: "3001234567"
+ *                     estado_encuesta:
+ *                       type: string
+ *                       example: "COMPLETADA"
  *                 metadata:
  *                   type: object
  *                   properties:
+ *                     campos_actualizados:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       example: ["apellido_familiar", "direccion_familia", "telefono", "fecha_encuesta"]
  *                     timestamp:
  *                       type: string
  *                       format: date-time
+ *                       example: "2025-12-25T12:00:00.000Z"
  *                     operacion:
  *                       type: string
  *                       example: "PATCH"
  *                     registros_afectados:
  *                       type: integer
  *                       example: 1
+ *                     personas_actualizadas:
+ *                       type: integer
+ *                       example: 1
+ *                       description: Número de personas actualizadas
+ *                     difuntos_actualizados:
+ *                       type: integer
+ *                       example: 1
+ *                       description: Número de difuntos actualizados
+ *                     relaciones_actualizadas:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       example: ["disposicion_basuras", "sistema_acueducto", "aguas_residuales"]
+ *                       description: Relaciones many-to-many actualizadas
  *       400:
  *         description: Campos inválidos o ID inválido
  *         content:

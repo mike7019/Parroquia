@@ -2981,20 +2981,28 @@ export const actualizarCamposEncuesta = async (req, res) => {
     console.log(`🔄 Actualizando campos específicos de encuesta ID: ${id}`);
     console.log('📝 Campos a actualizar:', Object.keys(camposValidos));
 
-    // Construir query dinámico de actualización
-    const setClauses = Object.keys(camposValidos).map(campo => `"${campo}" = :${campo}`);
-    const updateQuery = `
-      UPDATE familias 
-      SET ${setClauses.join(', ')}, fecha_ultima_encuesta = NOW()
-      WHERE id_familia = :id
-    `;
+    // Verificar que hay campos para actualizar
+    if (Object.keys(camposValidos).length === 0) {
+      console.log('⚠️  No hay campos básicos para actualizar, solo relaciones');
+    } else {
+      // Construir query dinámico de actualización
+      const setClauses = Object.keys(camposValidos).map(campo => `${campo} = :${campo}`);
+      const updateQuery = `
+        UPDATE familias 
+        SET ${setClauses.join(', ')}, fecha_ultima_encuesta = NOW()
+        WHERE id_familia = :id
+      `;
 
-    // Ejecutar actualización de campos básicos
-    await sequelize.query(updateQuery, {
-      replacements: { ...camposValidos, id },
-      type: QueryTypes.UPDATE,
-      transaction
-    });
+      console.log('🔍 Query SQL:', updateQuery);
+      console.log('🔍 Replacements:', { ...camposValidos, id });
+
+      // Ejecutar actualización de campos básicos
+      await sequelize.query(updateQuery, {
+        replacements: { ...camposValidos, id },
+        type: QueryTypes.UPDATE,
+        transaction
+      });
+    }
 
     // Actualizar relaciones many-to-many si vienen en el body
     
@@ -3014,7 +3022,7 @@ export const actualizarCamposEncuesta = async (req, res) => {
         // Insertar nuevos registros
         for (const idBasura of basurasSeleccionadas) {
           await sequelize.query(
-            'INSERT INTO familia_disposicion_basura (id_familia, id_tipo_disposicion_basura) VALUES (:id, :idBasura)',
+            'INSERT INTO familia_disposicion_basura (id_familia, id_tipo_disposicion_basura, created_at, updated_at) VALUES (:id, :idBasura, NOW(), NOW())',
             { replacements: { id, idBasura }, type: QueryTypes.INSERT, transaction }
           );
         }
@@ -3034,7 +3042,7 @@ export const actualizarCamposEncuesta = async (req, res) => {
       
       // Insertar nuevo registro
       await sequelize.query(
-        'INSERT INTO familia_sistema_acueducto (id_familia, id_sistema_acueducto) VALUES (:id, :idAcueducto)',
+        'INSERT INTO familia_sistema_acueducto (id_familia, id_sistema_acueducto, created_at, updated_at) VALUES (:id, :idAcueducto, NOW(), NOW())',
         { replacements: { id, idAcueducto }, type: QueryTypes.INSERT, transaction }
       );
       console.log('✅ Sistema de acueducto actualizado');
@@ -3056,7 +3064,7 @@ export const actualizarCamposEncuesta = async (req, res) => {
         // Insertar nuevos registros
         for (const idAgua of aguasSeleccionadas) {
           await sequelize.query(
-            'INSERT INTO familia_sistema_aguas_residuales (id_familia, id_tipo_aguas_residuales) VALUES (:id, :idAgua)',
+            'INSERT INTO familia_sistema_aguas_residuales (id_familia, id_tipo_aguas_residuales, created_at, updated_at) VALUES (:id, :idAgua, NOW(), NOW())',
             { replacements: { id, idAgua }, type: QueryTypes.INSERT, transaction }
           );
         }
@@ -3091,6 +3099,8 @@ export const actualizarCamposEncuesta = async (req, res) => {
             UPDATE personas SET
               primer_nombre = :primerNombre,
               primer_apellido = :primerApellido,
+              identificacion = :identificacion,
+              id_tipo_identificacion = :idTipoIdentificacion,
               fecha_nacimiento = :fechaNacimiento,
               id_sexo = :idSexo,
               telefono = :telefono,
@@ -3104,13 +3114,16 @@ export const actualizarCamposEncuesta = async (req, res) => {
               talla_pantalon = :tallaPantalon,
               talla_zapato = :tallaZapato,
               en_que_eres_lider = :enQueEresLider,
-              necesidad_enfermo = :necesidadEnfermo
+              necesidad_enfermo = :necesidadEnfermo,
+              solicitud_comunion_casa = :solicitudComunionCasa
             WHERE id_personas = :idPersona
           `, {
             replacements: {
               idPersona,
               primerNombre: miembro.nombres?.split(' ')[0] || '',
               primerApellido: miembro.nombres?.split(' ').slice(-1)[0] || '',
+              identificacion: miembro.numeroIdentificacion || null,
+              idTipoIdentificacion: miembro.tipoIdentificacion?.id || null,
               fechaNacimiento: miembro.fechaNacimiento || null,
               idSexo: miembro.sexo?.id || null,
               telefono: miembro.telefono || null,
@@ -3124,7 +3137,8 @@ export const actualizarCamposEncuesta = async (req, res) => {
               tallaPantalon: miembro.talla_pantalon || null,
               tallaZapato: miembro.talla_zapato || null,
               enQueEresLider: miembro.enQueEresLider ? JSON.stringify(miembro.enQueEresLider) : null,
-              necesidadEnfermo: miembro.necesidadesEnfermo ? JSON.stringify(miembro.necesidadesEnfermo) : null
+              necesidadEnfermo: miembro.necesidadesEnfermo ? JSON.stringify(miembro.necesidadesEnfermo) : null,
+              solicitudComunionCasa: miembro.solicitudComunionCasa || false
             },
             type: QueryTypes.UPDATE,
             transaction
@@ -3139,7 +3153,7 @@ export const actualizarCamposEncuesta = async (req, res) => {
             
             for (const habilidad of miembro.habilidades) {
               await sequelize.query(
-                'INSERT INTO persona_habilidad (id_persona, id_habilidad, nivel) VALUES (:idPersona, :idHabilidad, :nivel)',
+                'INSERT INTO persona_habilidad (id_persona, id_habilidad, nivel, created_at, updated_at) VALUES (:idPersona, :idHabilidad, :nivel, NOW(), NOW())',
                 { 
                   replacements: { 
                     idPersona, 
@@ -3162,7 +3176,7 @@ export const actualizarCamposEncuesta = async (req, res) => {
             
             for (const destreza of miembro.destrezas) {
               await sequelize.query(
-                'INSERT INTO persona_destreza (id_personas_personas, id_destrezas_destrezas) VALUES (:idPersona, :idDestreza)',
+                'INSERT INTO persona_destreza (id_personas_personas, id_destrezas_destrezas, created_at, updated_at) VALUES (:idPersona, :idDestreza, NOW(), NOW())',
                 { 
                   replacements: { idPersona, idDestreza: destreza.id }, 
                   type: QueryTypes.INSERT, 
@@ -3181,7 +3195,7 @@ export const actualizarCamposEncuesta = async (req, res) => {
             
             for (const celebracion of miembro.profesionMotivoFechaCelebrar.celebraciones) {
               await sequelize.query(
-                'INSERT INTO persona_celebracion (id_persona, motivo_celebracion, dia, mes) VALUES (:idPersona, :motivo, :dia, :mes)',
+                'INSERT INTO persona_celebracion (id_persona, motivo_celebracion, dia, mes, created_at, updated_at) VALUES (:idPersona, :motivo, :dia, :mes, NOW(), NOW())',
                 { 
                   replacements: { 
                     idPersona,
@@ -3205,7 +3219,7 @@ export const actualizarCamposEncuesta = async (req, res) => {
             
             for (const enfermedad of miembro.enfermedades) {
               await sequelize.query(
-                'INSERT INTO persona_enfermedad (id_persona, id_enfermedad) VALUES (:idPersona, :idEnfermedad)',
+                'INSERT INTO persona_enfermedad (id_persona, id_enfermedad, created_at, updated_at) VALUES (:idPersona, :idEnfermedad, NOW(), NOW())',
                 { 
                   replacements: { idPersona, idEnfermedad: enfermedad.id }, 
                   type: QueryTypes.INSERT, 
@@ -3234,8 +3248,8 @@ export const actualizarCamposEncuesta = async (req, res) => {
       for (const difunto of bodyCompleto.deceasedMembers) {
         await sequelize.query(`
           INSERT INTO difuntos_familia 
-          (id_familia_familias, nombre_completo, fecha_fallecimiento, id_sexo, id_parentesco, causa_fallecimiento)
-          VALUES (:idFamilia, :nombre, :fechaFallecimiento, :idSexo, :idParentesco, :causa)
+          (id_familia_familias, nombre_completo, fecha_fallecimiento, id_sexo, id_parentesco, causa_fallecimiento, "createdAt", "updatedAt")
+          VALUES (:idFamilia, :nombre, :fechaFallecimiento, :idSexo, :idParentesco, :causa, NOW(), NOW())
         `, {
           replacements: {
             idFamilia: id,
@@ -3259,8 +3273,10 @@ export const actualizarCamposEncuesta = async (req, res) => {
         id_familia, apellido_familiar, sector, direccion_familia,
         numero_contacto, telefono, email, "tamaño_familia",
         tipo_vivienda, estado_encuesta, tutor_responsable,
-        "comunionEnCasa", fecha_ultima_encuesta, sustento_familia,
-        observaciones_encuestador, autorizacion_datos
+        "comunionEnCasa", fecha_ultima_encuesta, fecha_encuesta,
+        sustento_familia, observaciones_encuestador, autorizacion_datos,
+        numero_contrato_epm, id_sector, id_municipio, id_vereda,
+        id_parroquia, id_corregimiento, id_centro_poblado
       FROM familias 
       WHERE id_familia = :id`,
       {
@@ -3309,7 +3325,62 @@ export const actualizarCamposEncuesta = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
     console.error('❌ Error actualizando encuesta:', error);
-    return errorResponse(res, error);
+    console.error('❌ Error stack:', error.stack);
+    console.error('❌ Error original:', error.original);
+    console.error('❌ Error parent:', error.parent);
+    
+    // Mejorar mensajes de error específicos
+    let mensajeUsuario = 'Error al actualizar la encuesta';
+    let detallesError = error.message;
+    
+    // Errores de base de datos - traducir a lenguaje claro
+    if (error.original || error.parent) {
+      const dbError = error.original || error.parent;
+      
+      // Constraint violations
+      if (dbError.code === '23502') { // NOT NULL constraint
+        const campo = dbError.column || 'desconocido';
+        const tabla = dbError.table || 'desconocida';
+        mensajeUsuario = `Falta información requerida en ${tabla}`;
+        detallesError = `El campo "${campo}" es obligatorio pero no se proporcionó`;
+      }
+      else if (dbError.code === '23503') { // FOREIGN KEY constraint
+        mensajeUsuario = 'Referencia inválida a catálogo';
+        detallesError = 'El ID proporcionado no existe en el catálogo correspondiente. Verifique los valores de municipio, sector, vereda, etc.';
+      }
+      else if (dbError.code === '23505') { // UNIQUE constraint
+        mensajeUsuario = 'Registro duplicado';
+        detallesError = 'Ya existe un registro con estos datos';
+      }
+      else if (dbError.code === '22P02') { // Invalid text representation
+        mensajeUsuario = 'Formato de dato incorrecto';
+        detallesError = 'Uno de los valores enviados tiene un formato inválido (ej: texto donde se espera número)';
+      }
+      else if (dbError.message) {
+        detallesError = dbError.message;
+      }
+    }
+    
+    // Errores de validación de Sequelize
+    if (error.name === 'SequelizeValidationError') {
+      mensajeUsuario = 'Datos inválidos';
+      detallesError = error.errors.map(e => `${e.path}: ${e.message}`).join(', ');
+    }
+    
+    return res.status(400).json({
+      status: 'error',
+      code: 'UPDATE_ERROR',
+      message: mensajeUsuario,
+      details: detallesError,
+      suggestion: 'Revise los datos enviados y vuelva a intentar. Si el problema persiste, contacte soporte técnico.',
+      ...(process.env.NODE_ENV === 'development' && { 
+        debug: {
+          stack: error.stack,
+          original: error.original,
+          parent: error.parent
+        }
+      })
+    });
   }
 };
 

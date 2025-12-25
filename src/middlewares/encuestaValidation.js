@@ -358,6 +358,7 @@ class EncuestaValidationMiddleware {
         'sustento_familia',
         'observaciones_encuestador',
         'autorizacion_datos',
+        'fecha_encuesta',
         'id_sector',
         'id_municipio',
         'id_vereda',
@@ -380,6 +381,7 @@ class EncuestaValidationMiddleware {
           if (info.email) camposActualizar.email = info.email;
           if (info.numero_contacto) camposActualizar.numero_contacto = info.numero_contacto;
           if (info.numero_contrato_epm) camposActualizar.numero_contrato_epm = info.numero_contrato_epm;
+          if (info.fecha) camposActualizar.fecha_encuesta = info.fecha;
           
           // Mapear IDs de catálogos
           if (info.sector?.id) camposActualizar.id_sector = info.sector.id;
