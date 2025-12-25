@@ -83,8 +83,7 @@ class PersonasCapacidadesService {
       const query = `
         SELECT DISTINCT
           p.id_personas,
-          TRIM(CONCAT(p.primer_nombre, ' ', COALESCE(p.segundo_nombre, ''))) as nombres,
-          TRIM(CONCAT(p.primer_apellido, ' ', COALESCE(p.segundo_apellido, ''))) as apellidos,
+          p.nombres as nombre_completo,
           p.identificacion as numero_identificacion,
           p.fecha_nacimiento,
           EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
@@ -297,8 +296,7 @@ class PersonasCapacidadesService {
       const query = `
         SELECT 
           p.id_personas,
-          TRIM(CONCAT(p.primer_nombre, ' ', COALESCE(p.segundo_nombre, ''))) as nombres,
-          TRIM(CONCAT(p.primer_apellido, ' ', COALESCE(p.segundo_apellido, ''))) as apellidos,
+          p.nombres as nombre_completo,
           p.identificacion as numero_identificacion,
           EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
           sx.nombre as sexo,
@@ -474,7 +472,7 @@ class PersonasCapacidadesService {
           LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
           LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
           WHERE cc.id_comunidad_cultural = :comunidad_id
-          ORDER BY p.primer_apellido, p.primer_nombre
+          ORDER BY p.nombres
         `;
 
         const personas = await sequelize.query(personasQuery, {

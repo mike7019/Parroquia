@@ -155,7 +155,7 @@ class FamiliasConsolidadoService {
           return {
             tipo_identificacio: miembro.tipo_id_nombre || 'Cédula',
             numero_identificacion: miembro.identificacion || '',
-            nombre_completo: `${miembro.primer_nombre || ''} ${miembro.segundo_nombre || ''} ${miembro.primer_apellido || ''} ${miembro.segundo_apellido || ''}`.trim(),
+            nombre_completo: miembro.nombres || '',
             telefono_personal: miembro.telefono || '',
             email_personal: miembro.correo_electronico || '',
             fecha_nacimiento: miembro.fecha_nacimiento,
@@ -173,7 +173,7 @@ class FamiliasConsolidadoService {
             comunion_casa: true,
             tallas: {
               id_persona: miembro.id_personas,
-              nombre_completo: `${miembro.primer_nombre || ''} ${miembro.primer_apellido || ''}`.trim(),
+              nombre_completo: miembro.nombres || '',
               camisa_blusa: miembro.talla_camisa || '',
               pantalon: miembro.talla_pantalon || '',
               calzado: miembro.talla_zapato || ''
@@ -691,7 +691,7 @@ class FamiliasConsolidadoService {
       const query = `
         SELECT 
           p.id_personas,
-          CONCAT(p.primer_nombre, ' ', COALESCE(p.segundo_nombre, ''), ' ', p.primer_apellido, ' ', COALESCE(p.segundo_apellido, '')) as nombre_completo,
+          p.nombres as nombre_completo,
           p.identificacion,
           p.fecha_nacimiento,
           EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
@@ -712,7 +712,7 @@ class FamiliasConsolidadoService {
         LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
         LEFT JOIN veredas ver ON f.id_vereda = ver.id_vereda
         WHERE ${whereConditions.join(' AND ')}
-        ORDER BY p.primer_apellido, p.primer_nombre
+        ORDER BY p.nombres
         LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
       `;
       
@@ -778,7 +778,7 @@ class FamiliasConsolidadoService {
       const query = `
         SELECT 
           p.id_personas,
-          CONCAT(p.primer_nombre, ' ', COALESCE(p.segundo_nombre, ''), ' ', p.primer_apellido, ' ', COALESCE(p.segundo_apellido, '')) as nombre_completo,
+          p.nombres as nombre_completo,
           p.identificacion,
           p.fecha_nacimiento,
           EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
@@ -799,7 +799,7 @@ class FamiliasConsolidadoService {
         LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
         LEFT JOIN veredas ver ON f.id_vereda = ver.id_vereda
         WHERE ${whereConditions.join(' AND ')}
-        ORDER BY p.primer_apellido, p.primer_nombre
+        ORDER BY p.nombres
         LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
       `;
       

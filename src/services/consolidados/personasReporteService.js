@@ -82,16 +82,7 @@ class PersonasReporteService {
         SELECT 
           p.id_personas,
           p.identificacion,
-          p.primer_nombre,
-          p.segundo_nombre,
-          p.primer_apellido,
-          p.segundo_apellido,
-          CONCAT(
-            p.primer_nombre,
-            CASE WHEN p.segundo_nombre IS NOT NULL THEN ' ' || p.segundo_nombre ELSE '' END,
-            ' ', p.primer_apellido,
-            CASE WHEN p.segundo_apellido IS NOT NULL THEN ' ' || p.segundo_apellido ELSE '' END
-          ) as nombre_completo,
+          p.nombres as nombre_completo,
           p.fecha_nacimiento,
           COALESCE(EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.fecha_nacimiento)), 0) as edad,
           p.telefono,
@@ -155,7 +146,7 @@ class PersonasReporteService {
         LEFT JOIN estados_civiles ec ON p.id_estado_civil_estado_civil = ec.id_estado
         LEFT JOIN tipos_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
         ${whereClause}
-        ORDER BY p.primer_apellido, p.primer_nombre
+        ORDER BY p.nombres
         LIMIT :limite
       `;
       

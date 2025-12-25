@@ -11,7 +11,7 @@ class ExcelValidationService {
   static VALIDATION_RULES = {
     REQUIRED_FIELDS: {
       familia: ['apellido_familiar'],
-      persona: ['primer_nombre', 'primer_apellido'],
+      persona: ['nombres'],
       ubicacion: ['municipio']
     },
     
@@ -556,7 +556,7 @@ class ExcelValidationService {
    */
   applyPersonCorrections(person, fieldPath, result, familyIndex) {
     // Corregir nombres
-    ['nombre_completo', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido'].forEach(nameField => {
+    ['nombre_completo', 'nombres'].forEach(nameField => {
       if (person[nameField]) {
         const original = person[nameField];
         person[nameField] = this.capitalizeWords(person[nameField]);

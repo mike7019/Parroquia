@@ -86,11 +86,7 @@ class SaludConsolidadoService {
       const query = `
         SELECT 
           p.id_personas,
-          CONCAT(p.primer_nombre, 
-                 CASE WHEN p.segundo_nombre IS NOT NULL THEN ' ' || p.segundo_nombre ELSE '' END,
-                 ' ', p.primer_apellido,
-                 CASE WHEN p.segundo_apellido IS NOT NULL THEN ' ' || p.segundo_apellido ELSE '' END
-          ) as nombre_completo,
+          p.nombres as nombre_completo,
           p.identificacion as documento,
           p.telefono,
           p.fecha_nacimiento,
@@ -126,7 +122,7 @@ class SaludConsolidadoService {
         LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
         LEFT JOIN parroquia pr ON f.id_parroquia = pr.id_parroquia
         ${whereClause}
-        ORDER BY p.primer_apellido, p.primer_nombre
+        ORDER BY p.nombres
         LIMIT :limite
       `;
       
@@ -245,7 +241,7 @@ class SaludConsolidadoService {
       const query = `
         SELECT 
           p.id_personas,
-          CONCAT(p.primer_nombre, ' ', p.primer_apellido) as nombre_completo,
+          p.nombres as nombre_completo,
           p.identificacion as documento,
           p.telefono,
           EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
@@ -259,7 +255,7 @@ class SaludConsolidadoService {
         LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
         LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
         WHERE p.necesidad_enfermo ILIKE :enfermedad
-        ORDER BY p.primer_apellido, p.primer_nombre
+        ORDER BY p.nombres
         LIMIT :limite
       `;
       
@@ -330,11 +326,7 @@ class SaludConsolidadoService {
       const personasQuery = `
         SELECT 
           p.id_personas,
-          CONCAT(p.primer_nombre, 
-                 CASE WHEN p.segundo_nombre IS NOT NULL THEN ' ' || p.segundo_nombre ELSE '' END,
-                 ' ', p.primer_apellido,
-                 CASE WHEN p.segundo_apellido IS NOT NULL THEN ' ' || p.segundo_apellido ELSE '' END
-          ) as nombre_completo,
+          p.nombres as nombre_completo,
           p.identificacion as documento,
           p.telefono,
           p.fecha_nacimiento,
@@ -360,7 +352,7 @@ class SaludConsolidadoService {
         LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
         LEFT JOIN parroquia pr ON p.id_parroquia = pr.id_parroquia
         WHERE p.id_parroquia = :idParroquia
-        ORDER BY p.primer_apellido, p.primer_nombre
+        ORDER BY p.nombres
       `;
       
       const personas = await sequelize.query(personasQuery, {

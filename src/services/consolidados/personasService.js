@@ -205,12 +205,7 @@ class PersonasService {
       const query = `
         SELECT
           p.id_personas,
-          CONCAT(
-            p.primer_nombre,
-            CASE WHEN p.segundo_nombre IS NOT NULL THEN ' ' || p.segundo_nombre ELSE '' END,
-            ' ', p.primer_apellido,
-            CASE WHEN p.segundo_apellido IS NOT NULL THEN ' ' || p.segundo_apellido ELSE '' END
-          ) as nombre_completo,
+          p.nombres as nombre_completo,
           p.identificacion as documento,
           ti.nombre as tipo_identificacion,
           EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
@@ -278,7 +273,7 @@ class PersonasService {
         LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
         LEFT JOIN tipos_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
         ${whereClause}
-        ORDER BY p.primer_apellido, p.primer_nombre
+        ORDER BY p.nombres
         LIMIT :limit OFFSET :offset
       `;
 
