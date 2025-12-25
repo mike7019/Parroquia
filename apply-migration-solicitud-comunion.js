@@ -11,9 +11,33 @@ import { execSync } from 'child_process';
 console.log('🚀 Aplicando migración: solicitud_comunion_casa');
 console.log('================================================\n');
 
-const CONTAINER_NAME = 'parroquia-postgres-1';
+// Detectar nombre del contenedor automáticamente
+let CONTAINER_NAME = 'parroquia-postgres-1';
 const DB_USER = 'parroquia_user';
 const DB_NAME = 'parroquia_db';
+
+try {
+  console.log('🔍 Buscando contenedor de PostgreSQL...');
+  
+  // Buscar contenedor que contenga 'postgres' en el nombre
+  const containers = execSync('docker ps --format "{{.Names}}"', { encoding: 'utf-8' })
+    .split('\n')
+    .filter(name => name.includes('postgres'));
+  
+  if (containers.length === 0) {
+    console.error('❌ Error: No se encontró ningún contenedor de PostgreSQL corriendo');
+    console.log('\nContenedores disponibles:');
+    console.log(execSync('docker ps --format "{{.Names}}"', { encoding: 'utf-8' }));
+    process.exit(1);
+  }
+  
+  CONTAINER_NAME = containers[0];
+  console.log(`✅ Contenedor encontrado: ${CONTAINER_NAME}\n`);
+  
+} catch (error) {
+  console.error('❌ Error al buscar contenedores:', error.message);
+  process.exit(1);
+}
 
 const SQL_COMMAND = `
 ALTER TABLE personas 
@@ -27,17 +51,6 @@ WHERE table_name = 'personas' AND column_name = 'solicitud_comunion_casa';
 `;
 
 try {
-  console.log('🔍 Verificando contenedor Docker...');
-  
-  // Verificar que el contenedor existe
-  try {
-    execSync(`docker ps -q -f name=${CONTAINER_NAME}`, { stdio: 'pipe' });
-    console.log('✅ Contenedor encontrado\n');
-  } catch (error) {
-    console.error('❌ Error: Contenedor no encontrado o Docker no está corriendo');
-    process.exit(1);
-  }
-
   console.log('🔧 Ejecutando ALTER TABLE...');
   
   // Ejecutar migración
