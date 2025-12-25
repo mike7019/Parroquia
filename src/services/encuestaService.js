@@ -112,7 +112,7 @@ class EncuestaService {
               WHEN per.id_personas IS NOT NULL THEN
                 JSON_BUILD_OBJECT(
                   'id', per.id_personas,
-                  'nombre_completo', CONCAT(per.primer_nombre, ' ', COALESCE(per.primer_apellido, '')),
+                  'nombre_completo', per.nombres,
                   'identificacion', per.identificacion,
                   'telefono', per.telefono
                 )
@@ -254,10 +254,7 @@ class EncuestaService {
                 WHEN per.id_personas IS NOT NULL THEN
                   JSON_BUILD_OBJECT(
                     'id', per.id_personas,
-                    'primer_nombre', per.primer_nombre,
-                    'segundo_nombre', per.segundo_nombre,
-                    'primer_apellido', per.primer_apellido,
-                    'segundo_apellido', per.segundo_apellido,
+                    'nombre_completo', per.nombres,
                     'identificacion', per.identificacion,
                     'telefono', per.telefono,
                     'fecha_nacimiento', per.fecha_nacimiento,
@@ -456,7 +453,7 @@ class EncuestaService {
               DISTINCT CASE 
                 WHEN p.id_personas IS NOT NULL THEN
                   JSON_BUILD_OBJECT(
-                    'nombre_completo', CONCAT(p.primer_nombre, ' ', COALESCE(p.primer_apellido, '')),
+                    'nombre_completo', p.nombres,
                     'identificacion', p.identificacion
                   )
                 END
