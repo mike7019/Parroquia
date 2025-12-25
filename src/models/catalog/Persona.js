@@ -8,21 +8,21 @@ const Persona = sequelize.define('Persona', {
     autoIncrement: true,
     allowNull: false
   },
-  primer_nombre: {
+  nombres: {
     type: DataTypes.STRING(255),
-    allowNull: false
-  },
-  segundo_nombre: {
-    type: DataTypes.STRING(255),
-    allowNull: true
-  },
-  primer_apellido: {
-    type: DataTypes.STRING(255),
-    allowNull: false
-  },
-  segundo_apellido: {
-    type: DataTypes.STRING(255),
-    allowNull: true
+    allowNull: false,
+    validate: {
+      notNull: {
+        msg: 'El nombre completo es requerido'
+      },
+      notEmpty: {
+        msg: 'El nombre completo no puede estar vacío'
+      },
+      len: {
+        args: [2, 255],
+        msg: 'El nombre completo debe tener entre 2 y 255 caracteres'
+      }
+    }
   },
   id_tipo_identificacion_tipo_identificacion: {
     type: DataTypes.BIGINT,

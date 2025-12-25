@@ -507,8 +507,9 @@ export const generarIdentificacionUnica = async (tipo = 'TEMP', contadorIntento 
     const timestamp = Date.now();
     const identificacion = `${tipo}_${timestamp}_${uuid}_${contadorIntento}`;
     
-    // Verificar que no exista en la base de datos
+    // Verificar que no exista en la base de datos - solo consultar identificacion
     const existe = await Persona.findOne({
+      attributes: ['id_personas', 'identificacion'],
       where: { identificacion }
     });
     
