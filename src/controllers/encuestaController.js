@@ -2629,6 +2629,7 @@ export const crearEncuesta = async (req, res) => {
       observaciones,
       familyMembers = [],
       deceasedMembers = [],
+      disposicionBasuras = [], // ⭐ v2.0: Array de disposiciones en nivel raíz
       metadata = {}
     } = req.body;
 
@@ -2786,8 +2787,18 @@ export const crearEncuesta = async (req, res) => {
     const familiaId = familia.id_familia;
 
     // 2. REGISTRAR SERVICIOS (usando funciones auxiliares)
-    await registrarDisposicionBasuras(familiaId, vivienda.disposicion_basuras, transaction);
-    await registrarSistemaAcueducto(familiaId, servicios_agua.sistema_acueducto, transaction);
+    // ⭐ v2.0: disposicionBasuras puede venir en nivel raíz (array) o en vivienda (objeto)
+    const basurasData = disposicionBasuras && disposicionBasuras.length > 0 
+      ? disposicionBasuras 
+      : vivienda.disposicion_basuras;
+    await registrarDisposicionBasuras(familiaId, basurasData, transaction);
+    
+    // ⭐ v2.0: sistemas_acueducto es array, tomar el primero si existe
+    const acueductoData = servicios_agua.sistemas_acueducto && servicios_agua.sistemas_acueducto.length > 0
+      ? servicios_agua.sistemas_acueducto[0]  // Tomar el primero del array
+      : servicios_agua.sistema_acueducto;  // Fallback a singular
+    await registrarSistemaAcueducto(familiaId, acueductoData, transaction);
+    
     await registrarAguasResiduales(familiaId, servicios_agua.aguas_residuales, transaction);
     await registrarTipoVivienda(familiaId, vivienda.tipo_vivienda, transaction);
 
