@@ -3135,8 +3135,7 @@ export const actualizarCamposEncuesta = async (req, res) => {
           
           await sequelize.query(`
             UPDATE personas SET
-              primer_nombre = :primerNombre,
-              primer_apellido = :primerApellido,
+              nombres = :nombres,
               identificacion = :identificacion,
               id_tipo_identificacion_tipo_identificacion = :idTipoIdentificacion,
               fecha_nacimiento = :fechaNacimiento,
@@ -3158,24 +3157,8 @@ export const actualizarCamposEncuesta = async (req, res) => {
           `, {
             replacements: {
               idPersona,
-              // Parseo mejorado de nombres: asume formato "Nombre1 Nombre2 Apellido1 Apellido2"
-              primerNombre: (() => {
-                if (!miembro.nombres) return '';
-                const partes = miembro.nombres.trim().split(' ');
-                // Si hay 4 partes: "María José Rodríguez Campo" -> "María"
-                // Si hay 3 partes: "María Rodríguez Campo" -> "María"
-                // Si hay 2 partes: "María Rodríguez" -> "María"
-                return partes[0] || '';
-              })(),
-              primerApellido: (() => {
-                if (!miembro.nombres) return '';
-                const partes = miembro.nombres.trim().split(' ');
-                // Si hay 4 partes: tomar el 3ro (índice 2)
-                if (partes.length >= 3) return partes[partes.length - 2] || '';
-                // Si hay 2 partes: tomar el 2do
-                if (partes.length === 2) return partes[1] || '';
-                return '';
-              })(),
+              // Guardar nombre completo sin separar
+              nombres: miembro.nombres || '',
               identificacion: miembro.numeroIdentificacion || null,
               idTipoIdentificacion: miembro.tipoIdentificacion?.id || null,
               fechaNacimiento: miembro.fechaNacimiento || null,
