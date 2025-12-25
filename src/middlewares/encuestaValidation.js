@@ -175,8 +175,7 @@ class EncuestaValidationMiddleware {
       const personasExistentes = await sequelize.query(`
         SELECT 
           p.identificacion,
-          p.primer_nombre,
-          p.primer_apellido,
+          p.nombres,
           p.id_familia_familias,
           f.apellido_familiar,
           f.id_familia
@@ -194,7 +193,7 @@ class EncuestaValidationMiddleware {
         // Formatear conflictos para la respuesta
         const conflictos = personasExistentes.map(persona => ({
           identificacion: persona.identificacion,
-          nombre_completo: `${persona.primer_nombre} ${persona.primer_apellido || ''}`.trim(),
+          nombre_completo: persona.nombres || '',
           familia_actual: {
             id: persona.id_familia,
             apellido: persona.apellido_familiar || 'Sin apellido familiar'
@@ -236,7 +235,7 @@ class EncuestaValidationMiddleware {
       if (familiaExistente) {
         // Detectar posibles errores de formulación comparando miembros
         const miembrosExistentes = await sequelize.query(`
-          SELECT identificacion, primer_nombre, primer_apellido 
+          SELECT identificacion, nombres 
           FROM personas 
           WHERE id_familia_familias = :familiaId
         `, {
@@ -260,12 +259,12 @@ class EncuestaValidationMiddleware {
             fecha_registro: familiaExistente.fecha_ultima_encuesta,
             miembros_existentes: miembrosExistentes.map(m => ({
               identificacion: m.identificacion,
-              nombre: `${m.primer_nombre} ${m.primer_apellido}`
+              nombre: m.nombres || ''
             }))
           },
           miembros_en_nueva_encuesta: familyMembers?.map(m => ({
             identificacion: m.numeroIdentificacion,
-            nombre: `${m.nombres} ${m.apellidos}`
+            nombre: m.nombres || ''
           })) || [],
           posible_error_formulacion: hayMiembrosNuevos
         });
