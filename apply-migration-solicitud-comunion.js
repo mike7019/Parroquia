@@ -6,7 +6,7 @@
  * Fecha: 2025-12-25
  */
 
-const { execSync } = require('child_process');
+import { execSync } from 'child_process';
 
 console.log('🚀 Aplicando migración: solicitud_comunion_casa');
 console.log('================================================\n');
