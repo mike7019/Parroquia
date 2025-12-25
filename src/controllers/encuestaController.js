@@ -3153,7 +3153,7 @@ export const actualizarCamposEncuesta = async (req, res) => {
             
             for (const habilidad of miembro.habilidades) {
               await sequelize.query(
-                'INSERT INTO persona_habilidad (id_persona, id_habilidad, nivel, created_at, updated_at) VALUES (:idPersona, :idHabilidad, :nivel, NOW(), NOW())',
+                'INSERT INTO persona_habilidad (id_persona, id_habilidad, nivel, "createdAt", "updatedAt") VALUES (:idPersona, :idHabilidad, :nivel, NOW(), NOW())',
                 { 
                   replacements: { 
                     idPersona, 
@@ -3176,7 +3176,7 @@ export const actualizarCamposEncuesta = async (req, res) => {
             
             for (const destreza of miembro.destrezas) {
               await sequelize.query(
-                'INSERT INTO persona_destreza (id_personas_personas, id_destrezas_destrezas, created_at, updated_at) VALUES (:idPersona, :idDestreza, NOW(), NOW())',
+                'INSERT INTO persona_destreza (id_personas_personas, id_destrezas_destrezas, "createdAt", "updatedAt") VALUES (:idPersona, :idDestreza, NOW(), NOW())',
                 { 
                   replacements: { idPersona, idDestreza: destreza.id }, 
                   type: QueryTypes.INSERT, 
@@ -3195,7 +3195,7 @@ export const actualizarCamposEncuesta = async (req, res) => {
             
             for (const celebracion of miembro.profesionMotivoFechaCelebrar.celebraciones) {
               await sequelize.query(
-                'INSERT INTO persona_celebracion (id_persona, motivo_celebracion, dia, mes, created_at, updated_at) VALUES (:idPersona, :motivo, :dia, :mes, NOW(), NOW())',
+                'INSERT INTO persona_celebracion (id_persona, motivo, dia, mes, created_at, updated_at) VALUES (:idPersona, :motivo, :dia, :mes, NOW(), NOW())',
                 { 
                   replacements: { 
                     idPersona,
