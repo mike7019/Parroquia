@@ -187,10 +187,7 @@ export async function obtenerPersonasFamiliaCompletas(idFamilia, transaction = n
   const personas = await sequelize.query(`
     SELECT 
       p.id_personas,
-      p.primer_nombre,
-      p.segundo_nombre,
-      p.primer_apellido,
-      p.segundo_apellido,
+      p.nombres,
       p.identificacion,
       p.telefono,
       p.correo_electronico,

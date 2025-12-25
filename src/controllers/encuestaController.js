@@ -515,17 +515,14 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
       }
       
       const personaData = {
-        primer_nombre: primerNombre,
-        segundo_nombre: segundoNombre || null,
-        primer_apellido: primerApellido || null,
-        segundo_apellido: segundoApellido || null,
+        nombres: miembro.nombres || '',
         fecha_nacimiento: fechaNacimiento ? new Date(fechaNacimiento) : new Date('1900-01-01'),
         telefono: miembro.telefono || informacionGeneral.telefono,
-        correo_electronico: `${primerNombre.toLowerCase()}.${Date.now()}.${personasCreadas}@temp.com`,
+        correo_electronico: `${(miembro.nombres || 'temp').toLowerCase().replace(/\s+/g, '_')}.${Date.now()}.${personasCreadas}@temp.com`,
         identificacion: miembro.numeroIdentificacion || identificacionUnica,
         direccion: informacionGeneral.direccion,
         id_familia_familias: familiaId,
-        id_familia: familiaId, // ⭐ AÑADIDO: Asegurar que id_familia también se llene
+        id_familia: familiaId,
         id_sexo: sexoId,
         id_tipo_identificacion_tipo_identificacion: tipoIdentificacionId,
         id_estado_civil_estado_civil: estadoCivilId,
@@ -548,7 +545,7 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         persona = await Persona.create(personaData, { 
           transaction,
           fields: [
-            'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido',
+            'nombres',
             'fecha_nacimiento', 'telefono', 'correo_electronico', 'identificacion',
             'direccion', 'id_familia_familias', 'id_familia', 'id_sexo', 
             'id_tipo_identificacion_tipo_identificacion', 'id_estado_civil_estado_civil',
@@ -1318,10 +1315,6 @@ export const obtenerEncuestas = async (req, res) => {
           SELECT 
             df.id_difunto,
             df.nombre_completo,
-            '' as primer_nombre,
-            '' as segundo_nombre, 
-            '' as primer_apellido,
-            '' as segundo_apellido,
             df.id_sexo,
             df.id_parentesco,
             s.nombre as sexo_nombre,
@@ -1650,7 +1643,7 @@ export const obtenerEncuestas = async (req, res) => {
 
           return {
             id: persona.id_personas,
-            nombre_completo: formatearNombreCompleto(persona.primer_nombre, persona.segundo_nombre, persona.primer_apellido, persona.segundo_apellido),
+            nombre_completo: persona.nombres || '',
             identificacion: {
               numero: persona.identificacion,
               tipo: persona.tipo_id_id ? {
@@ -1931,10 +1924,6 @@ export const obtenerEncuestaPorId = async (req, res) => {
       SELECT 
         df.id_difunto,
         df.nombre_completo,
-        '' as primer_nombre,
-        '' as segundo_nombre, 
-        '' as primer_apellido,
-        '' as segundo_apellido,
         df.id_sexo,
         df.id_parentesco,
         s.nombre as sexo_nombre,
@@ -2263,7 +2252,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
 
       return {
         id: persona.id_personas,
-        nombre_completo: formatearNombreCompleto(persona.primer_nombre, persona.segundo_nombre, persona.primer_apellido, persona.segundo_apellido),
+        nombre_completo: persona.nombres || '',
         identificacion: {
           numero: persona.identificacion,
           tipo: persona.tipo_id_id ? {

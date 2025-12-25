@@ -45,10 +45,7 @@ class FamiliasConsultasService {
           const familyMembers = await sequelize.query(`
             SELECT 
               p.id_personas,
-              p.primer_nombre,
-              p.segundo_nombre,
-              p.primer_apellido,
-              p.segundo_apellido,
+              p.nombres,
               p.identificacion,
               p.telefono,
               p.correo_electronico,
@@ -131,7 +128,7 @@ class FamiliasConsultasService {
 
           // Formatear familyMembers con estructura completa
           const familyMembersFormateados = familyMembers.map(persona => ({
-            nombres: `${persona.primer_nombre || ''} ${persona.segundo_nombre || ''}`.trim(),
+            nombres: persona.nombres || '',
             numeroIdentificacion: persona.identificacion,
             tipoIdentificacion: persona.tipo_id_id ? {
               id: persona.tipo_id_id,
