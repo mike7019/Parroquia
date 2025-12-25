@@ -277,6 +277,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: true
     },
+    solicitud_comunion_casa: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
+    },
     id_profesion: {
       type: DataTypes.BIGINT,
       allowNull: true
