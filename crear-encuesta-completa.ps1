@@ -59,17 +59,25 @@ try {
     Write-Host "ERROR AL CREAR ENCUESTA" -ForegroundColor Red
     Write-Host "   Mensaje: $($_.Exception.Message)" -ForegroundColor Yellow
     
-    if ($_.Exception.Response) {
-        $errorContent = $_.Exception.Response.Content.ReadAsStringAsync().Result
+    if ($_.ErrorDetails.Message) {
         Write-Host "`nDETALLES:" -ForegroundColor Yellow
         try {
-            $errorJson = $errorContent | ConvertFrom-Json
+            $errorJson = $_.ErrorDetails.Message | ConvertFrom-Json
             Write-Host "   Code: $($errorJson.code)" -ForegroundColor White
             Write-Host "   Message: $($errorJson.message)" -ForegroundColor White
-            Write-Host "   Details: $($errorJson.details)" -ForegroundColor White
+            if ($errorJson.details) {
+                Write-Host "   Details: $($errorJson.details)" -ForegroundColor White
+            }
+            if ($errorJson.errors) {
+                Write-Host "`n   Errores:" -ForegroundColor Yellow
+                foreach ($err in $errorJson.errors) {
+                    Write-Host "     - $err" -ForegroundColor White
+                }
+            }
         } catch {
-            Write-Host "   $errorContent" -ForegroundColor White
+            Write-Host "   $($_.ErrorDetails.Message)" -ForegroundColor White
         }
     }
+    
     exit 1
 }

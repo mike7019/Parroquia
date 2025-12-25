@@ -1,6 +1,6 @@
 import sequelize from '../../config/sequelize.js';
-import { QueryTypes } from 'sequelize';
-import { Familias, Municipios, Parroquia, Sector, Veredas, Sexo, TipoIdentificacion, Persona } from '../models/index.js';
+import { QueryTypes, Op } from 'sequelize';
+import { Familias, Municipios, Parroquia, Sector, Veredas, Sexo, TipoIdentificacion, Persona, TipoVivienda } from '../models/index.js';
 import DifuntosFamilia from '../models/catalog/DifuntosFamilia.js';
 import crypto from 'crypto';
 import FamiliasConsultasService from '../services/familiasConsultasService.js';
@@ -343,11 +343,12 @@ const registrarTipoVivienda = async (familiaId, tipoVivienda, transaction) => {
   if (!tipoVivienda) return;
 
   try {
-    let tipoViviendaId = tipoVivienda.id;
-    if (!tipoViviendaId) {
-      const TipoVivienda = sequelize.models.TiposVivienda;
+    let tipoViviendaId = tipoVivienda.id || tipoVivienda;
+    
+    // Si es un string, buscar el tipo por nombre
+    if (typeof tipoViviendaId === 'string') {
       const tipo = await TipoVivienda.findOne({
-        where: { nombre: { [sequelize.Op.iLike]: `%${tipoVivienda.nombre}%` } }
+        where: { nombre: { [Op.iLike]: `%${tipoViviendaId}%` } }
       });
       tipoViviendaId = tipo?.id_tipo_vivienda || 1; // Default: Casa
     }
