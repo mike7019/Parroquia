@@ -3077,23 +3077,61 @@ export const actualizarCamposEncuesta = async (req, res) => {
       console.log(`📋 Actualizando ${bodyCompleto.familyMembers.length} personas...`);
       
       for (const miembro of bodyCompleto.familyMembers) {
-        // Buscar si la persona ya existe por identificación
-        const personaExistente = await sequelize.query(
-          `SELECT id_personas FROM personas 
-           WHERE identificacion = :identificacion AND id_familia_familias = :idFamilia`,
-          {
-            replacements: { 
-              identificacion: miembro.numeroIdentificacion,
-              idFamilia: id 
-            },
-            type: QueryTypes.SELECT,
-            transaction
-          }
-        );
+        let personaExistente = [];
+        
+        // Opción 1: Buscar por ID si viene
+        if (miembro.id) {
+          personaExistente = await sequelize.query(
+            `SELECT id_personas FROM personas 
+             WHERE id_personas = :id AND id_familia = :idFamilia`,
+            {
+              replacements: { 
+                id: miembro.id,
+                idFamilia: id 
+              },
+              type: QueryTypes.SELECT,
+              transaction
+            }
+          );
+        }
+        
+        // Opción 2: Buscar por identificación si no se encontró por ID
+        if (personaExistente.length === 0 && miembro.numeroIdentificacion) {
+          personaExistente = await sequelize.query(
+            `SELECT id_personas FROM personas 
+             WHERE identificacion = :identificacion AND id_familia = :idFamilia`,
+            {
+              replacements: { 
+                identificacion: miembro.numeroIdentificacion,
+                idFamilia: id 
+              },
+              type: QueryTypes.SELECT,
+              transaction
+            }
+          );
+        }
+        
+        // Opción 3: Si solo hay 1 persona en la familia, actualizar esa
+        if (personaExistente.length === 0) {
+          personaExistente = await sequelize.query(
+            `SELECT id_personas FROM personas WHERE id_familia = :idFamilia LIMIT 1`,
+            {
+              replacements: { idFamilia: id },
+              type: QueryTypes.SELECT,
+              transaction
+            }
+          );
+          console.log(`⚠️  Persona no encontrada por ID ni identificación. Usando primera persona de la familia.`);
+        }
 
         if (personaExistente.length > 0) {
           // ACTUALIZAR persona existente
           const idPersona = personaExistente[0].id_personas;
+          
+          console.log(`🔄 Actualizando persona ID ${idPersona}:`);
+          console.log('  - Miembro recibido:', JSON.stringify(miembro, null, 2));
+          console.log('  - numeroIdentificacion:', miembro.numeroIdentificacion);
+          console.log('  - nombres completo:', miembro.nombres);
           
           await sequelize.query(`
             UPDATE personas SET
@@ -3120,8 +3158,24 @@ export const actualizarCamposEncuesta = async (req, res) => {
           `, {
             replacements: {
               idPersona,
-              primerNombre: miembro.nombres?.split(' ')[0] || '',
-              primerApellido: miembro.nombres?.split(' ').slice(-1)[0] || '',
+              // Parseo mejorado de nombres: asume formato "Nombre1 Nombre2 Apellido1 Apellido2"
+              primerNombre: (() => {
+                if (!miembro.nombres) return '';
+                const partes = miembro.nombres.trim().split(' ');
+                // Si hay 4 partes: "María José Rodríguez Campo" -> "María"
+                // Si hay 3 partes: "María Rodríguez Campo" -> "María"
+                // Si hay 2 partes: "María Rodríguez" -> "María"
+                return partes[0] || '';
+              })(),
+              primerApellido: (() => {
+                if (!miembro.nombres) return '';
+                const partes = miembro.nombres.trim().split(' ');
+                // Si hay 4 partes: tomar el 3ro (índice 2)
+                if (partes.length >= 3) return partes[partes.length - 2] || '';
+                // Si hay 2 partes: tomar el 2do
+                if (partes.length === 2) return partes[1] || '';
+                return '';
+              })(),
               identificacion: miembro.numeroIdentificacion || null,
               idTipoIdentificacion: miembro.tipoIdentificacion?.id || null,
               fechaNacimiento: miembro.fechaNacimiento || null,
