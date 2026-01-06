@@ -3134,6 +3134,62 @@ export const actualizarCamposEncuesta = async (req, res) => {
           console.log('  - numeroIdentificacion:', miembro.numeroIdentificacion);
           console.log('  - nombres completo:', miembro.nombres);
           
+          // Consultar datos actuales de la persona
+          const personaActual = await sequelize.query(
+            `SELECT identificacion, correo_electronico FROM personas WHERE id_personas = :idPersona`,
+            {
+              replacements: { idPersona },
+              type: QueryTypes.SELECT,
+              transaction
+            }
+          );
+          
+          const identificacionActual = personaActual[0]?.identificacion;
+          const correoActual = personaActual[0]?.correo_electronico;
+          
+          // Si la identificación no cambió, no validar duplicados (es la misma persona)
+          // Si cambió, verificar que no exista en otra persona
+          if (miembro.numeroIdentificacion && miembro.numeroIdentificacion !== identificacionActual) {
+            const identificacionDuplicada = await sequelize.query(
+              `SELECT id_personas FROM personas 
+               WHERE identificacion = :identificacion 
+               AND id_personas != :idPersona`,
+              {
+                replacements: { 
+                  identificacion: miembro.numeroIdentificacion,
+                  idPersona
+                },
+                type: QueryTypes.SELECT,
+                transaction
+              }
+            );
+            
+            if (identificacionDuplicada.length > 0) {
+              throw new Error(`La identificación ${miembro.numeroIdentificacion} ya existe en otra persona`);
+            }
+          }
+          
+          // Lo mismo para el correo electrónico
+          if (miembro.correo_electronico && miembro.correo_electronico !== correoActual) {
+            const correoDuplicado = await sequelize.query(
+              `SELECT id_personas FROM personas 
+               WHERE correo_electronico = :correo 
+               AND id_personas != :idPersona`,
+              {
+                replacements: { 
+                  correo: miembro.correo_electronico,
+                  idPersona
+                },
+                type: QueryTypes.SELECT,
+                transaction
+              }
+            );
+            
+            if (correoDuplicado.length > 0) {
+              throw new Error(`El correo electrónico ${miembro.correo_electronico} ya existe en otra persona`);
+            }
+          }
+          
           await sequelize.query(`
             UPDATE personas SET
               nombres = :nombres,
@@ -3208,7 +3264,7 @@ export const actualizarCamposEncuesta = async (req, res) => {
           // Actualizar destrezas
           if (miembro.destrezas && Array.isArray(miembro.destrezas)) {
             await sequelize.query(
-              'DELETE FROM persona_destreza WHERE id_persona = :idPersona',
+              'DELETE FROM persona_destreza WHERE id_personas_personas = :idPersona',
               { replacements: { idPersona }, type: QueryTypes.DELETE, transaction }
             );
             
