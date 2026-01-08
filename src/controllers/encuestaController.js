@@ -1274,6 +1274,8 @@ export const obtenerEncuestas = async (req, res) => {
         f.sustento_familia,
         f.observaciones_encuestador,
         f.autorizacion_datos,
+        f.created_at,
+        f.updated_at,
         m.nombre_municipio,
         v.nombre as nombre_vereda,
         s.nombre as nombre_sector,
@@ -1801,7 +1803,9 @@ export const obtenerEncuestas = async (req, res) => {
           
           // Metadatos
           metadatos: {
-            fecha_creacion: familiaData.fecha_ultima_encuesta,
+            fecha_creacion: familiaData.created_at,
+            fecha_actualizacion: familiaData.updated_at,
+            fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
             estado: familiaData.estado_encuesta,
             version: '1.0'
           }
@@ -1879,6 +1883,8 @@ export const obtenerEncuestaPorId = async (req, res) => {
         f.sustento_familia,
         f.observaciones_encuestador,
         f.autorizacion_datos,
+        f.created_at,
+        f.updated_at,
         m.nombre_municipio,
         v.nombre as nombre_vereda,
         s.nombre as nombre_sector,
@@ -2410,7 +2416,9 @@ export const obtenerEncuestaPorId = async (req, res) => {
       
       // Metadatos
       metadatos: {
-        fecha_creacion: familiaData.fecha_ultima_encuesta,
+        fecha_creacion: familiaData.created_at,
+        fecha_actualizacion: familiaData.updated_at,
+        fecha_ultima_encuesta: familiaData.fecha_ultima_encuesta,
         estado: familiaData.estado_encuesta,
         version: '1.0'
       }
@@ -2810,6 +2818,15 @@ export const crearEncuesta = async (req, res) => {
     await transaction.commit();
     console.log('✅ Transacción completada exitosamente');
     
+    // Obtener created_at y updated_at de la familia creada
+    const [familiaConFechas] = await sequelize.query(
+      'SELECT created_at, updated_at FROM familias WHERE id_familia = :familiaId',
+      {
+        replacements: { familiaId },
+        type: QueryTypes.SELECT
+      }
+    );
+    
     // 5. RESPUESTA EXITOSA
     return successResponse(res, {
       statusCode: 201,
@@ -2831,6 +2848,8 @@ export const crearEncuesta = async (req, res) => {
       metadata: {
         transaccion_id: `txn_${Date.now()}`,
         timestamp: new Date().toISOString(),
+        created_at: familiaConFechas?.created_at || null,
+        updated_at: familiaConFechas?.updated_at || null,
         version: '2.0',
         completada: metadata.completed || false,
         etapa_actual: metadata.currentStage || null,
@@ -3410,10 +3429,28 @@ export const actualizarCamposEncuesta = async (req, res) => {
       metadata.relaciones_actualizadas.push('aguas_residuales');
     }
 
+    // Obtener created_at y updated_at actualizados
+    const [familiaConFechas] = await sequelize.query(
+      'SELECT created_at, updated_at FROM familias WHERE id_familia = :id',
+      {
+        replacements: { id },
+        type: QueryTypes.SELECT,
+        transaction
+      }
+    );
+
     return successResponse(res, {
       message: 'Encuesta actualizada exitosamente',
-      data: familiaActualizada[0],
-      metadata
+      data: {
+        ...familiaActualizada[0],
+        created_at: familiaConFechas?.created_at || null,
+        updated_at: familiaConFechas?.updated_at || null
+      },
+      metadata: {
+        ...metadata,
+        created_at: familiaConFechas?.created_at || null,
+        updated_at: familiaConFechas?.updated_at || null
+      }
     });
 
   } catch (error) {
