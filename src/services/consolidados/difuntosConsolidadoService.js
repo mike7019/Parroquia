@@ -159,7 +159,7 @@ class DifuntosConsolidadoService {
         SELECT 
           'personas' as fuente,
           pe.id_personas::text as id_difunto,
-          TRIM(CONCAT(pe.primer_nombre, ' ', COALESCE(pe.segundo_nombre, ''), ' ', COALESCE(pe.primer_apellido, ''), ' ', COALESCE(pe.segundo_apellido, ''))) as nombre_completo,
+          pe.nombres as nombre_completo,
           (pe.estudios::json->>'fecha_aniversario')::date as fecha_aniversario,
           pe.estudios::json->>'causa_fallecimiento' as observaciones,
           f.apellido_familiar,
@@ -330,7 +330,7 @@ class DifuntosConsolidadoService {
           SELECT 
             'personas' as fuente,
             pe.id_personas::text as id_difunto,
-            TRIM(CONCAT(pe.primer_nombre, ' ', COALESCE(pe.segundo_nombre, ''), ' ', COALESCE(pe.primer_apellido, ''), ' ', COALESCE(pe.segundo_apellido, ''))) as nombre_completo,
+            pe.nombres as nombre_completo,
             (pe.estudios::json->>'fecha_aniversario')::date as fecha_aniversario,
             pe.estudios::json->>'causa_fallecimiento' as observaciones,
             f.apellido_familiar,
@@ -423,7 +423,7 @@ class DifuntosConsolidadoService {
         SELECT 
           'personas' as fuente,
           pe.id_personas::text as id_difunto,
-          TRIM(CONCAT(pe.primer_nombre, ' ', COALESCE(pe.segundo_nombre, ''), ' ', COALESCE(pe.primer_apellido, ''), ' ', COALESCE(pe.segundo_apellido, ''))) as nombre_completo,
+          pe.nombres as nombre_completo,
           (pe.estudios::json->>'fecha_aniversario')::date as fecha_aniversario,
           pe.estudios::json->>'causa_fallecimiento' as observaciones,
           f.apellido_familiar,
@@ -444,7 +444,7 @@ class DifuntosConsolidadoService {
         WHERE pe.estudios IS NOT NULL 
           AND pe.estudios LIKE '%es_fallecido%'
           AND pe.estudios::json->>'es_fallecido' = 'true'
-          AND TRIM(CONCAT(pe.primer_nombre, ' ', COALESCE(pe.segundo_nombre, ''), ' ', COALESCE(pe.primer_apellido, ''), ' ', COALESCE(pe.segundo_apellido, ''))) ILIKE :nombreBusqueda
+          AND pe.nombres ILIKE :nombreBusqueda
       `, {
         replacements: { nombreBusqueda: `%${nombreBusqueda}%` },
         type: QueryTypes.SELECT
