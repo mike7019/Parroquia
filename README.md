@@ -1,20 +1,56 @@
-# Parroquia API
+# Parroquia API - Sistema de Gestión Parroquial
+## Manual Técnico Completo para Clientes y Administradores
 
-## Descripción
+## DESCRIPCIÓN DEL SISTEMA
 
-**Parroquia API** es un sistema RESTful robusto diseñado para la gestión integral de la información parroquial. Esta aplicación facilita la administración eficiente de feligreses, núcleos familiares, sacramentos, grupos pastorales y la generación de reportes estadísticos y certificados.
+**Parroquia API** es un sistema integral de gestión parroquial diseñado para administrar:
 
-El proyecto está construido con tecnologías modernas de backend, asegurando escalabilidad, seguridad y facilidad de mantenimiento.
+- Información de feligreses (personas) con datos completos
+- Núcleos familiares y datos socioeconómicos
+- Sacramentos y celebraciones litúrgicas
+- Geografía eclesiástica (departamentos, municipios, parroquias, sectores)
+- Encuestas y diagnósticos pastorales
+- Reportes y certificados en PDF
+- Control de acceso basado en roles (RBAC)
+- Documentación API interactiva (Swagger/OpenAPI)
 
-## Características Principales
+**Tecnología:** Node.js + Express + PostgreSQL + Docker
 
-* **Gestión de Personas**: Registro detallado de feligreses con información personal, contacto y roles.
-* **Núcleos Familiares**: Administración de familias, vinculando miembros y datos socioeconómicos (vivienda, servicios, etc.).
-* **Sacramentos y Celebraciones**: Registro de bautizos, matrimonios, confirmaciones y otras celebraciones litúrgicas.
-* **Geografía Eclesiástica**: Gestión de barrios, sectores, veredas y corregimientos.
-* **Reportes y Documentos**: Generación automática de certificados en PDF y reportes en Excel.
-* **Seguridad**: Autenticación mediante JWT y control de acceso basado en roles.
-* **Documentación API**: Integración con Swagger para documentación interactiva de endpoints.
+---
+
+## REQUISITOS DEL SISTEMA
+
+### Para Producción (Servidor)
+- Servidor Linux (Ubuntu 20.04 LTS o superior)
+- Docker Engine 20.10+
+- Docker Compose 2.0+
+- 4GB RAM mínimo (8GB recomendado)
+- 20GB espacio libre en disco
+- Acceso SSH para administración
+
+### Para Desarrollo Local
+- Node.js v18 o superior
+- PostgreSQL 15+
+- Docker & Docker Compose (opcional)
+- Git para control de versiones
+
+### Para el Servidor (Producción)
+
+- **Servidor Linux** (Ubuntu 20.04+ recomendado)
+- **Docker Engine** 20.10 o superior
+- **Docker Compose** 2.0 o superior  
+- **4GB RAM mínimo** (8GB recomendado)
+- **20GB espacio en disco** (para datos y backups)
+- **Acceso SSH** al servidor para administración
+
+### Para Desarrollo Local
+
+- **Node.js** v18 o superior
+- **PostgreSQL** 15 o superior
+- **Docker** y **Docker Compose** (opcional)
+- **Git** para clonar el repositorio
+
+## 3. Características Principales
 
 ## Stack Tecnológico
 
@@ -51,7 +87,7 @@ npm install
 ```
 
 3. **Configurar Variables de Entorno**
-Crea un archivo `.env` en la raíz del proyecto basándote en el siguiente ejemplo:
+   Crea un archivo `.env` en la raíz del proyecto basándote en el siguiente ejemplo:
 
 ```env
 NODE_ENV=development
@@ -83,8 +119,8 @@ VERBOSE_LOGGING=true
 ```
 
 4. **Inicializar Base de Datos**
-para iniciar la base de datos tenemos que instalar en el equipo la herramienta DBeaver o cualquier otro cliente de base de datos para postgresql.
-aqui solo debemos levantar el contenedor de postgresql que se encuentra en el archivo docker-compose.yml con el comando
+   para iniciar la base de datos tenemos que instalar en el equipo la herramienta DBeaver o cualquier otro cliente de base de datos para postgresql.
+   aqui solo debemos levantar el contenedor de postgresql que se encuentra en el archivo docker-compose.yml con el comando
 
 ```bash
 docker-compose up -d
@@ -133,6 +169,7 @@ cp .env.example .env
 Edita el archivo `.env` y configura las variables necesarias:
 
 **Variables críticas:**
+
 - `DB_HOST=postgres` (⚠️ en Docker usar nombre del servicio, no localhost)
 - `DB_PASSWORD` - Contraseña segura para PostgreSQL
 - `JWT_SECRET` - Mínimo 32 caracteres (generar con `openssl rand -base64 32`)
@@ -300,6 +337,7 @@ cp .env.example .env
 Edita el archivo `.env` y configura las variables necesarias:
 
 **Variables críticas:**
+
 - `DB_HOST=postgres` (en Docker usar nombre del servicio)
 - `DB_PASSWORD` - Contraseña segura para PostgreSQL
 - `JWT_SECRET` - Mínimo 32 caracteres (generar con `openssl rand -base64 32`)

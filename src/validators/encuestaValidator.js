@@ -13,14 +13,12 @@ export const validarEncuesta = [
     .isLength({ min: 2, max: 200 })
     .withMessage('El apellido familiar debe tener entre 2 y 200 caracteres'),
   body('informacionGeneral.direccion')
-    .notEmpty()
-    .withMessage('La dirección es requerida')
+    .optional({ nullable: true, checkFalsy: true })
     .isLength({ max: 255 })
     .withMessage('La dirección no puede exceder 255 caracteres'),
   body('informacionGeneral.telefono')
-    .notEmpty()
-    .withMessage('El teléfono es requerido')
-    .matches(/^[0-9+\-\s()]+$/)
+    .optional({ nullable: true, checkFalsy: true })
+    .matches(/^[0-9+\-\s()]*$/)
     .withMessage('El teléfono debe contener solo números y caracteres válidos'),
   body('informacionGeneral.numero_contrato_epm')
     .notEmpty()

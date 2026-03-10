@@ -2698,6 +2698,30 @@ export const crearEncuesta = async (req, res) => {
     
     const tamanioFamiliaCalculado = Math.max(1, (familyMembers.length || 0) + (deceasedMembers.length || 0));
     
+    // 🔍 DEBUG: Ver qué está enviando el frontend
+    console.log('🌍 DEBUG - Datos geográficos recibidos del frontend:');
+    console.log('  sector:', JSON.stringify(informacionGeneral.sector));
+    console.log('  vereda:', JSON.stringify(informacionGeneral.vereda));
+    console.log('  municipio:', JSON.stringify(informacionGeneral.municipio));
+    console.log('  parroquia:', JSON.stringify(informacionGeneral.parroquia));
+    
+    // ⭐ FUNCIÓN AUXILIAR: Validar IDs geográficos para evitar valores por defecto del frontend
+    const validarIdGeografico = (campo) => {
+      // Si no existe el campo o no tiene id, retornar null
+      if (!campo || !campo.id) return null;
+      
+      const id = safeParseInt(campo.id);
+      
+      // Si el ID es null o 0, no guardarlo (el frontend envía estos valores por defecto)
+      if (!id || id === 0) return null;
+      
+      // Si hay nombre pero no se ha seleccionado explícitamente, ignorar
+      // (el frontend a veces pre-carga el primer elemento)
+      if (campo.id === '0' || campo.id === 0) return null;
+      
+      return id;
+    };
+    
     const familiaData = {
       apellido_familiar: informacionGeneral.apellido_familiar,
       sector: (typeof informacionGeneral.sector === 'object' && informacionGeneral.sector !== null) 
@@ -2722,10 +2746,10 @@ export const crearEncuesta = async (req, res) => {
       id_usuario_creador: req.user?.id || null, // ID del usuario que crea la encuesta
       id_municipio: safeParseInt(informacionGeneral.municipio?.id),
       id_parroquia: safeParseInt(informacionGeneral.parroquia?.id),
-      id_vereda: safeParseInt(informacionGeneral.vereda?.id),
-      id_sector: safeParseInt(informacionGeneral.sector?.id),
-      id_corregimiento: safeParseInt(informacionGeneral.corregimiento?.id),
-      id_centro_poblado: safeParseInt(informacionGeneral.centro_poblado?.id),
+      id_vereda: validarIdGeografico(informacionGeneral.vereda),  // ⚠️ Validación mejorada
+      id_sector: validarIdGeografico(informacionGeneral.sector),   // ⚠️ Validación mejorada
+      id_corregimiento: validarIdGeografico(informacionGeneral.corregimiento),
+      id_centro_poblado: validarIdGeografico(informacionGeneral.centro_poblado),
       
       // ⭐ SOPORTE v2.0: comunionEnCasa puede venir en informacionGeneral O en cualquier miembro (solicitudComunionCasa)
       comunionEnCasa: informacionGeneral.comunionEnCasa || 
@@ -2749,6 +2773,15 @@ export const crearEncuesta = async (req, res) => {
       observaciones_encuestador: observaciones?.observaciones_encuestador || null,
       autorizacion_datos: observaciones?.autorizacion_datos || false
     };
+
+    // 🔍 DEBUG: Ver qué valores se van a guardar después de la validación
+    console.log('💾 DEBUG - Valores geográficos a guardar en BD:');
+    console.log('  id_municipio:', familiaData.id_municipio);
+    console.log('  id_parroquia:', familiaData.id_parroquia);
+    console.log('  id_vereda:', familiaData.id_vereda);
+    console.log('  id_sector:', familiaData.id_sector);
+    console.log('  id_corregimiento:', familiaData.id_corregimiento);
+    console.log('  id_centro_poblado:', familiaData.id_centro_poblado);
 
     console.log('🔍 DEBUG familiaData.sustento_familia:', familiaData.sustento_familia);
     console.log('🔍 DEBUG familiaData.observaciones_encuestador:', familiaData.observaciones_encuestador);

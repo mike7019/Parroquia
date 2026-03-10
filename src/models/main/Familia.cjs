@@ -83,11 +83,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     address: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
       field: 'direccion_familia', // Mapeo al campo existente
-      validate: {
-        notEmpty: true
-      }
     },
     phone: {
       type: DataTypes.STRING(20),
