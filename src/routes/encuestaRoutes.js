@@ -993,8 +993,6 @@ router.delete('/:id',
  *       
  *       **Campos requeridos:**
  *       - apellido_familiar (obligatorio)
- *       - sector (obligatorio)
- *       - direccion_familia (obligatorio)
  *       
  *       **Características:**
  *       - Actualización completa de todos los campos
@@ -1019,8 +1017,6 @@ router.delete('/:id',
  *             type: object
  *             required:
  *               - apellido_familiar
- *               - sector
- *               - direccion_familia
  *             properties:
  *               apellido_familiar:
  *                 type: string
@@ -1028,11 +1024,11 @@ router.delete('/:id',
  *                 example: "Rodríguez García"
  *               sector:
  *                 type: string
- *                 description: Sector donde vive la familia (requerido)
+ *                 description: Sector donde vive la familia (opcional)
  *                 example: "Centro"
  *               direccion_familia:
  *                 type: string
- *                 description: Dirección de residencia (requerido)
+                 description: Dirección de residencia (opcional)
  *                 example: "Carrera 45 # 23-67"
  *               numero_contacto:
  *                 type: string

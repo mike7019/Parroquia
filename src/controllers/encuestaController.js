@@ -2724,11 +2724,17 @@ export const crearEncuesta = async (req, res) => {
     
     const familiaData = {
       apellido_familiar: informacionGeneral.apellido_familiar,
-      sector: (typeof informacionGeneral.sector === 'object' && informacionGeneral.sector !== null) 
-        ? (informacionGeneral.sector.nombre || 'General') 
-        : (informacionGeneral.sector || 'General'),
-      direccion_familia: informacionGeneral.direccion,
-      telefono: informacionGeneral.telefono,
+      // Si no se envía sector o viene null/vacío, se guarda como null (sin valor por defecto)
+      sector: (typeof informacionGeneral.sector === 'object' && informacionGeneral.sector !== null)
+        ? (informacionGeneral.sector.nombre || null)
+        : (informacionGeneral.sector || null),
+      // Dirección y teléfono pueden venir nulos o vacíos; en BD se guardan como null
+      direccion_familia: informacionGeneral.direccion && informacionGeneral.direccion.toString().trim()
+        ? informacionGeneral.direccion.toString().trim()
+        : null,
+      telefono: informacionGeneral.telefono && informacionGeneral.telefono.toString().trim()
+        ? informacionGeneral.telefono.toString().trim()
+        : null,
       email: informacionGeneral.email || null,
       tamaño_familia: tamanioFamiliaCalculado,
       // Campo de texto legacy - solo si es string, no objeto
@@ -2744,8 +2750,9 @@ export const crearEncuesta = async (req, res) => {
       tutor_responsable: null,
       numero_contrato_epm: informacionGeneral.numero_contrato_epm || null,
       id_usuario_creador: req.user?.id || null, // ID del usuario que crea la encuesta
-      id_municipio: safeParseInt(informacionGeneral.municipio?.id),
-      id_parroquia: safeParseInt(informacionGeneral.parroquia?.id),
+      // Datos geográficos: si vienen null, vacíos o con id 0, quedan en null
+      id_municipio: validarIdGeografico(informacionGeneral.municipio),
+      id_parroquia: validarIdGeografico(informacionGeneral.parroquia),
       id_vereda: validarIdGeografico(informacionGeneral.vereda),  // ⚠️ Validación mejorada
       id_sector: validarIdGeografico(informacionGeneral.sector),   // ⚠️ Validación mejorada
       id_corregimiento: validarIdGeografico(informacionGeneral.corregimiento),

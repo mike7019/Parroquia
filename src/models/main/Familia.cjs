@@ -76,10 +76,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     sector: {
       type: DataTypes.STRING(100),
-      allowNull: false,
-      validate: {
-        notEmpty: true
-      }
+      allowNull: true
     },
     address: {
       type: DataTypes.STRING(255),
