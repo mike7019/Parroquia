@@ -46,12 +46,6 @@ class EncuestaValidationMiddleware {
         if (!informacionGeneral.apellido_familiar) {
           errores.push({ field: 'apellido_familiar', message: 'El apellido familiar es requerido' });
         }
-        if (!informacionGeneral.direccion) {
-          errores.push({ field: 'direccion', message: 'La dirección es requerida' });
-        }
-        if (!informacionGeneral.telefono) {
-          errores.push({ field: 'telefono', message: 'El teléfono es requerido' });
-        }
       }
 
       if (errores.length > 0) {
