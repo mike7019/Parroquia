@@ -3464,6 +3464,36 @@ const swaggerConfig = {
             }
           }
         },
+        BadRequest: {
+          description: 'Solicitud inválida o parámetros incorrectos',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/ErrorResponse'
+              },
+              example: {
+                status: 'error',
+                message: 'Solicitud inválida o parámetros incorrectos',
+                code: 'BAD_REQUEST'
+              }
+            }
+          }
+        },
+        NotFound: {
+          description: 'Recurso no encontrado',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/ErrorResponse'
+              },
+              example: {
+                status: 'error',
+                message: 'Recurso no encontrado',
+                code: 'NOT_FOUND'
+              }
+            }
+          }
+        },
         NotFoundError: {
           description: 'Recurso no encontrado',
           content: {
