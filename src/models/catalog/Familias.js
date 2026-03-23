@@ -14,11 +14,11 @@ const Familias = sequelize.define('Familias', {
   },
   sector: {
     type: DataTypes.STRING(100),
-    allowNull: false
+    allowNull: true
   },
   direccion_familia: {
     type: DataTypes.STRING(255),
-    allowNull: false
+    allowNull: true
   },
   numero_contacto: {
     type: DataTypes.STRING(20),
