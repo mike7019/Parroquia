@@ -205,15 +205,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     direccion: {
       type: DataTypes.STRING(255),
-      allowNull: false,
-      validate: {
-        notNull: {
-          msg: 'La dirección es requerida'
-        },
-        notEmpty: {
-          msg: 'La dirección no puede estar vacía'
-        }
-      }
+      allowNull: true
     },
     id_familia_familias: {
       type: DataTypes.BIGINT,

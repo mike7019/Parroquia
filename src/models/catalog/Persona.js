@@ -55,7 +55,7 @@ const Persona = sequelize.define('Persona', {
   },
   direccion: {
     type: DataTypes.STRING(255),
-    allowNull: false
+    allowNull: true
   },
   id_familia_familias: {
     type: DataTypes.BIGINT,
