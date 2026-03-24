@@ -1028,7 +1028,7 @@ router.delete('/:id',
  *                 example: "Centro"
  *               direccion_familia:
  *                 type: string
-                 description: Dirección de residencia (opcional)
+ *                 description: Dirección de residencia (opcional)
  *                 example: "Carrera 45 # 23-67"
  *               numero_contacto:
  *                 type: string
