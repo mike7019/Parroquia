@@ -32,13 +32,21 @@ class DestrezaController {
 
       const resultado = await destrezaService.getAllDestrezas(options);
 
-      res.status(200).json(resultado);
+      const status = resultado.exito ? 'success' : 'error';
+
+      res.status(200).json({
+        status,
+        message: resultado.mensaje,
+        data: resultado.datos,
+        paginacion: resultado.paginacion,
+        filtros: resultado.filtros
+      });
 
     } catch (error) {
       console.error('Error en getAllDestrezas:', error);
       res.status(500).json({
-        exito: false,
-        mensaje: 'Error interno del servidor',
+        status: 'error',
+        message: 'Error interno del servidor',
         error: error.message
       });
     }
@@ -58,17 +66,20 @@ class DestrezaController {
         includePersonas.toLowerCase() === 'true'
       );
 
-      if (!resultado.exito) {
-        return res.status(404).json(resultado);
-      }
+      const status = resultado.exito ? 'success' : 'error';
+      const httpStatus = resultado.exito ? 200 : 404;
 
-      res.status(200).json(resultado);
+      return res.status(httpStatus).json({
+        status,
+        message: resultado.mensaje,
+        data: resultado.datos
+      });
 
     } catch (error) {
       console.error('Error en getDestrezaById:', error);
       res.status(500).json({
-        exito: false,
-        mensaje: 'Error interno del servidor',
+        status: 'error',
+        message: 'Error interno del servidor',
         error: error.message
       });
     }
@@ -85,10 +96,18 @@ class DestrezaController {
       const resultado = await destrezaService.createDestreza(destrezaData);
 
       if (!resultado.exito) {
-        return res.status(400).json(resultado);
+        return res.status(400).json({
+          status: 'error',
+          message: resultado.mensaje,
+          data: resultado.datos
+        });
       }
 
-      res.status(201).json(resultado);
+      res.status(201).json({
+        status: 'success',
+        message: resultado.mensaje,
+        data: resultado.datos
+      });
 
     } catch (error) {
       console.error('Error en createDestreza:', error);
@@ -96,15 +115,15 @@ class DestrezaController {
       // Manejar errores de validación
       if (error.message.includes('validación') || error.message.includes('requerido')) {
         return res.status(400).json({
-          exito: false,
-          mensaje: 'Datos de entrada inválidos',
+          status: 'error',
+          message: 'Datos de entrada inválidos',
           error: error.message
         });
       }
 
       res.status(500).json({
-        exito: false,
-        mensaje: 'Error interno del servidor',
+        status: 'error',
+        message: 'Error interno del servidor',
         error: error.message
       });
     }
@@ -123,25 +142,33 @@ class DestrezaController {
 
       if (!resultado.exito) {
         const statusCode = resultado.mensaje.includes('no encontrada') ? 404 : 400;
-        return res.status(statusCode).json(resultado);
+        return res.status(statusCode).json({
+          status: 'error',
+          message: resultado.mensaje,
+          data: resultado.datos
+        });
       }
 
-      res.status(200).json(resultado);
+      res.status(200).json({
+        status: 'success',
+        message: resultado.mensaje,
+        data: resultado.datos
+      });
 
     } catch (error) {
       console.error('Error en updateDestreza:', error);
       
       if (error.message.includes('validación') || error.message.includes('requerido')) {
         return res.status(400).json({
-          exito: false,
-          mensaje: 'Datos de entrada inválidos',
+          status: 'error',
+          message: 'Datos de entrada inválidos',
           error: error.message
         });
       }
 
       res.status(500).json({
-        exito: false,
-        mensaje: 'Error interno del servidor',
+        status: 'error',
+        message: 'Error interno del servidor',
         error: error.message
       });
     }
@@ -159,16 +186,24 @@ class DestrezaController {
 
       if (!resultado.exito) {
         const statusCode = resultado.mensaje.includes('no encontrada') ? 404 : 400;
-        return res.status(statusCode).json(resultado);
+        return res.status(statusCode).json({
+          status: 'error',
+          message: resultado.mensaje,
+          data: resultado.datos
+        });
       }
 
-      res.status(200).json(resultado);
+      res.status(200).json({
+        status: 'success',
+        message: resultado.mensaje,
+        data: resultado.datos
+      });
 
     } catch (error) {
       console.error('Error en deleteDestreza:', error);
       res.status(500).json({
-        exito: false,
-        mensaje: 'Error interno del servidor',
+        status: 'error',
+        message: 'Error interno del servidor',
         error: error.message
       });
     }
@@ -185,22 +220,28 @@ class DestrezaController {
 
       const resultado = await destrezaService.searchDestrezas(termino, parseInt(limite));
 
-      res.status(200).json(resultado);
+      res.status(200).json({
+        status: 'success',
+        message: resultado.mensaje,
+        data: resultado.datos,
+        total: resultado.total,
+        termino: resultado.termino
+      });
 
     } catch (error) {
       console.error('Error en searchDestrezas:', error);
       
       if (error.message.includes('requerido')) {
         return res.status(400).json({
-          exito: false,
-          mensaje: 'Parámetros de búsqueda inválidos',
+          status: 'error',
+          message: 'Parámetros de búsqueda inválidos',
           error: error.message
         });
       }
 
       res.status(500).json({
-        exito: false,
-        mensaje: 'Error interno del servidor',
+        status: 'error',
+        message: 'Error interno del servidor',
         error: error.message
       });
     }
@@ -214,13 +255,17 @@ class DestrezaController {
     try {
       const resultado = await destrezaService.getDestrezasStats();
 
-      res.status(200).json(resultado);
+      res.status(200).json({
+        status: 'success',
+        message: resultado.mensaje,
+        data: resultado.datos
+      });
 
     } catch (error) {
       console.error('Error en getDestrezasStats:', error);
       res.status(500).json({
-        exito: false,
-        mensaje: 'Error interno del servidor',
+        status: 'error',
+        message: 'Error interno del servidor',
         error: error.message
       });
     }
@@ -236,17 +281,20 @@ class DestrezaController {
 
       const resultado = await destrezaService.getDestrezasByPersona(parseInt(idPersona));
 
-      if (!resultado.exito) {
-        return res.status(404).json(resultado);
-      }
+      const status = resultado.exito ? 'success' : 'error';
+      const httpStatus = resultado.exito ? 200 : 404;
 
-      res.status(200).json(resultado);
+      return res.status(httpStatus).json({
+        status,
+        message: resultado.mensaje,
+        data: resultado.datos
+      });
 
     } catch (error) {
       console.error('Error en getDestrezasByPersona:', error);
       res.status(500).json({
-        exito: false,
-        mensaje: 'Error interno del servidor',
+        status: 'error',
+        message: 'Error interno del servidor',
         error: error.message
       });
     }
@@ -268,16 +316,24 @@ class DestrezaController {
 
       if (!resultado.exito) {
         const statusCode = resultado.mensaje.includes('no encontrada') ? 404 : 400;
-        return res.status(statusCode).json(resultado);
+        return res.status(statusCode).json({
+          status: 'error',
+          message: resultado.mensaje,
+          data: resultado.datos
+        });
       }
 
-      res.status(200).json(resultado);
+      res.status(200).json({
+        status: 'success',
+        message: resultado.mensaje,
+        data: resultado.datos
+      });
 
     } catch (error) {
       console.error('Error en asociarDestrezaPersona:', error);
       res.status(500).json({
-        exito: false,
-        mensaje: 'Error interno del servidor',
+        status: 'error',
+        message: 'Error interno del servidor',
         error: error.message
       });
     }
@@ -299,16 +355,24 @@ class DestrezaController {
 
       if (!resultado.exito) {
         const statusCode = resultado.mensaje.includes('no encontrada') ? 404 : 400;
-        return res.status(statusCode).json(resultado);
+        return res.status(statusCode).json({
+          status: 'error',
+          message: resultado.mensaje,
+          data: resultado.datos
+        });
       }
 
-      res.status(200).json(resultado);
+      res.status(200).json({
+        status: 'success',
+        message: resultado.mensaje,
+        data: resultado.datos
+      });
 
     } catch (error) {
       console.error('Error en desasociarDestrezaPersona:', error);
       res.status(500).json({
-        exito: false,
-        mensaje: 'Error interno del servidor',
+        status: 'error',
+        message: 'Error interno del servidor',
         error: error.message
       });
     }

@@ -79,13 +79,13 @@ const router = express.Router();
  *     DestrezasResponse:
  *       type: object
  *       properties:
- *         exito:
- *           type: boolean
- *           example: true
- *         mensaje:
+ *         status:
+ *           type: string
+ *           example: "success"
+ *         message:
  *           type: string
  *           example: "Destrezas obtenidas exitosamente"
- *         datos:
+ *         data:
  *           type: array
  *           items:
  *             $ref: '#/components/schemas/Destreza'
@@ -286,13 +286,13 @@ router.get('/stats', authMiddleware.authenticateToken, destrezaController.getDes
  *             schema:
  *               type: object
  *               properties:
- *                 exito:
- *                   type: boolean
- *                   example: true
- *                 mensaje:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 message:
  *                   type: string
  *                   example: "Búsqueda completada. 3 resultado(s) encontrado(s)"
- *                 datos:
+ *                 data:
  *                   type: array
  *                   items:
  *                     type: object
@@ -333,13 +333,13 @@ router.get('/search/:termino', authMiddleware.authenticateToken, destrezaControl
  *             schema:
  *               type: object
  *               properties:
- *                 exito:
- *                   type: boolean
- *                   example: true
- *                 mensaje:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 message:
  *                   type: string
  *                   example: "Destrezas de la persona obtenidas exitosamente"
- *                 datos:
+ *                 data:
  *                   type: object
  *                   properties:
  *                     persona:
@@ -384,13 +384,13 @@ router.get('/persona/:idPersona', authMiddleware.authenticateToken, destrezaCont
  *             schema:
  *               type: object
  *               properties:
- *                 exito:
- *                   type: boolean
- *                   example: true
- *                 mensaje:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 message:
  *                   type: string
  *                   example: "Destreza obtenida exitosamente"
- *                 datos:
+ *                 data:
  *                   $ref: '#/components/schemas/Destreza'
  *       404:
  *         $ref: '#/components/responses/NotFound'
@@ -433,13 +433,13 @@ router.get('/:id', authMiddleware.authenticateToken, destrezaController.getDestr
  *             schema:
  *               type: object
  *               properties:
- *                 exito:
- *                   type: boolean
- *                   example: true
- *                 mensaje:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 message:
  *                   type: string
  *                   example: "Destreza creada exitosamente"
- *                 datos:
+ *                 data:
  *                   $ref: '#/components/schemas/Destreza'
  *       400:
  *         $ref: '#/components/responses/BadRequest'
@@ -482,13 +482,13 @@ router.post('/', authMiddleware.authenticateToken,
  *             schema:
  *               type: object
  *               properties:
- *                 exito:
- *                   type: boolean
- *                   example: true
- *                 mensaje:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 message:
  *                   type: string
  *                   example: "Destreza asociada exitosamente a la persona"
- *                 datos:
+ *                 data:
  *                   type: object
  *                   properties:
  *                     persona:
@@ -543,13 +543,13 @@ router.post('/persona/:idPersona/asociar', authMiddleware.authenticateToken,
  *             schema:
  *               type: object
  *               properties:
- *                 exito:
- *                   type: boolean
- *                   example: true
- *                 mensaje:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 message:
  *                   type: string
  *                   example: "Destreza actualizada exitosamente"
- *                 datos:
+ *                 data:
  *                   $ref: '#/components/schemas/Destreza'
  *       400:
  *         $ref: '#/components/responses/BadRequest'
@@ -583,13 +583,13 @@ router.put('/:id', authMiddleware.authenticateToken,
  *             schema:
  *               type: object
  *               properties:
- *                 exito:
- *                   type: boolean
- *                   example: true
- *                 mensaje:
+ *                 status:
+                   type: string
+ *                   example: "success"
+ *                 message:
  *                   type: string
  *                   example: "Destreza eliminada exitosamente"
- *                 datos:
+ *                 data:
  *                   type: object
  *                   properties:
  *                     id_destreza:
@@ -603,13 +603,13 @@ router.put('/:id', authMiddleware.authenticateToken,
  *             schema:
  *               type: object
  *               properties:
- *                 exito:
- *                   type: boolean
- *                   example: false
- *                 mensaje:
+ *                 status:
+ *                   type: string
+ *                   example: "error"
+ *                 message:
  *                   type: string
  *                   example: "No se puede eliminar la destreza porque tiene 3 persona(s) asociada(s)"
- *                 datos:
+ *                 data:
  *                   type: object
  *                   properties:
  *                     personasAsociadas:
@@ -655,13 +655,13 @@ router.delete('/:id', authMiddleware.authenticateToken,
  *             schema:
  *               type: object
  *               properties:
- *                 exito:
- *                   type: boolean
- *                   example: true
- *                 mensaje:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 message:
  *                   type: string
  *                   example: "Destreza desasociada exitosamente de la persona"
- *                 datos:
+ *                 data:
  *                   type: object
  *                   properties:
  *                     persona:

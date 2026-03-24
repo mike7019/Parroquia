@@ -15,7 +15,7 @@ const router = express.Router();
  * /api/users:
  *   get:
  *     summary: Obtener todos los usuarios activos
- *     description: Recupera una lista de todos los usuarios activos del sistema (solo administradores)
+ *     description: Recupera una lista de todos los usuarios activos del sistema
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -43,10 +43,9 @@ const router = express.Router();
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-// GET /api/users - Get all active users (Admin only)
+// GET /api/users - Get all active users (any authenticated user)
 router.get('/', 
   AuthMiddleware.authenticateToken,
-  AuthMiddleware.requireRole(['admin']),
   UserController.getAllUsers
 );
 
