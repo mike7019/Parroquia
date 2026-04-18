@@ -22,11 +22,11 @@ const swaggerConfig = {
     },
     servers: [
       {
-        url: process.env.API_URL || 'http://localhost:3000',
+        url: process.env.API_URL || 'http://localhost:4000',
         description: '🖥️ Servidor de Desarrollo Local'
       },
       {
-        url: 'http://206.62.139.100:3000',
+        url: 'http://206.62.139.100:4000',
         description: '🌐 Servidor de Desarrollo'
       },
       {

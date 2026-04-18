@@ -212,7 +212,7 @@ export const swaggerUiOptions = {
     showMutatedRequest: true,
     supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
     validatorUrl: null, // Disable online validation
-    oauth2RedirectUrl: `${process.env.API_URL || 'http://localhost:3000'}/api-docs/oauth2-redirect.html`
+    oauth2RedirectUrl: `${process.env.API_URL || 'http://localhost:4000'}/api-docs/oauth2-redirect.html`
   }
 };
 

@@ -64,7 +64,7 @@ RUN mkdir -p logs temp uploads && \
 
 # Set environment variables for production
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=4000
 ENV PM2_PUBLIC_KEY=""
 ENV PM2_SECRET_KEY=""
 
@@ -72,12 +72,12 @@ ENV PM2_SECRET_KEY=""
 USER nodejs
 
 # Expose application port
-EXPOSE 3000
+EXPOSE 4000
 
 # Health check with improved reliability
 HEALTHCHECK --interval=30s --timeout=15s --start-period=120s --retries=3 \
-    CMD curl -f http://localhost:3000/api/health || \
-        node -e "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"
+    CMD curl -f http://localhost:4000/api/health || \
+        node -e "require('http').get('http://localhost:4000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"
 
 # Use dumb-init for proper signal handling
 ENTRYPOINT ["dumb-init", "--"]

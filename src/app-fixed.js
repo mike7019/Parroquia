@@ -27,7 +27,7 @@ import {
 import { setupSwagger } from './config/swagger.js';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 // Trust proxy for rate limiting and security
 app.set('trust proxy', true);
