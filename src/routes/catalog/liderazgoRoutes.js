@@ -1,7 +1,6 @@
 import express from 'express';
 import liderazgoController from '../../controllers/catalog/liderazgoController.js';
-import authMiddleware from '../../middlewares/authMiddleware.js';
-import { requireRole } from '../../middlewares/roleMiddleware.js';
+import authMiddleware from '../../middlewares/auth.js';
 
 const router = express.Router();
 
@@ -218,7 +217,7 @@ router.get('/persona/:idPersona', authMiddleware.authenticateToken, (req, res) =
  *       404:
  *         description: Persona o tipo de liderazgo no encontrado
  */
-router.post('/persona/:idPersona', authMiddleware.authenticateToken, requireRole(['Administrador']), (req, res) => liderazgoController.asociarPersonaLiderazgo(req, res));
+router.post('/persona/:idPersona', authMiddleware.authenticateToken, authMiddleware.requireRole(['Administrador']), (req, res) => liderazgoController.asociarPersonaLiderazgo(req, res));
 
 /**
  * @swagger
@@ -246,7 +245,7 @@ router.post('/persona/:idPersona', authMiddleware.authenticateToken, requireRole
  *       404:
  *         description: Asociación no encontrada
  */
-router.delete('/persona/:idPersona/:idTipoLiderazgo', authMiddleware.authenticateToken, requireRole(['Administrador']), (req, res) => liderazgoController.desasociarPersonaLiderazgo(req, res));
+router.delete('/persona/:idPersona/:idTipoLiderazgo', authMiddleware.authenticateToken, authMiddleware.requireRole(['Administrador']), (req, res) => liderazgoController.desasociarPersonaLiderazgo(req, res));
 
 /**
  * @swagger
@@ -318,7 +317,7 @@ router.get('/:id', authMiddleware.authenticateToken, (req, res) => liderazgoCont
  *       409:
  *         description: Ya existe un tipo de liderazgo con ese nombre
  */
-router.post('/', authMiddleware.authenticateToken, requireRole(['Administrador']), (req, res) => liderazgoController.createTipoLiderazgo(req, res));
+router.post('/', authMiddleware.authenticateToken, authMiddleware.requireRole(['Administrador']), (req, res) => liderazgoController.createTipoLiderazgo(req, res));
 
 /**
  * @swagger
@@ -359,7 +358,7 @@ router.post('/', authMiddleware.authenticateToken, requireRole(['Administrador']
  *       409:
  *         description: Nombre duplicado
  */
-router.put('/:id', authMiddleware.authenticateToken, requireRole(['Administrador']), (req, res) => liderazgoController.updateTipoLiderazgo(req, res));
+router.put('/:id', authMiddleware.authenticateToken, authMiddleware.requireRole(['Administrador']), (req, res) => liderazgoController.updateTipoLiderazgo(req, res));
 
 /**
  * @swagger
@@ -384,7 +383,7 @@ router.put('/:id', authMiddleware.authenticateToken, requireRole(['Administrador
  *       409:
  *         description: No se puede eliminar, tiene personas activas asociadas
  */
-router.delete('/:id', authMiddleware.authenticateToken, requireRole(['Administrador']), (req, res) => liderazgoController.deleteTipoLiderazgo(req, res));
+router.delete('/:id', authMiddleware.authenticateToken, authMiddleware.requireRole(['Administrador']), (req, res) => liderazgoController.deleteTipoLiderazgo(req, res));
 
 /**
  * @swagger
