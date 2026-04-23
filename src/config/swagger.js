@@ -1339,6 +1339,94 @@ const swaggerConfig = {
             }
           }
         },
+        TipoLiderazgo: {
+          type: 'object',
+          properties: {
+            id_tipo_liderazgo: {
+              type: 'integer',
+              description: 'ID único del tipo de liderazgo',
+              example: 1
+            },
+            nombre: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre del tipo de liderazgo',
+              example: 'Comunitario'
+            },
+            descripcion: {
+              type: 'string',
+              nullable: true,
+              description: 'Descripción del tipo de liderazgo',
+              example: 'Liderazgo en actividades y organizaciones comunitarias'
+            },
+            activo: {
+              type: 'boolean',
+              description: 'Estado activo/inactivo del tipo de liderazgo',
+              example: true
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación',
+              example: '2025-10-07T10:00:00Z'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización',
+              example: '2025-10-07T10:00:00Z'
+            }
+          }
+        },
+        PersonaLiderazgo: {
+          type: 'object',
+          properties: {
+            id_persona_liderazgo: {
+              type: 'integer',
+              description: 'ID único de la relación persona-liderazgo',
+              example: 1
+            },
+            id_tipo_liderazgo: {
+              type: 'integer',
+              description: 'ID del tipo de liderazgo',
+              example: 1
+            },
+            tipo_liderazgo: {
+              type: 'string',
+              description: 'Nombre del tipo de liderazgo',
+              example: 'Comunitario'
+            },
+            descripcion_tipo: {
+              type: 'string',
+              nullable: true,
+              description: 'Descripción general del tipo de liderazgo',
+              example: 'Liderazgo en actividades y organizaciones comunitarias'
+            },
+            descripcion_especifica: {
+              type: 'string',
+              nullable: true,
+              description: 'Descripción específica del rol de liderazgo de la persona',
+              example: 'Presidente de la Junta de Acción Comunal'
+            },
+            activo: {
+              type: 'boolean',
+              description: 'Estado activo/inactivo de la asignación',
+              example: true
+            },
+            fecha_asignacion: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha en que se asignó el liderazgo',
+              example: '2025-10-07T10:00:00Z'
+            },
+            fecha_actualizacion: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización de la asignación',
+              example: '2025-10-07T10:00:00Z'
+            }
+          }
+        },
         CreateMunicipioRequest: {
           type: 'object',
           properties: {

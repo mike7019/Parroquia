@@ -36,6 +36,8 @@ import SituacionCivil from './catalog/SituacionCivil.js';
 import Estudio from './catalog/Estudio.js';
 import Talla from './catalog/Talla.js';
 import PersonaCelebracion from './catalog/PersonaCelebracion.js';
+import TipoLiderazgo from './catalog/TipoLiderazgo.js';
+import PersonaLiderazgo from './catalog/PersonaLiderazgo.js';
 
 // Create User alias for compatibility
 const User = Usuario;
@@ -64,7 +66,7 @@ try {
     TipoVivienda, Parentesco, SituacionCivil, Estudio, Talla, DifuntosFamilia,
     TipoDisposicionBasura, FamiliaDisposicionBasura, TipoAguasResiduales, 
     FamiliaSistemaAguasResiduales, ComunidadCultural, Destreza, Corregimientos, 
-    CentrosPoblados, PersonaCelebracion
+    CentrosPoblados, PersonaCelebracion, TipoLiderazgo, PersonaLiderazgo
   };
   // Ejecutar asociaciones de Corregimientos
   if (Corregimientos && typeof Corregimientos.associate === 'function') {
@@ -170,7 +172,9 @@ export default {
   Profesion,
   Corregimientos,
   CentrosPoblados,
-  PersonaCelebracion
+  PersonaCelebracion,
+  TipoLiderazgo,
+  PersonaLiderazgo
 };
 
 export {
@@ -205,5 +209,7 @@ export {
   Profesion,
   Corregimientos,
   CentrosPoblados,
-  PersonaCelebracion
+  PersonaCelebracion,
+  TipoLiderazgo,
+  PersonaLiderazgo
 };
