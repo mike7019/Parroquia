@@ -67,12 +67,7 @@ class LiderazgoService {
         const personas = await sequelize.query(`
           SELECT
             p.id_personas,
-            TRIM(CONCAT(
-              COALESCE(p.primer_nombre, ''), ' ',
-              COALESCE(p.segundo_nombre, ''), ' ',
-              COALESCE(p.primer_apellido, ''), ' ',
-              COALESCE(p.segundo_apellido, '')
-            )) as nombre_completo,
+            COALESCE(p.nombres, '') as nombre_completo,
             p.identificacion,
             pl.descripcion as descripcion_liderazgo,
             pl.activo as liderazgo_activo,
@@ -80,7 +75,7 @@ class LiderazgoService {
           FROM persona_liderazgo pl
           INNER JOIN personas p ON pl.id_persona = p.id_personas
           WHERE pl.id_tipo_liderazgo = :id AND pl.activo = TRUE
-          ORDER BY p.primer_apellido, p.primer_nombre
+          ORDER BY p.nombres
         `, { replacements: { id }, type: QueryTypes.SELECT });
 
         result.personas = personas;

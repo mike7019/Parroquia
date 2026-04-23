@@ -205,16 +205,8 @@ class PersonasService {
       const query = `
         SELECT
           p.id_personas,
-          TRIM(CONCAT(
-            COALESCE(p.primer_nombre, ''), ' ',
-            COALESCE(p.segundo_nombre, ''), ' ',
-            COALESCE(p.primer_apellido, ''), ' ',
-            COALESCE(p.segundo_apellido, '')
-          )) as nombre_completo,
-          p.primer_nombre,
-          p.segundo_nombre,
-          p.primer_apellido,
-          p.segundo_apellido,
+          COALESCE(p.nombres, '') as nombre_completo,
+          p.nombres,
           p.identificacion as documento,
           ti.nombre as tipo_identificacion,
           EXTRACT(YEAR FROM AGE(p.fecha_nacimiento))::integer as edad,
@@ -309,7 +301,7 @@ class PersonasService {
         LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
         LEFT JOIN tipos_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
         ${whereClause}
-        ORDER BY p.primer_apellido, p.segundo_apellido, p.primer_nombre
+        ORDER BY p.nombres
         LIMIT :limit OFFSET :offset
       `;
 
@@ -397,11 +389,7 @@ class PersonasService {
         { header: 'ID', key: 'id_personas', width: 8 },
         { header: 'Documento', key: 'documento', width: 15 },
         { header: 'Tipo ID', key: 'tipo_identificacion', width: 15 },
-        { header: 'Nombre Completo', key: 'nombre_completo', width: 35 },
-        { header: 'Primer Nombre', key: 'primer_nombre', width: 18 },
-        { header: 'Segundo Nombre', key: 'segundo_nombre', width: 18 },
-        { header: 'Primer Apellido', key: 'primer_apellido', width: 18 },
-        { header: 'Segundo Apellido', key: 'segundo_apellido', width: 18 },
+        { header: 'Nombre Completo', key: 'nombre_completo', width: 40 },
         { header: 'Edad', key: 'edad', width: 8 },
         { header: 'Fecha Nacimiento', key: 'fecha_nacimiento', width: 15 },
         { header: 'Sexo', key: 'sexo', width: 12 },
