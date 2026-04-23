@@ -66,7 +66,13 @@ class PersonasController {
         limit: req.query.limit ? parseInt(req.query.limit) : 10,
         apellido_familiar: req.query.apellido_familiar,
         id_tipo_vivienda: req.query.id_tipo_vivienda ? parseInt(req.query.id_tipo_vivienda) : undefined,
-        id_parentesco: req.query.id_parentesco ? parseInt(req.query.id_parentesco) : undefined
+        id_parentesco: req.query.id_parentesco ? parseInt(req.query.id_parentesco) : undefined,
+        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
+        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
+        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
+        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined
       };
 
       Object.keys(filtros).forEach(key => {
@@ -115,7 +121,13 @@ class PersonasController {
         id_nivel_educativo: req.query.id_nivel_educativo ? parseInt(req.query.id_nivel_educativo) : undefined,
         id_comunidad_cultural: req.query.id_comunidad_cultural ? parseInt(req.query.id_comunidad_cultural) : undefined,
         liderazgo: req.query.liderazgo,
-        id_destreza: req.query.id_destreza ? parseInt(req.query.id_destreza) : undefined
+        id_destreza: req.query.id_destreza ? parseInt(req.query.id_destreza) : undefined,
+        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
+        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
+        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
+        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined
       };
 
       Object.keys(filtros).forEach(key => {
@@ -164,6 +176,14 @@ class PersonasController {
         talla_camisa: req.query.talla_camisa,
         talla_pantalon: req.query.talla_pantalon,
         talla_zapato: req.query.talla_zapato,
+        
+        // Filtros geográficos
+        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
+        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
+        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
+        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
         
         // Filtros adicionales: edad
         edad_min: req.query.edad_min ? parseInt(req.query.edad_min) : undefined,
@@ -216,7 +236,13 @@ class PersonasController {
         page: req.query.page ? parseInt(req.query.page) : 1,
         limit: req.query.limit ? parseInt(req.query.limit) : 10,
         edad_min: req.query.edad_min ? parseInt(req.query.edad_min) : undefined,
-        edad_max: req.query.edad_max ? parseInt(req.query.edad_max) : undefined
+        edad_max: req.query.edad_max ? parseInt(req.query.edad_max) : undefined,
+        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
+        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
+        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
+        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined
       };
 
       Object.keys(filtros).forEach(key => {

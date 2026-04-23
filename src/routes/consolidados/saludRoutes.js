@@ -139,6 +139,12 @@ const router = express.Router();
  *         description: Filtrar por ID de sector
  *         example: 1
  *       - in: query
+ *         name: id_vereda
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de vereda
+ *         example: 1
+ *       - in: query
  *         name: id_corregimiento
  *         schema:
  *           type: integer
@@ -258,6 +264,21 @@ router.get('/estadisticas', authMiddleware.authenticateToken, saludConsolidadoCo
  *           type: integer
  *         description: Filtrar por ID de sector
  *       - in: query
+ *         name: id_vereda
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de vereda
+ *       - in: query
+ *         name: id_corregimiento
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de corregimiento
+ *       - in: query
+ *         name: id_centro_poblado
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de centro poblado
+ *       - in: query
  *         name: limite
  *         schema:
  *           type: integer
@@ -318,6 +339,21 @@ router.get('/reporte/excel', authMiddleware.authenticateToken, saludConsolidadoC
  *         schema:
  *           type: integer
  *         description: ID del sector
+ *       - in: query
+ *         name: id_vereda
+ *         schema:
+ *           type: integer
+ *         description: ID de la vereda
+ *       - in: query
+ *         name: id_corregimiento
+ *         schema:
+ *           type: integer
+ *         description: ID del corregimiento
+ *       - in: query
+ *         name: id_centro_poblado
+ *         schema:
+ *           type: integer
+ *         description: ID del centro poblado
  *       - in: query
  *         name: id_enfermedad
  *         schema:

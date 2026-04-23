@@ -1,4 +1,5 @@
 # 📘 MANUAL TÉCNICO - SISTEMA DE GESTIÓN PARROQUIAL
+
 ## Parroquia API - Guía Completa de Instalación y Despliegue
 
 ---
@@ -76,6 +77,7 @@
 ### 📝 Paso 1: Conectarse al Servidor
 
 ssh usuario@206.62.139.11
+
 # Cambiar 'usuario' y la IP según su servidor
 
 ---
@@ -86,6 +88,7 @@ curl http://localhost:3000/api/health
 
 # Resultado esperado (JSON):
 # {"status":"ok","timestamp":"2025-01-27T10:30:00.000Z"}
+
 ```
 
 ### ✅ Paso 5: Verificar Instalación
@@ -102,14 +105,10 @@ docker-compose ps
 
 # Ver logs (presionar Ctrl+C para salir)
 docker-compose logs -f
+
 ```
 
 ### 🚀 Paso 4: Construir e Iniciar Servicios
-
-```bash
-openssl rand -base64 32
-# Ejecutar 2 veces para JWT_SECRET y JWT_REFRESH_SECRET
-```
 
 💡 **Generar claves JWT seguras:**
 
@@ -141,12 +140,14 @@ SMTP_PASS=ykgg ogoc infr bjgl
 # FRONTEND
 FRONTEND_URL=http://localhost:8080
 CORS_ORIGIN=http://localhost:8080
+
 ```
 
 **Contenido mínimo requerido del archivo `.env`:**
 
 ```bash
 nano .env
+
 ```
 
 ### ⚙️ Paso 3: Configurar Variables de Entorno
@@ -165,6 +166,7 @@ sudo chown -R $USER:$USER parroquia-api
 
 # Entrar al directorio
 cd parroquia-api
+
 ```
 
 ### 📦 Paso 2: Clonar el Repositorio
@@ -180,17 +182,20 @@ Script automatizado que simplifica las actualizaciones del sistema. **Automatiza
 ✅ Reconstrucción de imágenes  
 ✅ Inicio de servicios actualizados  
 ✅ Ejecución de seeders de datos  
-✅ Verificación de estado del servicio  
+✅ Verificación de estado del servicio
 
 ### 📖 Cómo Usar el Script
 
 # Hacer el script ejecutable (solo primera vez)
+
 chmod +x deploy_from_git.sh
 
 # Ejecutar el despliegue automático
+
 ./deploy_from_git.sh
 
 ⚠️ **Recomendaciones:**
+
 - Ejecutar durante **horas de bajo uso** (preferible madrugada)
 - Tiempo aproximado: **5-10 minutos**
 - **Sin pérdida de datos** (PostgreSQL persiste en volúmenes)
@@ -211,6 +216,7 @@ Servicio está funcionando correctamente
 Despliegue completado exitosamente!
 Aplicación disponible en: http://206.62.139.11:3000
 Documentación Swagger: http://206.62.139.11:3000/api-docs
+
 ```
 
 ### 📊 Salida Esperada
@@ -229,12 +235,17 @@ Documentación Swagger: http://206.62.139.11:3000/api-docs
 ### 👤 Crear Primer Usuario Administrador
 
 # Ejecutar comando para crear administrador
+
 docker-compose exec api npm run admin:create
 
 # Seguir instrucciones interactivas:
+
 # Email: admin@parroquia.com
+
 # Nombre: Administrador
+
 # Apellido: Sistema
+
 # Contraseña: [escribir contraseña segura]
 
 ---
@@ -246,6 +257,7 @@ curl -X POST http://206.62.139.11:3000/api/auth/login \
     "email": "admin@parroquia.com",
     "password": "tu-contraseña-admin"
   }'
+
 ```
 
 ### 🧪 Probar el Login
@@ -255,50 +267,64 @@ curl -X POST http://206.62.139.11:3000/api/auth/login \
 ### 🐳 Comandos Docker Principales
 
 # Ver estado de contenedores
+
 docker-compose ps
 
 # Ver logs en tiempo real
+
 docker-compose logs -f
 
 # Ver logs solo de API
+
 docker-compose logs -f api
 
 # Ver logs solo de PostgreSQL
+
 docker-compose logs -f postgres
 
 # Ver últimas 50 líneas
+
 docker-compose logs --tail=50 api
 
 # Reiniciar todos los servicios
+
 docker-compose restart
 
 # Reiniciar solo API
+
 docker-compose restart api
 
 # Reiniciar solo PostgreSQL
+
 docker-compose restart postgres
 
 # Detener servicios (sin eliminar datos)
+
 docker-compose down
 
 # Detener y eliminar volúmenes (⚠️ BORRA LA BASE DE DATOS)
+
 docker-compose down -v
 
 ### 💾 Backup de Base de Datos
 
 # Crear backup con fecha y hora
+
 docker-compose exec postgres pg_dump -U parroquia_user parroquia_db > backup_$(date +%Y%m%d_%H%M%S).sql
 
 # Guardar en carpeta específica
+
 mkdir -p backups
 docker-compose exec postgres pg_dump -U parroquia_user parroquia_db > backups/backup_$(date +%Y%m%d_%H%M%S).sql
 
 ### 📥 Restaurar Desde Backup
 
 # Restaurar desde archivo backup
+
 docker-compose exec -T postgres psql -U parroquia_user parroquia_db < backups/backup_20250127_150000.sql
 
 # Verificar restauración
+
 docker-compose exec postgres psql -U parroquia_user -d parroquia_db -c "SELECT COUNT(*) FROM personas;"
 
 ---
@@ -318,6 +344,7 @@ docker system df
 
 # Limpiar imágenes no usadas
 docker image prune -a -f
+
 ```
 
 ### 🔧 Operaciones de Mantenimiento
@@ -331,12 +358,15 @@ docker image prune -a -f
 **Solución:**
 
 # Ver logs detallados
+
 docker-compose logs api | head -100
 
 # Verificar estado de PostgreSQL
+
 docker-compose ps postgres
 
 # Reiniciar API
+
 docker-compose restart api
 
 ### ❌ ERROR: "Cannot connect to database"
@@ -346,15 +376,19 @@ docker-compose restart api
 **Verificar:**
 
 # 1. Asegurar que DB_HOST sea "postgres" (no localhost)
+
 grep DB_HOST .env
 
 # 2. Verificar que PostgreSQL esté corriendo
+
 docker-compose ps postgres
 
 # 3. Ver logs de PostgreSQL
+
 docker-compose logs postgres
 
 # 4. Reiniciar ambos servicios
+
 docker-compose restart
 
 ### ❌ ERROR: "Port 3000 already in use"
@@ -364,12 +398,15 @@ docker-compose restart
 **Solución:**
 
 # Ver qué está usando el puerto
+
 sudo lsof -i :3000
 
 # Cambiar puerto en .env a 3001
+
 sed -i 's/PORT=3000/PORT=3001/' .env
 
 # Recrear contenedores
+
 docker-compose up -d
 
 ### ❌ ERROR: "Disco lleno"
@@ -379,15 +416,19 @@ docker-compose up -d
 **Solución:**
 
 # Ver uso de disco Docker
+
 docker system df
 
 # Limpiar imágenes no usadas
+
 docker image prune -a -f
 
 # Limpiar contenedores detenidos
+
 docker container prune -f
 
 # Limpiar todo (⚠️ CUIDADO)
+
 docker system prune -a
 
 ---

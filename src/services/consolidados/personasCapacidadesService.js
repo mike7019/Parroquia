@@ -26,6 +26,9 @@ class PersonasCapacidadesService {
         id_municipio,
         id_sector,
         id_vereda,
+        id_parroquia,
+        id_corregimiento,
+        id_centro_poblado,
         id_sexo,
         edad_min,
         edad_max,
@@ -59,6 +62,21 @@ class PersonasCapacidadesService {
       if (id_vereda) {
         whereConditions.push('v.id_vereda = :id_vereda');
         params.id_vereda = id_vereda;
+      }
+
+      if (id_parroquia) {
+        whereConditions.push('f.id_parroquia = :id_parroquia');
+        params.id_parroquia = id_parroquia;
+      }
+
+      if (id_corregimiento) {
+        whereConditions.push('f.id_corregimiento = :id_corregimiento');
+        params.id_corregimiento = id_corregimiento;
+      }
+
+      if (id_centro_poblado) {
+        whereConditions.push('f.id_centro_poblado = :id_centro_poblado');
+        params.id_centro_poblado = id_centro_poblado;
       }
 
       if (id_sexo) {

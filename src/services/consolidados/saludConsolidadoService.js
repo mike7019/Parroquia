@@ -66,6 +66,12 @@ class SaludConsolidadoService {
         params.id_sector = filtros.id_sector;
       }
       
+      // Filtrar por vereda (por ID)
+      if (filtros.id_vereda) {
+        whereConditions.push(`f.id_vereda = :id_vereda`);
+        params.id_vereda = filtros.id_vereda;
+      }
+      
       // Filtrar por corregimiento (ahora por ID)
       if (filtros.id_corregimiento) {
         whereConditions.push(`f.id_corregimiento = :id_corregimiento`);

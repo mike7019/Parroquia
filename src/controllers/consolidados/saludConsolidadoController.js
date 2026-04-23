@@ -15,6 +15,7 @@ class SaludConsolidadoController {
         id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
         id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
         id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
         id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
         id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
         limite: req.query.limite ? parseInt(req.query.limite) : 100
@@ -139,6 +140,7 @@ class SaludConsolidadoController {
         id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
         id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
         id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
         id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
         id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
         limite: req.query.limite ? parseInt(req.query.limite) : 5000 // Límite más alto para Excel
@@ -189,6 +191,7 @@ class SaludConsolidadoController {
         id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
         id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
         id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
         id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
         id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
         limite: req.query.limite ? parseInt(req.query.limite) : 5000 // Límite más alto para reporte

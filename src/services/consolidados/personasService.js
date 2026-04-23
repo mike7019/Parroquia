@@ -140,9 +140,9 @@ class PersonasService {
       if (id_destreza) {
         whereConditions.push(`
           EXISTS (
-            SELECT 1 FROM destrezas_personas dp
-            WHERE dp.id_persona = p.id_personas
-            AND dp.id_destreza = :id_destreza
+            SELECT 1 FROM persona_destreza dp
+            WHERE dp.id_personas_personas = p.id_personas
+            AND dp.id_destrezas_destrezas = :id_destreza
           )
         `);
         params.id_destreza = id_destreza;

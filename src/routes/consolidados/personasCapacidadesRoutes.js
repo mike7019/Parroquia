@@ -331,6 +331,21 @@ const router = express.Router();
  *         description: ID de la vereda
  *         example: 1
  *       - in: query
+ *         name: id_parroquia
+ *         schema:
+ *           type: integer
+ *         description: ID de la parroquia
+ *       - in: query
+ *         name: id_corregimiento
+ *         schema:
+ *           type: integer
+ *         description: ID del corregimiento
+ *       - in: query
+ *         name: id_centro_poblado
+ *         schema:
+ *           type: integer
+ *         description: ID del centro poblado
+ *       - in: query
  *         name: id_sexo
  *         schema:
  *           type: integer

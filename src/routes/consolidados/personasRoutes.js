@@ -199,6 +199,36 @@ router.get('/geografico', authMiddleware.authenticateToken, personasController.c
  *         description: ID del parentesco
  *         example: 1
  *       - in: query
+ *         name: id_parroquia
+ *         schema:
+ *           type: integer
+ *         description: ID de la parroquia
+ *       - in: query
+ *         name: id_municipio
+ *         schema:
+ *           type: integer
+ *         description: ID del municipio
+ *       - in: query
+ *         name: id_sector
+ *         schema:
+ *           type: integer
+ *         description: ID del sector
+ *       - in: query
+ *         name: id_vereda
+ *         schema:
+ *           type: integer
+ *         description: ID de la vereda
+ *       - in: query
+ *         name: id_corregimiento
+ *         schema:
+ *           type: integer
+ *         description: ID del corregimiento
+ *       - in: query
+ *         name: id_centro_poblado
+ *         schema:
+ *           type: integer
+ *         description: ID del centro poblado
+ *       - in: query
  *         name: page
  *         schema:
  *           type: integer
@@ -278,6 +308,36 @@ router.get('/familia', authMiddleware.authenticateToken, personasController.cons
  *           type: integer
  *         description: ID de la destreza
  *         example: 1
+ *       - in: query
+ *         name: id_municipio
+ *         schema:
+ *           type: integer
+ *         description: ID del municipio
+ *       - in: query
+ *         name: id_parroquia
+ *         schema:
+ *           type: integer
+ *         description: ID de la parroquia
+ *       - in: query
+ *         name: id_sector
+ *         schema:
+ *           type: integer
+ *         description: ID del sector
+ *       - in: query
+ *         name: id_vereda
+ *         schema:
+ *           type: integer
+ *         description: ID de la vereda
+ *       - in: query
+ *         name: id_corregimiento
+ *         schema:
+ *           type: integer
+ *         description: ID del corregimiento
+ *       - in: query
+ *         name: id_centro_poblado
+ *         schema:
+ *           type: integer
+ *         description: ID del centro poblado
  *       - in: query
  *         name: page
  *         schema:
@@ -365,6 +425,36 @@ router.get('/personal', authMiddleware.authenticateToken, personasController.con
  *         description: Nombre del sexo (alternativa a id_sexo)
  *         example: Masculino
  *       - in: query
+ *         name: id_parroquia
+ *         schema:
+ *           type: integer
+ *         description: ID de la parroquia
+ *       - in: query
+ *         name: id_municipio
+ *         schema:
+ *           type: integer
+ *         description: ID del municipio
+ *       - in: query
+ *         name: id_sector
+ *         schema:
+ *           type: integer
+ *         description: ID del sector
+ *       - in: query
+ *         name: id_vereda
+ *         schema:
+ *           type: integer
+ *         description: ID de la vereda
+ *       - in: query
+ *         name: id_corregimiento
+ *         schema:
+ *           type: integer
+ *         description: ID del corregimiento
+ *       - in: query
+ *         name: id_centro_poblado
+ *         schema:
+ *           type: integer
+ *         description: ID del centro poblado
+ *       - in: query
  *         name: page
  *         schema:
  *           type: integer
@@ -420,6 +510,36 @@ router.get('/tallas', authMiddleware.authenticateToken, personasController.consu
  *           type: integer
  *         description: Edad máxima
  *         example: 65
+ *       - in: query
+ *         name: id_parroquia
+ *         schema:
+ *           type: integer
+ *         description: ID de la parroquia
+ *       - in: query
+ *         name: id_municipio
+ *         schema:
+ *           type: integer
+ *         description: ID del municipio
+ *       - in: query
+ *         name: id_sector
+ *         schema:
+ *           type: integer
+ *         description: ID del sector
+ *       - in: query
+ *         name: id_vereda
+ *         schema:
+ *           type: integer
+ *         description: ID de la vereda
+ *       - in: query
+ *         name: id_corregimiento
+ *         schema:
+ *           type: integer
+ *         description: ID del corregimiento
+ *       - in: query
+ *         name: id_centro_poblado
+ *         schema:
+ *           type: integer
+ *         description: ID del centro poblado
  *       - in: query
  *         name: page
  *         schema:

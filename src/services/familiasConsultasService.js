@@ -31,6 +31,31 @@ class FamiliasConsultasService {
         whereClauseFamilia.sector = { [Op.iLike]: `%${filtros.sector}%` };
       }
 
+      // Filtros geográficos por ID
+      if (filtros.id_parroquia) {
+        whereClauseFamilia.id_parroquia = filtros.id_parroquia;
+      }
+
+      if (filtros.id_municipio) {
+        whereClauseFamilia.id_municipio = filtros.id_municipio;
+      }
+
+      if (filtros.id_sector) {
+        whereClauseFamilia.id_sector = filtros.id_sector;
+      }
+
+      if (filtros.id_vereda) {
+        whereClauseFamilia.id_vereda = filtros.id_vereda;
+      }
+
+      if (filtros.id_corregimiento) {
+        whereClauseFamilia.id_corregimiento = filtros.id_corregimiento;
+      }
+
+      if (filtros.id_centro_poblado) {
+        whereClauseFamilia.id_centro_poblado = filtros.id_centro_poblado;
+      }
+
       // Obtener familias básicas
       const familias = await Familias.findAll({
         where: whereClauseFamilia,

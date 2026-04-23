@@ -146,6 +146,36 @@ const router = express.Router();
  *         description: Buscar por teléfono
  *         example: "300"
  *       - in: query
+ *         name: id_parroquia
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de parroquia
+ *       - in: query
+ *         name: id_municipio
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de municipio
+ *       - in: query
+ *         name: id_sector
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de sector
+ *       - in: query
+ *         name: id_vereda
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de vereda
+ *       - in: query
+ *         name: id_corregimiento
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de corregimiento
+ *       - in: query
+ *         name: id_centro_poblado
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de centro poblado
+ *       - in: query
  *         name: limite
  *         schema:
  *           type: integer
@@ -244,6 +274,36 @@ router.get('/madres',
  *         description: Buscar por teléfono
  *         example: "300"
  *       - in: query
+ *         name: id_parroquia
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de parroquia
+ *       - in: query
+ *         name: id_municipio
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de municipio
+ *       - in: query
+ *         name: id_sector
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de sector
+ *       - in: query
+ *         name: id_vereda
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de vereda
+ *       - in: query
+ *         name: id_corregimiento
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de corregimiento
+ *       - in: query
+ *         name: id_centro_poblado
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de centro poblado
+ *       - in: query
  *         name: limite
  *         schema:
  *           type: integer
@@ -331,6 +391,36 @@ router.get('/padres',
  *         description: Buscar desde una fecha de fallecimiento específica
  *         example: "2020-01-01"
  *       - in: query
+ *         name: id_parroquia
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de parroquia
+ *       - in: query
+ *         name: id_municipio
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de municipio
+ *       - in: query
+ *         name: id_sector
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de sector
+ *       - in: query
+ *         name: id_vereda
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de vereda
+ *       - in: query
+ *         name: id_corregimiento
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de corregimiento
+ *       - in: query
+ *         name: id_centro_poblado
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de centro poblado
+ *       - in: query
  *         name: limite
  *         schema:
  *           type: integer
@@ -392,6 +482,36 @@ router.get('/madres-fallecidas',
  *           format: date
  *         description: Buscar desde una fecha de fallecimiento específica
  *         example: "2020-01-01"
+ *       - in: query
+ *         name: id_parroquia
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de parroquia
+ *       - in: query
+ *         name: id_municipio
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de municipio
+ *       - in: query
+ *         name: id_sector
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de sector
+ *       - in: query
+ *         name: id_vereda
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de vereda
+ *       - in: query
+ *         name: id_corregimiento
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de corregimiento
+ *       - in: query
+ *         name: id_centro_poblado
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de centro poblado
  *       - in: query
  *         name: limite
  *         schema:
@@ -521,6 +641,36 @@ router.get('/padres-fallecidos',
  *           - `sector=Centro` → busca familias en sectores que contengan "Centro"
  *           - `sector=Norte` → busca familias en sectores del norte
  *         example: "Centro Histórico"
+ *       - in: query
+ *         name: id_parroquia
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de parroquia
+ *       - in: query
+ *         name: id_municipio
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de municipio
+ *       - in: query
+ *         name: id_sector
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de sector
+ *       - in: query
+ *         name: id_vereda
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de vereda
+ *       - in: query
+ *         name: id_corregimiento
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de corregimiento
+ *       - in: query
+ *         name: id_centro_poblado
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de centro poblado
  *       - in: query
  *         name: limite
  *         schema:
