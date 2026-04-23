@@ -3,15 +3,15 @@ module.exports = {
     {
       name: 'parroquia-api',
       script: 'src/app.js',
-      instances: 'max', // Use all available CPU cores
-      exec_mode: 'cluster',
+      instances: 1,
+      exec_mode: 'fork',
       env: {
         NODE_ENV: 'production',
-        PORT: 4000
+        PORT: 3000
       },
       env_production: {
         NODE_ENV: 'production',
-        PORT: 4000
+        PORT: 3000
       },
       // PM2 monitoring and restart configuration
       max_memory_restart: '1G',
