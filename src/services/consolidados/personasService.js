@@ -205,30 +205,57 @@ class PersonasService {
       const query = `
         SELECT
           p.id_personas,
-          p.nombres as nombre_completo,
+          TRIM(CONCAT(
+            COALESCE(p.primer_nombre, ''), ' ',
+            COALESCE(p.segundo_nombre, ''), ' ',
+            COALESCE(p.primer_apellido, ''), ' ',
+            COALESCE(p.segundo_apellido, '')
+          )) as nombre_completo,
+          p.primer_nombre,
+          p.segundo_nombre,
+          p.primer_apellido,
+          p.segundo_apellido,
           p.identificacion as documento,
           ti.nombre as tipo_identificacion,
-          EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
+          EXTRACT(YEAR FROM AGE(p.fecha_nacimiento))::integer as edad,
           p.fecha_nacimiento,
+          sx.id_sexo,
           sx.nombre as sexo,
           p.telefono,
           p.correo_electronico,
           p.direccion as direccion_personal,
-          
-          -- Ubicación
+
+          -- Ubicación geográfica
+          m.id_municipio,
           m.nombre_municipio as municipio,
+          pr.id_parroquia,
           pr.nombre as parroquia,
+          sec.id_sector,
           sec.nombre as sector,
+          v.id_vereda,
           v.nombre as vereda,
+          corr.id_corregimiento,
+          corr.nombre as corregimiento,
+          cp.id_centro_poblado,
+          cp.nombre as centro_poblado,
           f.direccion_familia,
-          
+
           -- Familia
+          f.id_familia,
           f.apellido_familiar,
+          par.id_parentesco,
           par.nombre as parentesco,
           f.telefono as telefono_familia,
+          f.email as email_familia,
+          f.sustento_familia,
+          f.observaciones_encuestador,
+          f.autorizacion_datos,
           f.fecha_encuesta as fecha_registro,
-          
+          f.tamaño_familia,
+          f.tutor_responsable,
+
           -- Vivienda
+          tv.id_tipo_vivienda,
           tv.nombre as tipo_vivienda,
           f.pozo_septico,
           f.letrina,
@@ -238,42 +265,51 @@ class PersonasService {
           f.disposicion_enterrada as basura_enterrada,
           f.disposicion_recicla as basura_recicla,
           f.disposicion_aire_libre as basura_aire_libre,
-          
+          f.disposicion_no_aplica as basura_no_aplica,
+
           -- Datos personales
+          ec.id_situacion_civil as id_estado_civil,
           ec.nombre as estado_civil,
+          prof.id_profesion,
           prof.nombre as profesion,
+          ne.id_niveles_educativos as id_nivel_educativo,
+          ne.nivel as nivel_educativo,
           p.estudios,
+          cc.id_comunidad_cultural,
           cc.nombre as comunidad_cultural,
           p.en_que_eres_lider as liderazgo,
-          
+
           -- Tallas
           p.talla_camisa,
           p.talla_pantalon,
           p.talla_zapato,
-          
+
           -- Salud
           p.necesidad_enfermo,
-          
+
           -- Celebraciones
           p.motivo_celebrar,
           p.dia_celebrar,
           p.mes_celebrar
-          
+
         FROM personas p
         LEFT JOIN familias f ON p.id_familia_familias = f.id_familia
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
+        LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
+        LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
         LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
         LEFT JOIN parroquia pr ON f.id_parroquia = pr.id_parroquia
         LEFT JOIN parentescos par ON p.id_parentesco = par.id_parentesco
         LEFT JOIN situaciones_civiles ec ON p.id_estado_civil_estado_civil = ec.id_situacion_civil
         LEFT JOIN profesiones prof ON p.id_profesion = prof.id_profesion
+        LEFT JOIN niveles_educativos ne ON p.id_nivel_educativo = ne.id_niveles_educativos
         LEFT JOIN comunidades_culturales cc ON p.id_comunidad_cultural = cc.id_comunidad_cultural
         LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
         LEFT JOIN tipos_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
         ${whereClause}
-        ORDER BY p.nombres
+        ORDER BY p.primer_apellido, p.segundo_apellido, p.primer_nombre
         LIMIT :limit OFFSET :offset
       `;
 
@@ -285,11 +321,14 @@ class PersonasService {
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
         LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
+        LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
+        LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
         LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
         LEFT JOIN parroquia pr ON f.id_parroquia = pr.id_parroquia
         LEFT JOIN parentescos par ON p.id_parentesco = par.id_parentesco
         LEFT JOIN situaciones_civiles ec ON p.id_estado_civil_estado_civil = ec.id_situacion_civil
         LEFT JOIN profesiones prof ON p.id_profesion = prof.id_profesion
+        LEFT JOIN niveles_educativos ne ON p.id_nivel_educativo = ne.id_niveles_educativos
         LEFT JOIN comunidades_culturales cc ON p.id_comunidad_cultural = cc.id_comunidad_cultural
         LEFT JOIN tipos_vivienda tv ON f.id_tipo_vivienda = tv.id_tipo_vivienda
         ${whereClause}
@@ -359,6 +398,10 @@ class PersonasService {
         { header: 'Documento', key: 'documento', width: 15 },
         { header: 'Tipo ID', key: 'tipo_identificacion', width: 15 },
         { header: 'Nombre Completo', key: 'nombre_completo', width: 35 },
+        { header: 'Primer Nombre', key: 'primer_nombre', width: 18 },
+        { header: 'Segundo Nombre', key: 'segundo_nombre', width: 18 },
+        { header: 'Primer Apellido', key: 'primer_apellido', width: 18 },
+        { header: 'Segundo Apellido', key: 'segundo_apellido', width: 18 },
         { header: 'Edad', key: 'edad', width: 8 },
         { header: 'Fecha Nacimiento', key: 'fecha_nacimiento', width: 15 },
         { header: 'Sexo', key: 'sexo', width: 12 },
@@ -369,13 +412,27 @@ class PersonasService {
         { header: 'Parroquia', key: 'parroquia', width: 25 },
         { header: 'Sector', key: 'sector', width: 20 },
         { header: 'Vereda', key: 'vereda', width: 25 },
+        { header: 'Corregimiento', key: 'corregimiento', width: 25 },
+        { header: 'Centro Poblado', key: 'centro_poblado', width: 25 },
         { header: 'Dirección Familia', key: 'direccion_familia', width: 30 },
         { header: 'Apellido Familiar', key: 'apellido_familiar', width: 25 },
         { header: 'Parentesco', key: 'parentesco', width: 15 },
         { header: 'Teléfono Familia', key: 'telefono_familia', width: 15 },
+        { header: 'Tamaño Familia', key: 'tamaño_familia', width: 14 },
+        { header: 'Tutor Responsable', key: 'tutor_responsable', width: 25 },
+        { header: 'Sustento Familia', key: 'sustento_familia', width: 25 },
         { header: 'Tipo Vivienda', key: 'tipo_vivienda', width: 20 },
+        { header: 'Pozo Séptico', key: 'pozo_septico', width: 12 },
+        { header: 'Letrina', key: 'letrina', width: 10 },
+        { header: 'Campo Abierto', key: 'campo_abierto', width: 14 },
+        { header: 'Basura Recolector', key: 'basura_recolector', width: 18 },
+        { header: 'Basura Quemada', key: 'basura_quemada', width: 15 },
+        { header: 'Basura Enterrada', key: 'basura_enterrada', width: 16 },
+        { header: 'Basura Recicla', key: 'basura_recicla', width: 14 },
+        { header: 'Basura Aire Libre', key: 'basura_aire_libre', width: 17 },
         { header: 'Estado Civil', key: 'estado_civil', width: 15 },
         { header: 'Profesión', key: 'profesion', width: 25 },
+        { header: 'Nivel Educativo', key: 'nivel_educativo', width: 20 },
         { header: 'Estudios', key: 'estudios', width: 25 },
         { header: 'Comunidad Cultural', key: 'comunidad_cultural', width: 25 },
         { header: 'Liderazgo', key: 'liderazgo', width: 30 },
@@ -431,7 +488,7 @@ class PersonasService {
       // Autofiltro
       worksheet.autoFilter = {
         from: 'A1',
-        to: `AC1`
+        to: `AW1`
       };
 
       // Congelar primera fila

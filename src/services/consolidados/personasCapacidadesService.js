@@ -101,7 +101,12 @@ class PersonasCapacidadesService {
       const query = `
         SELECT DISTINCT
           p.id_personas,
-          p.nombres as nombre_completo,
+          TRIM(CONCAT(
+            COALESCE(p.primer_nombre, ''), ' ',
+            COALESCE(p.segundo_nombre, ''), ' ',
+            COALESCE(p.primer_apellido, ''), ' ',
+            COALESCE(p.segundo_apellido, '')
+          )) as nombre_completo,
           p.identificacion as numero_identificacion,
           p.fecha_nacimiento,
           EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
@@ -123,7 +128,7 @@ class PersonasCapacidadesService {
         LEFT JOIN parroquia pqa ON f.id_parroquia = pqa.id_parroquia
         LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
         ${whereClause}
-        ORDER BY apellidos, nombres
+        ORDER BY p.primer_apellido, p.segundo_apellido, p.primer_nombre
         LIMIT :limite OFFSET :offset
       `;
 
@@ -314,7 +319,12 @@ class PersonasCapacidadesService {
       const query = `
         SELECT 
           p.id_personas,
-          p.nombres as nombre_completo,
+          TRIM(CONCAT(
+            COALESCE(p.primer_nombre, ''), ' ',
+            COALESCE(p.segundo_nombre, ''), ' ',
+            COALESCE(p.primer_apellido, ''), ' ',
+            COALESCE(p.segundo_apellido, '')
+          )) as nombre_completo,
           p.identificacion as numero_identificacion,
           EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
           sx.nombre as sexo,
@@ -331,7 +341,7 @@ class PersonasCapacidadesService {
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
         LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
         ${whereClause}
-        ORDER BY pr.nombre, apellidos, nombres
+        ORDER BY pr.nombre, p.primer_apellido, p.primer_nombre
         LIMIT :limite OFFSET :offset
       `;
 
