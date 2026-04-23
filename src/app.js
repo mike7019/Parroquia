@@ -57,7 +57,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3001;
 const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
 
 // Trust proxy for rate limiting and security
