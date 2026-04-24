@@ -75,9 +75,9 @@ function toPersonaDTO(row, destrezas, disposicionBasura, sistemaAcueducto, aguas
       tipo_vivienda:             row.tipo_vivienda             ?? null,
       pozo_septico:              row.pozo_septico              ?? null,
       // Arrays de servicios — estructura consistente con el input { id, nombre }
-      disposicion_basura,
-      sistema_acueducto,
-      aguas_residuales,
+      disposicion_basura: disposicionBasura,
+      sistema_acueducto:  sistemaAcueducto,
+      aguas_residuales:   aguasResiduales,
     },
 
     // ── Ubicación geográfica ──────────────────────────────────────────────────
