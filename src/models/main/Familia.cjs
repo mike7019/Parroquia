@@ -168,6 +168,14 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id_parroquia'
       }
     },
+    id_corregimiento: {
+      type: DataTypes.BIGINT,
+      allowNull: true
+    },
+    id_centro_poblado: {
+      type: DataTypes.BIGINT,
+      allowNull: true
+    },
     numero_contrato_epm: {
       type: DataTypes.STRING(50),
       allowNull: true

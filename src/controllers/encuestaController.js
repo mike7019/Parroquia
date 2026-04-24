@@ -2797,17 +2797,26 @@ export const crearEncuesta = async (req, res) => {
     const familia = await Familias.create(familiaData, { transaction });
     console.log(`✅ Familia creada con ID: ${familia.id_familia}`);
     
-    // FIX TEMPORAL: Sequelize no está guardando id_parroquia en el create, forzar con UPDATE directo
-    if (familiaData.id_parroquia && !familia.id_parroquia) {
-      console.log('🔧 FIX: Actualizando id_parroquia manualmente...');
-      await sequelize.query(
-        'UPDATE familias SET id_parroquia = $1 WHERE id_familia = $2',
-        {
-          bind: [familiaData.id_parroquia, familia.id_familia],
-          transaction
+    // FIX: Forzar persistencia de todos los IDs geográficos con UPDATE directo
+    // Sequelize a veces no guarda estos campos en el create (problema conocido con referencias FK)
+    {
+      const geoFieldsToFix = ['id_parroquia', 'id_sector', 'id_vereda', 'id_corregimiento', 'id_centro_poblado'];
+      const geoUpdates = {};
+      for (const field of geoFieldsToFix) {
+        if (familiaData[field] != null && !familia[field]) {
+          geoUpdates[field] = familiaData[field];
         }
-      );
-      console.log(`✅ id_parroquia actualizado a: ${familiaData.id_parroquia}`);
+      }
+      if (Object.keys(geoUpdates).length > 0) {
+        console.log('🔧 FIX: Actualizando IDs geográficos manualmente:', Object.keys(geoUpdates));
+        const setClauses = Object.keys(geoUpdates).map((f, i) => `${f} = $${i + 1}`).join(', ');
+        const bindValues = [...Object.values(geoUpdates), familia.id_familia];
+        await sequelize.query(
+          `UPDATE familias SET ${setClauses} WHERE id_familia = $${bindValues.length}`,
+          { bind: bindValues, transaction }
+        );
+        console.log('✅ IDs geográficos actualizados:', geoUpdates);
+      }
     }
 
     // FIX TEMPORAL: Sequelize no está guardando campos de observaciones en el create, forzar con UPDATE directo
