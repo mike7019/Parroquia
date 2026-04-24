@@ -33,11 +33,13 @@ function groupById(rows, keyField) {
 /**
  * Convierte una fila SQL cruda + arrays relacionados en un DTO limpio.
  * - Elimina IDs internos del output
- * - Normaliza arrays (liderazgo, necesidad_enfermo, destrezas)
- * - Agrupa ubicación y familia en sub-objetos
- * - Unifica nivel educativo con COALESCE(ne.nivel, estudios) ya resuelto en SQL
+ * - Normaliza arrays (liderazgo, necesidad_enfermo, destrezas, celebraciones)
+ * - Agrupa ubicación (con {id,nombre}) y familia en sub-objetos
+ * - sistema_acueducto es objeto singular {id,nombre} | null (un registro por familia)
+ * - aguas_residuales es array (múltiples registros posibles)
+ * - celebraciones es array desde tabla persona_celebracion
  */
-function toPersonaDTO(row, destrezas, disposicionBasura, sistemaAcueducto, aguasResiduales) {
+function toPersonaDTO(row, destrezas, disposicionBasura, sistemaAcueducto, aguasResiduales, celebraciones) {
   return {
     // ── Datos personales ──────────────────────────────────────────────────────
     nombres:             row.nombres            ?? null,
@@ -62,9 +64,8 @@ function toPersonaDTO(row, destrezas, disposicionBasura, sistemaAcueducto, aguas
     liderazgo:         parseTextArray(row.liderazgo_raw),
     necesidad_enfermo: parseTextArray(row.necesidad_enfermo_raw),
     destrezas,
-    celebracion: (row.motivo_celebrar || row.dia_celebrar || row.mes_celebrar)
-      ? { motivo: row.motivo_celebrar ?? null, dia: row.dia_celebrar ?? null, mes: row.mes_celebrar ?? null }
-      : null,
+    // Múltiples celebraciones por persona (tabla persona_celebracion)
+    celebraciones,
 
     // ── Familia ───────────────────────────────────────────────────────────────
     familia: {
@@ -73,21 +74,22 @@ function toPersonaDTO(row, destrezas, disposicionBasura, sistemaAcueducto, aguas
       observaciones_encuestador: row.observaciones_encuestador ?? null,
       autorizacion_datos:        row.autorizacion_datos        ?? null,
       tipo_vivienda:             row.tipo_vivienda             ?? null,
-      pozo_septico:              row.pozo_septico              ?? null,
-      // Arrays de servicios — estructura consistente con el input { id, nombre }
+      // Servicios: disposicion_basura y aguas_residuales son arrays; sistema_acueducto es objeto único
       disposicion_basura: disposicionBasura,
-      sistema_acueducto:  sistemaAcueducto,
+      sistema_acueducto:  sistemaAcueducto,  // { id, nombre } | null
       aguas_residuales:   aguasResiduales,
     },
 
-    // ── Ubicación geográfica ──────────────────────────────────────────────────
+    // ── Ubicación geográfica — espejo del modelo de entrada {id, nombre} ─────
     ubicacion: {
-      municipio:      row.municipio      ?? null,
-      parroquia:      row.parroquia      ?? null,
-      sector:         row.sector         ?? null,
-      vereda:         row.vereda         ?? null,
-      corregimiento:  row.corregimiento  ?? null,
-      centro_poblado: row.centro_poblado ?? null,
+      municipio:      row.id_municipio      ? { id: Number(row.id_municipio),      nombre: row.municipio      ?? null } : null,
+      parroquia:      row.id_parroquia      ? { id: Number(row.id_parroquia),      nombre: row.parroquia      ?? null } : null,
+      sector:         (row.id_sector || row.sector)
+        ? { id: row.id_sector ? Number(row.id_sector) : null, nombre: row.sector ?? null }
+        : null,
+      vereda:         row.id_vereda         ? { id: Number(row.id_vereda),         nombre: row.vereda         ?? null } : null,
+      corregimiento:  row.id_corregimiento  ? { id: Number(row.id_corregimiento),  nombre: row.corregimiento  ?? null } : null,
+      centro_poblado: row.id_centro_poblado ? { id: Number(row.id_centro_poblado), nombre: row.centro_poblado ?? null } : null,
     },
   };
 }
@@ -294,13 +296,13 @@ class PersonasService {
         : '';
 
       // ── Consulta principal ──────────────────────────────────────────────────
-      // IDs internos (id_personas, id_familia) se seleccionan solo para las
-      // sub-consultas en lote; NO se exponen en el DTO final.
+      // JOIN fix: personas tiene DOS columnas FK a familias (id_familia_familias e id_familia).
+      // Usando COALESCE garantizamos que el JOIN funcione sin importar cuál esté poblada.
       const query = `
         SELECT
           -- IDs internos (uso interno para sub-consultas)
           p.id_personas,
-          p.id_familia_familias                AS id_familia,
+          COALESCE(p.id_familia_familias, p.id_familia) AS id_familia,
 
           -- Datos personales
           p.nombres,
@@ -321,9 +323,6 @@ class PersonasService {
           p.talla_camisa,
           p.talla_pantalon,
           p.talla_zapato,
-          p.motivo_celebrar,
-          p.dia_celebrar,
-          p.mes_celebrar,
 
           -- Familia
           f.apellido_familiar,
@@ -331,10 +330,16 @@ class PersonasService {
           f.observaciones_encuestador,
           f.autorizacion_datos,
           tv.nombre                            AS tipo_vivienda,
-          f.pozo_septico,
 
-          -- Ubicación geográfica
-          -- sector: COALESCE resuelve registros con texto libre (campo legado) o FK
+          -- IDs geográficos (para respuesta con {id, nombre} y para validación)
+          f.id_municipio,
+          f.id_parroquia,
+          f.id_sector,
+          f.id_vereda,
+          f.id_corregimiento,
+          f.id_centro_poblado,
+
+          -- Nombres geográficos
           m.nombre_municipio                   AS municipio,
           pr.nombre                            AS parroquia,
           COALESCE(sec.nombre, f.sector)       AS sector,
@@ -343,7 +348,7 @@ class PersonasService {
           cp.nombre                            AS centro_poblado
 
         FROM personas p
-        LEFT JOIN familias            f    ON p.id_familia_familias = f.id_familia
+        LEFT JOIN familias            f    ON COALESCE(p.id_familia_familias, p.id_familia) = f.id_familia
         LEFT JOIN municipios          m    ON f.id_municipio        = m.id_municipio
         LEFT JOIN sectores            sec  ON f.id_sector           = sec.id_sector
         LEFT JOIN veredas             v    ON f.id_vereda           = v.id_vereda
@@ -367,7 +372,7 @@ class PersonasService {
       const countQuery = `
         SELECT COUNT(p.id_personas) AS total
         FROM personas p
-        LEFT JOIN familias            f    ON p.id_familia_familias = f.id_familia
+        LEFT JOIN familias            f    ON COALESCE(p.id_familia_familias, p.id_familia) = f.id_familia
         LEFT JOIN municipios          m    ON f.id_municipio        = m.id_municipio
         LEFT JOIN sectores            sec  ON f.id_sector           = sec.id_sector
         LEFT JOIN veredas             v    ON f.id_vereda           = v.id_vereda
@@ -397,7 +402,7 @@ class PersonasService {
       const personaIds = rows.map(r => r.id_personas);
       const familiaIds = [...new Set(rows.map(r => r.id_familia).filter(Boolean))];
 
-      const [destrezasRows, basuraRows, acueductoRows, aguasRows] = await Promise.all([
+      const [destrezasRows, basuraRows, acueductoRows, aguasRows, celebracionesRows] = await Promise.all([
         // Destrezas por persona
         sequelize.query(
           `SELECT pd.id_personas_personas AS id_persona, d.nombre
@@ -414,7 +419,7 @@ class PersonasService {
            WHERE fdb.id_familia IN (:ids)`,
           { replacements: { ids: familiaIds }, type: QueryTypes.SELECT }
         ) : Promise.resolve([]),
-        // Sistema de acueducto por familia
+        // Sistema de acueducto por familia (se toma solo el primero → objeto único)
         familiaIds.length ? sequelize.query(
           `SELECT fsa.id_familia, sa.id_sistema_acueducto AS id, sa.nombre
            FROM familia_sistema_acueducto fsa
@@ -422,7 +427,7 @@ class PersonasService {
            WHERE fsa.id_familia IN (:ids)`,
           { replacements: { ids: familiaIds }, type: QueryTypes.SELECT }
         ) : Promise.resolve([]),
-        // Aguas residuales por familia
+        // Aguas residuales por familia (array)
         familiaIds.length ? sequelize.query(
           `SELECT far.id_familia, tar.id_tipo_aguas_residuales AS id, tar.nombre
            FROM familia_sistema_aguas_residuales far
@@ -430,22 +435,38 @@ class PersonasService {
            WHERE far.id_familia IN (:ids)`,
           { replacements: { ids: familiaIds }, type: QueryTypes.SELECT }
         ) : Promise.resolve([]),
+        // Celebraciones por persona (tabla persona_celebracion, columna id_persona sin 's')
+        sequelize.query(
+          `SELECT pc.id_persona, pc.motivo, pc.dia, pc.mes
+           FROM persona_celebracion pc
+           WHERE pc.id_persona IN (:ids)
+           ORDER BY pc.mes, pc.dia`,
+          { replacements: { ids: personaIds }, type: QueryTypes.SELECT }
+        ),
       ]);
 
       // Agrupar por clave para O(1) lookup
-      const destrezasByPersona  = groupById(destrezasRows, 'id_persona');
-      const basuraByFamilia     = groupById(basuraRows,    'id_familia');
-      const acueductoByFamilia  = groupById(acueductoRows, 'id_familia');
-      const aguasByFamilia      = groupById(aguasRows,     'id_familia');
+      const destrezasByPersona     = groupById(destrezasRows,     'id_persona');
+      const basuraByFamilia        = groupById(basuraRows,        'id_familia');
+      const acueductoByFamilia     = groupById(acueductoRows,     'id_familia');
+      const aguasByFamilia         = groupById(aguasRows,         'id_familia');
+      const celebracionesByPersona = groupById(celebracionesRows, 'id_persona');
 
       // ── Mapear filas crudas → DTOs limpios ───────────────────────────────────
       const data = rows.map(row => {
-        const destrezas        = (destrezasByPersona.get(row.id_personas) || []).map(d => d.nombre);
+        const destrezas        = (destrezasByPersona.get(row.id_personas)     || []).map(d => d.nombre);
         const fid              = row.id_familia;
-        const disposicionBasura = (basuraByFamilia.get(fid)    || []).map(r => ({ id: r.id, nombre: r.nombre }));
-        const sistemaAcueducto  = (acueductoByFamilia.get(fid) || []).map(r => ({ id: r.id, nombre: r.nombre }));
-        const aguasResiduales   = (aguasByFamilia.get(fid)     || []).map(r => ({ id: r.id, nombre: r.nombre }));
-        return toPersonaDTO(row, destrezas, disposicionBasura, sistemaAcueducto, aguasResiduales);
+        const disposicionBasura = (basuraByFamilia.get(fid)    || []).map(r => ({ id: Number(r.id), nombre: r.nombre }));
+        // sistema_acueducto: objeto único (primer registro) o null
+        const acueductoArr     = acueductoByFamilia.get(fid) || [];
+        const sistemaAcueducto = acueductoArr.length ? { id: Number(acueductoArr[0].id), nombre: acueductoArr[0].nombre } : null;
+        const aguasResiduales  = (aguasByFamilia.get(fid)     || []).map(r => ({ id: Number(r.id), nombre: r.nombre }));
+        const celebraciones    = (celebracionesByPersona.get(row.id_personas) || []).map(c => ({
+          motivo: c.motivo ?? null,
+          dia:    c.dia    ?? null,
+          mes:    c.mes    ?? null,
+        }));
+        return toPersonaDTO(row, destrezas, disposicionBasura, sistemaAcueducto, aguasResiduales, celebraciones);
       });
 
       console.log(`✅ Consulta exitosa: ${data.length} personas encontradas de ${countResult.total} totales`);
@@ -504,7 +525,7 @@ class PersonasService {
         { header: 'Sustento Familia',    key: 'sustento_familia',    width: 30 },
         { header: 'Autorización Datos',  key: 'autorizacion_datos',  width: 16 },
         { header: 'Tipo Vivienda',       key: 'tipo_vivienda',       width: 20 },
-        { header: 'Pozo Séptico',        key: 'pozo_septico',        width: 12 },
+        { header: 'Celebraciones',       key: 'celebraciones',       width: 40 },
         { header: 'Disposición Basura',  key: 'disposicion_basura',  width: 35 },
         { header: 'Sistema Acueducto',   key: 'sistema_acueducto',   width: 30 },
         { header: 'Aguas Residuales',    key: 'aguas_residuales',    width: 30 },
@@ -552,16 +573,16 @@ class PersonasService {
           sustento_familia:    p.familia?.sustento_familia,
           autorizacion_datos:  p.familia?.autorizacion_datos ? 'Sí' : 'No',
           tipo_vivienda:       p.familia?.tipo_vivienda,
-          pozo_septico:        p.familia?.pozo_septico ? 'Sí' : 'No',
-          disposicion_basura:  p.familia?.disposicion_basura?.map(d => d.nombre).join(', ') || '',
-          sistema_acueducto:   p.familia?.sistema_acueducto?.map(a => a.nombre).join(', ') || '',
-          aguas_residuales:    p.familia?.aguas_residuales?.map(a => a.nombre).join(', ')  || '',
-          municipio:           p.ubicacion?.municipio,
-          parroquia:           p.ubicacion?.parroquia,
-          sector:              p.ubicacion?.sector,
-          vereda:              p.ubicacion?.vereda,
-          corregimiento:       p.ubicacion?.corregimiento,
-          centro_poblado:      p.ubicacion?.centro_poblado,
+          celebraciones:       p.celebraciones?.map(c => `${c.motivo || ''} (${c.dia || '?'}/${c.mes || '?'})`).join(' | ') || '',
+          disposicion_basura:  p.familia?.disposicion_basura?.map(d => d.nombre).join(', ')  || '',
+          sistema_acueducto:   p.familia?.sistema_acueducto?.nombre                           || '',
+          aguas_residuales:    p.familia?.aguas_residuales?.map(a => a.nombre).join(', ')     || '',
+          municipio:           p.ubicacion?.municipio?.nombre,
+          parroquia:           p.ubicacion?.parroquia?.nombre,
+          sector:              p.ubicacion?.sector?.nombre,
+          vereda:              p.ubicacion?.vereda?.nombre,
+          corregimiento:       p.ubicacion?.corregimiento?.nombre,
+          centro_poblado:      p.ubicacion?.centro_poblado?.nombre,
         });
 
         // Zebra striping
