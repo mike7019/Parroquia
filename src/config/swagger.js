@@ -1021,11 +1021,16 @@ const swaggerConfig = {
             },
             enQueEresLider: {
               type: 'array',
-              description: 'Formato v2.0: Array de liderazgos (se unen con comas)',
+              description: 'Array de tipos de liderazgo del catálogo. Cada objeto debe tener id (id_tipo_liderazgo) y nombre.',
               items: {
-                type: 'string'
+                type: 'object',
+                properties: {
+                  id: { type: 'integer', description: 'ID del tipo de liderazgo', example: 1 },
+                  nombre: { type: 'string', description: 'Nombre del tipo de liderazgo', example: 'Comunitario' }
+                },
+                required: ['id']
               },
-              example: ['Agricultor', 'Amanzar caballos', 'Líder comunitario']
+              example: [{ id: 1, nombre: 'Comunitario' }, { id: 3, nombre: 'Juvenil' }]
             },
             solicitudComunionCasa: {
               type: 'boolean',
@@ -3029,9 +3034,16 @@ const swaggerConfig = {
                   telefono: { type: 'string', example: '3013445333' },
                   enQueEresLider: {
                     type: 'array',
-                    description: 'Array de strings con liderazgos',
-                    items: { type: 'string' },
-                    example: ['mmm', 'todo', 'nada']
+                    description: 'Array de tipos de liderazgo del catálogo. Cada objeto debe tener id (id_tipo_liderazgo) y nombre.',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'integer', description: 'ID del tipo de liderazgo', example: 1 },
+                        nombre: { type: 'string', description: 'Nombre del tipo de liderazgo', example: 'Comunitario' }
+                      },
+                      required: ['id']
+                    },
+                    example: [{ id: 1, nombre: 'Comunitario' }, { id: 3, nombre: 'Juvenil' }]
                   },
                   correoElectronico: { type: 'string', example: 'raquel.1762312461034@gmail.com' },
                   enfermedades: {

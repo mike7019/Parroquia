@@ -262,7 +262,11 @@ const router = express.Router();
  *                 estudio: { id: 3, nombre: "Educación Secundaria" }
  *                 comunidadCultural: { id: 5, nombre: "Otra" }
  *                 telefono: "3218820571"
- *                 enQueEresLider: ["mmm", "todo", "nada"]
+ *                 enQueEresLider:
+ *                   - id: 1
+ *                     nombre: "Comunitario"
+ *                   - id: 3
+ *                     nombre: "Juvenil"
  *                 correo_electronico: "raquel.176@gmail.com"
  *                 enfermedades:
  *                   - id: 76
@@ -858,7 +862,9 @@ router.delete('/:id',
  *                 talla_camisa: "M"
  *                 talla_pantalon: "32"
  *                 talla_zapato: "38"
- *                 enQueEresLider: ["Comunitario"]
+ *                 enQueEresLider:
+ *                   - id: 1
+ *                     nombre: "Comunitario"
  *                 necesidadesEnfermo: []
  *                 solicitudComunionCasa: false
  *                 profesionMotivoFechaCelebrar:

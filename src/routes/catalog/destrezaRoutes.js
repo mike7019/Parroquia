@@ -584,7 +584,7 @@ router.put('/:id', authMiddleware.authenticateToken,
  *               type: object
  *               properties:
  *                 status:
-                   type: string
+ *                   type: string
  *                   example: "success"
  *                 message:
  *                   type: string

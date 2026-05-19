@@ -90,7 +90,7 @@ class SaludConsolidadoService {
       params.limite = limite;
       
       const query = `
-        SELECT 
+        SELECT
           p.id_personas,
           p.nombres as nombre_completo,
           p.identificacion as documento,
@@ -98,10 +98,6 @@ class SaludConsolidadoService {
           p.fecha_nacimiento,
           EXTRACT(YEAR FROM AGE(p.fecha_nacimiento)) as edad,
           p.necesidad_enfermo,
-          CASE 
-            WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN true
-            ELSE false
-          END as tiene_enfermedades,
           s.nombre as sexo,
           f.apellido_familiar,
           f.sector as sector_familia,
@@ -112,12 +108,7 @@ class SaludConsolidadoService {
           v.nombre as nombre_vereda,
           corr.nombre as corregimiento_nombre,
           cp.nombre as centro_poblado_nombre,
-          pr.nombre as nombre_parroquia,
-          -- Obtener enfermedades de la tabla relacional
-          (SELECT STRING_AGG(e.nombre, ', ')
-           FROM persona_enfermedad pe
-           LEFT JOIN enfermedades e ON pe.id_enfermedad = e.id_enfermedad
-           WHERE pe.id_persona = p.id_personas) as enfermedades_texto
+          pr.nombre as nombre_parroquia
         FROM personas p
         LEFT JOIN familias f ON p.id_familia_familias = f.id_familia
         LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
@@ -134,12 +125,29 @@ class SaludConsolidadoService {
       
       console.log('📋 Ejecutando consulta SQL de salud:', query);
       console.log('📊 Parámetros:', params);
-      
+
       const personas = await sequelize.query(query, {
         replacements: params,
         type: QueryTypes.SELECT
       });
-      
+
+      // Batch query de enfermedades para evitar N+1
+      const personaIds = personas.map(p => p.id_personas).filter(Boolean);
+      const enfermedadesMap = new Map();
+      if (personaIds.length > 0) {
+        const enfermedadesRows = await sequelize.query(`
+          SELECT pe.id_persona, pe.id_enfermedad AS id, e.nombre
+          FROM persona_enfermedad pe
+          INNER JOIN enfermedades e ON pe.id_enfermedad = e.id_enfermedad
+          WHERE pe.id_persona IN (:ids)
+          ORDER BY e.nombre
+        `, { replacements: { ids: personaIds }, type: QueryTypes.SELECT });
+        enfermedadesRows.forEach(row => {
+          if (!enfermedadesMap.has(row.id_persona)) enfermedadesMap.set(row.id_persona, []);
+          enfermedadesMap.get(row.id_persona).push({ id: Number(row.id), nombre: row.nombre });
+        });
+      }
+
       // Consulta para obtener el total
       const countQuery = `
         SELECT COUNT(*) as total
@@ -160,6 +168,7 @@ class SaludConsolidadoService {
       
       // Procesar los datos para estructurar mejor la información de salud
       const personasConSalud = personas.map((persona) => {
+        const enfermedades = enfermedadesMap.get(persona.id_personas) || [];
         return {
           id: persona.id_personas,
           documento: persona.documento,
@@ -178,9 +187,9 @@ class SaludConsolidadoService {
           direccion: persona.direccion_familia,
           telefono_familia: persona.telefono_familia,
           salud: {
-            enfermedades: persona.enfermedades_texto || '', // De la tabla persona_enfermedad
-            necesidades_medicas: persona.necesidad_enfermo, // Del campo necesidad_enfermo
-            tiene_enfermedades: persona.tiene_enfermedades
+            enfermedades,
+            necesidades_medicas: persona.necesidad_enfermo,
+            tiene_enfermedades: enfermedades.length > 0
           }
         };
       });
@@ -365,34 +374,53 @@ class SaludConsolidadoService {
         replacements: { idParroquia },
         type: QueryTypes.SELECT
       });
-      
+
+      // Batch enfermedades para personas de esta parroquia
+      const parroquiaPersonaIds = personas.map(p => p.id_personas).filter(Boolean);
+      const parroquiaEnfermedadesMap = new Map();
+      if (parroquiaPersonaIds.length > 0) {
+        const enfermedadesRows = await sequelize.query(`
+          SELECT pe.id_persona, pe.id_enfermedad AS id, e.nombre
+          FROM persona_enfermedad pe
+          INNER JOIN enfermedades e ON pe.id_enfermedad = e.id_enfermedad
+          WHERE pe.id_persona IN (:ids)
+          ORDER BY e.nombre
+        `, { replacements: { ids: parroquiaPersonaIds }, type: QueryTypes.SELECT });
+        enfermedadesRows.forEach(row => {
+          if (!parroquiaEnfermedadesMap.has(row.id_persona)) parroquiaEnfermedadesMap.set(row.id_persona, []);
+          parroquiaEnfermedadesMap.get(row.id_persona).push({ id: Number(row.id), nombre: row.nombre });
+        });
+      }
+
       // Estructurar información de cada persona
-      const personasConSalud = personas.map(persona => ({
-        id: persona.id_personas,
-        documento: persona.documento,
-        nombre: persona.nombre_completo,
-        edad: parseInt(persona.edad),
-        sexo: persona.sexo,
-        telefono: persona.telefono,
-        fecha_nacimiento: persona.fecha_nacimiento,
-        familia: {
-          telefono: persona.telefono_familia,
-          direccion: persona.direccion_familia,
-          sector: persona.nombre_sector || persona.sector_familia
-        },
-        ubicacion: {
-          municipio: persona.nombre_municipio,
-          sector: persona.nombre_sector || persona.sector_familia,
-          vereda: persona.nombre_vereda,
-          parroquia: persona.nombre_parroquia
-        },
-        salud: {
-          tiene_enfermedades: persona.tiene_enfermedades,
-          enfermedades: persona.necesidad_enfermo ? 
-            persona.necesidad_enfermo.split(',').map(e => e.trim()) : [],
-          necesidades_medicas: persona.necesidad_enfermo
-        }
-      }));
+      const personasConSalud = personas.map(persona => {
+        const enfermedades = parroquiaEnfermedadesMap.get(persona.id_personas) || [];
+        return {
+          id: persona.id_personas,
+          documento: persona.documento,
+          nombre: persona.nombre_completo,
+          edad: parseInt(persona.edad),
+          sexo: persona.sexo,
+          telefono: persona.telefono,
+          fecha_nacimiento: persona.fecha_nacimiento,
+          familia: {
+            telefono: persona.telefono_familia,
+            direccion: persona.direccion_familia,
+            sector: persona.nombre_sector || persona.sector_familia
+          },
+          ubicacion: {
+            municipio: persona.nombre_municipio,
+            sector: persona.nombre_sector || persona.sector_familia,
+            vereda: persona.nombre_vereda,
+            parroquia: persona.nombre_parroquia
+          },
+          salud: {
+            tiene_enfermedades: enfermedades.length > 0,
+            enfermedades,
+            necesidades_medicas: persona.necesidad_enfermo
+          }
+        };
+      });
       
       console.log('✅ Consulta de salud por parroquia exitosa:', {
         parroquia: parroquia.nombre,
@@ -484,7 +512,7 @@ class SaludConsolidadoService {
           parroquia: persona.parroquia || '',
           direccion: persona.direccion || '',
           telefono_familia: persona.telefono_familia || '',
-          enfermedades: persona.salud.enfermedades || '',
+          enfermedades: persona.salud.enfermedades?.map(e => e.nombre).join(', ') || '',
           necesidades_medicas: persona.salud.necesidades_medicas || '',
           tiene_enfermedades: persona.salud.tiene_enfermedades ? 'Sí' : 'No'
         });

@@ -145,13 +145,11 @@ class FamiliasConsolidadoService {
       
       const miembrosConDestrezas = await Promise.all(
         miembros.map(async (miembro) => {
-          const destrezas = await this.obtenerDestrezasPersona(miembro.id_personas);
-          
-          // Formatear enfermedades desde el array
-          const enfermedadesTexto = miembro.enfermedades && miembro.enfermedades.length > 0
-            ? miembro.enfermedades.map(e => e.nombre || e.enfermedad_nombre).join(', ')
-            : '';
-          
+          const [destrezas, liderazgos] = await Promise.all([
+            this.obtenerDestrezasPersona(miembro.id_personas),
+            this.obtenerLiderazgosPersona(miembro.id_personas)
+          ]);
+
           return {
             tipo_identificacio: miembro.tipo_id_nombre || 'Cédula',
             numero_identificacion: miembro.identificacion || '',
@@ -166,10 +164,10 @@ class FamiliasConsolidadoService {
             estudios: miembro.estudios || '',
             profesion: miembro.profesion_nombre || 'No especificado',
             comunidad_cultural: miembro.comunidad_cultural_nombre || 'No especificado',
-            enfermedades: enfermedadesTexto,
-            liderazgo: miembro.en_que_eres_lider || '',
-            destrezas: destrezas.length > 0 ? destrezas.join(', ') : '',
-            necesidades_enfermo: miembro.necesidad_enfermo_deprecated || '',
+            enfermedades: miembro.enfermedades || [],
+            liderazgos,
+            destrezas,
+            necesidades_enfermo: miembro.necesidad_enfermo || '',
             comunion_casa: true,
             tallas: {
               id_persona: miembro.id_personas,
@@ -178,7 +176,6 @@ class FamiliasConsolidadoService {
               pantalon: miembro.talla_pantalon || '',
               calzado: miembro.talla_zapato || ''
             },
-            // ⭐ Arrays completos ⭐
             todas_las_celebraciones: miembro.celebraciones || [],
             todas_las_enfermedades: miembro.enfermedades || []
           };
@@ -196,21 +193,44 @@ class FamiliasConsolidadoService {
   async obtenerDestrezasPersona(idPersona) {
     try {
       const query = `
-        SELECT d.nombre
+        SELECT d.id_destreza AS id, d.nombre
         FROM persona_destreza pd
         JOIN destrezas d ON pd.id_destrezas_destrezas = d.id_destreza
         WHERE pd.id_personas_personas = $1
       `;
-      
+
       const destrezas = await sequelize.query(query, {
         bind: [idPersona],
         type: QueryTypes.SELECT
       });
-      
-      return destrezas.map(d => d.nombre);
-      
+
+      return destrezas.map(d => ({ id: Number(d.id), nombre: d.nombre }));
+
     } catch (error) {
       console.error('❌ Error en obtenerDestrezasPersona:', error);
+      return [];
+    }
+  }
+
+  async obtenerLiderazgosPersona(idPersona) {
+    try {
+      const query = `
+        SELECT pl.id_tipo_liderazgo AS id, tl.nombre
+        FROM persona_liderazgo pl
+        JOIN tipos_liderazgo tl ON pl.id_tipo_liderazgo = tl.id_tipo_liderazgo
+        WHERE pl.id_persona = $1 AND pl.activo = TRUE
+        ORDER BY tl.nombre
+      `;
+
+      const liderazgos = await sequelize.query(query, {
+        bind: [idPersona],
+        type: QueryTypes.SELECT
+      });
+
+      return liderazgos.map(l => ({ id: Number(l.id), nombre: l.nombre }));
+
+    } catch (error) {
+      console.error('❌ Error en obtenerLiderazgosPersona:', error);
       return [];
     }
   }
@@ -498,13 +518,13 @@ class FamiliasConsolidadoService {
           estudios: miembro.estudios,
           profesion: miembro.profesion,
           comunidad: miembro.comunidad_cultural,
-          destrezas: miembro.destrezas,
-          liderazgo: miembro.liderazgo,
+          destrezas: miembro.destrezas?.map(d => d.nombre).join(', ') || '',
+          liderazgo: miembro.liderazgos?.map(l => l.nombre).join(', ') || '',
           talla_camisa: miembro.tallas?.camisa_blusa || '',
           talla_pantalon: miembro.tallas?.pantalon || '',
           talla_calzado: miembro.tallas?.calzado || '',
           celebraciones: celebracionesTexto,
-          enfermedades: miembro.enfermedades,
+          enfermedades: miembro.enfermedades?.map(e => e.nombre).join(', ') || '',
           necesidades_enfermo: miembro.necesidades_enfermo || ''
         });
       });

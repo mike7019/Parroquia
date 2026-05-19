@@ -9,6 +9,7 @@ import { ErrorCodes, createError } from '../utils/errorCodes.js';
 import { successResponse, paginatedResponse, errorResponse } from '../utils/responseFormatter.js';
 import EncuestaService from '../services/encuestaService.js';
 import personaDetallesHelper from '../services/helpers/personaDetallesHelper.js';
+import LiderazgoService from '../services/catalog/liderazgoService.js';
 
 /**
  * Helper function to safely parse integers and return null if NaN
@@ -495,11 +496,13 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         nombreEnfermedad = miembro.enfermedad.nombre || null;
       }
       
-      // ⭐ SOPORTE v2.0: Procesar enQueEresLider como array o string
+      // ⭐ SOPORTE v2.0: Procesar enQueEresLider como array de objetos {id, nombre}
       let enQueEresLider = null;
       if (miembro.enQueEresLider && Array.isArray(miembro.enQueEresLider)) {
-        // Formato v2.0: Array de strings, unir con comas
-        enQueEresLider = miembro.enQueEresLider.join(', ');
+        enQueEresLider = miembro.enQueEresLider
+          .map(item => (typeof item === 'object' && item !== null ? item.nombre : item))
+          .filter(Boolean)
+          .join(', ');
       } else if (miembro.en_que_eres_lider) {
         // Formato v1.0: String
         enQueEresLider = miembro.en_que_eres_lider;
@@ -960,25 +963,24 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
       }
       
       // ========================================================================
-      // PROCESAR LIDERAZGO (campo de texto libre)
+      // PROCESAR LIDERAZGO (relación muchos a muchos → persona_liderazgo)
       // ========================================================================
-      if (miembro.en_que_eres_lider || miembro.liderazgo) {
-        const liderazgoTexto = miembro.en_que_eres_lider || miembro.liderazgo;
-        console.log(`    👑 Actualizando liderazgo: "${liderazgoTexto}"`);
-        
-        await sequelize.query(`
-          UPDATE personas 
-          SET en_que_eres_lider = :liderazgo
-          WHERE id_personas = :id_persona
-        `, {
-          replacements: {
-            liderazgo: liderazgoTexto,
-            id_persona: personaId
-          },
-          transaction
-        });
-        
-        console.log(`      ✅ Campo liderazgo actualizado`);
+      if (miembro.enQueEresLider && Array.isArray(miembro.enQueEresLider) && miembro.enQueEresLider.length > 0) {
+        console.log(`    👑 Procesando ${miembro.enQueEresLider.length} liderazgos...`);
+        const savepointName = `sp_liderazgo_${personaId}_${Date.now()}`;
+        try {
+          await sequelize.query(`SAVEPOINT ${savepointName};`, { transaction });
+          const resultado = await LiderazgoService.sincronizarLiderazgosPersona(personaId, miembro.enQueEresLider, transaction);
+          console.log(`      ✅ Liderazgos sincronizados: ${resultado.sincronizados}`);
+        } catch (error) {
+          try {
+            await sequelize.query(`ROLLBACK TO SAVEPOINT ${savepointName};`, { transaction });
+            console.warn(`      ⚠️ Error sincronizando liderazgos: ${error.message} — Revertido al savepoint`);
+          } catch (rbErr) {
+            console.error(`      ❌ Error al revertir savepoint liderazgo: ${rbErr.message}`);
+            throw error;
+          }
+        }
       }
       
     } catch (error) {
@@ -1630,7 +1632,7 @@ export const obtenerEncuestas = async (req, res) => {
           // CONSULTAR HABILIDADES DE LA PERSONA
           // ========================================================================
           const habilidades = await sequelize.query(`
-            SELECT 
+            SELECT
               h.id_habilidad,
               h.nombre,
               h.descripcion,
@@ -1639,6 +1641,22 @@ export const obtenerEncuestas = async (req, res) => {
             INNER JOIN habilidades h ON ph.id_habilidad = h.id_habilidad
             WHERE ph.id_persona = :personaId
             ORDER BY h.nombre
+          `, {
+            replacements: { personaId: persona.id_personas },
+            type: QueryTypes.SELECT
+          });
+
+          // ========================================================================
+          // CONSULTAR LIDERAZGOS DE LA PERSONA
+          // ========================================================================
+          const liderazgos = await sequelize.query(`
+            SELECT
+              pl.id_tipo_liderazgo,
+              tl.nombre
+            FROM persona_liderazgo pl
+            INNER JOIN tipos_liderazgo tl ON pl.id_tipo_liderazgo = tl.id_tipo_liderazgo
+            WHERE pl.id_persona = :personaId AND pl.activo = TRUE
+            ORDER BY tl.nombre
           `, {
             replacements: { personaId: persona.id_personas },
             type: QueryTypes.SELECT
@@ -1686,7 +1704,10 @@ export const obtenerEncuestas = async (req, res) => {
               descripcion: h.descripcion,
               nivel: h.nivel
             })),
-            en_que_eres_lider: persona.en_que_eres_lider || null,
+            liderazgos: liderazgos.map(l => ({
+              id: l.id_tipo_liderazgo,
+              nombre: l.nombre
+            })),
             // ⭐ CAMPOS AGREGADOS - profesion, parentesco, comunidad cultural, celebraciones, necesidades ⭐
             profesion: persona.id_profesion ? {
               id: persona.id_profesion,
@@ -2243,7 +2264,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
       // CONSULTAR HABILIDADES DE LA PERSONA
       // ========================================================================
       const habilidades = await sequelize.query(`
-        SELECT 
+        SELECT
           h.id_habilidad,
           h.nombre,
           h.descripcion,
@@ -2252,6 +2273,22 @@ export const obtenerEncuestaPorId = async (req, res) => {
         INNER JOIN habilidades h ON ph.id_habilidad = h.id_habilidad
         WHERE ph.id_persona = :personaId
         ORDER BY h.nombre
+      `, {
+        replacements: { personaId: persona.id_personas },
+        type: QueryTypes.SELECT
+      });
+
+      // ========================================================================
+      // CONSULTAR LIDERAZGOS DE LA PERSONA
+      // ========================================================================
+      const liderazgos = await sequelize.query(`
+        SELECT
+          pl.id_tipo_liderazgo,
+          tl.nombre
+        FROM persona_liderazgo pl
+        INNER JOIN tipos_liderazgo tl ON pl.id_tipo_liderazgo = tl.id_tipo_liderazgo
+        WHERE pl.id_persona = :personaId AND pl.activo = TRUE
+        ORDER BY tl.nombre
       `, {
         replacements: { personaId: persona.id_personas },
         type: QueryTypes.SELECT
@@ -2273,7 +2310,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
         fecha_nacimiento: persona.fecha_nacimiento,
         direccion: persona.direccion,
         estudios: estudioInfo,
-        edad: persona.fecha_nacimiento ? 
+        edad: persona.fecha_nacimiento ?
           Math.floor((new Date() - new Date(persona.fecha_nacimiento)) / (365.25 * 24 * 60 * 60 * 1000)) : null,
         sexo: persona.sexo_id ? {
           id: persona.sexo_id,
@@ -2288,7 +2325,6 @@ export const obtenerEncuestaPorId = async (req, res) => {
           pantalon: persona.talla_pantalon,
           zapato: persona.talla_zapato
         },
-        // ⭐ NUEVOS CAMPOS ⭐
         destrezas: destrezas.map(d => ({
           id: d.id_destreza,
           nombre: d.nombre
@@ -2299,8 +2335,10 @@ export const obtenerEncuestaPorId = async (req, res) => {
           descripcion: h.descripcion,
           nivel: h.nivel
         })),
-        en_que_eres_lider: persona.en_que_eres_lider || null,
-        // ⭐ CAMPOS AGREGADOS - profesion, parentesco, comunidad cultural, celebraciones, necesidades ⭐
+        liderazgos: liderazgos.map(l => ({
+          id: l.id_tipo_liderazgo,
+          nombre: l.nombre
+        })),
         profesion: persona.id_profesion ? {
           id: persona.id_profesion,
           nombre: persona.profesion_nombre || null
@@ -2313,7 +2351,6 @@ export const obtenerEncuestaPorId = async (req, res) => {
           id: persona.id_comunidad_cultural,
           nombre: persona.comunidad_cultural_nombre || null
         } : null,
-        // ⭐ NUEVOS CAMPOS - Celebraciones y Enfermedades (arrays) ⭐
         celebraciones: persona.celebraciones || [],
         enfermedades: persona.enfermedades || [],
         necesidad_enfermo: persona.necesidad_enfermo || null
@@ -3298,7 +3335,9 @@ export const actualizarCamposEncuesta = async (req, res) => {
               tallaCamisa: miembro.talla_camisa || null,
               tallaPantalon: miembro.talla_pantalon || null,
               tallaZapato: miembro.talla_zapato || null,
-              enQueEresLider: miembro.enQueEresLider ? JSON.stringify(miembro.enQueEresLider) : null,
+              enQueEresLider: miembro.enQueEresLider && Array.isArray(miembro.enQueEresLider)
+                ? miembro.enQueEresLider.map(item => (typeof item === 'object' && item !== null ? item.nombre : item)).filter(Boolean).join(', ')
+                : null,
               necesidadEnfermo: miembro.necesidadesEnfermo ? JSON.stringify(miembro.necesidadesEnfermo) : null,
               solicitudComunionCasa: miembro.solicitudComunionCasa || false
             },
@@ -3378,17 +3417,24 @@ export const actualizarCamposEncuesta = async (req, res) => {
               'DELETE FROM persona_enfermedad WHERE id_persona = :idPersona',
               { replacements: { idPersona }, type: QueryTypes.DELETE, transaction }
             );
-            
+
             for (const enfermedad of miembro.enfermedades) {
               await sequelize.query(
                 'INSERT INTO persona_enfermedad (id_persona, id_enfermedad, created_at, updated_at) VALUES (:idPersona, :idEnfermedad, NOW(), NOW())',
-                { 
-                  replacements: { idPersona, idEnfermedad: enfermedad.id }, 
-                  type: QueryTypes.INSERT, 
-                  transaction 
+                {
+                  replacements: { idPersona, idEnfermedad: enfermedad.id },
+                  type: QueryTypes.INSERT,
+                  transaction
                 }
               );
             }
+          }
+
+          // Actualizar liderazgos (relación muchos a muchos → persona_liderazgo)
+          if (miembro.enQueEresLider !== undefined) {
+            const liderazgoItems = Array.isArray(miembro.enQueEresLider) ? miembro.enQueEresLider : [];
+            const resultado = await LiderazgoService.sincronizarLiderazgosPersona(idPersona, liderazgoItems, transaction);
+            console.log(`    👑 Liderazgos actualizados: ${resultado.sincronizados} | omitidos sin match: ${resultado.omitidos}`);
           }
 
           console.log(`  ✅ Persona actualizada: ${miembro.nombres} (ID: ${idPersona})`);

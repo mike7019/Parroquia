@@ -39,7 +39,7 @@ function groupById(rows, keyField) {
  * - aguas_residuales es array (múltiples registros posibles)
  * - celebraciones es array desde tabla persona_celebracion
  */
-function toPersonaDTO(row, destrezas, disposicionBasura, sistemaAcueducto, aguasResiduales, celebraciones) {
+function toPersonaDTO(row, destrezas, liderazgos, disposicionBasura, sistemaAcueducto, aguasResiduales, celebraciones) {
   return {
     // ── Datos personales ──────────────────────────────────────────────────────
     nombres:             row.nombres            ?? null,
@@ -60,10 +60,10 @@ function toPersonaDTO(row, destrezas, disposicionBasura, sistemaAcueducto, aguas
       pantalon: row.talla_pantalon ?? null,
       zapato:   row.talla_zapato   ?? null,
     },
-    // Arrays — siempre devueltos como array, nunca string
-    liderazgo:         parseTextArray(row.liderazgo_raw),
-    necesidad_enfermo: parseTextArray(row.necesidad_enfermo_raw),
+    // Arrays de objetos {id, nombre} — igual que en la respuesta de encuesta
     destrezas,
+    liderazgos,
+    necesidad_enfermo: parseTextArray(row.necesidad_enfermo_raw),
     // Múltiples celebraciones por persona (tabla persona_celebracion)
     celebraciones,
 
@@ -402,13 +402,22 @@ class PersonasService {
       const personaIds = rows.map(r => r.id_personas);
       const familiaIds = [...new Set(rows.map(r => r.id_familia).filter(Boolean))];
 
-      const [destrezasRows, basuraRows, acueductoRows, aguasRows, celebracionesRows] = await Promise.all([
-        // Destrezas por persona
+      const [destrezasRows, liderazgosRows, basuraRows, acueductoRows, aguasRows, celebracionesRows] = await Promise.all([
+        // Destrezas por persona — incluye id para devolver {id, nombre}
         sequelize.query(
-          `SELECT pd.id_personas_personas AS id_persona, d.nombre
+          `SELECT pd.id_personas_personas AS id_persona, d.id_destreza AS id, d.nombre
            FROM persona_destreza pd
            INNER JOIN destrezas d ON pd.id_destrezas_destrezas = d.id_destreza
            WHERE pd.id_personas_personas IN (:ids)`,
+          { replacements: { ids: personaIds }, type: QueryTypes.SELECT }
+        ),
+        // Liderazgos por persona desde tabla intermedia
+        sequelize.query(
+          `SELECT pl.id_persona, pl.id_tipo_liderazgo AS id, tl.nombre
+           FROM persona_liderazgo pl
+           INNER JOIN tipos_liderazgo tl ON pl.id_tipo_liderazgo = tl.id_tipo_liderazgo
+           WHERE pl.id_persona IN (:ids) AND pl.activo = TRUE
+           ORDER BY tl.nombre`,
           { replacements: { ids: personaIds }, type: QueryTypes.SELECT }
         ),
         // Disposición de basura por familia (array de catálogo)
@@ -447,6 +456,7 @@ class PersonasService {
 
       // Agrupar por clave para O(1) lookup
       const destrezasByPersona     = groupById(destrezasRows,     'id_persona');
+      const liderazgosByPersona    = groupById(liderazgosRows,    'id_persona');
       const basuraByFamilia        = groupById(basuraRows,        'id_familia');
       const acueductoByFamilia     = groupById(acueductoRows,     'id_familia');
       const aguasByFamilia         = groupById(aguasRows,         'id_familia');
@@ -454,19 +464,19 @@ class PersonasService {
 
       // ── Mapear filas crudas → DTOs limpios ───────────────────────────────────
       const data = rows.map(row => {
-        const destrezas        = (destrezasByPersona.get(row.id_personas)     || []).map(d => d.nombre);
-        const fid              = row.id_familia;
+        const destrezas         = (destrezasByPersona.get(row.id_personas)  || []).map(d => ({ id: Number(d.id), nombre: d.nombre }));
+        const liderazgos        = (liderazgosByPersona.get(row.id_personas) || []).map(l => ({ id: Number(l.id), nombre: l.nombre }));
+        const fid               = row.id_familia;
         const disposicionBasura = (basuraByFamilia.get(fid)    || []).map(r => ({ id: Number(r.id), nombre: r.nombre }));
-        // sistema_acueducto: objeto único (primer registro) o null
-        const acueductoArr     = acueductoByFamilia.get(fid) || [];
-        const sistemaAcueducto = acueductoArr.length ? { id: Number(acueductoArr[0].id), nombre: acueductoArr[0].nombre } : null;
-        const aguasResiduales  = (aguasByFamilia.get(fid)     || []).map(r => ({ id: Number(r.id), nombre: r.nombre }));
-        const celebraciones    = (celebracionesByPersona.get(row.id_personas) || []).map(c => ({
+        const acueductoArr      = acueductoByFamilia.get(fid) || [];
+        const sistemaAcueducto  = acueductoArr.length ? { id: Number(acueductoArr[0].id), nombre: acueductoArr[0].nombre } : null;
+        const aguasResiduales   = (aguasByFamilia.get(fid)     || []).map(r => ({ id: Number(r.id), nombre: r.nombre }));
+        const celebraciones     = (celebracionesByPersona.get(row.id_personas) || []).map(c => ({
           motivo: c.motivo ?? null,
           dia:    c.dia    ?? null,
           mes:    c.mes    ?? null,
         }));
-        return toPersonaDTO(row, destrezas, disposicionBasura, sistemaAcueducto, aguasResiduales, celebraciones);
+        return toPersonaDTO(row, destrezas, liderazgos, disposicionBasura, sistemaAcueducto, aguasResiduales, celebraciones);
       });
 
       console.log(`✅ Consulta exitosa: ${data.length} personas encontradas de ${countResult.total} totales`);
@@ -566,9 +576,9 @@ class PersonasService {
           talla_camisa:        p.tallas?.camisa,
           talla_pantalon:      p.tallas?.pantalon,
           talla_zapato:        p.tallas?.zapato,
-          liderazgo:           p.liderazgo?.join(', ')                                     || '',
+          liderazgo:           p.liderazgos?.map(l => l.nombre).join(', ')               || '',
           necesidad_enfermo:   p.necesidad_enfermo?.join(', ')                             || '',
-          destrezas:           p.destrezas?.join(', ')                                     || '',
+          destrezas:           p.destrezas?.map(d => d.nombre).join(', ')                 || '',
           apellido_familiar:   p.familia?.apellido_familiar,
           sustento_familia:    p.familia?.sustento_familia,
           autorizacion_datos:  p.familia?.autorizacion_datos ? 'Sí' : 'No',

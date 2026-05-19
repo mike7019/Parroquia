@@ -236,7 +236,19 @@ class PersonasReporteService {
           replacements: { id_persona: persona.id_personas },
           type: QueryTypes.SELECT
         });
-        
+
+        // Obtener liderazgos
+        const liderazgos = await sequelize.query(`
+          SELECT pl.id_tipo_liderazgo AS id, tl.nombre
+          FROM persona_liderazgo pl
+          INNER JOIN tipos_liderazgo tl ON pl.id_tipo_liderazgo = tl.id_tipo_liderazgo
+          WHERE pl.id_persona = :id_persona AND pl.activo = TRUE
+          ORDER BY tl.nombre
+        `, {
+          replacements: { id_persona: persona.id_personas },
+          type: QueryTypes.SELECT
+        });
+
         return {
           id_personas: persona.id_personas,
           identificacion: persona.identificacion,
@@ -261,7 +273,8 @@ class PersonasReporteService {
           profesion: persona.profesion,
           estudios: persona.estudios,
           necesidad_enfermo: persona.necesidad_enfermo,
-          liderazgo: persona.en_que_eres_lider || 'No especificado',
+          liderazgos: liderazgos.map(l => ({ id: Number(l.id), nombre: l.nombre })),
+          liderazgo_texto: liderazgos.length > 0 ? liderazgos.map(l => l.nombre).join(', ') : 'Ninguno',
           estado_civil: persona.estado_civil,
           tipo_identificacion: persona.tipo_identificacion,
           destrezas: destrezas,
@@ -415,7 +428,7 @@ class PersonasReporteService {
           familia_apellido: p.familia_apellido,
           profesion: p.profesion,
           estudios: p.estudios,
-          liderazgo: p.liderazgo,
+          liderazgo: p.liderazgo_texto,
           destrezas_texto: p.destrezas_texto,
           total_destrezas: p.total_destrezas,
           habilidades_texto: p.habilidades_texto,

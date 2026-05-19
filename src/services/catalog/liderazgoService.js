@@ -317,6 +317,47 @@ class LiderazgoService {
   }
 
   /**
+   * Sincronizar liderazgos de una persona desde la encuesta.
+   * Recibe un array de objetos { id, nombre } (igual que destrezas/habilidades).
+   * Reactiva los que vuelven, desactiva los que ya no están en la lista.
+   */
+  async sincronizarLiderazgosPersona(idPersona, liderazgos, transaction = null) {
+    const idsToAssociate = (Array.isArray(liderazgos) ? liderazgos : [])
+      .map(item => parseInt(typeof item === 'object' && item !== null ? item.id : item))
+      .filter(id => !isNaN(id) && id > 0);
+
+    // Desactivar asociaciones que ya no están en la nueva lista
+    if (idsToAssociate.length > 0) {
+      const placeholders = idsToAssociate.map((_, i) => `:lid_${i}`).join(', ');
+      const replacements = { idPersona };
+      idsToAssociate.forEach((id, i) => { replacements[`lid_${i}`] = id; });
+
+      await sequelize.query(`
+        UPDATE persona_liderazgo SET activo = FALSE, "updatedAt" = NOW()
+        WHERE id_persona = :idPersona AND activo = TRUE
+          AND id_tipo_liderazgo NOT IN (${placeholders})
+      `, { replacements, transaction, type: QueryTypes.UPDATE });
+    } else {
+      await sequelize.query(`
+        UPDATE persona_liderazgo SET activo = FALSE, "updatedAt" = NOW()
+        WHERE id_persona = :idPersona AND activo = TRUE
+      `, { replacements: { idPersona }, transaction, type: QueryTypes.UPDATE });
+    }
+
+    // Insertar o reactivar las asociaciones de la nueva lista
+    for (const tipoId of idsToAssociate) {
+      await sequelize.query(`
+        INSERT INTO persona_liderazgo (id_persona, id_tipo_liderazgo, activo, "createdAt", "updatedAt")
+        VALUES (:idPersona, :tipoId, TRUE, NOW(), NOW())
+        ON CONFLICT (id_persona, id_tipo_liderazgo)
+        DO UPDATE SET activo = TRUE, "updatedAt" = NOW()
+      `, { replacements: { idPersona, tipoId }, transaction, type: QueryTypes.INSERT });
+    }
+
+    return { sincronizados: idsToAssociate.length };
+  }
+
+  /**
    * Desasociar persona de un tipo de liderazgo (soft delete)
    */
   async desasociarPersonaLiderazgo(idPersona, idTipoLiderazgo) {
