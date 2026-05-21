@@ -62,14 +62,14 @@ class DifuntosConsolidadoService {
 
       // Filtro de rango de fechas
       if (filtros.fecha_inicio && filtros.fecha_fin) {
-        whereConditions.push('df.fecha_fallecimiento BETWEEN :fecha_inicio AND :fecha_fin');
+        whereConditions.push('df.fecha_fallecimiento::date BETWEEN :fecha_inicio AND :fecha_fin');
         replacements.fecha_inicio = filtros.fecha_inicio;
         replacements.fecha_fin = filtros.fecha_fin;
       } else if (filtros.fecha_inicio) {
-        whereConditions.push('df.fecha_fallecimiento >= :fecha_inicio');
+        whereConditions.push('df.fecha_fallecimiento::date >= :fecha_inicio');
         replacements.fecha_inicio = filtros.fecha_inicio;
       } else if (filtros.fecha_fin) {
-        whereConditions.push('df.fecha_fallecimiento <= :fecha_fin');
+        whereConditions.push('df.fecha_fallecimiento::date <= :fecha_fin');
         replacements.fecha_fin = filtros.fecha_fin;
       }
 

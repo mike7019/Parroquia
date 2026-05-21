@@ -28,45 +28,6 @@ class DifuntosService {
         filters: filters
       };
 
-      /*
-      const includeClause = [
-        {
-          model: Familias,
-          as: 'familia',
-          required: true,
-          include: [
-            {
-              model: Veredas,
-              as: 'vereda',
-              required: false
-            },
-            {
-              model: Sector,
-              as: 'sector_info',
-              required: false
-            }
-          ]
-        }
-      ];
-
-      // Filtros opcionales
-      if (filters.sector) {
-        includeClause[0].where = {
-          sector: {
-            [Op.iLike]: `%${filters.sector}%`
-          }
-        };
-      }
-
-      if (filters.apellido_familiar) {
-        includeClause[0].where = {
-          ...includeClause[0].where,
-          apellido_familiar: {
-            [Op.iLike]: `%${filters.apellido_familiar}%`
-          }
-        };
-      }*/
-
       if (filters.nombre) {
         whereClause.nombre_completo = {
           [Op.iLike]: `%${filters.nombre}%`
