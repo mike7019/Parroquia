@@ -133,7 +133,15 @@ class DifuntosConsolidadoService {
       if (filtros.id_sector) {
         whereConditionsPersonas.push('s.id_sector = :id_sector');
       }
-      
+
+      if (filtros.id_corregimiento) {
+        whereConditionsPersonas.push('corr.id_corregimiento = :id_corregimiento');
+      }
+
+      if (filtros.id_centro_poblado) {
+        whereConditionsPersonas.push('cp.id_centro_poblado = :id_centro_poblado');
+      }
+
       if (filtros.id_parentesco) {
         whereConditionsPersonas.push('pe.id_parentesco = :id_parentesco');
       }
