@@ -297,11 +297,11 @@ router.get('/familia', authMiddleware.authenticateToken, personasController.cons
  *         description: ID de la comunidad cultural
  *         example: 2
  *       - in: query
- *         name: liderazgo
+ *         name: id_liderazgo
  *         schema:
- *           type: boolean
- *         description: Filtrar solo personas con liderazgo
- *         example: true
+ *           type: integer
+ *         description: ID del tipo de liderazgo (ver catálogo /api/liderazgo/tipos)
+ *         example: 1
  *       - in: query
  *         name: id_destreza
  *         schema:
@@ -650,10 +650,11 @@ router.get('/edad', authMiddleware.authenticateToken, personasController.consult
  *           type: integer
  *         description: ID de la comunidad cultural
  *       - in: query
- *         name: liderazgo
+ *         name: id_liderazgo
  *         schema:
- *           type: boolean
- *         description: Filtrar solo líderes
+ *           type: integer
+ *         description: ID del tipo de liderazgo (ver catálogo /api/liderazgo/tipos)
+ *         example: 1
  *       - in: query
  *         name: id_destreza
  *         schema:

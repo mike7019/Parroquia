@@ -134,7 +134,7 @@ class PersonasService {
         id_profesion,
         id_nivel_educativo,
         id_comunidad_cultural,
-        liderazgo,
+        id_liderazgo,
         id_destreza,
         
         // Sexo
@@ -227,8 +227,16 @@ class PersonasService {
         params.id_comunidad_cultural = id_comunidad_cultural;
       }
 
-      if (liderazgo) {
-        whereConditions.push('p.en_que_eres_lider IS NOT NULL AND p.en_que_eres_lider != \'\'');
+      if (id_liderazgo) {
+        whereConditions.push(`
+          EXISTS (
+            SELECT 1 FROM persona_liderazgo pl2
+            WHERE pl2.id_persona = p.id_personas
+              AND pl2.id_tipo_liderazgo = :id_liderazgo
+              AND pl2.activo = TRUE
+          )
+        `);
+        params.id_liderazgo = id_liderazgo;
       }
 
       if (id_destreza) {

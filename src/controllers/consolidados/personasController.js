@@ -120,7 +120,7 @@ class PersonasController {
         id_profesion: req.query.id_profesion ? parseInt(req.query.id_profesion) : undefined,
         id_nivel_educativo: req.query.id_nivel_educativo ? parseInt(req.query.id_nivel_educativo) : undefined,
         id_comunidad_cultural: req.query.id_comunidad_cultural ? parseInt(req.query.id_comunidad_cultural) : undefined,
-        liderazgo: req.query.liderazgo,
+        id_liderazgo: req.query.id_liderazgo ? parseInt(req.query.id_liderazgo) : undefined,
         id_destreza: req.query.id_destreza ? parseInt(req.query.id_destreza) : undefined,
         id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
         id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
@@ -305,9 +305,9 @@ class PersonasController {
         id_profesion: req.query.id_profesion ? parseInt(req.query.id_profesion) : undefined,
         id_nivel_educativo: req.query.id_nivel_educativo ? parseInt(req.query.id_nivel_educativo) : undefined,
         id_comunidad_cultural: req.query.id_comunidad_cultural ? parseInt(req.query.id_comunidad_cultural) : undefined,
-        liderazgo: req.query.liderazgo,
+        id_liderazgo: req.query.id_liderazgo ? parseInt(req.query.id_liderazgo) : undefined,
         id_destreza: req.query.id_destreza ? parseInt(req.query.id_destreza) : undefined,
-        
+
         // Tallas
         talla_camisa: req.query.talla_camisa,
         talla_pantalon: req.query.talla_pantalon,
