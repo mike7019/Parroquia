@@ -4,7 +4,7 @@ module.exports = {
       name: 'parroquia-api',
       script: 'src/app.js',
       instances: 3,
-      exec_mode: 'fork',
+      exec_mode: 'cluster',
       env: {
         NODE_ENV: 'production',
         PORT: 3000
