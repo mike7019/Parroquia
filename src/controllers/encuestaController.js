@@ -10,6 +10,7 @@ import { successResponse, paginatedResponse, errorResponse } from '../utils/resp
 import EncuestaService from '../services/encuestaService.js';
 import personaDetallesHelper from '../services/helpers/personaDetallesHelper.js';
 import LiderazgoService from '../services/catalog/liderazgoService.js';
+import NecesidadEnfermoService from '../services/catalog/necesidadEnfermoService.js';
 
 /**
  * Helper function to safely parse integers and return null if NaN
@@ -508,11 +509,14 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
         enQueEresLider = miembro.en_que_eres_lider;
       }
       
-      // ⭐ SOPORTE v2.0: Procesar necesidadesEnfermo (guardar como JSON string)
+      // ⭐ SOPORTE v2.0: Procesar necesidadesEnfermo como array de objetos {id, nombre}
       let necesidadEnfermo = null;
       if (miembro.necesidadesEnfermo && Array.isArray(miembro.necesidadesEnfermo) && miembro.necesidadesEnfermo.length > 0) {
-        // Formato v2.0: Array de necesidades, unir con comas
-        necesidadEnfermo = miembro.necesidadesEnfermo.join(', ');
+        // Formato v2.0: Array de objetos {id, nombre} o strings — unir nombres con comas
+        necesidadEnfermo = miembro.necesidadesEnfermo
+          .map(item => (typeof item === 'object' && item !== null ? item.nombre : item))
+          .filter(Boolean)
+          .join(', ');
       } else {
         // Mantener compatibilidad con formato anterior (nombre de enfermedad)
         necesidadEnfermo = nombreEnfermedad;
@@ -978,6 +982,27 @@ const procesarMiembrosFamilia = async (familiaId, familyMembers, informacionGene
             console.warn(`      ⚠️ Error sincronizando liderazgos: ${error.message} — Revertido al savepoint`);
           } catch (rbErr) {
             console.error(`      ❌ Error al revertir savepoint liderazgo: ${rbErr.message}`);
+            throw error;
+          }
+        }
+      }
+
+      // ========================================================================
+      // PROCESAR NECESIDADES DEL ENFERMO (relación muchos a muchos → persona_necesidad_enfermo)
+      // ========================================================================
+      if (miembro.necesidadesEnfermo && Array.isArray(miembro.necesidadesEnfermo) && miembro.necesidadesEnfermo.length > 0) {
+        console.log(`    🏥 Procesando ${miembro.necesidadesEnfermo.length} necesidades del enfermo...`);
+        const savepointName = `sp_necesidad_enfermo_${personaId}_${Date.now()}`;
+        try {
+          await sequelize.query(`SAVEPOINT ${savepointName};`, { transaction });
+          const resultado = await NecesidadEnfermoService.sincronizarNecesidadesPersona(personaId, miembro.necesidadesEnfermo, transaction);
+          console.log(`      ✅ Necesidades del enfermo sincronizadas: ${resultado.sincronizados}`);
+        } catch (error) {
+          try {
+            await sequelize.query(`ROLLBACK TO SAVEPOINT ${savepointName};`, { transaction });
+            console.warn(`      ⚠️ Error sincronizando necesidades del enfermo: ${error.message} — Revertido al savepoint`);
+          } catch (rbErr) {
+            console.error(`      ❌ Error al revertir savepoint necesidad_enfermo: ${rbErr.message}`);
             throw error;
           }
         }
@@ -1662,6 +1687,22 @@ export const obtenerEncuestas = async (req, res) => {
             type: QueryTypes.SELECT
           });
 
+          // ========================================================================
+          // CONSULTAR NECESIDADES DEL ENFERMO DE LA PERSONA
+          // ========================================================================
+          const necesidadesEnfermo = await sequelize.query(`
+            SELECT
+              pne.id_tipo_necesidad_enfermo,
+              tne.nombre
+            FROM persona_necesidad_enfermo pne
+            INNER JOIN tipos_necesidad_enfermo tne ON pne.id_tipo_necesidad_enfermo = tne.id_tipo_necesidad_enfermo
+            WHERE pne.id_persona = :personaId AND pne.activo = TRUE
+            ORDER BY tne.nombre
+          `, {
+            replacements: { personaId: persona.id_personas },
+            type: QueryTypes.SELECT
+          });
+
           return {
             id: persona.id_personas,
             nombre_completo: persona.nombres || '',
@@ -1707,6 +1748,10 @@ export const obtenerEncuestas = async (req, res) => {
             liderazgos: liderazgos.map(l => ({
               id: l.id_tipo_liderazgo,
               nombre: l.nombre
+            })),
+            necesidadesEnfermo: necesidadesEnfermo.map(n => ({
+              id: n.id_tipo_necesidad_enfermo,
+              nombre: n.nombre
             })),
             // ⭐ CAMPOS AGREGADOS - profesion, parentesco, comunidad cultural, celebraciones, necesidades ⭐
             profesion: persona.id_profesion ? {
@@ -2294,6 +2339,22 @@ export const obtenerEncuestaPorId = async (req, res) => {
         type: QueryTypes.SELECT
       });
 
+      // ========================================================================
+      // CONSULTAR NECESIDADES DEL ENFERMO DE LA PERSONA
+      // ========================================================================
+      const necesidadesEnfermo = await sequelize.query(`
+        SELECT
+          pne.id_tipo_necesidad_enfermo,
+          tne.nombre
+        FROM persona_necesidad_enfermo pne
+        INNER JOIN tipos_necesidad_enfermo tne ON pne.id_tipo_necesidad_enfermo = tne.id_tipo_necesidad_enfermo
+        WHERE pne.id_persona = :personaId AND pne.activo = TRUE
+        ORDER BY tne.nombre
+      `, {
+        replacements: { personaId: persona.id_personas },
+        type: QueryTypes.SELECT
+      });
+
       return {
         id: persona.id_personas,
         nombre_completo: persona.nombres || '',
@@ -2338,6 +2399,10 @@ export const obtenerEncuestaPorId = async (req, res) => {
         liderazgos: liderazgos.map(l => ({
           id: l.id_tipo_liderazgo,
           nombre: l.nombre
+        })),
+        necesidadesEnfermo: necesidadesEnfermo.map(n => ({
+          id: n.id_tipo_necesidad_enfermo,
+          nombre: n.nombre
         })),
         profesion: persona.id_profesion ? {
           id: persona.id_profesion,
@@ -3338,7 +3403,9 @@ export const actualizarCamposEncuesta = async (req, res) => {
               enQueEresLider: miembro.enQueEresLider && Array.isArray(miembro.enQueEresLider)
                 ? miembro.enQueEresLider.map(item => (typeof item === 'object' && item !== null ? item.nombre : item)).filter(Boolean).join(', ')
                 : null,
-              necesidadEnfermo: miembro.necesidadesEnfermo ? JSON.stringify(miembro.necesidadesEnfermo) : null,
+              necesidadEnfermo: miembro.necesidadesEnfermo && Array.isArray(miembro.necesidadesEnfermo)
+                ? miembro.necesidadesEnfermo.map(item => (typeof item === 'object' && item !== null ? item.nombre : item)).filter(Boolean).join(', ')
+                : null,
               solicitudComunionCasa: miembro.solicitudComunionCasa || false
             },
             type: QueryTypes.UPDATE,
@@ -3434,7 +3501,14 @@ export const actualizarCamposEncuesta = async (req, res) => {
           if (miembro.enQueEresLider !== undefined) {
             const liderazgoItems = Array.isArray(miembro.enQueEresLider) ? miembro.enQueEresLider : [];
             const resultado = await LiderazgoService.sincronizarLiderazgosPersona(idPersona, liderazgoItems, transaction);
-            console.log(`    👑 Liderazgos actualizados: ${resultado.sincronizados} | omitidos sin match: ${resultado.omitidos}`);
+            console.log(`    👑 Liderazgos actualizados: ${resultado.sincronizados}`);
+          }
+
+          // Actualizar necesidades del enfermo (relación muchos a muchos → persona_necesidad_enfermo)
+          if (miembro.necesidadesEnfermo !== undefined) {
+            const necesidadItems = Array.isArray(miembro.necesidadesEnfermo) ? miembro.necesidadesEnfermo : [];
+            const resultado = await NecesidadEnfermoService.sincronizarNecesidadesPersona(idPersona, necesidadItems, transaction);
+            console.log(`    🏥 Necesidades del enfermo actualizadas: ${resultado.sincronizados}`);
           }
 
           console.log(`  ✅ Persona actualizada: ${miembro.nombres} (ID: ${idPersona})`);

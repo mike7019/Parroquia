@@ -1013,11 +1013,16 @@ const swaggerConfig = {
             },
             necesidadesEnfermo: {
               type: 'array',
-              description: 'Formato v2.0: Array de necesidades médicas (se unen con comas)',
+              description: 'Array de necesidades del enfermo del catálogo. Cada objeto debe tener id (id_tipo_necesidad_enfermo) y nombre.',
               items: {
-                type: 'string'
+                type: 'object',
+                properties: {
+                  id: { type: 'integer', description: 'ID del tipo de necesidad del enfermo', example: 1 },
+                  nombre: { type: 'string', description: 'Nombre del tipo de necesidad del enfermo', example: 'Medicamentos' }
+                },
+                required: ['id']
               },
-              example: ['Medicina para su enfermedad', 'Silla de ruedas', 'Pasajes para Citas']
+              example: [{ id: 1, nombre: 'Medicamentos' }, { id: 3, nombre: 'Cuidador domiciliario' }]
             },
             enQueEresLider: {
               type: 'array',
@@ -1422,6 +1427,94 @@ const swaggerConfig = {
               type: 'string',
               format: 'date-time',
               description: 'Fecha en que se asignó el liderazgo',
+              example: '2025-10-07T10:00:00Z'
+            },
+            fecha_actualizacion: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización de la asignación',
+              example: '2025-10-07T10:00:00Z'
+            }
+          }
+        },
+        TipoNecesidadEnfermo: {
+          type: 'object',
+          properties: {
+            id_tipo_necesidad_enfermo: {
+              type: 'integer',
+              description: 'ID único del tipo de necesidad del enfermo',
+              example: 1
+            },
+            nombre: {
+              type: 'string',
+              maxLength: 255,
+              description: 'Nombre del tipo de necesidad del enfermo',
+              example: 'Medicamentos'
+            },
+            descripcion: {
+              type: 'string',
+              nullable: true,
+              description: 'Descripción del tipo de necesidad del enfermo',
+              example: 'Necesidad de medicamentos para tratamiento médico continuo'
+            },
+            activo: {
+              type: 'boolean',
+              description: 'Estado activo/inactivo del tipo de necesidad',
+              example: true
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación',
+              example: '2025-10-07T10:00:00Z'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización',
+              example: '2025-10-07T10:00:00Z'
+            }
+          }
+        },
+        PersonaNecesidadEnfermo: {
+          type: 'object',
+          properties: {
+            id_persona_necesidad_enfermo: {
+              type: 'integer',
+              description: 'ID único de la relación persona-necesidad del enfermo',
+              example: 1
+            },
+            id_tipo_necesidad_enfermo: {
+              type: 'integer',
+              description: 'ID del tipo de necesidad del enfermo',
+              example: 1
+            },
+            tipo_necesidad: {
+              type: 'string',
+              description: 'Nombre del tipo de necesidad del enfermo',
+              example: 'Medicamentos'
+            },
+            descripcion_tipo: {
+              type: 'string',
+              nullable: true,
+              description: 'Descripción general del tipo de necesidad del enfermo',
+              example: 'Necesidad de medicamentos para tratamiento médico continuo'
+            },
+            descripcion_especifica: {
+              type: 'string',
+              nullable: true,
+              description: 'Descripción específica de la necesidad de la persona',
+              example: 'Insulina diaria para diabetes tipo 2'
+            },
+            activo: {
+              type: 'boolean',
+              description: 'Estado activo/inactivo de la asignación',
+              example: true
+            },
+            fecha_asignacion: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha en que se asignó la necesidad',
               example: '2025-10-07T10:00:00Z'
             },
             fecha_actualizacion: {
@@ -3063,9 +3156,16 @@ const swaggerConfig = {
                   },
                   necesidadesEnfermo: {
                     type: 'array',
-                    description: 'Necesidades del enfermo (array de strings)',
-                    items: { type: 'string' },
-                    example: ['pasajes', 'medicamentos']
+                    description: 'Array de necesidades del enfermo del catálogo. Cada objeto debe tener id (id_tipo_necesidad_enfermo) y nombre.',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'integer', description: 'ID del tipo de necesidad del enfermo', example: 1 },
+                        nombre: { type: 'string', description: 'Nombre del tipo de necesidad del enfermo', example: 'Medicamentos' }
+                      },
+                      required: ['id']
+                    },
+                    example: [{ id: 1, nombre: 'Medicamentos' }, { id: 3, nombre: 'Cuidador domiciliario' }]
                   },
                   solicitudComunionCasa: { type: 'boolean', example: true },
                   profesionMotivoFechaCelebrar: {

@@ -19,6 +19,7 @@ import profesionRoutes from './profesionRoutes.js';
 import tallaRoutes from './tallas.js';
 import destrezaRoutes from './destrezaRoutes.js';
 import liderazgoRoutes from './liderazgoRoutes.js';
+import necesidadEnfermoRoutes from './necesidadEnfermoRoutes.js';
 
 const router = express.Router();
 
@@ -124,6 +125,7 @@ router.use('/profesiones', profesionRoutes);
 router.use('/tallas', tallaRoutes);
 router.use('/destrezas', destrezaRoutes);
 router.use('/liderazgo', liderazgoRoutes);
+router.use('/necesidad-enfermo', necesidadEnfermoRoutes);
 
 // Health check for catalog module
 router.get('/health', (req, res) => {
@@ -151,7 +153,8 @@ router.get('/health', (req, res) => {
       profesiones: 'active',
       tallas: 'active',
       destrezas: 'active',
-      liderazgo: 'active'
+      liderazgo: 'active',
+      necesidadEnfermo: 'active'
     }
   });
 });

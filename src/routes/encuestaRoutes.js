@@ -273,7 +273,11 @@ const router = express.Router();
  *                     nombre: "Anemia"
  *                   - id: 67
  *                     nombre: "Acné"
- *                 necesidadesEnfermo: ["pasajes", "medicamentos"]
+ *                 necesidadesEnfermo:
+ *                   - id: 1
+ *                     nombre: "Medicamentos"
+ *                   - id: 3
+ *                     nombre: "Cuidador domiciliario"
  *                 solicitudComunionCasa: true
  *                 profesionMotivoFechaCelebrar:
  *                   profesion: { id: 6, nombre: "Agricultor" }
@@ -865,7 +869,9 @@ router.delete('/:id',
  *                 enQueEresLider:
  *                   - id: 1
  *                     nombre: "Comunitario"
- *                 necesidadesEnfermo: []
+ *                 necesidadesEnfermo:
+ *                   - id: 1
+ *                     nombre: "Medicamentos"
  *                 solicitudComunionCasa: false
  *                 profesionMotivoFechaCelebrar:
  *                   profesion:
