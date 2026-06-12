@@ -136,7 +136,8 @@ class PersonasService {
         id_comunidad_cultural,
         id_liderazgo,
         id_destreza,
-        
+        id_necesidad_enfermo,
+
         // Sexo
         id_sexo,
         sexo,
@@ -248,6 +249,18 @@ class PersonasService {
           )
         `);
         params.id_destreza = id_destreza;
+      }
+
+      if (id_necesidad_enfermo) {
+        whereConditions.push(`
+          EXISTS (
+            SELECT 1 FROM persona_necesidad_enfermo pne2
+            WHERE pne2.id_persona = p.id_personas
+              AND pne2.id_tipo_necesidad_enfermo = :id_necesidad_enfermo
+              AND pne2.activo = TRUE
+          )
+        `);
+        params.id_necesidad_enfermo = id_necesidad_enfermo;
       }
 
       // FILTROS DE TALLAS
