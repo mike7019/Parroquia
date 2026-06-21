@@ -48,6 +48,10 @@ function extraerFiltros(query) {
     // Fechas de registro
     fecha_registro_desde: query.fecha_registro_desde || undefined,
     fecha_registro_hasta: query.fecha_registro_hasta || undefined,
+
+    // Cumpleaños
+    mes_nacimiento: query.mes_nacimiento ? parseInt(query.mes_nacimiento) : undefined,
+    dia_nacimiento: query.dia_nacimiento ? parseInt(query.dia_nacimiento) : undefined,
   };
 
   // Eliminar claves sin valor (undefined, null, NaN)
@@ -172,6 +176,26 @@ class PersonasController {
     } catch (error) {
       console.error('❌ Error en consultarPorEdad:', error);
       res.status(500).json({ status: 'error', message: error.message, code: 'CONSULTA_EDAD_ERROR' });
+    }
+  }
+
+  /**
+   * GET /api/personas/consolidado/cumpleanos
+   */
+  async consultarPorCumpleanos(req, res) {
+    try {
+      const format = req.query.format || 'json';
+      const filtros = extraerFiltros(req.query);
+      console.log('🎂 Consulta por cumpleaños:', filtros);
+
+      if (format === 'excel') {
+        await responderExcel(res, filtros, 'personas_cumpleanos');
+      } else {
+        res.json(await personasService.consultarPersonas(filtros));
+      }
+    } catch (error) {
+      console.error('❌ Error en consultarPorCumpleanos:', error);
+      res.status(500).json({ status: 'error', message: error.message, code: 'CONSULTA_CUMPLEANOS_ERROR' });
     }
   }
 

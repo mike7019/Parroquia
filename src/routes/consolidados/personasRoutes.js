@@ -864,6 +864,81 @@ router.get('/edad', authMiddleware.authenticateToken, personasController.consult
 
 /**
  * @swagger
+ * /api/personas/consolidado/cumpleanos:
+ *   get:
+ *     summary: Consultar personas por mes/día de cumpleaños
+ *     description: Filtra personas cuyo día o mes de nacimiento coincide con los parámetros indicados, sin importar el año de nacimiento. Admite todos los filtros disponibles.
+ *     tags:
+ *       - Personas Consolidado
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: mes_nacimiento
+ *         required: true
+ *         schema: { type: integer, minimum: 1, maximum: 12 }
+ *         description: Mes de nacimiento (1=Enero … 12=Diciembre)
+ *         example: 6
+ *       - in: query
+ *         name: id_municipio
+ *         schema: { type: integer }
+ *         description: ID del municipio
+ *       - in: query
+ *         name: id_parroquia
+ *         schema: { type: integer }
+ *         description: ID de la parroquia
+ *       - in: query
+ *         name: id_sector
+ *         schema: { type: integer }
+ *         description: ID del sector
+ *       - in: query
+ *         name: id_vereda
+ *         schema: { type: integer }
+ *         description: ID de la vereda
+ *       - in: query
+ *         name: id_corregimiento
+ *         schema: { type: integer }
+ *         description: ID del corregimiento
+ *       - in: query
+ *         name: id_centro_poblado
+ *         schema: { type: integer }
+ *         description: ID del centro poblado
+ *       - in: query
+ *         name: id_sexo
+ *         schema: { type: integer }
+ *         description: ID del sexo (1=Masculino, 2=Femenino)
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 10 }
+ *         description: Registros por página
+ *       - in: query
+ *         name: format
+ *         schema: { type: string, enum: [json, excel], default: json }
+ *         description: Formato de respuesta
+ *     responses:
+ *       200:
+ *         description: Lista de personas filtradas por cumpleaños
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PersonasResponse'
+ *           application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
+router.get('/cumpleanos', authMiddleware.authenticateToken, personasController.consultarPorCumpleanos);
+
+/**
+ * @swagger
  * /api/personas/consolidado/reporte:
  *   get:
  *     summary: Reporte general con todos los filtros combinados

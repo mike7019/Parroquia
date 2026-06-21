@@ -153,7 +153,11 @@ class PersonasService {
 
         // Fechas de registro
         fecha_registro_desde,
-        fecha_registro_hasta
+        fecha_registro_hasta,
+
+        // Cumpleaños (mes de nacimiento, independiente del año)
+        mes_nacimiento,
+        dia_nacimiento
       } = filtros;
 
       const offset = (page - 1) * limit;
@@ -310,6 +314,17 @@ class PersonasService {
       if (fecha_registro_hasta) {
         whereConditions.push('f.fecha_encuesta <= :fecha_registro_hasta');
         params.fecha_registro_hasta = fecha_registro_hasta;
+      }
+
+      // FILTRO DE CUMPLEAÑOS (mes de nacimiento, ignora el año)
+      if (mes_nacimiento) {
+        whereConditions.push('EXTRACT(MONTH FROM p.fecha_nacimiento) = :mes_nacimiento');
+        params.mes_nacimiento = mes_nacimiento;
+      }
+
+      if (dia_nacimiento) {
+        whereConditions.push('EXTRACT(DAY FROM p.fecha_nacimiento) = :dia_nacimiento');
+        params.dia_nacimiento = dia_nacimiento;
       }
 
       const whereClause = whereConditions.length > 0 
