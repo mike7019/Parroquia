@@ -1768,8 +1768,7 @@ export const obtenerEncuestas = async (req, res) => {
             } : null,
             // ⭐ NUEVOS CAMPOS - Celebraciones y Enfermedades (arrays) ⭐
             celebraciones: persona.celebraciones || [],
-            enfermedades: persona.enfermedades || [],
-            necesidad_enfermo: persona.necesidad_enfermo || null
+            enfermedades: persona.enfermedades || []
           };
         }));
 
@@ -2417,8 +2416,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
           nombre: persona.comunidad_cultural_nombre || null
         } : null,
         celebraciones: persona.celebraciones || [],
-        enfermedades: persona.enfermedades || [],
-        necesidad_enfermo: persona.necesidad_enfermo || null
+        enfermedades: persona.enfermedades || []
       };
     }));
 
