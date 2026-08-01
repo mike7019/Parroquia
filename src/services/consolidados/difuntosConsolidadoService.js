@@ -3,6 +3,7 @@ import { Op, QueryTypes } from 'sequelize';
 import sequelize from '../../../config/sequelize.js';
 import ExcelJS from 'exceljs';
 import PDFDocument from 'pdfkit';
+import { seleccionarColumnas, letraColumnaExcel } from '../../utils/exportColumns.js';
 
 class DifuntosConsolidadoService {
   /**
@@ -526,7 +527,7 @@ class DifuntosConsolidadoService {
    * NUEVO MÉTODO: Generar reporte Excel completo de difuntos
    * Con múltiples hojas profesionales
    */
-  async generarReporteExcelDifuntos(filtros = {}) {
+  async generarReporteExcelDifuntos(filtros = {}, camposSeleccionados = null) {
     const workbook = new ExcelJS.Workbook();
     
     // Configuración del workbook
@@ -545,10 +546,10 @@ class DifuntosConsolidadoService {
       console.log(`📋 Procesando ${difuntos.length} difuntos para Excel`);
       
       // 2. HOJA 1: RESUMEN GENERAL
-      await this.crearHojaResumenDifuntos(workbook, difuntos, datosDifuntos.estadisticas);
-      
+      await this.crearHojaResumenDifuntos(workbook, difuntos, datosDifuntos.estadisticas, camposSeleccionados);
+
       // 3. HOJA 2: DETALLE COMPLETO
-      await this.crearHojaDetalleDifuntos(workbook, difuntos);
+      await this.crearHojaDetalleDifuntos(workbook, difuntos, camposSeleccionados);
       
       // 4. HOJA 3: ESTADÍSTICAS POR FUENTE
       await this.crearHojaEstadisticasFuente(workbook, difuntos);
@@ -571,11 +572,11 @@ class DifuntosConsolidadoService {
   /**
    * HOJA 1: RESUMEN GENERAL DE DIFUNTOS
    */
-  async crearHojaResumenDifuntos(workbook, difuntos, estadisticas) {
+  async crearHojaResumenDifuntos(workbook, difuntos, estadisticas, camposSeleccionados = null) {
     const hoja = workbook.addWorksheet('Resumen General');
-    
-    // Configurar columnas
-    hoja.columns = [
+
+    // Configurar columnas disponibles y aplicar selección del usuario (si la envió)
+    const columnasDisponibles = [
       { header: 'Fuente', key: 'fuente', width: 18 },
       { header: 'ID Difunto', key: 'id_difunto', width: 12 },
       { header: 'Nombre Completo', key: 'nombre_completo', width: 30 },
@@ -592,7 +593,8 @@ class DifuntosConsolidadoService {
       { header: 'Dirección', key: 'direccion', width: 35 },
       { header: 'Observaciones', key: 'observaciones', width: 40 }
     ];
-    
+    hoja.columns = seleccionarColumnas(columnasDisponibles, camposSeleccionados);
+
     // Agregar datos
     difuntos.forEach(difunto => {
       hoja.addRow({
@@ -620,10 +622,10 @@ class DifuntosConsolidadoService {
   /**
    * HOJA 2: DETALLE COMPLETO POR DIFUNTO
    */
-  async crearHojaDetalleDifuntos(workbook, difuntos) {
+  async crearHojaDetalleDifuntos(workbook, difuntos, camposSeleccionados = null) {
     const hoja = workbook.addWorksheet('Detalle Completo');
-    
-    hoja.columns = [
+
+    const columnasDisponibles = [
       { header: 'Tipo Registro', key: 'tipo_registro', width: 18 },
       { header: 'ID Sistema', key: 'id_sistema', width: 12 },
       { header: 'Nombre Completo', key: 'nombre', width: 35 },
@@ -636,7 +638,8 @@ class DifuntosConsolidadoService {
       { header: 'Contacto', key: 'contacto', width: 15 },
       { header: 'Observaciones Completas', key: 'observaciones_completas', width: 50 }
     ];
-    
+    hoja.columns = seleccionarColumnas(columnasDisponibles, camposSeleccionados);
+
     // Agregar datos enriquecidos
     difuntos.forEach(difunto => {
       const fecha = difunto.fecha_aniversario ? new Date(difunto.fecha_aniversario) : null;

@@ -459,6 +459,13 @@ router.get('/sin-madre', authMiddleware.authenticateToken, familiasConsolidadoCo
  *           type: integer
  *           default: 100
  *         description: Límite de resultados por página
+ *       - in: query
+ *         name: campos
+ *         schema: { type: string }
+ *         description: >
+ *           Lista de columnas a incluir en las hojas "Información General", "Miembros de
+ *           Familias" y "Difuntos", separadas por comas (ej. `apellido,direccion,telefono`).
+ *           Si se omite, se incluyen todas. La hoja de Estadísticas no se ve afectada.
  *     responses:
  *       200:
  *         description: Archivo Excel generado exitosamente

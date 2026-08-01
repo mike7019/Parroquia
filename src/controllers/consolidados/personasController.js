@@ -1,4 +1,5 @@
 import personasService from '../../services/consolidados/personasService.js';
+import { parseCampos } from '../../utils/exportColumns.js';
 
 /**
  * Extrae y parsea todos los filtros disponibles del query string.
@@ -68,8 +69,8 @@ function extraerFiltros(query) {
 /**
  * Envía la respuesta Excel con los headers correctos.
  */
-async function responderExcel(res, filtros, filename) {
-  const buffer = await personasService.generarExcelPersonas(filtros);
+async function responderExcel(res, filtros, filename, camposSeleccionados) {
+  const buffer = await personasService.generarExcelPersonas(filtros, camposSeleccionados);
   const timestamp = new Date().toISOString().split('T')[0];
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.setHeader('Content-Disposition', `attachment; filename="${filename}_${timestamp}.xlsx"`);
@@ -86,10 +87,11 @@ class PersonasController {
     try {
       const format = req.query.format || 'json';
       const filtros = extraerFiltros(req.query);
+      const camposSeleccionados = parseCampos(req.query);
       console.log('📍 Consulta geográfica:', filtros);
 
       if (format === 'excel') {
-        await responderExcel(res, filtros, 'personas_geografico');
+        await responderExcel(res, filtros, 'personas_geografico', camposSeleccionados);
       } else {
         res.json(await personasService.consultarPersonas(filtros));
       }
@@ -106,10 +108,11 @@ class PersonasController {
     try {
       const format = req.query.format || 'json';
       const filtros = extraerFiltros(req.query);
+      const camposSeleccionados = parseCampos(req.query);
       console.log('👨‍👩‍👧‍👦 Consulta por familia:', filtros);
 
       if (format === 'excel') {
-        await responderExcel(res, filtros, 'personas_familia');
+        await responderExcel(res, filtros, 'personas_familia', camposSeleccionados);
       } else {
         res.json(await personasService.consultarPersonas(filtros));
       }
@@ -126,10 +129,11 @@ class PersonasController {
     try {
       const format = req.query.format || 'json';
       const filtros = extraerFiltros(req.query);
+      const camposSeleccionados = parseCampos(req.query);
       console.log('👤 Consulta por datos personales:', filtros);
 
       if (format === 'excel') {
-        await responderExcel(res, filtros, 'personas_personal');
+        await responderExcel(res, filtros, 'personas_personal', camposSeleccionados);
       } else {
         res.json(await personasService.consultarPersonas(filtros));
       }
@@ -146,10 +150,11 @@ class PersonasController {
     try {
       const format = req.query.format || 'json';
       const filtros = extraerFiltros(req.query);
+      const camposSeleccionados = parseCampos(req.query);
       console.log('👕 Consulta por tallas:', filtros);
 
       if (format === 'excel') {
-        await responderExcel(res, filtros, 'personas_tallas');
+        await responderExcel(res, filtros, 'personas_tallas', camposSeleccionados);
       } else {
         res.json(await personasService.consultarPersonas(filtros));
       }
@@ -166,10 +171,11 @@ class PersonasController {
     try {
       const format = req.query.format || 'json';
       const filtros = extraerFiltros(req.query);
+      const camposSeleccionados = parseCampos(req.query);
       console.log('🎂 Consulta por edad:', filtros);
 
       if (format === 'excel') {
-        await responderExcel(res, filtros, 'personas_edad');
+        await responderExcel(res, filtros, 'personas_edad', camposSeleccionados);
       } else {
         res.json(await personasService.consultarPersonas(filtros));
       }
@@ -186,10 +192,11 @@ class PersonasController {
     try {
       const format = req.query.format || 'json';
       const filtros = extraerFiltros(req.query);
+      const camposSeleccionados = parseCampos(req.query);
       console.log('🎂 Consulta por cumpleaños:', filtros);
 
       if (format === 'excel') {
-        await responderExcel(res, filtros, 'personas_cumpleanos');
+        await responderExcel(res, filtros, 'personas_cumpleanos', camposSeleccionados);
       } else {
         res.json(await personasService.consultarPersonas(filtros));
       }
@@ -206,10 +213,11 @@ class PersonasController {
     try {
       const format = req.query.format || 'json';
       const filtros = extraerFiltros(req.query);
+      const camposSeleccionados = parseCampos(req.query);
       console.log('📊 Reporte general con filtros:', filtros);
 
       if (format === 'excel') {
-        await responderExcel(res, filtros, 'personas_reporte_general');
+        await responderExcel(res, filtros, 'personas_reporte_general', camposSeleccionados);
       } else {
         res.json(await personasService.consultarPersonas(filtros));
       }

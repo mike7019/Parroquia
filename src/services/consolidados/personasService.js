@@ -1,6 +1,7 @@
 import sequelize from '../../../config/sequelize.js';
 import { QueryTypes } from 'sequelize';
 import ExcelJS from 'exceljs';
+import { seleccionarColumnas, letraColumnaExcel } from '../../utils/exportColumns.js';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -544,9 +545,10 @@ class PersonasService {
   /**
    * Generar reporte Excel de personas
    * @param {Object} filtros - Filtros de búsqueda
+   * @param {string[]|null} camposSeleccionados - Keys de columnas a incluir (null = todas)
    * @returns {Promise<Buffer>} Buffer del archivo Excel
    */
-  async generarExcelPersonas(filtros = {}) {
+  async generarExcelPersonas(filtros = {}, camposSeleccionados = null) {
     try {
       console.log('📊 Generando Excel de personas...');
 
@@ -557,8 +559,8 @@ class PersonasService {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Personas');
 
-      // Definir columnas
-      worksheet.columns = [
+      // Definir columnas disponibles y aplicar selección del usuario (si la envió)
+      const columnasDisponibles = [
         { header: 'Nombres',             key: 'nombres',             width: 35 },
         { header: 'Documento',           key: 'identificacion',      width: 18 },
         { header: 'Tipo ID',             key: 'tipo_identificacion', width: 15 },
@@ -593,6 +595,7 @@ class PersonasService {
         { header: 'Corregimiento',       key: 'corregimiento',       width: 25 },
         { header: 'Centro Poblado',      key: 'centro_poblado',      width: 25 },
       ];
+      worksheet.columns = seleccionarColumnas(columnasDisponibles, camposSeleccionados);
 
       // Estilo del header
       worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
@@ -666,7 +669,7 @@ class PersonasService {
       // Autofiltro
       worksheet.autoFilter = {
         from: 'A1',
-        to: `AG1`
+        to: `${letraColumnaExcel(worksheet.columns.length)}1`
       };
 
       // Congelar primera fila

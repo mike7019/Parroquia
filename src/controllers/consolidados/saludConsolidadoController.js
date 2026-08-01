@@ -1,4 +1,5 @@
 import saludConsolidadoService from '../../services/consolidados/saludConsolidadoService.js';
+import { parseCampos } from '../../utils/exportColumns.js';
 
 class SaludConsolidadoController {
   /**
@@ -155,7 +156,8 @@ class SaludConsolidadoController {
 
       console.log('📊 Generando reporte Excel de salud con filtros:', filtros);
 
-      const buffer = await saludConsolidadoService.generarReporteExcel(filtros);
+      const camposSeleccionados = parseCampos(req.query);
+      const buffer = await saludConsolidadoService.generarReporteExcel(filtros, camposSeleccionados);
 
       // Configurar headers para descarga de archivo Excel
       const timestamp = new Date().toISOString().split('T')[0];

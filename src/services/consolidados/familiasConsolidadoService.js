@@ -2,6 +2,7 @@ import { QueryTypes } from 'sequelize';
 import sequelize from '../../../config/sequelize.js';
 import ExcelJS from 'exceljs';
 import personaDetallesHelper from '../helpers/personaDetallesHelper.js';
+import { seleccionarColumnas } from '../../utils/exportColumns.js';
 
 class FamiliasConsolidadoService {
   
@@ -370,7 +371,7 @@ class FamiliasConsolidadoService {
    * Generar reporte Excel completo de familias
    * GET /api/familias/reporte/excel
    */
-  async generarReporteExcelFamilias(filtros = {}) {
+  async generarReporteExcelFamilias(filtros = {}, camposSeleccionados = null) {
     const workbook = new ExcelJS.Workbook();
     
     // Configuración del workbook
@@ -389,13 +390,13 @@ class FamiliasConsolidadoService {
       console.log(`📋 Procesando ${familias.length} familias para Excel`);
       
       // 2. HOJA 1: INFORMACIÓN GENERAL DE FAMILIAS
-      await this.crearHojaInfoGeneral(workbook, familias);
-      
+      await this.crearHojaInfoGeneral(workbook, familias, camposSeleccionados);
+
       // 3. HOJA 2: MIEMBROS DE FAMILIAS
-      await this.crearHojaMiembrosFamilias(workbook, familias);
-      
+      await this.crearHojaMiembrosFamilias(workbook, familias, camposSeleccionados);
+
       // 4. HOJA 3: DIFUNTOS POR FAMILIA
-      await this.crearHojaDifuntosFamilias(workbook, familias);
+      await this.crearHojaDifuntosFamilias(workbook, familias, camposSeleccionados);
       
       // 5. HOJA 4: ESTADÍSTICAS GENERALES
       await this.crearHojaEstadisticasFamilias(workbook, familias);
@@ -412,11 +413,11 @@ class FamiliasConsolidadoService {
   /**
    * HOJA 1: INFORMACIÓN GENERAL DE FAMILIAS
    */
-  async crearHojaInfoGeneral(workbook, familias) {
+  async crearHojaInfoGeneral(workbook, familias, camposSeleccionados = null) {
     const hoja = workbook.addWorksheet('Información General');
-    
-    // Configurar columnas
-    hoja.columns = [
+
+    // Configurar columnas disponibles y aplicar selección del usuario (si la envió)
+    const columnasDisponibles = [
       { header: 'Código Familia', key: 'codigo', width: 15 },
       { header: 'Apellido Familiar', key: 'apellido', width: 25 },
       { header: 'Dirección', key: 'direccion', width: 35 },
@@ -435,7 +436,8 @@ class FamiliasConsolidadoService {
       { header: 'N° Miembros', key: 'num_miembros', width: 12 },
       { header: 'N° Difuntos', key: 'num_difuntos', width: 12 }
     ];
-    
+    hoja.columns = seleccionarColumnas(columnasDisponibles, camposSeleccionados);
+
     // Agregar datos
     familias.forEach(familia => {
       hoja.addRow({
@@ -465,10 +467,10 @@ class FamiliasConsolidadoService {
   /**
    * HOJA 2: MIEMBROS DE FAMILIAS
    */
-  async crearHojaMiembrosFamilias(workbook, familias) {
+  async crearHojaMiembrosFamilias(workbook, familias, camposSeleccionados = null) {
     const hoja = workbook.addWorksheet('Miembros de Familias');
-    
-    hoja.columns = [
+
+    const columnasDisponibles = [
       { header: 'ID Familia', key: 'id_familia', width: 12 },
       { header: 'Apellido Familia', key: 'familia', width: 25 },
       { header: 'Nombre Completo', key: 'nombre', width: 35 },
@@ -493,7 +495,8 @@ class FamiliasConsolidadoService {
       { header: 'Enfermedades', key: 'enfermedades', width: 30 },
       { header: 'Necesidades del Enfermo', key: 'necesidades_enfermo', width: 40 }
     ];
-    
+    hoja.columns = seleccionarColumnas(columnasDisponibles, camposSeleccionados);
+
     // Agregar datos de todos los miembros
     familias.forEach(familia => {
       familia.miembros_familia?.forEach(miembro => {
@@ -536,10 +539,10 @@ class FamiliasConsolidadoService {
   /**
    * HOJA 3: DIFUNTOS POR FAMILIA
    */
-  async crearHojaDifuntosFamilias(workbook, familias) {
+  async crearHojaDifuntosFamilias(workbook, familias, camposSeleccionados = null) {
     const hoja = workbook.addWorksheet('Difuntos');
-    
-    hoja.columns = [
+
+    const columnasDisponibles = [
       { header: 'ID Familia', key: 'id_familia', width: 12 },
       { header: 'Apellido Familia', key: 'familia', width: 25 },
       { header: 'Nombre Difunto', key: 'nombre', width: 35 },
@@ -548,7 +551,8 @@ class FamiliasConsolidadoService {
       { header: 'Fecha Fallecimiento', key: 'fecha', width: 18 },
       { header: 'Causa Fallecimiento', key: 'causa', width: 40 }
     ];
-    
+    hoja.columns = seleccionarColumnas(columnasDisponibles, camposSeleccionados);
+
     // Agregar datos de todos los difuntos
     familias.forEach(familia => {
       familia.difuntos_familia?.forEach(difunto => {

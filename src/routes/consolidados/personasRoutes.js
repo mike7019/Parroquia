@@ -274,6 +274,20 @@ const router = express.Router();
  *         name: format
  *         schema: { type: string, enum: [json, excel], default: json }
  *         description: Formato de respuesta
+ *       - in: query
+ *         name: campos
+ *         schema: { type: string }
+ *         description: >
+ *           Lista de columnas a incluir en el Excel exportado, separadas por comas
+ *           (ej. `nombres,identificacion,telefono,municipio`). Solo aplica cuando format=excel;
+ *           si se omite, se incluyen todas las columnas. Columnas disponibles: nombres,
+ *           identificacion, tipo_identificacion, fecha_nacimiento, sexo, telefono,
+ *           correo_electronico, direccion, parentesco, estado_civil, profesion, nivel_educativo,
+ *           comunidad_cultural, talla_camisa, talla_pantalon, talla_zapato, liderazgo,
+ *           necesidad_enfermo, destrezas, apellido_familiar, sustento_familia,
+ *           autorizacion_datos, tipo_vivienda, celebraciones, disposicion_basura,
+ *           sistema_acueducto, aguas_residuales, municipio, parroquia, sector, vereda,
+ *           corregimiento, centro_poblado.
  *     responses:
  *       200:
  *         description: Lista de personas filtradas
@@ -418,6 +432,20 @@ router.get('/geografico', authMiddleware.authenticateToken, personasController.c
  *         name: format
  *         schema: { type: string, enum: [json, excel], default: json }
  *         description: Formato de respuesta
+ *       - in: query
+ *         name: campos
+ *         schema: { type: string }
+ *         description: >
+ *           Lista de columnas a incluir en el Excel exportado, separadas por comas
+ *           (ej. `nombres,identificacion,telefono,municipio`). Solo aplica cuando format=excel;
+ *           si se omite, se incluyen todas las columnas. Columnas disponibles: nombres,
+ *           identificacion, tipo_identificacion, fecha_nacimiento, sexo, telefono,
+ *           correo_electronico, direccion, parentesco, estado_civil, profesion, nivel_educativo,
+ *           comunidad_cultural, talla_camisa, talla_pantalon, talla_zapato, liderazgo,
+ *           necesidad_enfermo, destrezas, apellido_familiar, sustento_familia,
+ *           autorizacion_datos, tipo_vivienda, celebraciones, disposicion_basura,
+ *           sistema_acueducto, aguas_residuales, municipio, parroquia, sector, vereda,
+ *           corregimiento, centro_poblado.
  *     responses:
  *       200:
  *         description: Lista de personas filtradas
@@ -563,6 +591,20 @@ router.get('/familia', authMiddleware.authenticateToken, personasController.cons
  *         name: format
  *         schema: { type: string, enum: [json, excel], default: json }
  *         description: Formato de respuesta
+ *       - in: query
+ *         name: campos
+ *         schema: { type: string }
+ *         description: >
+ *           Lista de columnas a incluir en el Excel exportado, separadas por comas
+ *           (ej. `nombres,identificacion,telefono,municipio`). Solo aplica cuando format=excel;
+ *           si se omite, se incluyen todas las columnas. Columnas disponibles: nombres,
+ *           identificacion, tipo_identificacion, fecha_nacimiento, sexo, telefono,
+ *           correo_electronico, direccion, parentesco, estado_civil, profesion, nivel_educativo,
+ *           comunidad_cultural, talla_camisa, talla_pantalon, talla_zapato, liderazgo,
+ *           necesidad_enfermo, destrezas, apellido_familiar, sustento_familia,
+ *           autorizacion_datos, tipo_vivienda, celebraciones, disposicion_basura,
+ *           sistema_acueducto, aguas_residuales, municipio, parroquia, sector, vereda,
+ *           corregimiento, centro_poblado.
  *     responses:
  *       200:
  *         description: Lista de personas filtradas
@@ -708,6 +750,20 @@ router.get('/personal', authMiddleware.authenticateToken, personasController.con
  *         name: format
  *         schema: { type: string, enum: [json, excel], default: json }
  *         description: Formato de respuesta
+ *       - in: query
+ *         name: campos
+ *         schema: { type: string }
+ *         description: >
+ *           Lista de columnas a incluir en el Excel exportado, separadas por comas
+ *           (ej. `nombres,identificacion,telefono,municipio`). Solo aplica cuando format=excel;
+ *           si se omite, se incluyen todas las columnas. Columnas disponibles: nombres,
+ *           identificacion, tipo_identificacion, fecha_nacimiento, sexo, telefono,
+ *           correo_electronico, direccion, parentesco, estado_civil, profesion, nivel_educativo,
+ *           comunidad_cultural, talla_camisa, talla_pantalon, talla_zapato, liderazgo,
+ *           necesidad_enfermo, destrezas, apellido_familiar, sustento_familia,
+ *           autorizacion_datos, tipo_vivienda, celebraciones, disposicion_basura,
+ *           sistema_acueducto, aguas_residuales, municipio, parroquia, sector, vereda,
+ *           corregimiento, centro_poblado.
  *     responses:
  *       200:
  *         description: Lista de personas filtradas
@@ -848,6 +904,20 @@ router.get('/tallas', authMiddleware.authenticateToken, personasController.consu
  *         name: format
  *         schema: { type: string, enum: [json, excel], default: json }
  *         description: Formato de respuesta
+ *       - in: query
+ *         name: campos
+ *         schema: { type: string }
+ *         description: >
+ *           Lista de columnas a incluir en el Excel exportado, separadas por comas
+ *           (ej. `nombres,identificacion,telefono,municipio`). Solo aplica cuando format=excel;
+ *           si se omite, se incluyen todas las columnas. Columnas disponibles: nombres,
+ *           identificacion, tipo_identificacion, fecha_nacimiento, sexo, telefono,
+ *           correo_electronico, direccion, parentesco, estado_civil, profesion, nivel_educativo,
+ *           comunidad_cultural, talla_camisa, talla_pantalon, talla_zapato, liderazgo,
+ *           necesidad_enfermo, destrezas, apellido_familiar, sustento_familia,
+ *           autorizacion_datos, tipo_vivienda, celebraciones, disposicion_basura,
+ *           sistema_acueducto, aguas_residuales, municipio, parroquia, sector, vereda,
+ *           corregimiento, centro_poblado.
  *     responses:
  *       200:
  *         description: Lista de personas filtradas
@@ -919,6 +989,20 @@ router.get('/edad', authMiddleware.authenticateToken, personasController.consult
  *         name: format
  *         schema: { type: string, enum: [json, excel], default: json }
  *         description: Formato de respuesta
+ *       - in: query
+ *         name: campos
+ *         schema: { type: string }
+ *         description: >
+ *           Lista de columnas a incluir en el Excel exportado, separadas por comas
+ *           (ej. `nombres,identificacion,telefono,municipio`). Solo aplica cuando format=excel;
+ *           si se omite, se incluyen todas las columnas. Columnas disponibles: nombres,
+ *           identificacion, tipo_identificacion, fecha_nacimiento, sexo, telefono,
+ *           correo_electronico, direccion, parentesco, estado_civil, profesion, nivel_educativo,
+ *           comunidad_cultural, talla_camisa, talla_pantalon, talla_zapato, liderazgo,
+ *           necesidad_enfermo, destrezas, apellido_familiar, sustento_familia,
+ *           autorizacion_datos, tipo_vivienda, celebraciones, disposicion_basura,
+ *           sistema_acueducto, aguas_residuales, municipio, parroquia, sector, vereda,
+ *           corregimiento, centro_poblado.
  *     responses:
  *       200:
  *         description: Lista de personas filtradas por cumpleaños
@@ -1051,6 +1135,16 @@ router.get('/cumpleanos', authMiddleware.authenticateToken, personasController.c
  *         schema: { type: string, format: date }
  *         description: Fecha de registro hasta
  *       - in: query
+ *         name: mes_nacimiento
+ *         schema: { type: integer, minimum: 1, maximum: 12 }
+ *         description: Mes de nacimiento (1=Enero … 12=Diciembre), ignora el año
+ *         example: 6
+ *       - in: query
+ *         name: dia_nacimiento
+ *         schema: { type: integer, minimum: 1, maximum: 31 }
+ *         description: Día de nacimiento, ignora el mes y el año
+ *         example: 15
+ *       - in: query
  *         name: page
  *         schema: { type: integer, default: 1 }
  *         description: Número de página
@@ -1062,6 +1156,20 @@ router.get('/cumpleanos', authMiddleware.authenticateToken, personasController.c
  *         name: format
  *         schema: { type: string, enum: [json, excel], default: json }
  *         description: Formato de respuesta
+ *       - in: query
+ *         name: campos
+ *         schema: { type: string }
+ *         description: >
+ *           Lista de columnas a incluir en el Excel exportado, separadas por comas
+ *           (ej. `nombres,identificacion,telefono,municipio`). Solo aplica cuando format=excel;
+ *           si se omite, se incluyen todas las columnas. Columnas disponibles: nombres,
+ *           identificacion, tipo_identificacion, fecha_nacimiento, sexo, telefono,
+ *           correo_electronico, direccion, parentesco, estado_civil, profesion, nivel_educativo,
+ *           comunidad_cultural, talla_camisa, talla_pantalon, talla_zapato, liderazgo,
+ *           necesidad_enfermo, destrezas, apellido_familiar, sustento_familia,
+ *           autorizacion_datos, tipo_vivienda, celebraciones, disposicion_basura,
+ *           sistema_acueducto, aguas_residuales, municipio, parroquia, sector, vereda,
+ *           corregimiento, centro_poblado.
  *     responses:
  *       200:
  *         description: Reporte general de personas

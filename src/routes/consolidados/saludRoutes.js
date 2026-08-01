@@ -284,6 +284,16 @@ router.get('/estadisticas', authMiddleware.authenticateToken, saludConsolidadoCo
  *           type: integer
  *           default: 5000
  *         description: Límite de resultados (máximo para Excel)
+ *       - in: query
+ *         name: campos
+ *         schema: { type: string }
+ *         description: >
+ *           Lista de columnas a incluir en el Excel, separadas por comas
+ *           (ej. `nombre,documento,telefono,enfermedades`). Si se omite, se incluyen todas.
+ *           Columnas disponibles: id, documento, nombre, edad, sexo, telefono,
+ *           fecha_nacimiento, apellido_familiar, municipio, sector, vereda, corregimiento,
+ *           centro_poblado, parroquia, direccion, telefono_familia, enfermedades,
+ *           necesidades_medicas, tiene_enfermedades.
  *     responses:
  *       200:
  *         description: Archivo Excel generado exitosamente

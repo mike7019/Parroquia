@@ -1,4 +1,5 @@
 import difuntosConsolidadoService from '../../services/consolidados/difuntosConsolidadoService.js';
+import { parseCampos } from '../../utils/exportColumns.js';
 
 class DifuntosConsolidadoController {
   /**
@@ -152,7 +153,8 @@ class DifuntosConsolidadoController {
 
       console.log('📊 Generando Excel de difuntos con filtros:', filtros);
 
-      const workbook = await difuntosConsolidadoService.generarReporteExcelDifuntos(filtros);
+      const camposSeleccionados = parseCampos(req.query);
+      const workbook = await difuntosConsolidadoService.generarReporteExcelDifuntos(filtros, camposSeleccionados);
 
       // Configurar headers para descarga
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);

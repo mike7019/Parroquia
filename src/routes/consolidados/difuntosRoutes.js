@@ -257,6 +257,18 @@ router.get('/estadisticas', authMiddleware.authenticateToken, difuntosConsolidad
  *           type: string
  *           format: date
  *         description: Fecha fin del rango de análisis (YYYY-MM-DD)
+ *       - in: query
+ *         name: campos
+ *         schema: { type: string }
+ *         description: >
+ *           Lista de columnas a incluir en las hojas "Resumen General" y "Detalle Completo",
+ *           separadas por comas (ej. `nombre_completo,fecha_aniversario,municipio`). Si se
+ *           omite, se incluyen todas. Las hojas de estadísticas y análisis no se ven afectadas.
+ *           Columnas de Resumen General: fuente, id_difunto, nombre_completo, parentesco,
+ *           fecha_aniversario, apellido_familiar, parroquia, municipio, sector, vereda,
+ *           corregimiento, centro_poblado, telefono, direccion, observaciones. Columnas de
+ *           Detalle Completo: tipo_registro, id_sistema, nombre, parentesco, fecha, año, mes,
+ *           familia, ubicacion, contacto, observaciones_completas.
  *     responses:
  *       200:
  *         description: Archivo Excel generado exitosamente

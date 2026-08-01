@@ -1,4 +1,5 @@
 import familiasConsolidadoService from '../../services/consolidados/familiasConsolidadoService.js';
+import { parseCampos } from '../../utils/exportColumns.js';
 
 class FamiliasConsolidadoController {
   /**
@@ -82,7 +83,8 @@ class FamiliasConsolidadoController {
 
       console.log('📊 Generando Excel de familias con filtros:', filtros);
 
-      const workbook = await familiasConsolidadoService.generarReporteExcelFamilias(filtros);
+      const camposSeleccionados = parseCampos(req.query);
+      const workbook = await familiasConsolidadoService.generarReporteExcelFamilias(filtros, camposSeleccionados);
 
       // Configurar headers para descarga
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);

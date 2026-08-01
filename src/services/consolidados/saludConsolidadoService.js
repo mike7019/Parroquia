@@ -1,6 +1,7 @@
 import { QueryTypes } from 'sequelize';
 import sequelize from '../../../config/sequelize.js';
 import ExcelJS from 'exceljs';
+import { seleccionarColumnas, letraColumnaExcel } from '../../utils/exportColumns.js';
 
 class SaludConsolidadoService {
   /**
@@ -448,7 +449,7 @@ class SaludConsolidadoService {
   /**
    * Generar reporte de salud en formato Excel
    */
-  async generarReporteExcel(filtros = {}) {
+  async generarReporteExcel(filtros = {}, camposSeleccionados = null) {
     try {
       console.log('📊 Generando reporte Excel de salud...');
 
@@ -460,8 +461,8 @@ class SaludConsolidadoService {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Reporte Salud');
 
-      // Definir columnas
-      worksheet.columns = [
+      // Definir columnas disponibles y aplicar selección del usuario (si la envió)
+      const columnasDisponibles = [
         { header: 'ID', key: 'id', width: 8 },
         { header: 'Documento', key: 'documento', width: 15 },
         { header: 'Nombre Completo', key: 'nombre', width: 35 },
@@ -482,6 +483,7 @@ class SaludConsolidadoService {
         { header: 'Necesidades Médicas', key: 'necesidades_medicas', width: 40 },
         { header: 'Tiene Enfermedades', key: 'tiene_enfermedades', width: 18 }
       ];
+      worksheet.columns = seleccionarColumnas(columnasDisponibles, camposSeleccionados);
 
       // Estilo del header
       worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
@@ -538,10 +540,10 @@ class SaludConsolidadoService {
         });
       });
 
-      // Agregar autofiltro (ahora son 19 columnas)
+      // Agregar autofiltro
       worksheet.autoFilter = {
         from: 'A1',
-        to: `S1`
+        to: `${letraColumnaExcel(worksheet.columns.length)}1`
       };
 
       // Congelar primera fila
