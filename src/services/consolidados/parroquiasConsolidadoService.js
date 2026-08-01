@@ -1,5 +1,6 @@
 import sequelize from '../../../config/sequelize.js';
 import { QueryTypes } from 'sequelize';
+import { normalizarPaginacion } from '../../utils/pagination.js';
 
 /**
  * Servicio para consultas consolidadas de parroquias e infraestructura
@@ -40,12 +41,10 @@ class ParroquiasConsolidadoService {
         sistema_acueducto,
         tipo_aguas_residuales,
         disposicion_basura,
-        incluir_estadisticas = true,
-        pagina = 1,
-        limite = 50
+        incluir_estadisticas = true
       } = filtros;
 
-      const offset = (pagina - 1) * limite;
+      const { page: pagina, limit: limite, offset } = normalizarPaginacion(filtros.pagina, filtros.limite, { limiteMaximo: 200, limitePorDefecto: 50 });
 
       // Construir consulta base con filtros
       let whereConditions = [];

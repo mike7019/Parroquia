@@ -2,6 +2,7 @@ import sequelize from '../../../config/sequelize.js';
 import { QueryTypes } from 'sequelize';
 import ExcelJS from 'exceljs';
 import { seleccionarColumnas, letraColumnaExcel } from '../../utils/exportColumns.js';
+import { normalizarPaginacion } from '../../utils/pagination.js';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -108,15 +109,11 @@ class PersonasService {
    * @param {Object} filtros - Filtros de búsqueda
    * @returns {Promise<Object>} Resultado paginado
    */
-  async consultarPersonas(filtros = {}) {
+  async consultarPersonas(filtros = {}, { limiteMaximo = 500 } = {}) {
     try {
       console.log('🔍 Consultando personas con filtros:', filtros);
 
       const {
-        // Paginación
-        page = 1,
-        limit = 10,
-
         // Ubicación geográfica (IDs)
         id_municipio,
         id_parroquia,
@@ -161,7 +158,7 @@ class PersonasService {
         dia_nacimiento
       } = filtros;
 
-      const offset = (page - 1) * limit;
+      const { page, limit, offset } = normalizarPaginacion(filtros.page, filtros.limit, { limiteMaximo, limitePorDefecto: 10 });
       const whereConditions = [];
       const params = { limit, offset };
 
@@ -553,7 +550,7 @@ class PersonasService {
       console.log('📊 Generando Excel de personas...');
 
       // Usar consulta sin límite para Excel (obtener todos)
-      const resultado = await this.consultarPersonas({ ...filtros, limit: 10000, page: 1 });
+      const resultado = await this.consultarPersonas({ ...filtros, limit: 10000, page: 1 }, { limiteMaximo: 10000 });
       const personas = resultado.data;
 
       const workbook = new ExcelJS.Workbook();

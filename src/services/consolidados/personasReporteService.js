@@ -2,6 +2,19 @@ import { QueryTypes } from 'sequelize';
 import sequelize from '../../../config/sequelize.js';
 import ExcelJS from 'exceljs';
 
+/**
+ * Agrupa un array de filas por una clave dada → Map<keyValue, row[]>
+ */
+function agruparPorId(rows, keyField) {
+  const map = new Map();
+  for (const row of rows) {
+    const k = row[keyField];
+    if (!map.has(k)) map.set(k, []);
+    map.get(k).push(row);
+  }
+  return map;
+}
+
 class PersonasReporteService {
   /**
    * Generar reporte de personas con filtros avanzados
@@ -71,7 +84,19 @@ class PersonasReporteService {
         whereConditions.push('p.id_profesion = :id_profesion');
         params.id_profesion = filtros.id_profesion;
       }
-      
+
+      // Filtro por destreza específica (EXISTS evita tener que verificar persona por persona)
+      if (filtros.id_destreza) {
+        whereConditions.push(`
+          EXISTS (
+            SELECT 1 FROM persona_destreza pd
+            WHERE pd.id_personas_personas = p.id_personas
+              AND pd.id_destrezas_destrezas = :id_destreza
+          )
+        `);
+        params.id_destreza = filtros.id_destreza;
+      }
+
       const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
       
       const limite = filtros.limite || 1000;
@@ -159,95 +184,62 @@ class PersonasReporteService {
       });
       
       console.log(`✅ Encontradas ${personas.length} personas`);
-      
-      // Obtener capacidades/destrezas para cada persona
-      const personasConCapacidades = await Promise.all(personas.map(async (persona) => {
-        // Obtener destrezas
-        let destrezas = [];
-        if (filtros.id_destreza) {
-          // Si se filtra por destreza específica, verificar si la persona la tiene
-          const [tieneDestreza] = await sequelize.query(`
-            SELECT COUNT(*) as tiene
-            FROM persona_destreza pd
-            WHERE pd.id_personas_personas = :id_persona
-              AND pd.id_destrezas_destrezas = :id_destreza
-          `, {
-            replacements: {
-              id_persona: persona.id_personas,
-              id_destreza: filtros.id_destreza
-            },
-            type: QueryTypes.SELECT
-          });
-          
-          if (tieneDestreza.tiene > 0) {
-            destrezas = await sequelize.query(`
-              SELECT d.id_destreza, d.nombre
+
+      // ── Sub-consultas en lote (evita N+1: antes eran hasta 6 queries por persona) ──
+      const personaIds = personas.map(p => p.id_personas);
+
+      const [destrezasRows, habilidadesRows, enfermedadesRows, celebracionesRows, liderazgosRows] = personaIds.length
+        ? await Promise.all([
+            sequelize.query(`
+              SELECT pd.id_personas_personas AS id_persona, d.id_destreza, d.nombre
               FROM persona_destreza pd
               INNER JOIN destrezas d ON pd.id_destrezas_destrezas = d.id_destreza
-              WHERE pd.id_personas_personas = :id_persona
-            `, {
-              replacements: { id_persona: persona.id_personas },
-              type: QueryTypes.SELECT
-            });
-          } else {
-            return null; // Excluir persona si no tiene la destreza filtrada
-          }
-        } else {
-          // Sin filtro, obtener todas las destrezas
-          destrezas = await sequelize.query(`
-            SELECT d.id_destreza, d.nombre
-            FROM persona_destreza pd
-            INNER JOIN destrezas d ON pd.id_destrezas_destrezas = d.id_destreza
-            WHERE pd.id_personas_personas = :id_persona
-          `, {
-            replacements: { id_persona: persona.id_personas },
-            type: QueryTypes.SELECT
-          });
-        }
-        
-        // Obtener habilidades
-        const habilidades = await sequelize.query(`
-          SELECT h.id_habilidad, h.nombre
-          FROM persona_habilidad ph
-          INNER JOIN habilidades h ON ph.id_habilidad = h.id_habilidad
-          WHERE ph.id_persona = :id_persona
-        `, {
-          replacements: { id_persona: persona.id_personas },
-          type: QueryTypes.SELECT
-        });
-        
-        // Obtener enfermedades
-        const enfermedades = await sequelize.query(`
-          SELECT e.id_enfermedad, e.nombre
-          FROM persona_enfermedad pe
-          INNER JOIN enfermedades e ON pe.id_enfermedad = e.id_enfermedad
-          WHERE pe.id_persona = :id_persona AND pe.activo = true
-        `, {
-          replacements: { id_persona: persona.id_personas },
-          type: QueryTypes.SELECT
-        });
-        
-        // Obtener celebraciones
-        const celebraciones = await sequelize.query(`
-          SELECT pc.motivo, pc.dia, pc.mes
-          FROM persona_celebracion pc
-          WHERE pc.id_persona = :id_persona
-        `, {
-          replacements: { id_persona: persona.id_personas },
-          type: QueryTypes.SELECT
-        });
+              WHERE pd.id_personas_personas IN (:ids)
+            `, { replacements: { ids: personaIds }, type: QueryTypes.SELECT }),
+            sequelize.query(`
+              SELECT ph.id_persona, h.id_habilidad, h.nombre
+              FROM persona_habilidad ph
+              INNER JOIN habilidades h ON ph.id_habilidad = h.id_habilidad
+              WHERE ph.id_persona IN (:ids)
+            `, { replacements: { ids: personaIds }, type: QueryTypes.SELECT }),
+            sequelize.query(`
+              SELECT pe.id_persona, e.id_enfermedad, e.nombre
+              FROM persona_enfermedad pe
+              INNER JOIN enfermedades e ON pe.id_enfermedad = e.id_enfermedad
+              WHERE pe.id_persona IN (:ids) AND pe.activo = true
+            `, { replacements: { ids: personaIds }, type: QueryTypes.SELECT }),
+            sequelize.query(`
+              SELECT pc.id_persona, pc.motivo, pc.dia, pc.mes
+              FROM persona_celebracion pc
+              WHERE pc.id_persona IN (:ids)
+            `, { replacements: { ids: personaIds }, type: QueryTypes.SELECT }),
+            sequelize.query(`
+              SELECT pl.id_persona, pl.id_tipo_liderazgo AS id, tl.nombre
+              FROM persona_liderazgo pl
+              INNER JOIN tipos_liderazgo tl ON pl.id_tipo_liderazgo = tl.id_tipo_liderazgo
+              WHERE pl.id_persona IN (:ids) AND pl.activo = TRUE
+              ORDER BY tl.nombre
+            `, { replacements: { ids: personaIds }, type: QueryTypes.SELECT }),
+          ])
+        : [[], [], [], [], []];
 
-        // Obtener liderazgos
-        const liderazgos = await sequelize.query(`
-          SELECT pl.id_tipo_liderazgo AS id, tl.nombre
-          FROM persona_liderazgo pl
-          INNER JOIN tipos_liderazgo tl ON pl.id_tipo_liderazgo = tl.id_tipo_liderazgo
-          WHERE pl.id_persona = :id_persona AND pl.activo = TRUE
-          ORDER BY tl.nombre
-        `, {
-          replacements: { id_persona: persona.id_personas },
-          type: QueryTypes.SELECT
-        });
+      const destrezasPorPersona     = agruparPorId(destrezasRows,     'id_persona');
+      const habilidadesPorPersona   = agruparPorId(habilidadesRows,   'id_persona');
+      const enfermedadesPorPersona  = agruparPorId(enfermedadesRows,  'id_persona');
+      const celebracionesPorPersona = agruparPorId(celebracionesRows, 'id_persona');
+      const liderazgosPorPersona    = agruparPorId(liderazgosRows,    'id_persona');
+
+      const personasConCapacidades = personas.map((persona) => {
+        const destrezas = (destrezasPorPersona.get(persona.id_personas) || [])
+          .map(d => ({ id_destreza: d.id_destreza, nombre: d.nombre }));
+        const habilidades = (habilidadesPorPersona.get(persona.id_personas) || [])
+          .map(h => ({ id_habilidad: h.id_habilidad, nombre: h.nombre }));
+        const enfermedades = (enfermedadesPorPersona.get(persona.id_personas) || [])
+          .map(e => ({ id_enfermedad: e.id_enfermedad, nombre: e.nombre }));
+        const celebraciones = (celebracionesPorPersona.get(persona.id_personas) || [])
+          .map(c => ({ motivo: c.motivo, dia: c.dia, mes: c.mes }));
+        const liderazgos = (liderazgosPorPersona.get(persona.id_personas) || [])
+          .map(l => ({ id: Number(l.id), nombre: l.nombre }));
 
         return {
           id_personas: persona.id_personas,
@@ -273,7 +265,7 @@ class PersonasReporteService {
           profesion: persona.profesion,
           estudios: persona.estudios,
           necesidad_enfermo: persona.necesidad_enfermo,
-          liderazgos: liderazgos.map(l => ({ id: Number(l.id), nombre: l.nombre })),
+          liderazgos,
           liderazgo_texto: liderazgos.length > 0 ? liderazgos.map(l => l.nombre).join(', ') : 'Ninguno',
           estado_civil: persona.estado_civil,
           tipo_identificacion: persona.tipo_identificacion,
@@ -289,11 +281,10 @@ class PersonasReporteService {
           enfermedades_texto: enfermedades.length > 0 ? enfermedades.map(e => e.nombre).join(', ') : 'Ninguna',
           total_enfermedades: enfermedades.length
         };
-      }));
-      
-      // Filtrar personas que no cumplen con el filtro de destrezas
-      const personasFiltradas = personasConCapacidades.filter(p => p !== null);
-      
+      });
+
+      const personasFiltradas = personasConCapacidades;
+
       // Obtener total sin límite
       const countQuery = `
         SELECT COUNT(DISTINCT p.id_personas) as total

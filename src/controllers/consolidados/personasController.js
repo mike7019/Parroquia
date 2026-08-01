@@ -78,153 +78,77 @@ async function responderExcel(res, filtros, filename, camposSeleccionados) {
   res.send(buffer);
 }
 
+/**
+ * Configuración por endpoint: los 7 endpoints de /api/personas/consolidado/*
+ * comparten exactamente el mismo comportamiento (extraerFiltros + consultarPersonas),
+ * solo cambian el emoji/etiqueta de log, el nombre de archivo Excel y el código de error.
+ */
+const ENDPOINTS = {
+  consultarPorGeografia:       { emoji: '📍', label: 'Consulta geográfica',          filename: 'personas_geografico',      errorCode: 'CONSULTA_GEOGRAFICA_ERROR' },
+  consultarPorFamilia:         { emoji: '👨‍👩‍👧‍👦', label: 'Consulta por familia',         filename: 'personas_familia',         errorCode: 'CONSULTA_FAMILIA_ERROR' },
+  consultarPorDatosPersonales: { emoji: '👤', label: 'Consulta por datos personales', filename: 'personas_personal',        errorCode: 'CONSULTA_PERSONAL_ERROR' },
+  consultarPorTallas:          { emoji: '👕', label: 'Consulta por tallas',           filename: 'personas_tallas',          errorCode: 'CONSULTA_TALLAS_ERROR' },
+  consultarPorEdad:            { emoji: '🎂', label: 'Consulta por edad',             filename: 'personas_edad',            errorCode: 'CONSULTA_EDAD_ERROR' },
+  consultarPorCumpleanos:      { emoji: '🎂', label: 'Consulta por cumpleaños',       filename: 'personas_cumpleanos',      errorCode: 'CONSULTA_CUMPLEANOS_ERROR' },
+  generarReporteGeneral:       { emoji: '📊', label: 'Reporte general con filtros',   filename: 'personas_reporte_general', errorCode: 'REPORTE_GENERAL_ERROR' },
+};
+
+/**
+ * Maneja la lógica común a los 7 endpoints: extrae filtros, consulta y responde en JSON o Excel.
+ */
+async function manejarConsultaConsolidada(req, res, { emoji, label, filename, errorCode, methodName }) {
+  try {
+    const format = req.query.format || 'json';
+    const filtros = extraerFiltros(req.query);
+    const camposSeleccionados = parseCampos(req.query);
+    console.log(`${emoji} ${label}:`, filtros);
+
+    if (format === 'excel') {
+      await responderExcel(res, filtros, filename, camposSeleccionados);
+    } else {
+      res.json(await personasService.consultarPersonas(filtros));
+    }
+  } catch (error) {
+    console.error(`❌ Error en ${methodName}:`, error);
+    res.status(500).json({ status: 'error', message: error.message, code: errorCode });
+  }
+}
+
 class PersonasController {
 
-  /**
-   * GET /api/personas/consolidado/geografico
-   */
+  /** GET /api/personas/consolidado/geografico */
   async consultarPorGeografia(req, res) {
-    try {
-      const format = req.query.format || 'json';
-      const filtros = extraerFiltros(req.query);
-      const camposSeleccionados = parseCampos(req.query);
-      console.log('📍 Consulta geográfica:', filtros);
-
-      if (format === 'excel') {
-        await responderExcel(res, filtros, 'personas_geografico', camposSeleccionados);
-      } else {
-        res.json(await personasService.consultarPersonas(filtros));
-      }
-    } catch (error) {
-      console.error('❌ Error en consultarPorGeografia:', error);
-      res.status(500).json({ status: 'error', message: error.message, code: 'CONSULTA_GEOGRAFICA_ERROR' });
-    }
+    return manejarConsultaConsolidada(req, res, { ...ENDPOINTS.consultarPorGeografia, methodName: 'consultarPorGeografia' });
   }
 
-  /**
-   * GET /api/personas/consolidado/familia
-   */
+  /** GET /api/personas/consolidado/familia */
   async consultarPorFamilia(req, res) {
-    try {
-      const format = req.query.format || 'json';
-      const filtros = extraerFiltros(req.query);
-      const camposSeleccionados = parseCampos(req.query);
-      console.log('👨‍👩‍👧‍👦 Consulta por familia:', filtros);
-
-      if (format === 'excel') {
-        await responderExcel(res, filtros, 'personas_familia', camposSeleccionados);
-      } else {
-        res.json(await personasService.consultarPersonas(filtros));
-      }
-    } catch (error) {
-      console.error('❌ Error en consultarPorFamilia:', error);
-      res.status(500).json({ status: 'error', message: error.message, code: 'CONSULTA_FAMILIA_ERROR' });
-    }
+    return manejarConsultaConsolidada(req, res, { ...ENDPOINTS.consultarPorFamilia, methodName: 'consultarPorFamilia' });
   }
 
-  /**
-   * GET /api/personas/consolidado/personal
-   */
+  /** GET /api/personas/consolidado/personal */
   async consultarPorDatosPersonales(req, res) {
-    try {
-      const format = req.query.format || 'json';
-      const filtros = extraerFiltros(req.query);
-      const camposSeleccionados = parseCampos(req.query);
-      console.log('👤 Consulta por datos personales:', filtros);
-
-      if (format === 'excel') {
-        await responderExcel(res, filtros, 'personas_personal', camposSeleccionados);
-      } else {
-        res.json(await personasService.consultarPersonas(filtros));
-      }
-    } catch (error) {
-      console.error('❌ Error en consultarPorDatosPersonales:', error);
-      res.status(500).json({ status: 'error', message: error.message, code: 'CONSULTA_PERSONAL_ERROR' });
-    }
+    return manejarConsultaConsolidada(req, res, { ...ENDPOINTS.consultarPorDatosPersonales, methodName: 'consultarPorDatosPersonales' });
   }
 
-  /**
-   * GET /api/personas/consolidado/tallas
-   */
+  /** GET /api/personas/consolidado/tallas */
   async consultarPorTallas(req, res) {
-    try {
-      const format = req.query.format || 'json';
-      const filtros = extraerFiltros(req.query);
-      const camposSeleccionados = parseCampos(req.query);
-      console.log('👕 Consulta por tallas:', filtros);
-
-      if (format === 'excel') {
-        await responderExcel(res, filtros, 'personas_tallas', camposSeleccionados);
-      } else {
-        res.json(await personasService.consultarPersonas(filtros));
-      }
-    } catch (error) {
-      console.error('❌ Error en consultarPorTallas:', error);
-      res.status(500).json({ status: 'error', message: error.message, code: 'CONSULTA_TALLAS_ERROR' });
-    }
+    return manejarConsultaConsolidada(req, res, { ...ENDPOINTS.consultarPorTallas, methodName: 'consultarPorTallas' });
   }
 
-  /**
-   * GET /api/personas/consolidado/edad
-   */
+  /** GET /api/personas/consolidado/edad */
   async consultarPorEdad(req, res) {
-    try {
-      const format = req.query.format || 'json';
-      const filtros = extraerFiltros(req.query);
-      const camposSeleccionados = parseCampos(req.query);
-      console.log('🎂 Consulta por edad:', filtros);
-
-      if (format === 'excel') {
-        await responderExcel(res, filtros, 'personas_edad', camposSeleccionados);
-      } else {
-        res.json(await personasService.consultarPersonas(filtros));
-      }
-    } catch (error) {
-      console.error('❌ Error en consultarPorEdad:', error);
-      res.status(500).json({ status: 'error', message: error.message, code: 'CONSULTA_EDAD_ERROR' });
-    }
+    return manejarConsultaConsolidada(req, res, { ...ENDPOINTS.consultarPorEdad, methodName: 'consultarPorEdad' });
   }
 
-  /**
-   * GET /api/personas/consolidado/cumpleanos
-   */
+  /** GET /api/personas/consolidado/cumpleanos */
   async consultarPorCumpleanos(req, res) {
-    try {
-      const format = req.query.format || 'json';
-      const filtros = extraerFiltros(req.query);
-      const camposSeleccionados = parseCampos(req.query);
-      console.log('🎂 Consulta por cumpleaños:', filtros);
-
-      if (format === 'excel') {
-        await responderExcel(res, filtros, 'personas_cumpleanos', camposSeleccionados);
-      } else {
-        res.json(await personasService.consultarPersonas(filtros));
-      }
-    } catch (error) {
-      console.error('❌ Error en consultarPorCumpleanos:', error);
-      res.status(500).json({ status: 'error', message: error.message, code: 'CONSULTA_CUMPLEANOS_ERROR' });
-    }
+    return manejarConsultaConsolidada(req, res, { ...ENDPOINTS.consultarPorCumpleanos, methodName: 'consultarPorCumpleanos' });
   }
 
-  /**
-   * GET /api/personas/consolidado/reporte
-   */
+  /** GET /api/personas/consolidado/reporte */
   async generarReporteGeneral(req, res) {
-    try {
-      const format = req.query.format || 'json';
-      const filtros = extraerFiltros(req.query);
-      const camposSeleccionados = parseCampos(req.query);
-      console.log('📊 Reporte general con filtros:', filtros);
-
-      if (format === 'excel') {
-        await responderExcel(res, filtros, 'personas_reporte_general', camposSeleccionados);
-      } else {
-        res.json(await personasService.consultarPersonas(filtros));
-      }
-    } catch (error) {
-      console.error('❌ Error en generarReporteGeneral:', error);
-      res.status(500).json({ status: 'error', message: error.message, code: 'REPORTE_GENERAL_ERROR' });
-    }
+    return manejarConsultaConsolidada(req, res, { ...ENDPOINTS.generarReporteGeneral, methodName: 'generarReporteGeneral' });
   }
 }
 

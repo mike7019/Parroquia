@@ -3,27 +3,14 @@ import { parseCampos } from '../../utils/exportColumns.js';
 
 class DifuntosConsolidadoController {
   /**
-   * Consulta consolidada        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        
-        // Filtros adicionales
-        id_parentesco: req.query.id_parentesco ? parseInt(req.query.id_parentesco) : undefined,
-        fecha_inicio: req.query.fecha_inicio,
-        fecha_fin: req.query.fecha_fin
-      };
-
-      // Limpiar filtros vacíos
-      Object.keys(filtros).forEach(key => {
-        if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '' || 
-            (typeof filtros[key] === 'number' && isNaN(filtros[key]))) {
-          delete filtros[key];
-        }
-      });
-
-      console.log('📊 Generando PDF de difuntos con filtros:', filtros);* GET /api/difuntos
+   * Consulta consolidada de difuntos
+   * GET /api/difuntos
    * @param {Object} req.query - Parámetros de consulta
    * @param {number} req.query.id_parroquia - ID de la parroquia
    * @param {number} req.query.id_municipio - ID del municipio
    * @param {number} req.query.id_sector - ID del sector
+   * @param {number} req.query.id_corregimiento - ID del corregimiento
+   * @param {number} req.query.id_centro_poblado - ID del centro poblado
    * @param {number} req.query.id_parentesco - ID del parentesco
    * @param {string} req.query.fecha_inicio - Fecha de inicio del rango (YYYY-MM-DD)
    * @param {string} req.query.fecha_fin - Fecha de fin del rango (YYYY-MM-DD)

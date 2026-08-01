@@ -1,5 +1,6 @@
 import sequelize from '../../../config/sequelize.js';
 import { QueryTypes } from 'sequelize';
+import { normalizarPaginacion } from '../../utils/pagination.js';
 
 /**
  * Servicio para consultas consolidadas de personas, capacidades y análisis geográfico
@@ -32,14 +33,12 @@ class PersonasCapacidadesService {
         id_sexo,
         edad_min,
         edad_max,
-        incluir_estadisticas = true,
-        pagina = 1,
-        limite = 50
+        incluir_estadisticas = true
       } = filtros;
 
       console.log('🔍 Consultando personas por destrezas con filtros:', filtros);
 
-      const offset = (pagina - 1) * limite;
+      const { page: pagina, limit: limite, offset } = normalizarPaginacion(filtros.pagina, filtros.limite, { limiteMaximo: 200, limitePorDefecto: 50 });
       const whereConditions = [];
       const params = {};
 
@@ -123,7 +122,7 @@ class PersonasCapacidadesService {
         LEFT JOIN parroquia pqa ON f.id_parroquia = pqa.id_parroquia
         LEFT JOIN sexos sx ON p.id_sexo = sx.id_sexo
         ${whereClause}
-        ORDER BY p.nombres
+        ORDER BY nombre_completo
         LIMIT :limite OFFSET :offset
       `;
 
@@ -276,14 +275,12 @@ class PersonasCapacidadesService {
         profesion_id,
         profesion_nombre,
         id_municipio,
-        id_sexo,
-        pagina = 1,
-        limite = 50
+        id_sexo
       } = filtros;
 
       console.log('💼 Consultando por profesiones:', filtros);
 
-      const offset = (pagina - 1) * limite;
+      const { page: pagina, limit: limite, offset } = normalizarPaginacion(filtros.pagina, filtros.limite, { limiteMaximo: 200, limitePorDefecto: 50 });
       const whereConditions = [];
       const params = {};
 

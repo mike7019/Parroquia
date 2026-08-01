@@ -945,10 +945,14 @@ router.get('/edad', authMiddleware.authenticateToken, personasController.consult
  *     parameters:
  *       - in: query
  *         name: mes_nacimiento
- *         required: true
  *         schema: { type: integer, minimum: 1, maximum: 12 }
- *         description: Mes de nacimiento (1=Enero … 12=Diciembre)
+ *         description: Mes de nacimiento (1=Enero … 12=Diciembre). Opcional — se puede combinar con dia_nacimiento o usar cualquiera de los dos por separado.
  *         example: 6
+ *       - in: query
+ *         name: dia_nacimiento
+ *         schema: { type: integer, minimum: 1, maximum: 31 }
+ *         description: Día de nacimiento, ignora el mes y el año. Opcional — se puede combinar con mes_nacimiento.
+ *         example: 15
  *       - in: query
  *         name: id_municipio
  *         schema: { type: integer }
@@ -974,9 +978,81 @@ router.get('/edad', authMiddleware.authenticateToken, personasController.consult
  *         schema: { type: integer }
  *         description: ID del centro poblado
  *       - in: query
+ *         name: apellido_familiar
+ *         schema: { type: string }
+ *         description: Apellido familiar (búsqueda parcial)
+ *       - in: query
+ *         name: id_tipo_vivienda
+ *         schema: { type: integer }
+ *         description: ID del tipo de vivienda
+ *       - in: query
+ *         name: id_parentesco
+ *         schema: { type: integer }
+ *         description: ID del parentesco
+ *       - in: query
+ *         name: id_estado_civil
+ *         schema: { type: integer }
+ *         description: ID del estado civil
+ *       - in: query
+ *         name: id_profesion
+ *         schema: { type: integer }
+ *         description: ID de la profesión
+ *       - in: query
+ *         name: id_nivel_educativo
+ *         schema: { type: integer }
+ *         description: ID del nivel educativo
+ *       - in: query
+ *         name: id_comunidad_cultural
+ *         schema: { type: integer }
+ *         description: ID de la comunidad cultural
+ *       - in: query
+ *         name: id_liderazgo
+ *         schema: { type: integer }
+ *         description: ID del tipo de liderazgo
+ *       - in: query
+ *         name: id_destreza
+ *         schema: { type: integer }
+ *         description: ID de la destreza
+ *       - in: query
+ *         name: id_necesidad_enfermo
+ *         schema: { type: integer }
+ *         description: ID del tipo de necesidad del enfermo
+ *       - in: query
  *         name: id_sexo
  *         schema: { type: integer }
  *         description: ID del sexo (1=Masculino, 2=Femenino)
+ *       - in: query
+ *         name: sexo
+ *         schema: { type: string }
+ *         description: Nombre del sexo (alternativa a id_sexo)
+ *       - in: query
+ *         name: talla_camisa
+ *         schema: { type: string }
+ *         description: Talla de camisa
+ *       - in: query
+ *         name: talla_pantalon
+ *         schema: { type: string }
+ *         description: Talla de pantalón
+ *       - in: query
+ *         name: talla_zapato
+ *         schema: { type: string }
+ *         description: Talla de zapato
+ *       - in: query
+ *         name: edad_min
+ *         schema: { type: integer }
+ *         description: Edad mínima
+ *       - in: query
+ *         name: edad_max
+ *         schema: { type: integer }
+ *         description: Edad máxima
+ *       - in: query
+ *         name: fecha_registro_desde
+ *         schema: { type: string, format: date }
+ *         description: Fecha de registro desde
+ *       - in: query
+ *         name: fecha_registro_hasta
+ *         schema: { type: string, format: date }
+ *         description: Fecha de registro hasta
  *       - in: query
  *         name: page
  *         schema: { type: integer, default: 1 }
