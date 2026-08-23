@@ -31,7 +31,7 @@ class DifuntosConsolidadoService {
       }
 
       if (filtros.id_municipio) {
-        whereConditions.push('m.id_municipio = :id_municipio');
+        whereConditions.push('p.id_municipio = :id_municipio');
         replacements.id_municipio = filtros.id_municipio;
       }
 
@@ -128,7 +128,7 @@ class DifuntosConsolidadoService {
       }
       
       if (filtros.id_municipio) {
-        whereConditionsPersonas.push('m.id_municipio = :id_municipio');
+        whereConditionsPersonas.push('p.id_municipio = :id_municipio');
       }
       
       if (filtros.id_sector) {
