@@ -1,6 +1,16 @@
 import difuntosConsolidadoService from '../../services/consolidados/difuntosConsolidadoService.js';
 import { parseCampos } from '../../utils/exportColumns.js';
 
+/**
+ * Acepta tanto el ID numérico del municipio como su nombre (ej. "Girardota").
+ * Si no es un número válido, se devuelve como texto para filtrar por nombre.
+ */
+function parseMunicipioParam(value) {
+  if (value === undefined || value === null || value === '') return undefined;
+  const parsed = parseInt(value, 10);
+  return isNaN(parsed) ? String(value).trim() : parsed;
+}
+
 class DifuntosConsolidadoController {
   /**
    * Consulta consolidada de difuntos
@@ -20,7 +30,7 @@ class DifuntosConsolidadoController {
       const filtros = {
         // Filtros por ID
         id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_municipio: parseMunicipioParam(req.query.id_municipio),
         id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
         id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
         id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
@@ -118,7 +128,7 @@ class DifuntosConsolidadoController {
       const filtros = {
         // Filtros por ID (prioritarios)
         id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_municipio: parseMunicipioParam(req.query.id_municipio),
         id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
         id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
         id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
@@ -180,7 +190,7 @@ class DifuntosConsolidadoController {
       const filtros = {
         // Filtros por ID (prioritarios)
         id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_municipio: parseMunicipioParam(req.query.id_municipio),
         id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
         id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
         id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
@@ -241,7 +251,7 @@ class DifuntosConsolidadoController {
       const filtros = {
         // Filtros por ID
         id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
+        id_municipio: parseMunicipioParam(req.query.id_municipio),
         id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
         id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
         id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,

@@ -30,9 +30,15 @@ class DifuntosConsolidadoService {
         replacements.id_parroquia = filtros.id_parroquia;
       }
 
-      if (filtros.id_municipio) {
-        whereConditions.push('p.id_municipio = :id_municipio');
-        replacements.id_municipio = filtros.id_municipio;
+      if (filtros.id_municipio !== undefined && filtros.id_municipio !== null && filtros.id_municipio !== '') {
+        if (typeof filtros.id_municipio === 'number') {
+          whereConditions.push('p.id_municipio = :id_municipio');
+          replacements.id_municipio = filtros.id_municipio;
+        } else {
+          // Se recibió el nombre del municipio en vez del ID
+          whereConditions.push('LOWER(mp.nombre_municipio) LIKE LOWER(:municipio_nombre)');
+          replacements.municipio_nombre = `%${filtros.id_municipio}%`;
+        }
       }
 
       if (filtros.id_sector) {
@@ -109,6 +115,7 @@ class DifuntosConsolidadoService {
         LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
         LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
         LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
+        LEFT JOIN municipios mp ON p.id_municipio = mp.id_municipio
         LEFT JOIN parentescos par ON df.id_parentesco = par.id_parentesco
         ${whereClause}
       `, { 
@@ -127,8 +134,12 @@ class DifuntosConsolidadoService {
         whereConditionsPersonas.push('p.id_parroquia = :id_parroquia');
       }
       
-      if (filtros.id_municipio) {
-        whereConditionsPersonas.push('p.id_municipio = :id_municipio');
+      if (filtros.id_municipio !== undefined && filtros.id_municipio !== null && filtros.id_municipio !== '') {
+        if (typeof filtros.id_municipio === 'number') {
+          whereConditionsPersonas.push('p.id_municipio = :id_municipio');
+        } else {
+          whereConditionsPersonas.push('LOWER(mp.nombre_municipio) LIKE LOWER(:municipio_nombre)');
+        }
       }
       
       if (filtros.id_sector) {
@@ -196,6 +207,7 @@ class DifuntosConsolidadoService {
         LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
         LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
         LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
+        LEFT JOIN municipios mp ON p.id_municipio = mp.id_municipio
         LEFT JOIN parentescos par ON pe.id_parentesco = par.id_parentesco
         ${whereClausePersonas}
       `, { 
