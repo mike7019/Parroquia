@@ -1,5 +1,31 @@
 import familiasConsolidadoService from '../../services/consolidados/familiasConsolidadoService.js';
 import { parseCampos } from '../../utils/exportColumns.js';
+import { parseIdOrNombre, parseIdEstricto, FiltroInvalidoError } from '../../utils/queryFilters.js';
+
+/**
+ * Extrae los filtros geográficos comunes a todos los endpoints de familias.
+ * id_municipio acepta ID numérico o nombre; el resto exige un ID numérico
+ * válido (o lanza FiltroInvalidoError en vez de descartar el filtro en silencio).
+ */
+function extraerFiltrosGeograficos(query) {
+  return {
+    id_parroquia: parseIdEstricto(query.id_parroquia, 'id_parroquia'),
+    id_municipio: parseIdOrNombre(query.id_municipio),
+    id_sector: parseIdEstricto(query.id_sector, 'id_sector'),
+    id_vereda: parseIdEstricto(query.id_vereda, 'id_vereda'),
+    id_corregimiento: parseIdEstricto(query.id_corregimiento, 'id_corregimiento'),
+    id_centro_poblado: parseIdEstricto(query.id_centro_poblado, 'id_centro_poblado')
+  };
+}
+
+function limpiarFiltros(filtros) {
+  Object.keys(filtros).forEach(key => {
+    if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '') {
+      delete filtros[key];
+    }
+  });
+  return filtros;
+}
 
 class FamiliasConsolidadoController {
   /**
@@ -16,26 +42,10 @@ class FamiliasConsolidadoController {
    */
   async consultarFamilias(req, res) {
     try {
-      const filtros = {
-        // Filtros por ID (nuevos)
-        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
-        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
-        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
-        
-        // Paginación
+      const filtros = limpiarFiltros({
+        ...extraerFiltrosGeograficos(req.query),
         limite: req.query.limite ? parseInt(req.query.limite) : 100,
         offset: req.query.offset ? parseInt(req.query.offset) : 0
-      };
-
-      // Remover filtros undefined, null o vacíos
-      Object.keys(filtros).forEach(key => {
-        if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '' || 
-            (typeof filtros[key] === 'number' && isNaN(filtros[key]))) {
-          delete filtros[key];
-        }
       });
 
       console.log('🔍 Consultando familias consolidadas con filtros:', filtros);
@@ -45,6 +55,9 @@ class FamiliasConsolidadoController {
       res.json(resultado);
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ status: "error", message: error.message, code: error.code });
+      }
       console.error('❌ Error en consultarFamilias:', error);
       res.status(500).json({
         status: "error",
@@ -60,25 +73,10 @@ class FamiliasConsolidadoController {
    */
   async generarReporteExcelCompleto(req, res) {
     try {
-      const filtros = {
-        // Filtros por ID
-        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
-        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
-        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
-        
+      const filtros = limpiarFiltros({
+        ...extraerFiltrosGeograficos(req.query),
         // Sin límite para reporte completo
         limite: 10000
-      };
-
-      // Limpiar filtros vacíos
-      Object.keys(filtros).forEach(key => {
-        if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '' || 
-            (typeof filtros[key] === 'number' && isNaN(filtros[key]))) {
-          delete filtros[key];
-        }
       });
 
       console.log('📊 Generando Excel de familias con filtros:', filtros);
@@ -99,6 +97,9 @@ class FamiliasConsolidadoController {
       res.end();
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ status: "error", message: error.message, code: error.code });
+      }
       console.error('❌ Error generando Excel de familias:', error);
       res.status(500).json({
         status: "error",
@@ -143,20 +144,10 @@ class FamiliasConsolidadoController {
    */
   async consultarMadres(req, res) {
     try {
-      const filtros = {
-        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
+      const filtros = limpiarFiltros({
+        ...extraerFiltrosGeograficos(req.query),
         limite: req.query.limite ? parseInt(req.query.limite) : 100,
         offset: req.query.offset ? parseInt(req.query.offset) : 0
-      };
-
-      // Limpiar filtros undefined
-      Object.keys(filtros).forEach(key => {
-        if (filtros[key] === undefined || filtros[key] === null) {
-          delete filtros[key];
-        }
       });
 
       const resultado = await familiasConsolidadoService.consultarMadres(filtros);
@@ -164,6 +155,9 @@ class FamiliasConsolidadoController {
       res.json(resultado);
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ status: "error", message: error.message, code: error.code });
+      }
       console.error('❌ Error en consultarMadres:', error);
       res.status(500).json({
         status: "error",
@@ -179,20 +173,10 @@ class FamiliasConsolidadoController {
    */
   async consultarPadres(req, res) {
     try {
-      const filtros = {
-        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
+      const filtros = limpiarFiltros({
+        ...extraerFiltrosGeograficos(req.query),
         limite: req.query.limite ? parseInt(req.query.limite) : 100,
         offset: req.query.offset ? parseInt(req.query.offset) : 0
-      };
-
-      // Limpiar filtros undefined
-      Object.keys(filtros).forEach(key => {
-        if (filtros[key] === undefined || filtros[key] === null) {
-          delete filtros[key];
-        }
       });
 
       const resultado = await familiasConsolidadoService.consultarPadres(filtros);
@@ -200,6 +184,9 @@ class FamiliasConsolidadoController {
       res.json(resultado);
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ status: "error", message: error.message, code: error.code });
+      }
       console.error('❌ Error en consultarPadres:', error);
       res.status(500).json({
         status: "error",
@@ -215,18 +202,9 @@ class FamiliasConsolidadoController {
    */
   async consultarFamiliasSinPadre(req, res) {
     try {
-      const filtros = {
-        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+      const filtros = limpiarFiltros({
+        ...extraerFiltrosGeograficos(req.query),
         limite: req.query.limite ? parseInt(req.query.limite) : 100
-      };
-
-      // Limpiar filtros undefined
-      Object.keys(filtros).forEach(key => {
-        if (filtros[key] === undefined || filtros[key] === null) {
-          delete filtros[key];
-        }
       });
 
       const resultado = await familiasConsolidadoService.consultarFamiliasSinPadre(filtros);
@@ -234,6 +212,9 @@ class FamiliasConsolidadoController {
       res.json(resultado);
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ status: "error", message: error.message, code: error.code });
+      }
       console.error('❌ Error en consultarFamiliasSinPadre:', error);
       res.status(500).json({
         status: "error",
@@ -249,18 +230,9 @@ class FamiliasConsolidadoController {
    */
   async consultarFamiliasSinMadre(req, res) {
     try {
-      const filtros = {
-        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
+      const filtros = limpiarFiltros({
+        ...extraerFiltrosGeograficos(req.query),
         limite: req.query.limite ? parseInt(req.query.limite) : 100
-      };
-
-      // Limpiar filtros undefined
-      Object.keys(filtros).forEach(key => {
-        if (filtros[key] === undefined || filtros[key] === null) {
-          delete filtros[key];
-        }
       });
 
       const resultado = await familiasConsolidadoService.consultarFamiliasSinMadre(filtros);
@@ -268,6 +240,9 @@ class FamiliasConsolidadoController {
       res.json(resultado);
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ status: "error", message: error.message, code: error.code });
+      }
       console.error('❌ Error en consultarFamiliasSinMadre:', error);
       res.status(500).json({
         status: "error",

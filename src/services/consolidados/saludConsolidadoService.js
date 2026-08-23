@@ -55,10 +55,15 @@ class SaludConsolidadoService {
         params.id_parroquia = filtros.id_parroquia;
       }
       
-      // Filtrar por municipio (ahora por ID)
-      if (filtros.id_municipio) {
-        whereConditions.push(`f.id_municipio = :id_municipio`);
-        params.id_municipio = filtros.id_municipio;
+      // Filtrar por municipio (por ID o por nombre)
+      if (filtros.id_municipio !== undefined && filtros.id_municipio !== null && filtros.id_municipio !== '') {
+        if (typeof filtros.id_municipio === 'number') {
+          whereConditions.push(`f.id_municipio = :id_municipio`);
+          params.id_municipio = filtros.id_municipio;
+        } else {
+          whereConditions.push(`m.nombre_municipio ILIKE :municipio_nombre`);
+          params.municipio_nombre = `%${filtros.id_municipio}%`;
+        }
       }
       
       // Filtrar por sector (ahora por ID)
@@ -158,7 +163,7 @@ class SaludConsolidadoService {
         LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
         LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
-        LEFT JOIN parroquia pr ON p.id_parroquia = pr.id_parroquia
+        LEFT JOIN parroquia pr ON f.id_parroquia = pr.id_parroquia
         ${whereClause}
       `;
       
@@ -323,14 +328,17 @@ class SaludConsolidadoService {
       }
       
       // Obtener estadísticas de salud
+      // NOTA: la parroquia es un dato de la familia (f.id_parroquia), no de la persona
+      // (personas.id_parroquia existe pero nunca se puebla en la práctica).
       const estadisticasQuery = `
-        SELECT 
+        SELECT
           COUNT(*) as total_personas,
           COUNT(CASE WHEN p.necesidad_enfermo IS NOT NULL AND p.necesidad_enfermo != '' THEN 1 END) as con_enfermedades,
           COUNT(CASE WHEN p.necesidad_enfermo IS NULL OR p.necesidad_enfermo = '' THEN 1 END) as sin_enfermedades,
           ROUND(AVG(EXTRACT(YEAR FROM AGE(p.fecha_nacimiento))), 2) as edad_promedio
         FROM personas p
-        WHERE p.id_parroquia = :idParroquia
+        LEFT JOIN familias f ON p.id_familia_familias = f.id_familia
+        WHERE f.id_parroquia = :idParroquia
       `;
       
       const [estadisticas] = await sequelize.query(estadisticasQuery, {
@@ -366,8 +374,8 @@ class SaludConsolidadoService {
         LEFT JOIN sectores sec ON f.id_sector = sec.id_sector
         LEFT JOIN veredas v ON f.id_vereda = v.id_vereda
         LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
-        LEFT JOIN parroquia pr ON p.id_parroquia = pr.id_parroquia
-        WHERE p.id_parroquia = :idParroquia
+        LEFT JOIN parroquia pr ON f.id_parroquia = pr.id_parroquia
+        WHERE f.id_parroquia = :idParroquia
         ORDER BY p.nombres
       `;
       

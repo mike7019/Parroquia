@@ -1,4 +1,20 @@
 import FamiliasConsultasService from '../services/familiasConsultasService.js';
+import { parseIdOrNombre, parseIdEstricto, FiltroInvalidoError } from '../utils/queryFilters.js';
+
+/**
+ * Filtros geográficos comunes a las consultas de madres/padres/familias.
+ * id_municipio acepta ID numérico o nombre; el resto exige un entero válido.
+ */
+function extraerFiltrosGeograficos(query) {
+  return {
+    id_parroquia: parseIdEstricto(query.id_parroquia, 'id_parroquia'),
+    id_municipio: parseIdOrNombre(query.id_municipio),
+    id_sector: parseIdEstricto(query.id_sector, 'id_sector'),
+    id_vereda: parseIdEstricto(query.id_vereda, 'id_vereda'),
+    id_corregimiento: parseIdEstricto(query.id_corregimiento, 'id_corregimiento'),
+    id_centro_poblado: parseIdEstricto(query.id_centro_poblado, 'id_centro_poblado')
+  };
+}
 
 class FamiliasConsultasController {
   /**
@@ -14,12 +30,7 @@ class FamiliasConsultasController {
         apellido_familiar: req.query.apellido_familiar,
         documento: req.query.documento,
         telefono: req.query.telefono,
-        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
-        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
-        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
+        ...extraerFiltrosGeograficos(req.query),
         limite: parseInt(req.query.limite) || 50
       };
 
@@ -43,6 +54,9 @@ class FamiliasConsultasController {
       });
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ exito: false, mensaje: error.message, error: error.message, code: error.code });
+      }
       console.error('❌ Error en consulta de madres:', error);
       return res.status(500).json({
         exito: false,
@@ -65,12 +79,7 @@ class FamiliasConsultasController {
         apellido_familiar: req.query.apellido_familiar,
         documento: req.query.documento,
         telefono: req.query.telefono,
-        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
-        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
-        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
+        ...extraerFiltrosGeograficos(req.query),
         limite: parseInt(req.query.limite) || 50
       };
 
@@ -94,6 +103,9 @@ class FamiliasConsultasController {
       });
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ exito: false, mensaje: error.message, error: error.message, code: error.code });
+      }
       console.error('❌ Error en consulta de padres:', error);
       return res.status(500).json({
         exito: false,
@@ -114,12 +126,7 @@ class FamiliasConsultasController {
       const filtros = {
         apellido_familiar: req.query.apellido_familiar,
         sector: req.query.sector,
-        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
-        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
-        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
+        ...extraerFiltrosGeograficos(req.query),
         limite: parseInt(req.query.limite) || 30
       };
 
@@ -143,6 +150,9 @@ class FamiliasConsultasController {
       });
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ exito: false, mensaje: error.message, error: error.message, code: error.code });
+      }
       console.error('❌ Error en consulta de familias:', error);
       return res.status(500).json({
         exito: false,
@@ -192,12 +202,7 @@ class FamiliasConsultasController {
         nombre: req.query.nombre,
         apellido_familiar: req.query.apellido_familiar,
         fecha_fallecimiento: req.query.fecha_fallecimiento,
-        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
-        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
-        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
+        ...extraerFiltrosGeograficos(req.query),
         limite: parseInt(req.query.limite) || 50
       };
 
@@ -237,6 +242,9 @@ class FamiliasConsultasController {
       });
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ exito: false, mensaje: error.message, error: error.message, code: error.code });
+      }
       console.error('❌ Error en consulta de madres fallecidas:', error);
       return res.status(500).json({
         exito: false,
@@ -258,12 +266,7 @@ class FamiliasConsultasController {
         nombre: req.query.nombre,
         apellido_familiar: req.query.apellido_familiar,
         fecha_fallecimiento: req.query.fecha_fallecimiento,
-        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
-        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
-        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
+        ...extraerFiltrosGeograficos(req.query),
         limite: parseInt(req.query.limite) || 50
       };
 
@@ -303,6 +306,9 @@ class FamiliasConsultasController {
       });
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ exito: false, mensaje: error.message, error: error.message, code: error.code });
+      }
       console.error('❌ Error en consulta de padres fallecidos:', error);
       return res.status(500).json({
         exito: false,

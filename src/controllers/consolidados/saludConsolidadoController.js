@@ -1,5 +1,36 @@
 import saludConsolidadoService from '../../services/consolidados/saludConsolidadoService.js';
 import { parseCampos } from '../../utils/exportColumns.js';
+import { parseIdOrNombre, parseIdEstricto, FiltroInvalidoError } from '../../utils/queryFilters.js';
+
+/**
+ * Extrae los filtros comunes a los endpoints de salud. id_municipio acepta
+ * ID numérico o nombre; el resto de IDs exige un entero válido en vez de
+ * descartar el filtro en silencio si llega un valor no numérico.
+ */
+function extraerFiltrosSalud(query, limiteDefecto) {
+  return {
+    id_enfermedad: parseIdEstricto(query.id_enfermedad, 'id_enfermedad'),
+    edad_min: query.edad_min,
+    edad_max: query.edad_max,
+    id_sexo: parseIdEstricto(query.id_sexo, 'id_sexo'),
+    id_parroquia: parseIdEstricto(query.id_parroquia, 'id_parroquia'),
+    id_municipio: parseIdOrNombre(query.id_municipio),
+    id_sector: parseIdEstricto(query.id_sector, 'id_sector'),
+    id_vereda: parseIdEstricto(query.id_vereda, 'id_vereda'),
+    id_corregimiento: parseIdEstricto(query.id_corregimiento, 'id_corregimiento'),
+    id_centro_poblado: parseIdEstricto(query.id_centro_poblado, 'id_centro_poblado'),
+    limite: query.limite ? parseInt(query.limite) : limiteDefecto
+  };
+}
+
+function limpiarFiltros(filtros) {
+  Object.keys(filtros).forEach(key => {
+    if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '') {
+      delete filtros[key];
+    }
+  });
+  return filtros;
+}
 
 class SaludConsolidadoController {
   /**
@@ -8,26 +39,7 @@ class SaludConsolidadoController {
    */
   async consultarSalud(req, res) {
     try {
-      const filtros = {
-        id_enfermedad: req.query.id_enfermedad ? parseInt(req.query.id_enfermedad) : undefined,
-        edad_min: req.query.edad_min,
-        edad_max: req.query.edad_max,
-        id_sexo: req.query.id_sexo ? parseInt(req.query.id_sexo) : undefined,
-        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
-        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
-        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
-        limite: req.query.limite ? parseInt(req.query.limite) : 100
-      };
-
-      // Remover filtros undefined
-      Object.keys(filtros).forEach(key => {
-        if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '') {
-          delete filtros[key];
-        }
-      });
+      const filtros = limpiarFiltros(extraerFiltrosSalud(req.query, 100));
 
       console.log('🔍 Consultando información de salud con filtros:', filtros);
 
@@ -36,6 +48,9 @@ class SaludConsolidadoController {
       res.json(resultado);
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ status: "error", message: error.message, code: error.code });
+      }
       console.error('❌ Error en consultarSalud:', error);
       res.status(500).json({
         status: "error",
@@ -133,26 +148,7 @@ class SaludConsolidadoController {
    */
   async generarReporteExcel(req, res) {
     try {
-      const filtros = {
-        id_enfermedad: req.query.id_enfermedad ? parseInt(req.query.id_enfermedad) : undefined,
-        edad_min: req.query.edad_min,
-        edad_max: req.query.edad_max,
-        id_sexo: req.query.id_sexo ? parseInt(req.query.id_sexo) : undefined,
-        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
-        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
-        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
-        limite: req.query.limite ? parseInt(req.query.limite) : 5000 // Límite más alto para Excel
-      };
-
-      // Remover filtros undefined
-      Object.keys(filtros).forEach(key => {
-        if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '') {
-          delete filtros[key];
-        }
-      });
+      const filtros = limpiarFiltros(extraerFiltrosSalud(req.query, 5000));
 
       console.log('📊 Generando reporte Excel de salud con filtros:', filtros);
 
@@ -170,6 +166,9 @@ class SaludConsolidadoController {
       res.send(buffer);
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ status: "error", message: error.message, code: error.code });
+      }
       console.error('❌ Error generando reporte Excel:', error);
       res.status(500).json({
         status: "error",
@@ -185,26 +184,7 @@ class SaludConsolidadoController {
    */
   async generarReporteJSON(req, res) {
     try {
-      const filtros = {
-        id_enfermedad: req.query.id_enfermedad ? parseInt(req.query.id_enfermedad) : undefined,
-        edad_min: req.query.edad_min,
-        edad_max: req.query.edad_max,
-        id_sexo: req.query.id_sexo ? parseInt(req.query.id_sexo) : undefined,
-        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
-        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
-        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
-        limite: req.query.limite ? parseInt(req.query.limite) : 5000 // Límite más alto para reporte
-      };
-
-      // Remover filtros undefined
-      Object.keys(filtros).forEach(key => {
-        if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '') {
-          delete filtros[key];
-        }
-      });
+      const filtros = limpiarFiltros(extraerFiltrosSalud(req.query, 5000));
 
       console.log('📊 Generando reporte JSON de salud con filtros:', filtros);
 
@@ -220,6 +200,9 @@ class SaludConsolidadoController {
       });
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ status: "error", message: error.message, code: error.code });
+      }
       console.error('❌ Error generando reporte JSON:', error);
       res.status(500).json({
         status: "error",

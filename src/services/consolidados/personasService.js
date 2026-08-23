@@ -162,10 +162,15 @@ class PersonasService {
       const whereConditions = [];
       const params = { limit, offset };
 
-      // FILTROS GEOGRÁFICOS (por ID)
-      if (id_municipio) {
-        whereConditions.push('f.id_municipio = :id_municipio');
-        params.id_municipio = id_municipio;
+      // FILTROS GEOGRÁFICOS (por ID o por nombre de municipio)
+      if (id_municipio !== undefined && id_municipio !== null && id_municipio !== '') {
+        if (typeof id_municipio === 'number') {
+          whereConditions.push('f.id_municipio = :id_municipio');
+          params.id_municipio = id_municipio;
+        } else {
+          whereConditions.push('m.nombre_municipio ILIKE :municipio_nombre');
+          params.municipio_nombre = `%${id_municipio}%`;
+        }
       }
 
       if (id_parroquia) {
@@ -221,7 +226,13 @@ class PersonasService {
       }
 
       if (id_nivel_educativo) {
-        whereConditions.push('p.id_nivel_educativo = :id_nivel_educativo');
+        // p.id_nivel_educativo nunca está poblado: el dato real vive como texto
+        // libre en p.estudios (ej. "Educación Primaria"), igual al catálogo niveles_educativos.nivel
+        whereConditions.push(`EXISTS (
+          SELECT 1 FROM niveles_educativos ne2
+          WHERE ne2.id_niveles_educativos = :id_nivel_educativo
+            AND ne2.nivel = p.estudios
+        )`);
         params.id_nivel_educativo = id_nivel_educativo;
       }
 

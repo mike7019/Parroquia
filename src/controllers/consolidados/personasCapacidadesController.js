@@ -1,4 +1,5 @@
 import personasCapacidadesService from '../../services/consolidados/personasCapacidadesService.js';
+import { parseIdOrNombre, parseIdEstricto, FiltroInvalidoError } from '../../utils/queryFilters.js';
 
 /**
  * Controlador para endpoints consolidados de personas, capacidades y análisis geográfico
@@ -13,16 +14,16 @@ class PersonasCapacidadesController {
   async obtenerPersonasPorDestrezas(req, res) {
     try {
       console.log('🔍 Controlador: Obteniendo personas por destrezas');
-      
+
       const filtros = {
-        destreza_id: req.query.destreza_id ? parseInt(req.query.destreza_id) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
-        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        id_corregimiento: req.query.id_corregimiento ? parseInt(req.query.id_corregimiento) : undefined,
-        id_centro_poblado: req.query.id_centro_poblado ? parseInt(req.query.id_centro_poblado) : undefined,
-        id_sexo: req.query.id_sexo ? parseInt(req.query.id_sexo) : undefined,
+        destreza_id: parseIdEstricto(req.query.destreza_id, 'destreza_id'),
+        id_municipio: parseIdOrNombre(req.query.id_municipio),
+        id_sector: parseIdEstricto(req.query.id_sector, 'id_sector'),
+        id_vereda: parseIdEstricto(req.query.id_vereda, 'id_vereda'),
+        id_parroquia: parseIdEstricto(req.query.id_parroquia, 'id_parroquia'),
+        id_corregimiento: parseIdEstricto(req.query.id_corregimiento, 'id_corregimiento'),
+        id_centro_poblado: parseIdEstricto(req.query.id_centro_poblado, 'id_centro_poblado'),
+        id_sexo: parseIdEstricto(req.query.id_sexo, 'id_sexo'),
         edad_min: req.query.edad_min ? parseInt(req.query.edad_min) : undefined,
         edad_max: req.query.edad_max ? parseInt(req.query.edad_max) : undefined,
         incluir_estadisticas: req.query.incluir_estadisticas !== 'false',
@@ -44,6 +45,9 @@ class PersonasCapacidadesController {
       });
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ status: 'error', message: error.message, code: error.code });
+      }
       console.error('❌ Error en obtenerPersonasPorDestrezas:', error);
       res.status(500).json({
         status: 'error',
@@ -96,10 +100,10 @@ class PersonasCapacidadesController {
       console.log('💼 Controlador: Obteniendo personas por profesiones');
       
       const filtros = {
-        profesion_id: req.query.profesion_id ? parseInt(req.query.profesion_id) : undefined,
+        profesion_id: parseIdEstricto(req.query.profesion_id, 'profesion_id'),
         profesion_nombre: req.query.profesion_nombre,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sexo: req.query.id_sexo ? parseInt(req.query.id_sexo) : undefined,
+        id_municipio: parseIdOrNombre(req.query.id_municipio),
+        id_sexo: parseIdEstricto(req.query.id_sexo, 'id_sexo'),
         pagina: req.query.pagina ? parseInt(req.query.pagina) : 1,
         limite: req.query.limite ? parseInt(req.query.limite) : 50
       };
@@ -117,6 +121,9 @@ class PersonasCapacidadesController {
       });
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ status: 'error', message: error.message, code: error.code });
+      }
       console.error('❌ Error en obtenerPersonasPorProfesiones:', error);
       res.status(500).json({
         status: 'error',

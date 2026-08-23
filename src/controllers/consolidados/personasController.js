@@ -1,9 +1,12 @@
 import personasService from '../../services/consolidados/personasService.js';
 import { parseCampos } from '../../utils/exportColumns.js';
+import { parseIdOrNombre, parseIdEstricto, FiltroInvalidoError } from '../../utils/queryFilters.js';
 
 /**
  * Extrae y parsea todos los filtros disponibles del query string.
  * Centralizado para que todos los endpoints apliquen el mismo conjunto completo de filtros.
+ * id_municipio acepta ID numérico o nombre; el resto de IDs exige un entero
+ * válido (lanza FiltroInvalidoError) en vez de descartar el filtro en silencio.
  */
 function extraerFiltros(query) {
   const filtros = {
@@ -12,29 +15,29 @@ function extraerFiltros(query) {
     limit: query.limit ? parseInt(query.limit) : 10,
 
     // Geográficos
-    id_municipio:     query.id_municipio     ? parseInt(query.id_municipio)     : undefined,
-    id_parroquia:     query.id_parroquia     ? parseInt(query.id_parroquia)     : undefined,
-    id_sector:        query.id_sector        ? parseInt(query.id_sector)        : undefined,
-    id_vereda:        query.id_vereda        ? parseInt(query.id_vereda)        : undefined,
-    id_corregimiento: query.id_corregimiento ? parseInt(query.id_corregimiento) : undefined,
-    id_centro_poblado: query.id_centro_poblado ? parseInt(query.id_centro_poblado) : undefined,
+    id_municipio:     parseIdOrNombre(query.id_municipio),
+    id_parroquia:     parseIdEstricto(query.id_parroquia, 'id_parroquia'),
+    id_sector:        parseIdEstricto(query.id_sector, 'id_sector'),
+    id_vereda:        parseIdEstricto(query.id_vereda, 'id_vereda'),
+    id_corregimiento: parseIdEstricto(query.id_corregimiento, 'id_corregimiento'),
+    id_centro_poblado: parseIdEstricto(query.id_centro_poblado, 'id_centro_poblado'),
 
     // Familia y vivienda
     apellido_familiar: query.apellido_familiar || undefined,
-    id_tipo_vivienda:  query.id_tipo_vivienda  ? parseInt(query.id_tipo_vivienda)  : undefined,
-    id_parentesco:     query.id_parentesco     ? parseInt(query.id_parentesco)     : undefined,
+    id_tipo_vivienda:  parseIdEstricto(query.id_tipo_vivienda, 'id_tipo_vivienda'),
+    id_parentesco:     parseIdEstricto(query.id_parentesco, 'id_parentesco'),
 
     // Datos personales
-    id_estado_civil:      query.id_estado_civil      ? parseInt(query.id_estado_civil)      : undefined,
-    id_profesion:         query.id_profesion         ? parseInt(query.id_profesion)         : undefined,
-    id_nivel_educativo:   query.id_nivel_educativo   ? parseInt(query.id_nivel_educativo)   : undefined,
-    id_comunidad_cultural: query.id_comunidad_cultural ? parseInt(query.id_comunidad_cultural) : undefined,
-    id_liderazgo:         query.id_liderazgo         ? parseInt(query.id_liderazgo)         : undefined,
-    id_destreza:          query.id_destreza          ? parseInt(query.id_destreza)          : undefined,
-    id_necesidad_enfermo: query.id_necesidad_enfermo ? parseInt(query.id_necesidad_enfermo) : undefined,
+    id_estado_civil:      parseIdEstricto(query.id_estado_civil, 'id_estado_civil'),
+    id_profesion:         parseIdEstricto(query.id_profesion, 'id_profesion'),
+    id_nivel_educativo:   parseIdEstricto(query.id_nivel_educativo, 'id_nivel_educativo'),
+    id_comunidad_cultural: parseIdEstricto(query.id_comunidad_cultural, 'id_comunidad_cultural'),
+    id_liderazgo:         parseIdEstricto(query.id_liderazgo, 'id_liderazgo'),
+    id_destreza:          parseIdEstricto(query.id_destreza, 'id_destreza'),
+    id_necesidad_enfermo: parseIdEstricto(query.id_necesidad_enfermo, 'id_necesidad_enfermo'),
 
     // Sexo
-    id_sexo: query.id_sexo ? parseInt(query.id_sexo) : undefined,
+    id_sexo: parseIdEstricto(query.id_sexo, 'id_sexo'),
     sexo:    query.sexo    || undefined,
 
     // Tallas
@@ -109,6 +112,9 @@ async function manejarConsultaConsolidada(req, res, { emoji, label, filename, er
       res.json(await personasService.consultarPersonas(filtros));
     }
   } catch (error) {
+    if (error instanceof FiltroInvalidoError) {
+      return res.status(400).json({ status: 'error', message: error.message, code: error.code });
+    }
     console.error(`❌ Error en ${methodName}:`, error);
     res.status(500).json({ status: 'error', message: error.message, code: errorCode });
   }

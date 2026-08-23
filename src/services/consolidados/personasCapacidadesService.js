@@ -48,9 +48,14 @@ class PersonasCapacidadesService {
         params.destreza_id = destreza_id;
       }
 
-      if (id_municipio) {
-        whereConditions.push('m.id_municipio = :id_municipio');
-        params.id_municipio = id_municipio;
+      if (id_municipio !== undefined && id_municipio !== null && id_municipio !== '') {
+        if (typeof id_municipio === 'number') {
+          whereConditions.push('m.id_municipio = :id_municipio');
+          params.id_municipio = id_municipio;
+        } else {
+          whereConditions.push('m.nombre_municipio ILIKE :municipio_nombre');
+          params.municipio_nombre = `%${id_municipio}%`;
+        }
       }
 
       if (id_sector) {
@@ -93,7 +98,7 @@ class PersonasCapacidadesService {
         params.edad_max = edad_max;
       }
 
-      const whereClause = whereConditions.length > 0 
+      const whereClause = whereConditions.length > 0
         ? `WHERE ${whereConditions.join(' AND ')}`
         : '';
 
@@ -294,9 +299,14 @@ class PersonasCapacidadesService {
         params.profesion_nombre = `%${profesion_nombre}%`;
       }
 
-      if (id_municipio) {
-        whereConditions.push('m.id_municipio = :id_municipio');
-        params.id_municipio = id_municipio;
+      if (id_municipio !== undefined && id_municipio !== null && id_municipio !== '') {
+        if (typeof id_municipio === 'number') {
+          whereConditions.push('m.id_municipio = :id_municipio');
+          params.id_municipio = id_municipio;
+        } else {
+          whereConditions.push('m.nombre_municipio ILIKE :municipio_nombre');
+          params.municipio_nombre = `%${id_municipio}%`;
+        }
       }
 
       if (id_sexo) {
@@ -304,12 +314,12 @@ class PersonasCapacidadesService {
         params.id_sexo = id_sexo;
       }
 
-      const whereClause = whereConditions.length > 0 
+      const whereClause = whereConditions.length > 0
         ? `WHERE ${whereConditions.join(' AND ')}`
         : '';
 
       const query = `
-        SELECT 
+        SELECT
           p.id_personas,
           COALESCE(p.nombres, '') as nombre_completo,
           p.identificacion as numero_identificacion,

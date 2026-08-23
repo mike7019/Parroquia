@@ -1,4 +1,33 @@
 import personasReporteService from '../../services/consolidados/personasReporteService.js';
+import { parseIdOrNombre, parseIdEstricto, FiltroInvalidoError } from '../../utils/queryFilters.js';
+
+/**
+ * id_municipio acepta ID numérico o nombre; el resto de IDs exige un entero
+ * válido en vez de descartar el filtro en silencio si llega un valor no numérico.
+ */
+function extraerFiltros(query) {
+  const filtros = {
+    id_persona: parseIdEstricto(query.id_persona, 'id_persona'),
+    id_municipio: parseIdOrNombre(query.id_municipio),
+    id_sector: parseIdEstricto(query.id_sector, 'id_sector'),
+    id_vereda: parseIdEstricto(query.id_vereda, 'id_vereda'),
+    id_parroquia: parseIdEstricto(query.id_parroquia, 'id_parroquia'),
+    talla_camisa: query.talla_camisa,
+    talla_pantalon: query.talla_pantalon,
+    talla_zapatos: query.talla_zapatos,
+    id_profesion: parseIdEstricto(query.id_profesion, 'id_profesion'),
+    id_destreza: parseIdEstricto(query.id_destreza, 'id_destreza'),
+    limite: query.limite ? parseInt(query.limite) : 1000
+  };
+
+  Object.keys(filtros).forEach(key => {
+    if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '') {
+      delete filtros[key];
+    }
+  });
+
+  return filtros;
+}
 
 class PersonasReporteController {
   /**
@@ -7,26 +36,7 @@ class PersonasReporteController {
    */
   async generarReporteJSON(req, res) {
     try {
-      const filtros = {
-        id_persona: req.query.id_persona ? parseInt(req.query.id_persona) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
-        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        talla_camisa: req.query.talla_camisa,
-        talla_pantalon: req.query.talla_pantalon,
-        talla_zapatos: req.query.talla_zapatos,
-        id_profesion: req.query.id_profesion ? parseInt(req.query.id_profesion) : undefined,
-        id_destreza: req.query.id_destreza ? parseInt(req.query.id_destreza) : undefined,
-        limite: req.query.limite ? parseInt(req.query.limite) : 1000
-      };
-
-      // Remover filtros undefined
-      Object.keys(filtros).forEach(key => {
-        if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '') {
-          delete filtros[key];
-        }
-      });
+      const filtros = extraerFiltros(req.query);
 
       console.log('🔍 Generando reporte de personas (JSON) con filtros:', filtros);
 
@@ -39,6 +49,9 @@ class PersonasReporteController {
       });
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ status: "error", message: error.message, code: error.code });
+      }
       console.error('❌ Error en generarReporteJSON:', error);
       res.status(500).json({
         status: "error",
@@ -54,26 +67,7 @@ class PersonasReporteController {
    */
   async generarReporteExcel(req, res) {
     try {
-      const filtros = {
-        id_persona: req.query.id_persona ? parseInt(req.query.id_persona) : undefined,
-        id_municipio: req.query.id_municipio ? parseInt(req.query.id_municipio) : undefined,
-        id_sector: req.query.id_sector ? parseInt(req.query.id_sector) : undefined,
-        id_vereda: req.query.id_vereda ? parseInt(req.query.id_vereda) : undefined,
-        id_parroquia: req.query.id_parroquia ? parseInt(req.query.id_parroquia) : undefined,
-        talla_camisa: req.query.talla_camisa,
-        talla_pantalon: req.query.talla_pantalon,
-        talla_zapatos: req.query.talla_zapatos,
-        id_profesion: req.query.id_profesion ? parseInt(req.query.id_profesion) : undefined,
-        id_destreza: req.query.id_destreza ? parseInt(req.query.id_destreza) : undefined,
-        limite: req.query.limite ? parseInt(req.query.limite) : 1000
-      };
-
-      // Remover filtros undefined
-      Object.keys(filtros).forEach(key => {
-        if (filtros[key] === undefined || filtros[key] === null || filtros[key] === '') {
-          delete filtros[key];
-        }
-      });
+      const filtros = extraerFiltros(req.query);
 
       console.log('📊 Generando reporte de personas (Excel) con filtros:', filtros);
 
@@ -90,6 +84,9 @@ class PersonasReporteController {
       res.send(buffer);
 
     } catch (error) {
+      if (error instanceof FiltroInvalidoError) {
+        return res.status(400).json({ status: "error", message: error.message, code: error.code });
+      }
       console.error('❌ Error en generarReporteExcel:', error);
       res.status(500).json({
         status: "error",

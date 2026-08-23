@@ -24,9 +24,14 @@ class FamiliasConsolidadoService {
         paramIndex++;
       }
       
-      if (filtros.id_municipio) {
-        whereConditions.push(`f.id_municipio = $${paramIndex}`);
-        bindParams.push(filtros.id_municipio);
+      if (filtros.id_municipio !== undefined) {
+        if (typeof filtros.id_municipio === 'number') {
+          whereConditions.push(`f.id_municipio = $${paramIndex}`);
+          bindParams.push(filtros.id_municipio);
+        } else {
+          whereConditions.push(`mun.nombre_municipio ILIKE $${paramIndex}`);
+          bindParams.push(`%${filtros.id_municipio}%`);
+        }
         paramIndex++;
       }
       
@@ -692,9 +697,14 @@ class FamiliasConsolidadoService {
         paramIndex++;
       }
       
-      if (filtros.id_municipio) {
-        whereConditions.push(`f.id_municipio = $${paramIndex}`);
-        bindParams.push(filtros.id_municipio);
+      if (filtros.id_municipio !== undefined) {
+        if (typeof filtros.id_municipio === 'number') {
+          whereConditions.push(`f.id_municipio = $${paramIndex}`);
+          bindParams.push(filtros.id_municipio);
+        } else {
+          whereConditions.push(`mun.nombre_municipio ILIKE $${paramIndex}`);
+          bindParams.push(`%${filtros.id_municipio}%`);
+        }
         paramIndex++;
       }
       
@@ -779,9 +789,14 @@ class FamiliasConsolidadoService {
         paramIndex++;
       }
       
-      if (filtros.id_municipio) {
-        whereConditions.push(`f.id_municipio = $${paramIndex}`);
-        bindParams.push(filtros.id_municipio);
+      if (filtros.id_municipio !== undefined) {
+        if (typeof filtros.id_municipio === 'number') {
+          whereConditions.push(`f.id_municipio = $${paramIndex}`);
+          bindParams.push(filtros.id_municipio);
+        } else {
+          whereConditions.push(`mun.nombre_municipio ILIKE $${paramIndex}`);
+          bindParams.push(`%${filtros.id_municipio}%`);
+        }
         paramIndex++;
       }
       
@@ -864,9 +879,14 @@ class FamiliasConsolidadoService {
         paramIndex++;
       }
       
-      if (filtros.id_municipio) {
-        whereConditions.push(`f.id_municipio = $${paramIndex}`);
-        bindParams.push(filtros.id_municipio);
+      if (filtros.id_municipio !== undefined) {
+        if (typeof filtros.id_municipio === 'number') {
+          whereConditions.push(`f.id_municipio = $${paramIndex}`);
+          bindParams.push(filtros.id_municipio);
+        } else {
+          whereConditions.push(`mun.nombre_municipio ILIKE $${paramIndex}`);
+          bindParams.push(`%${filtros.id_municipio}%`);
+        }
         paramIndex++;
       }
       
@@ -946,9 +966,14 @@ class FamiliasConsolidadoService {
         paramIndex++;
       }
       
-      if (filtros.id_municipio) {
-        whereConditions.push(`f.id_municipio = $${paramIndex}`);
-        bindParams.push(filtros.id_municipio);
+      if (filtros.id_municipio !== undefined) {
+        if (typeof filtros.id_municipio === 'number') {
+          whereConditions.push(`f.id_municipio = $${paramIndex}`);
+          bindParams.push(filtros.id_municipio);
+        } else {
+          whereConditions.push(`mun.nombre_municipio ILIKE $${paramIndex}`);
+          bindParams.push(`%${filtros.id_municipio}%`);
+        }
         paramIndex++;
       }
       

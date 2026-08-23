@@ -1409,7 +1409,7 @@ export const obtenerEncuestas = async (req, res) => {
           // Si tenemos id_parroquia pero no nombre, buscar en la tabla parroquias
           try {
             const parroquiaDb = await sequelize.query(
-              'SELECT id_parroquia, nombre FROM parroquias WHERE id_parroquia = :id',
+              'SELECT id_parroquia, nombre FROM parroquia WHERE id_parroquia = :id',
               {
                 replacements: { id: parseInt(familiaData.id_parroquia) },
                 type: QueryTypes.SELECT
@@ -2061,7 +2061,7 @@ export const obtenerEncuestaPorId = async (req, res) => {
       // Si tenemos id_parroquia pero no nombre, buscar en la tabla parroquias
       try {
         const parroquiaDb = await sequelize.query(
-          'SELECT id_parroquia, nombre FROM parroquias WHERE id_parroquia = :id',
+          'SELECT id_parroquia, nombre FROM parroquia WHERE id_parroquia = :id',
           {
             replacements: { id: parseInt(familiaData.id_parroquia) },
             type: QueryTypes.SELECT

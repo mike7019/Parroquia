@@ -33,9 +33,14 @@ class PersonasReporteService {
       }
       
       // Filtros geográficos
-      if (filtros.id_municipio) {
-        whereConditions.push('f.id_municipio = :id_municipio');
-        params.id_municipio = filtros.id_municipio;
+      if (filtros.id_municipio !== undefined && filtros.id_municipio !== null && filtros.id_municipio !== '') {
+        if (typeof filtros.id_municipio === 'number') {
+          whereConditions.push('f.id_municipio = :id_municipio');
+          params.id_municipio = filtros.id_municipio;
+        } else {
+          whereConditions.push('m.nombre_municipio ILIKE :municipio_nombre');
+          params.municipio_nombre = `%${filtros.id_municipio}%`;
+        }
       }
       
       if (filtros.id_sector) {
@@ -59,7 +64,7 @@ class PersonasReporteService {
       }
       
       if (filtros.id_parroquia) {
-        whereConditions.push('p.id_parroquia = :id_parroquia');
+        whereConditions.push('f.id_parroquia = :id_parroquia');
         params.id_parroquia = filtros.id_parroquia;
       }
       
@@ -167,7 +172,7 @@ class PersonasReporteService {
         LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
         LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
         LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
-        LEFT JOIN parroquia pr ON p.id_parroquia = pr.id_parroquia
+        LEFT JOIN parroquia pr ON f.id_parroquia = pr.id_parroquia
         LEFT JOIN profesiones prof ON p.id_profesion = prof.id_profesion
         LEFT JOIN estados_civiles ec ON p.id_estado_civil_estado_civil = ec.id_estado
         LEFT JOIN tipos_identificacion ti ON p.id_tipo_identificacion_tipo_identificacion = ti.id_tipo_identificacion
@@ -296,7 +301,7 @@ class PersonasReporteService {
         LEFT JOIN corregimientos corr ON f.id_corregimiento = corr.id_corregimiento
         LEFT JOIN centros_poblados cp ON f.id_centro_poblado = cp.id_centro_poblado
         LEFT JOIN sexos s ON p.id_sexo = s.id_sexo
-        LEFT JOIN parroquia pr ON p.id_parroquia = pr.id_parroquia
+        LEFT JOIN parroquia pr ON f.id_parroquia = pr.id_parroquia
         LEFT JOIN profesiones prof ON p.id_profesion = prof.id_profesion
         ${whereClause}
       `;

@@ -381,6 +381,128 @@ class FamiliasConsultasService {
       throw new Error(`Error al consultar padres: ${error.message}`);
     }
   }
+
+  /**
+   * Consulta interna compartida por consultarMadresFallecidas y consultarPadresFallecidos.
+   * Busca en difuntos_familia por nombre de parentesco (Madre/Padre), con los mismos
+   * filtros geográficos que el resto del servicio.
+   */
+  async _consultarFallecidosPorParentesco(filtros, nombreParentesco, etiquetaResultado) {
+    // Match exacto (insensible a mayúsculas): el catálogo también tiene entradas
+    // como "Madre Cabeza de Hogar" que un ILIKE con comodines confundiría con "Madre".
+    const whereConditions = ['par.nombre ILIKE :nombreParentesco'];
+    const replacements = { nombreParentesco };
+
+    if (filtros.nombre) {
+      whereConditions.push('df.nombre_completo ILIKE :nombre');
+      replacements.nombre = `%${filtros.nombre}%`;
+    }
+
+    if (filtros.apellido_familiar) {
+      whereConditions.push('f.apellido_familiar ILIKE :apellido_familiar');
+      replacements.apellido_familiar = `%${filtros.apellido_familiar}%`;
+    }
+
+    if (filtros.fecha_fallecimiento) {
+      whereConditions.push('df.fecha_fallecimiento = :fecha_fallecimiento');
+      replacements.fecha_fallecimiento = filtros.fecha_fallecimiento;
+    }
+
+    if (filtros.id_parroquia) {
+      whereConditions.push('f.id_parroquia = :id_parroquia');
+      replacements.id_parroquia = filtros.id_parroquia;
+    }
+
+    if (filtros.id_municipio !== undefined && filtros.id_municipio !== null && filtros.id_municipio !== '') {
+      if (typeof filtros.id_municipio === 'number') {
+        whereConditions.push('f.id_municipio = :id_municipio');
+        replacements.id_municipio = filtros.id_municipio;
+      } else {
+        whereConditions.push('m.nombre_municipio ILIKE :municipio_nombre');
+        replacements.municipio_nombre = `%${filtros.id_municipio}%`;
+      }
+    }
+
+    if (filtros.id_sector) {
+      whereConditions.push('f.id_sector = :id_sector');
+      replacements.id_sector = filtros.id_sector;
+    }
+
+    if (filtros.id_vereda) {
+      whereConditions.push('f.id_vereda = :id_vereda');
+      replacements.id_vereda = filtros.id_vereda;
+    }
+
+    if (filtros.id_corregimiento) {
+      whereConditions.push('f.id_corregimiento = :id_corregimiento');
+      replacements.id_corregimiento = filtros.id_corregimiento;
+    }
+
+    if (filtros.id_centro_poblado) {
+      whereConditions.push('f.id_centro_poblado = :id_centro_poblado');
+      replacements.id_centro_poblado = filtros.id_centro_poblado;
+    }
+
+    const datos = await sequelize.query(`
+      SELECT
+        par.nombre as tipo_parentesco,
+        f.apellido_familiar,
+        df.nombre_completo as nombre,
+        sx.nombre as sexo,
+        f.telefono,
+        df.fecha_fallecimiento,
+        EXTRACT(YEAR FROM AGE(CURRENT_DATE, df.fecha_fallecimiento)) as anos_fallecido,
+        df.observaciones,
+        df.causa_fallecimiento,
+        m.nombre_municipio,
+        p.nombre as nombre_parroquia
+      FROM difuntos_familia df
+      LEFT JOIN familias f ON df.id_familia_familias = f.id_familia
+      LEFT JOIN parentescos par ON df.id_parentesco = par.id_parentesco
+      LEFT JOIN sexos sx ON df.id_sexo = sx.id_sexo
+      LEFT JOIN municipios m ON f.id_municipio = m.id_municipio
+      LEFT JOIN parroquia p ON f.id_parroquia = p.id_parroquia
+      WHERE ${whereConditions.join(' AND ')}
+      ORDER BY df.fecha_fallecimiento DESC
+      LIMIT :limite
+    `, {
+      replacements: { ...replacements, limite: filtros.limite || 50 },
+      type: QueryTypes.SELECT
+    });
+
+    return {
+      exito: true,
+      mensaje: `Se encontraron ${datos.length} ${etiquetaResultado}`,
+      datos,
+      total: datos.length,
+      filtros_aplicados: filtros,
+      nota: 'Los datos provienen de difuntos_familia; campos como documento, fecha de nacimiento y edad no se registran para difuntos y no están disponibles.'
+    };
+  }
+
+  /**
+   * Consultar madres fallecidas
+   */
+  async consultarMadresFallecidas(filtros = {}) {
+    try {
+      return await this._consultarFallecidosPorParentesco(filtros, 'Madre', 'madres fallecidas');
+    } catch (error) {
+      console.error('❌ Error en consultarMadresFallecidas:', error);
+      throw new Error(`Error al consultar madres fallecidas: ${error.message}`);
+    }
+  }
+
+  /**
+   * Consultar padres fallecidos
+   */
+  async consultarPadresFallecidos(filtros = {}) {
+    try {
+      return await this._consultarFallecidosPorParentesco(filtros, 'Padre', 'padres fallecidos');
+    } catch (error) {
+      console.error('❌ Error en consultarPadresFallecidos:', error);
+      throw new Error(`Error al consultar padres fallecidos: ${error.message}`);
+    }
+  }
 }
 
 export default new FamiliasConsultasService();
