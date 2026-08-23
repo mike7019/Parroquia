@@ -334,7 +334,7 @@ docker-compose exec postgres psql -U parroquia_user -d parroquia_db -c "SELECT C
 docker-compose exec api npm run db:sync:complete
 
 # Cargar datos de catálogos (geografía, roles, etc.)
-docker-compose exec api npm run db:seed:config
+docker-compose exec api npm run db:seed
 
 # Ver recursos utilizados
 docker stats

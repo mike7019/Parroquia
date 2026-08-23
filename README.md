@@ -264,7 +264,7 @@ docker-compose exec api sh
 
 # Dentro del contenedor
 npm run db:sync:complete
-npm run db:seed:config
+npm run db:seed
 npm run admin:create
 ```
 
@@ -438,7 +438,7 @@ docker-compose exec api sh
 
 # Dentro del contenedor
 npm run db:sync:complete
-npm run db:seed:config
+npm run db:seed
 npm run admin:create
 
 ```

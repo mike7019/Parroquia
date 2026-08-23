@@ -206,4 +206,12 @@ async function seedGeographicData() {
   }
 }
 
-seedGeographicData();
+// Fuera de alcance para la siembra oficial de catálogos (npm run db:seed):
+// sector/vereda son geografía específica de cada despliegue, no un catálogo
+// universal. Este script queda disponible solo para ejecución manual.
+const isMainModule = process.argv[1] && process.argv[1].endsWith('seed-geographic-data.js');
+if (isMainModule) {
+  seedGeographicData();
+}
+
+export default seedGeographicData;

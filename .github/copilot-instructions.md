@@ -39,8 +39,8 @@ npm start                   # Production mode
 ### Database Operations
 ```bash
 npm run db:sync:complete    # Sync all models (use alter/force params)
-npm run db:seed:config      # Load catalog data (departments, municipalities)
-npm run admin:create        # Create admin user interactively
+npm run db:seed             # Load catalog data (identification types, roles, professions, departments, municipalities, etc.)
+npm run admin:create        # Create/reset the default admin user (admin@parroquia.com, hardcoded — not interactive)
 ```
 
 ### Docker Deployment

@@ -89,25 +89,29 @@ export async function seedTallas(sequelize) {
     let tallasCreadasus = 0;
     let tallasActualizadas = 0;
 
+    // NOTA: la tabla "tallas" no tiene una restricción UNIQUE sobre
+    // (tipo_prenda, talla, genero), así que Talla.upsert(..., {conflictFields})
+    // falla con "no unique or exclusion constraint matching ON CONFLICT".
+    // findOrCreate no depende de una restricción a nivel de BD.
     for (const tallaData of tallasData) {
-      const [talla, created] = await Talla.upsert(
-        {
-          ...tallaData,
-          activo: true,
-          updated_at: new Date()
+      const [talla, created] = await Talla.findOrCreate({
+        where: {
+          tipo_prenda: tallaData.tipo_prenda,
+          talla: tallaData.talla,
+          genero: tallaData.genero
         },
-        {
-          conflictFields: ['tipo_prenda', 'talla', 'genero'], // Campos únicos para evitar duplicados
-          returning: true
+        defaults: {
+          ...tallaData,
+          activo: true
         }
-      );
+      });
 
       if (created) {
         tallasCreadasus++;
         console.log(`✅ Creada: ${tallaData.tipo_prenda} - ${tallaData.talla} (${tallaData.genero})`);
       } else {
         tallasActualizadas++;
-        console.log(`🔄 Actualizada: ${tallaData.tipo_prenda} - ${tallaData.talla} (${tallaData.genero})`);
+        console.log(`🔄 Ya existía: ${tallaData.tipo_prenda} - ${tallaData.talla} (${tallaData.genero})`);
       }
     }
 

@@ -5,18 +5,41 @@
  */
 
 /**
- * Parsea el query param `campos` (lista separada por comas) a un array de keys.
- * Devuelve null si no se envió (para poder distinguir "sin selección" = todas las columnas).
+ * Parsea un query param de lista separada por comas (por defecto `campos`) a
+ * un array de keys. Devuelve null si no se envió (para poder distinguir "sin
+ * selección" = todas las columnas).
  * @param {Object} query - req.query
+ * @param {string} [paramName='campos'] - nombre del query param a leer
  * @returns {string[]|null}
  */
-export function parseCampos(query) {
-  if (!query || !query.campos) return null;
-  const campos = String(query.campos)
+export function parseCampos(query, paramName = 'campos') {
+  if (!query || !query[paramName]) return null;
+  const campos = String(query[paramName])
     .split(',')
     .map(c => c.trim())
     .filter(Boolean);
   return campos.length > 0 ? campos : null;
+}
+
+/**
+ * Parsea la selección de columnas por hoja para reportes Excel con varias
+ * pestañas (ej. familias: Información General / Miembros de Familias /
+ * Difuntos). Cada entrada de `hojas` mapea el nombre lógico de la hoja al
+ * query param que la controla; si ese param específico no vino, cae de
+ * vuelta al param genérico `campos` (compatibilidad con clientes que aún
+ * mandan una sola lista para todas las hojas).
+ * @param {Object} query - req.query
+ * @param {Object<string,string>} hojas - ej. { informacionGeneral: 'campos_informacion_general', miembros: 'campos_miembros_familias', difuntos: 'campos_difuntos' }
+ * @returns {Object<string,string[]|null>} mismas keys que `hojas`, cada una con su array de campos (o null = todas las columnas)
+ */
+export function parseCamposPorHoja(query, hojas) {
+  const campoGenerico = parseCampos(query, 'campos');
+  const resultado = {};
+  for (const [nombreHoja, paramName] of Object.entries(hojas)) {
+    const especifico = parseCampos(query, paramName);
+    resultado[nombreHoja] = especifico ?? campoGenerico;
+  }
+  return resultado;
 }
 
 /**

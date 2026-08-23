@@ -1,3 +1,11 @@
+// ⚠️ FUERA DE ALCANCE de la siembra oficial de catálogos (npm run db:seed):
+// las parroquias son geografía específica de cada despliegue, no un catálogo
+// universal, y se cargan manualmente vía la app una vez desplegada.
+// Además este script tiene un bug conocido: la sección "sync con tabla
+// parroquias" (línea ~114) inserta en una tabla "parroquias" (plural) que no
+// existe en el esquema real (la tabla real es "parroquia", singular) y
+// haría fallar la ejecución en ese punto. Se deja documentado en vez de
+// reparado porque no forma parte del flujo de siembra soportado.
 import sequelize from '../config/sequelize.js';
 
 const sampleParroquias = [
@@ -150,4 +158,9 @@ async function seedParroquias() {
   }
 }
 
-seedParroquias();
+const isMainModule = process.argv[1] && process.argv[1].endsWith('seed-parroquias.js');
+if (isMainModule) {
+  seedParroquias();
+}
+
+export default seedParroquias;

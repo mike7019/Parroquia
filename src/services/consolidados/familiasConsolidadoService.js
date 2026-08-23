@@ -376,39 +376,52 @@ class FamiliasConsolidadoService {
    * Generar reporte Excel completo de familias
    * GET /api/familias/reporte/excel
    */
-  async generarReporteExcelFamilias(filtros = {}, camposSeleccionados = null) {
+  /**
+   * @param {Object} filtros - filtros de consulta (municipio, parroquia, etc.)
+   * @param {Object|string[]|null} camposPorHoja - selección de columnas por
+   *   hoja: { informacionGeneral, miembrosFamilias, difuntos } (cada una un
+   *   array de keys o null = todas). Por compatibilidad hacia atrás también
+   *   acepta un array plano (se aplica igual a las 3 hojas, comportamiento
+   *   anterior) o null (todas las columnas en las 3 hojas).
+   */
+  async generarReporteExcelFamilias(filtros = {}, camposPorHoja = null) {
     const workbook = new ExcelJS.Workbook();
-    
+
     // Configuración del workbook
     workbook.creator = 'Sistema Parroquial - Familias';
     workbook.created = new Date();
     workbook.modified = new Date();
     workbook.subject = 'Reporte Consolidado de Familias';
-    
+
+    // Normaliza a la forma { informacionGeneral, miembrosFamilias, difuntos }
+    const campos = Array.isArray(camposPorHoja) || camposPorHoja === null
+      ? { informacionGeneral: camposPorHoja, miembrosFamilias: camposPorHoja, difuntos: camposPorHoja }
+      : camposPorHoja;
+
     try {
-      console.log('📊 Generando reporte Excel de familias con filtros:', filtros);
-      
+      console.log('📊 Generando reporte Excel de familias con filtros:', filtros, 'campos por hoja:', campos);
+
       // 1. Obtener datos consolidados
       const datosFamilias = await this.consultarFamilias(filtros);
       const familias = datosFamilias.datos || [];
-      
+
       console.log(`📋 Procesando ${familias.length} familias para Excel`);
-      
+
       // 2. HOJA 1: INFORMACIÓN GENERAL DE FAMILIAS
-      await this.crearHojaInfoGeneral(workbook, familias, camposSeleccionados);
+      await this.crearHojaInfoGeneral(workbook, familias, campos.informacionGeneral);
 
       // 3. HOJA 2: MIEMBROS DE FAMILIAS
-      await this.crearHojaMiembrosFamilias(workbook, familias, camposSeleccionados);
+      await this.crearHojaMiembrosFamilias(workbook, familias, campos.miembrosFamilias);
 
       // 4. HOJA 3: DIFUNTOS POR FAMILIA
-      await this.crearHojaDifuntosFamilias(workbook, familias, camposSeleccionados);
-      
+      await this.crearHojaDifuntosFamilias(workbook, familias, campos.difuntos);
+
       // 5. HOJA 4: ESTADÍSTICAS GENERALES
       await this.crearHojaEstadisticasFamilias(workbook, familias);
-      
+
       console.log('✅ Excel de familias generado exitosamente');
       return workbook;
-      
+
     } catch (error) {
       console.error('❌ Error generando Excel de familias:', error);
       throw new Error(`Error en generación de Excel: ${error.message}`);

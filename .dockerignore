@@ -88,8 +88,11 @@ __tests__/
 *.spec.js
 
 # Development files
+# NOTA: "scripts/" NO se excluye a propósito — scripts/createAdminUser.js se
+# ejecuta en producción vía `docker-compose exec api npm run admin:create`
+# (ver README_MANUAL_TECNICO.md). Excluirlo aquí lo saca del build context
+# por completo, y ni siquiera Dockerfile puede copiarlo después.
 ollama/
-scripts/
 jenkins/
 temp-archive/
 

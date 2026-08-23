@@ -1,6 +1,16 @@
 /**
- * Seeder para TIPOS DE VIVIENDAS - Servidor Remoto
- * Soluciona: Foreign key constraint error en tabla familias
+ * Seeder para TIPOS DE VIVIENDA - Servidor Remoto
+ *
+ * ⚠️ DEPRECADO: esta tabla ya la siembra de forma segura e idempotente
+ * `src/seeders/configSeeder.js` (seedTiposVivienda), que se ejecuta vía
+ * `npm run db:seed` respetando NODE_ENV/.env. Este script queda solo como
+ * herramienta manual de emergencia para el servidor remoto.
+ *
+ * Reparado: la tabla real es "tipos_vivienda" (sin "s") con columna
+ * "id_tipo_vivienda" y "nombre"/"descripcion" — el script original apuntaba
+ * a una tabla "tipos_viviendas" inexistente y además borraba todo el
+ * contenido de la tabla antes de insertar. Ahora es idempotente (no borra
+ * nada, solo inserta lo que falte).
  */
 
 import { Sequelize } from 'sequelize';
@@ -15,74 +25,35 @@ const sequelize = new Sequelize({
   logging: false
 });
 
-async function insertarTiposViviendas() {
+async function insertarTiposVivienda() {
   try {
-    console.log('🏠 INSERTANDO TIPOS DE VIVIENDAS - SERVIDOR REMOTO');
+    console.log('🏠 SEMBRANDO TIPOS DE VIVIENDA - SERVIDOR REMOTO');
     console.log('='.repeat(80));
-    console.log('📍 Host: 206.62.139.100:5433');
-    console.log('🎯 Solución para: "Key (id_tipo_vivienda)=(1) is not present"\n');
-    
+    console.log('📍 Host: 206.62.139.100:5433\n');
+
     await sequelize.authenticate();
     console.log('✅ Conectado\n');
 
-    // Limpiar y reiniciar
-    await sequelize.query('DELETE FROM tipos_viviendas;');
-    await sequelize.query('ALTER SEQUENCE tipos_viviendas_id_tipo_seq RESTART WITH 1;');
-    console.log('🗑️  Tabla limpiada\n');
-
-    console.log('📝 Insertando tipos de vivienda...\n');
-
-    const tiposVivienda = [
-      { descripcion: 'Casa', activo: true },
-      { descripcion: 'Apartamento', activo: true },
-      { descripcion: 'Rancho/Finca', activo: true },
-      { descripcion: 'Cuarto', activo: true },
-      { descripcion: 'Inquilinato', activo: true },
-      { descripcion: 'Otro', activo: true }
-    ];
-
-    for (const tipo of tiposVivienda) {
-      const [result] = await sequelize.query(`
-        INSERT INTO tipos_viviendas (descripcion, activo, created_at, updated_at)
-        VALUES (
-          '${tipo.descripcion}',
-          ${tipo.activo},
-          NOW(),
-          NOW()
-        )
-        RETURNING id_tipo, descripcion, activo;
-      `);
-      
-      console.log(`  ✅ ID ${result[0].id_tipo} - ${result[0].descripcion} (activo: ${result[0].activo})`);
+    const [{ count }] = (await sequelize.query('SELECT COUNT(*) as count FROM tipos_vivienda'))[0];
+    if (parseInt(count) > 0) {
+      console.log(`ℹ️  tipos_vivienda ya tiene ${count} registros, no se inserta nada.`);
+      await sequelize.close();
+      return;
     }
 
-    // Verificación
-    console.log('\n' + '='.repeat(80));
-    console.log('📊 VERIFICACIÓN FINAL:\n');
-    
-    const [verificacion] = await sequelize.query(`
-      SELECT id_tipo, descripcion, activo
-      FROM tipos_viviendas
-      ORDER BY id_tipo;
-    `);
+    const tiposVivienda = ['Casa', 'Apartamento', 'Rancho/Finca', 'Cuarto', 'Inquilinato', 'Otro'];
 
-    console.log('┌────┬─────────────────────┬────────┐');
-    console.log('│ ID │ Tipo de Vivienda    │ Activo │');
-    console.log('├────┼─────────────────────┼────────┤');
-    
-    verificacion.forEach(t => {
-      const id = String(t.id_tipo).padStart(2, ' ');
-      const desc = t.descripcion.padEnd(19, ' ');
-      const activo = t.activo ? '  Sí  ' : '  No  ';
-      console.log(`│ ${id} │ ${desc} │ ${activo} │`);
-    });
-    
-    console.log('└────┴─────────────────────┴────────┘');
-    console.log(`\n📊 Total de tipos de vivienda: ${verificacion.length}`);
-    console.log('='.repeat(80));
-    console.log('✅ TIPOS DE VIVIENDA INSERTADOS CORRECTAMENTE');
-    console.log('\n💡 Ahora puedes crear encuestas con id_tipo_vivienda del 1 al 6\n');
+    for (const nombre of tiposVivienda) {
+      const [result] = await sequelize.query(`
+        INSERT INTO tipos_vivienda (nombre, descripcion, created_at, updated_at)
+        VALUES (:nombre, :nombre, NOW(), NOW())
+        RETURNING id_tipo_vivienda, nombre;
+      `, { replacements: { nombre } });
 
+      console.log(`  ✅ ID ${result[0].id_tipo_vivienda} - ${result[0].nombre}`);
+    }
+
+    console.log('\n✅ TIPOS DE VIVIENDA INSERTADOS CORRECTAMENTE');
     await sequelize.close();
 
   } catch (error) {
@@ -94,4 +65,9 @@ async function insertarTiposViviendas() {
   }
 }
 
-insertarTiposViviendas();
+const isMainModule = process.argv[1] && process.argv[1].endsWith('seeder-tipos-viviendas-remoto.js');
+if (isMainModule) {
+  insertarTiposVivienda();
+}
+
+export default insertarTiposVivienda;

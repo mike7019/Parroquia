@@ -45,11 +45,13 @@ export async function seedProfesiones(sequelize) {
     let profesionesCreadas = 0;
     let profesionesActualizadas = 0;
 
+    // NOTA: la tabla "profesiones" no tiene columna "activo" (a diferencia
+    // de otros catálogos como tallas); se removió del payload y de las
+    // verificaciones porque causaba "column Profesion.activo does not exist".
     for (const profesionData of profesionesData) {
       const [profesion, created] = await Profesion.upsert(
         {
           ...profesionData,
-          activo: true,
           updated_at: new Date()
         },
         {
@@ -69,11 +71,9 @@ export async function seedProfesiones(sequelize) {
 
     // Verificación final
     const profesionesFinales = await Profesion.count();
-    const profesionesActivas = await Profesion.count({ where: { activo: true } });
 
     console.log(`\n📋 RESUMEN SEEDING PROFESIONES:`);
     console.log(`   • Total profesiones en BD: ${profesionesFinales}`);
-    console.log(`   • Profesiones activas: ${profesionesActivas}`);
     console.log(`   • Profesiones creadas: ${profesionesCreadas}`);
     console.log(`   • Profesiones actualizadas: ${profesionesActualizadas}`);
 
@@ -81,8 +81,7 @@ export async function seedProfesiones(sequelize) {
       success: true,
       profesionesCreadas,
       profesionesActualizadas,
-      totalProfesiones: profesionesFinales,
-      profesionesActivas
+      totalProfesiones: profesionesFinales
     };
 
   } catch (error) {

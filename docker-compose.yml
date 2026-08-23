@@ -43,6 +43,9 @@ services:
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-noreply@parroquia.com}
+      SEND_REAL_EMAILS: ${SEND_REAL_EMAILS:-true}
+      VERBOSE_LOGGING: ${VERBOSE_LOGGING:-false}
     ports:
       - "${API_PORT:-3000}:3000"
     volumes:

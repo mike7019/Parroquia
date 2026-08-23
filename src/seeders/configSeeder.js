@@ -1,73 +1,12 @@
 import sequelize from '../../config/sequelize.js';
-import { QueryTypes } from 'sequelize';
 import { v4 as uuidv4 } from 'uuid';
+import { safeInsert } from './seederUtils.js';
 
 /**
  * Seeder consolidado para tablas de configuración
  * Este archivo contiene todos los seeders para las tablas básicas de configuración
  * que se ejecutarán automáticamente durante la sincronización de la base de datos
  */
-
-// Función auxiliar para verificar si una tabla existe y tiene datos
-async function tableHasData(tableName) {
-  try {
-    const [results] = await sequelize.query(
-      `SELECT COUNT(*) as count FROM ${tableName}`,
-      { type: QueryTypes.SELECT }
-    );
-    return results.count > 0;
-  } catch (error) {
-    console.warn(`⚠️  Tabla ${tableName} no existe o no se puede consultar:`, error.message);
-    return false;
-  }
-}
-
-// Función auxiliar para insertar datos de forma segura
-async function safeInsert(tableName, data, description) {
-  try {
-    const hasData = await tableHasData(tableName);
-    
-    if (!hasData) {
-      // Intentar inserción simple primero
-      try {
-        await sequelize.getQueryInterface().bulkInsert(tableName, data);
-        console.log(`✅ ${description}: ${data.length} registros insertados`);
-        return true;
-      } catch (insertError) {
-        // Si falla la inserción simple, intentar con query directa
-        console.warn(`⚠️  Inserción normal falló para ${tableName}, intentando query directa...`);
-        
-        // Crear query manual para evitar problemas con campos auto-incrementales
-        const fields = Object.keys(data[0]).filter(key => !key.includes('id_')); // Excluir campos ID
-        const fieldNames = fields.join(', ');
-        const values = data.map(item => {
-          const itemValues = fields.map(field => {
-            const value = item[field];
-            if (value instanceof Date) {
-              return `'${value.toISOString()}'`;
-            } else if (typeof value === 'string') {
-              return `'${value.replace(/'/g, "''")}'`; // Escape single quotes
-            } else {
-              return value;
-            }
-          });
-          return `(${itemValues.join(', ')})`;
-        }).join(', ');
-        
-        const query = `INSERT INTO ${tableName} (${fieldNames}) VALUES ${values}`;
-        await sequelize.query(query);
-        console.log(`✅ ${description}: ${data.length} registros insertados (query directa)`);
-        return true;
-      }
-    } else {
-      console.log(`ℹ️  ${description}: datos ya existen, saltando inserción`);
-      return false;
-    }
-  } catch (error) {
-    console.error(`❌ Error insertando ${description}:`, error.message);
-    return false;
-  }
-}
 
 // Seeder para tipos de identificación
 export async function seedTiposIdentificacion() {

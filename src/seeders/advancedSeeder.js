@@ -2,6 +2,7 @@ import sequelize from '../../config/sequelize.js';
 import { runConfigSeeders } from './configSeeder.js';
 import { seedProfesiones } from './profesionesSeeder.js';
 import { seedTallas } from './tallasSeeder.js';
+import { runCatalogosAdicionalesSeeders } from './catalogosAdicionalesSeeder.js';
 
 /**
  * Sistema avanzado de seeders que incluye tanto seeders básicos como avanzados
@@ -16,6 +17,7 @@ export async function runAllSeeders() {
     configSeeders: null,
     profesiones: null,
     tallas: null,
+    catalogosAdicionales: null,
     errores: []
   };
 
@@ -24,7 +26,7 @@ export async function runAllSeeders() {
     console.log('\n📋 FASE 1: Seeders de Configuración Básica');
     console.log('='.repeat(50));
     resultados.configSeeders = await runConfigSeeders();
-    
+
     // 2. Ejecutar seeder de profesiones
     console.log('\n💼 FASE 2: Seeder de Profesiones');
     console.log('='.repeat(50));
@@ -47,6 +49,19 @@ export async function runAllSeeders() {
       resultados.errores.push(`Tallas: ${error.message}`);
     }
 
+    // 4. Ejecutar seeders de catálogos adicionales (parentescos, niveles
+    // educativos, comunidades culturales, situaciones civiles, tipos de
+    // liderazgo, tipos de necesidad del enfermo, destrezas, habilidades)
+    console.log('\n📚 FASE 4: Catálogos Adicionales');
+    console.log('='.repeat(50));
+    try {
+      resultados.catalogosAdicionales = await runCatalogosAdicionalesSeeders();
+      console.log('✅ Catálogos Adicionales completados exitosamente');
+    } catch (error) {
+      console.error('❌ Error en Catálogos Adicionales:', error.message);
+      resultados.errores.push(`Catálogos Adicionales: ${error.message}`);
+    }
+
     // Resumen general
     console.log('\n' + '='.repeat(60));
     console.log('📊 RESUMEN GENERAL DE SEEDERS');
@@ -65,7 +80,7 @@ export async function runAllSeeders() {
     if (resultados.profesiones) {
       console.log(`   ✅ Creadas: ${resultados.profesiones.profesionesCreadas}`);
       console.log(`   🔄 Actualizadas: ${resultados.profesiones.profesionesActualizadas}`);
-      console.log(`   📊 Total activas: ${resultados.profesiones.profesionesActivas}`);
+      console.log(`   📊 Total: ${resultados.profesiones.totalProfesiones}`);
     } else {
       console.log(`   ❌ No se pudo ejecutar`);
     }
@@ -79,6 +94,15 @@ export async function runAllSeeders() {
       console.log(`   ❌ No se pudo ejecutar`);
     }
 
+    console.log('\n📚 Catálogos Adicionales:');
+    if (resultados.catalogosAdicionales) {
+      console.log(`   ✅ Exitosos: ${resultados.catalogosAdicionales.success}`);
+      console.log(`   ❌ Errores: ${resultados.catalogosAdicionales.errors}`);
+      console.log(`   📊 Total: ${resultados.catalogosAdicionales.total}`);
+    } else {
+      console.log(`   ❌ No se pudo ejecutar`);
+    }
+
     if (resultados.errores.length > 0) {
       console.log('\n❌ Errores encontrados:');
       resultados.errores.forEach(error => {
@@ -86,16 +110,20 @@ export async function runAllSeeders() {
       });
     }
 
-    const totalExitosos = [
-      resultados.configSeeders?.success || 0,
-      resultados.profesiones ? 1 : 0,
-      resultados.tallas ? 1 : 0
-    ].reduce((a, b) => a + b, 0);
+    const totalExitosos =
+      (resultados.configSeeders?.success || 0) +
+      (resultados.profesiones ? 1 : 0) +
+      (resultados.tallas ? 1 : 0) +
+      (resultados.catalogosAdicionales?.success || 0);
 
-    const totalPosibles = 3; // config + profesiones + tallas
+    const totalPosibles =
+      (resultados.configSeeders?.total || 0) +
+      1 + // profesiones
+      1 + // tallas
+      (resultados.catalogosAdicionales?.total || 0);
 
     console.log('\n🎯 RESULTADO FINAL:');
-    console.log(`   📈 Seeders exitosos: ${totalExitosos}/${totalPosibles + (resultados.configSeeders?.total || 0) - 1}`);
+    console.log(`   📈 Seeders exitosos: ${totalExitosos}/${totalPosibles}`);
     console.log(`   🎉 Estado: ${resultados.errores.length === 0 ? 'ÉXITO COMPLETO' : 'COMPLETADO CON ADVERTENCIAS'}`);
 
   } catch (error) {
@@ -179,5 +207,6 @@ export default {
   runAdvancedSeeders,
   cleanAdvancedData,
   seedProfesiones,
-  seedTallas
+  seedTallas,
+  runCatalogosAdicionalesSeeders
 };

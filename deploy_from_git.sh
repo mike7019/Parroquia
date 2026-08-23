@@ -51,6 +51,14 @@ fi
 log "Commit actual: $(git rev-parse --short HEAD)"
 log "Último commit: $(git log -1 --pretty=format:'%h - %s (%an, %ar)')"
 
+# docker-compose.yml depende de un .env con DB_NAME/DB_USER/DB_PASSWORD/
+# JWT_SECRET/etc. Sin él, los contenedores arrancarían con esas variables
+# vacías en vez de fallar de forma clara.
+if [ ! -f ".env" ]; then
+    log "ERROR: No existe .env en $PROJECT_DIR. Créalo antes de desplegar (ver .env.example)."
+    exit 1
+fi
+
 # Detener contenedores existentes
 log "Deteniendo contenedores existentes..."
 docker-compose down --remove-orphans || true
@@ -68,7 +76,7 @@ docker-compose up -d
 
 # Ejecutar seeders de datos
 log "Ejecutando seeders de la base de datos..."
-docker-compose exec -T api npm run db:seed:config || log "Seeders completados con advertencias"
+docker-compose exec -T api npm run db:seed || log "Seeders completados con advertencias"
 
 # Esperar a que el servicio esté listo
 log "Esperando a que el servicio esté listo..."

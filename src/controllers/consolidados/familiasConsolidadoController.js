@@ -1,5 +1,15 @@
 import familiasConsolidadoService from '../../services/consolidados/familiasConsolidadoService.js';
-import { parseCampos } from '../../utils/exportColumns.js';
+import { parseCamposPorHoja } from '../../utils/exportColumns.js';
+
+/**
+ * Mapeo de hoja lógica -> nombre del query param que selecciona sus columnas.
+ * Cada uno cae de vuelta a `campos` (genérico) si no vino su param específico.
+ */
+const HOJAS_EXCEL_FAMILIAS = {
+  informacionGeneral: 'campos_informacion_general',
+  miembrosFamilias: 'campos_miembros_familias',
+  difuntos: 'campos_difuntos'
+};
 import { parseIdOrNombre, parseIdEstricto, FiltroInvalidoError } from '../../utils/queryFilters.js';
 
 /**
@@ -81,8 +91,8 @@ class FamiliasConsolidadoController {
 
       console.log('📊 Generando Excel de familias con filtros:', filtros);
 
-      const camposSeleccionados = parseCampos(req.query);
-      const workbook = await familiasConsolidadoService.generarReporteExcelFamilias(filtros, camposSeleccionados);
+      const camposPorHoja = parseCamposPorHoja(req.query, HOJAS_EXCEL_FAMILIAS);
+      const workbook = await familiasConsolidadoService.generarReporteExcelFamilias(filtros, camposPorHoja);
 
       // Configurar headers para descarga
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
